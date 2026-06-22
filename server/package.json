@@ -1,0 +1,20 @@
+{
+  "name": "yieldfit-server",
+  "version": "1.0.0",
+  "description": "API REST para Yield Fit, aplicación de seguimiento de entrenamiento",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "David Hernández Pérez",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

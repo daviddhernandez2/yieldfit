@@ -68,6 +68,16 @@ const exerciseSchema = new mongoose.Schema(
   }
 );
 
+// Middleware: deriva automáticamente el tracking en función del grupo y el tipo
+// Se ejecuta antes de cada save() (creación o actualización con .save())
+exerciseSchema.pre('save', function () {
+  if (this.grupoMuscular === 'Cardio' && this.tipo === 'Cardio') {
+    this.tracking = 'tiempo_distancia';
+  } else {
+    this.tracking = '1RM';
+  }
+});
+
 const Exercise = mongoose.model('Exercise', exerciseSchema);
 
 export default Exercise;

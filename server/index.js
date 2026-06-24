@@ -2,9 +2,13 @@ import 'dotenv/config';
 import app from './app.js';
 import { connectDB } from './config/database.js';
 
+// Cargar los modelos para que se registren en Mongoose
+import './models/User.js';
+import './models/Exercise.js';
+import './models/Chart.js';
+
 const PORT = process.env.PORT || 3000;
 
-// Conectar a MongoDB y, una vez conectado, arrancar el servidor
 const startServer = async () => {
   await connectDB();
 

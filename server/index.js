@@ -6,6 +6,8 @@ import { connectDB } from './config/database.js';
 import './models/User.js';
 import './models/Exercise.js';
 import './models/Chart.js';
+import './models/Workout.js';
+import './models/Session.js';
 
 const PORT = process.env.PORT || 3000;
 

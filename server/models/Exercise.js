@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+// Listas de valores permitidos. Se extraen como constantes para reutilizarlas
+// como enums en el schema y poder exportarlas al frontend en el futuro.
 const GRUPOS_MUSCULARES = [
   'Pecho',
   'Espalda',
@@ -22,6 +24,8 @@ const TRACKINGS = ['1RM', 'tiempo_distancia'];
 
 const exerciseSchema = new mongoose.Schema(
   {
+    // Referencia al usuario dueño del ejercicio. Indexado porque la query
+    // más frecuente del recurso es "dame los ejercicios de este usuario".
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -51,6 +55,9 @@ const exerciseSchema = new mongoose.Schema(
         message: 'Tipo no válido',
       },
     },
+    // No es required porque se deriva automáticamente del middleware pre('save').
+    // Mantenerlo como campo persistido (en lugar de virtual) simplifica las queries
+    // del frontend, que pueden filtrar por tracking sin recalcular.
     tracking: {
       type: String,
       enum: {
@@ -58,18 +65,17 @@ const exerciseSchema = new mongoose.Schema(
         message: 'Tracking no válido',
       },
     },
-    esPreset: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
+    // createdAt y updatedAt gestionados automáticamente por Mongoose.
     timestamps: true,
   }
 );
 
-// Middleware: deriva automáticamente el tracking en función del grupo y el tipo
-// Se ejecuta antes de cada save() (creación o actualización con .save())
+// Deriva el tracking en función del grupo y el tipo antes de cada guardado.
+// Solo los ejercicios que son simultáneamente de grupo Cardio Y tipo Cardio
+// se miden por tiempo/distancia. El resto (incluyendo cardio en máquinas
+// usadas como fuerza) se mide por 1RM estimado.
 exerciseSchema.pre('save', function () {
   if (this.grupoMuscular === 'Cardio' && this.tipo === 'Cardio') {
     this.tracking = 'tiempo_distancia';

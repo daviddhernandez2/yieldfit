@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema(
   {
@@ -48,6 +49,29 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Middleware: hashea la contraseña antes de guardar
+// Solo se ejecuta si el campo password ha cambiado (creación o cambio explícito)
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Método de instancia: compara una contraseña en texto plano con el hash guardado
+// Devuelve true si coinciden, false si no
+userSchema.methods.comparePassword = async function (plainPassword) {
+  return bcrypt.compare(plainPassword, this.password);
+};
+
+// Método de instancia: convierte el documento a JSON eliminando datos sensibles
+// Se llama automáticamente cuando haces res.json(user)
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
+};
 
 const User = mongoose.model('User', userSchema);
 

@@ -1,5 +1,31 @@
 import User from '../models/User.js';
+import Exercise from '../models/Exercise.js';
 import { signToken } from '../utils/jwt.js';
+import { exercisePresets } from '../data/exercisePresets.js';
+
+// Deriva el tracking igual que el middleware pre('save') del modelo Exercise
+// Lo replicamos aquí porque insertMany NO ejecuta los middlewares de save()
+const derivarTracking = (grupoMuscular, tipo) => {
+  if (grupoMuscular === 'Cardio' && tipo === 'Cardio') {
+    return 'tiempo_distancia';
+  }
+  return '1RM';
+};
+
+// Clona los ejercicios preestablecidos al catálogo del nuevo usuario
+// Una sola operación bulk (insertMany) en lugar de 55 saves
+const clonarPresetsAUsuario = async (userId) => {
+  const documentos = exercisePresets.map((preset) => ({
+    userId,
+    nombre: preset.nombre,
+    grupoMuscular: preset.grupoMuscular,
+    tipo: preset.tipo,
+    tracking: derivarTracking(preset.grupoMuscular, preset.tipo),
+    esPreset: true,
+  }));
+
+  await Exercise.insertMany(documentos);
+};
 
 // POST /api/auth/register
 export const register = async (req, res, next) => {
@@ -24,6 +50,9 @@ export const register = async (req, res, next) => {
       genero,
     });
     await user.save();
+
+    // Clonar los ejercicios preestablecidos al catálogo del nuevo usuario
+    await clonarPresetsAUsuario(user._id);
 
     const token = signToken(user._id);
 
@@ -86,7 +115,6 @@ export const login = async (req, res, next) => {
 };
 
 // GET /api/auth/me
-// Devuelve los datos del usuario autenticado (requiere middleware requireAuth)
 export const me = async (req, res, next) => {
   try {
     res.status(200).json({ user: req.user });

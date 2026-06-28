@@ -1,14 +1,13 @@
 import Exercise from '../models/Exercise.js';
+import Session from '../models/Session.js';
 
 // GET /api/exercises
 // Lista los ejercicios del usuario autenticado.
 // Admite filtros opcionales por query string: grupoMuscular, tipo, search (por nombre).
 export const list = async (req, res, next) => {
   try {
-    // Filtro base: solo ejercicios del usuario actual. Esto garantiza ownership.
     const filter = { userId: req.user._id };
 
-    // Filtros opcionales recibidos en la URL como query params.
     if (req.query.grupoMuscular) {
       filter.grupoMuscular = req.query.grupoMuscular;
     }
@@ -16,14 +15,11 @@ export const list = async (req, res, next) => {
       filter.tipo = req.query.tipo;
     }
     if (req.query.search) {
-      // Búsqueda por nombre case-insensitive con regex.
-      // El método escape garantiza que caracteres especiales del usuario
-      // no se interpreten como sintaxis de regex.
+      // Escapa caracteres especiales para que no se interpreten como regex.
       const safeSearch = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.nombre = { $regex: safeSearch, $options: 'i' };
     }
 
-    // Orden alfabético por defecto. El frontend puede reordenar localmente si lo necesita.
     const exercises = await Exercise.find(filter).sort({ nombre: 1 });
 
     res.status(200).json({ exercises });
@@ -34,8 +30,7 @@ export const list = async (req, res, next) => {
 
 // GET /api/exercises/:id
 // Devuelve un ejercicio concreto del usuario autenticado.
-// Si el ejercicio no existe o pertenece a otro usuario, devolvemos 404
-// (en lugar de 403) para no revelar la existencia de IDs ajenos.
+// 404 (en lugar de 403) para no revelar la existencia de IDs ajenos.
 export const getOne = async (req, res, next) => {
   try {
     const exercise = await Exercise.findOne({
@@ -52,8 +47,6 @@ export const getOne = async (req, res, next) => {
 
     res.status(200).json({ exercise });
   } catch (error) {
-    // CastError de Mongoose: el id de la URL no tiene formato ObjectId válido.
-    // También devolvemos 404 para mantener coherencia y no filtrar información.
     if (error.name === 'CastError') {
       return res.status(404).json({
         error: 'Not Found',
@@ -65,8 +58,7 @@ export const getOne = async (req, res, next) => {
 };
 
 // POST /api/exercises
-// Crea un nuevo ejercicio en el catálogo del usuario.
-// El campo tracking se deriva automáticamente del middleware pre('save').
+// Crea un nuevo ejercicio. El tracking se deriva en el middleware pre('save').
 export const create = async (req, res, next) => {
   try {
     const { nombre, grupoMuscular, tipo } = req.body;
@@ -94,8 +86,9 @@ export const create = async (req, res, next) => {
 };
 
 // PUT /api/exercises/:id
-// Actualiza un ejercicio del usuario. Solo se modifican los campos enviados.
-// Si la actualización afecta a grupoMuscular o tipo, el middleware recalcula tracking.
+// Actualiza un ejercicio. Si cambian grupoMuscular o tipo, el middleware
+// recalcula tracking. Usamos findOne+save() en lugar de findOneAndUpdate
+// para garantizar la ejecución del middleware pre('save').
 export const update = async (req, res, next) => {
   try {
     const exercise = await Exercise.findOne({
@@ -110,9 +103,6 @@ export const update = async (req, res, next) => {
       });
     }
 
-    // Solo actualizamos los campos enviados. El resto permanece intacto.
-    // No usamos findOneAndUpdate porque queremos que se ejecuten los
-    // middlewares pre('save') del modelo (en concreto, la derivación de tracking).
     const { nombre, grupoMuscular, tipo } = req.body;
     if (nombre !== undefined) exercise.nombre = nombre;
     if (grupoMuscular !== undefined) exercise.grupoMuscular = grupoMuscular;
@@ -141,9 +131,9 @@ export const update = async (req, res, next) => {
 };
 
 // DELETE /api/exercises/:id
-// Borra un ejercicio del catálogo del usuario.
-// Las sesiones que lo referencien mantienen sus datos gracias a los snapshots
-// (nombreSnapshot y trackingSnapshot) que guarda el modelo Session.
+// Borra un ejercicio y cascada: elimina ese ejercicio de todas las sesiones que
+// lo referencien (sin borrar las sesiones enteras). Decisión de producto: si el
+// usuario borra un ejercicio, no quiere que aparezca en su progreso histórico.
 export const remove = async (req, res, next) => {
   try {
     const result = await Exercise.deleteOne({
@@ -151,7 +141,6 @@ export const remove = async (req, res, next) => {
       userId: req.user._id,
     });
 
-    // deletedCount es 0 si el ejercicio no existía o pertenecía a otro usuario.
     if (result.deletedCount === 0) {
       return res.status(404).json({
         error: 'Not Found',
@@ -159,8 +148,13 @@ export const remove = async (req, res, next) => {
       });
     }
 
-    // 204 No Content: borrado correcto sin cuerpo de respuesta.
-    // Es la convención REST para deletes exitosos.
+    // Cascada: quitar el subdocumento del ejercicio de todas las sesiones del usuario.
+    // $pull elimina elementos del array que cumplan el filtro.
+    await Session.updateMany(
+      { userId: req.user._id },
+      { $pull: { ejercicios: { exerciseId: req.params.id } } }
+    );
+
     res.status(204).send();
   } catch (error) {
     if (error.name === 'CastError') {

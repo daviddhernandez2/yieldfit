@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes.js';
 import exerciseRoutes from './routes/exerciseRoutes.js';
 import chartRoutes from './routes/chartRoutes.js';
 import workoutRoutes from './routes/workoutRoutes.js';
+import sessionRoutes from './routes/sessionRoutes.js';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/charts', chartRoutes);
 app.use('/api/workouts', workoutRoutes);
+app.use('/api/sessions', sessionRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

@@ -40,3 +40,13 @@
 .fullWidth {
   width: 100%;
 }
+
+/* Variante danger: fondo rojo sólido. Para acciones destructivas como borrar. */
+.danger {
+  background-color: var(--color-error);
+  color: var(--color-text);
+}
+
+.danger:hover:not(:disabled) {
+  background-color: #cc2600;
+}

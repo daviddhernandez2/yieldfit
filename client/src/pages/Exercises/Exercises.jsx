@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listExercises } from '../../api/exercises.js';
+import { listExercises, deleteExercise } from '../../api/exercises.js';
 import Button from '../../components/Button/Button.jsx';
 import Chip from '../../components/Chip/Chip.jsx';
+import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
 import styles from './Exercises.module.css';
 
-// Grupos musculares disponibles. Sincronizado con el enum del modelo Exercise.
-// Si en el backend se ampliara, hay que añadirlo aquí también.
 const GRUPOS_MUSCULARES = [
   'Pecho',
   'Espalda',
@@ -17,9 +16,27 @@ const GRUPOS_MUSCULARES = [
   'Cardio',
 ];
 
-// Pantalla principal del catálogo de ejercicios.
-// Muestra una lista filtrable por grupo muscular y buscable por nombre.
-// Permite navegar a crear/editar (rutas independientes en el Bloque 3.3b).
+// Icono inline de papelera para el botón de borrar de cada fila.
+// Inline en lugar de librería para no añadir dependencia por un solo icono.
+const IconTrash = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+    <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+  </svg>
+);
+
 export default function Exercises() {
   const navigate = useNavigate();
 
@@ -29,8 +46,15 @@ export default function Exercises() {
   const [search, setSearch] = useState('');
   const [grupoSeleccionado, setGrupoSeleccionado] = useState(null);
 
-  // Carga la lista desde la API. Se vuelve a llamar cuando cambian los filtros.
-  // Los parámetros vacíos se omiten para que el backend devuelva todo.
+  // Estado del modal de confirmación: guardamos el ejercicio en proceso de borrado.
+  // null cuando no hay diálogo abierto.
+  const [exerciseToDelete, setExerciseToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Carga la lista. Se vuelve a llamar al cambiar filtros o tras un borrado exitoso.
+  // El número incremental refreshKey fuerza recargas explícitas.
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useEffect(() => {
     const cargar = async () => {
       setLoading(true);
@@ -49,11 +73,33 @@ export default function Exercises() {
       }
     };
     cargar();
-  }, [search, grupoSeleccionado]);
+  }, [search, grupoSeleccionado, refreshKey]);
 
-  // Toggle del filtro de grupo muscular: si pulsas el mismo, se deselecciona.
   const handleGrupoClick = (grupo) => {
     setGrupoSeleccionado((actual) => (actual === grupo ? null : grupo));
+  };
+
+  // Abre el diálogo con el ejercicio seleccionado. stopPropagation evita que
+  // se dispare el onClick de la fila (que navegaría a editar).
+  const handleAskDelete = (exercise, e) => {
+    e.stopPropagation();
+    setExerciseToDelete(exercise);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!exerciseToDelete) return;
+    setDeleting(true);
+    try {
+      await deleteExercise(exerciseToDelete._id);
+      setExerciseToDelete(null);
+      // Forzamos recarga de la lista para reflejar la eliminación.
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      const message = err.response?.data?.message || 'Error al eliminar el ejercicio.';
+      setError(message);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -100,14 +146,23 @@ export default function Exercises() {
             <span>Tipo</span>
           </div>
           {exercises.map((ex) => (
-            <button
-              key={ex._id}
-              className={styles.row}
-              onClick={() => navigate(`/exercises/${ex._id}/edit`)}
-            >
-              <span className={styles.rowName}>{ex.nombre}</span>
-              <span className={styles.rowType}>{ex.tipo}</span>
-            </button>
+            <div key={ex._id} className={styles.row}>
+              <button
+                className={styles.rowMain}
+                onClick={() => navigate(`/exercises/${ex._id}/edit`)}
+              >
+                <span className={styles.rowName}>{ex.nombre}</span>
+                <span className={styles.rowType}>{ex.tipo}</span>
+              </button>
+              <button
+                type="button"
+                className={styles.deleteIcon}
+                onClick={(e) => handleAskDelete(ex, e)}
+                aria-label={`Eliminar ${ex.nombre}`}
+              >
+                <IconTrash />
+              </button>
+            </div>
           ))}
         </div>
       )}
@@ -117,6 +172,21 @@ export default function Exercises() {
           + Nuevo ejercicio
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(exerciseToDelete)}
+        title="¿Eliminar este ejercicio?"
+        message={
+          exerciseToDelete
+            ? `"${exerciseToDelete.nombre}" desaparecerá de tu catálogo. Las sesiones que lo contengan perderán esta referencia.`
+            : ''
+        }
+        confirmLabel={deleting ? 'Eliminando...' : 'Eliminar'}
+        cancelLabel="Cancelar"
+        confirmVariant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setExerciseToDelete(null)}
+      />
     </div>
   );
 }

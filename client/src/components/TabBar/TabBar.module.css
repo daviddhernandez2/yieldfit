@@ -1,0 +1,46 @@
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border-top: 1px solid var(--color-border);
+  z-index: 100;
+}
+
+/* En desktop la tab bar desaparece, su lugar lo ocupa el sidebar. */
+@media (min-width: 768px) {
+  .tabbar {
+    display: none;
+  }
+}
+
+.item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-sm) var(--space-xs);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-base);
+}
+
+.item:hover {
+  color: var(--color-text);
+}
+
+.active {
+  color: var(--color-accent);
+}
+
+.label {
+  font-size: 0.7rem;
+  line-height: 1;
+}

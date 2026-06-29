@@ -1,0 +1,74 @@
+/* Oculto por defecto en móvil. Se muestra en desktop. */
+.sidebar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    flex-shrink: 0;
+    padding: var(--space-xl);
+    border-right: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+  }
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-2xl);
+}
+
+.logoIcon {
+  color: var(--color-accent);
+}
+
+.logoText {
+  color: var(--color-text);
+}
+
+.logoSuffix {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  align-self: flex-start;
+  margin-top: 0.2rem;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-base);
+}
+
+.item:hover {
+  color: var(--color-text);
+  background-color: var(--color-bg-elevated);
+}
+
+/* Item activo: fondo verde sutil + texto verde. Llamada visual clara
+   de en qué sección estamos. */
+.active {
+  color: var(--color-accent);
+  background-color: rgba(62, 248, 126, 0.08);
+}
+
+.active:hover {
+  color: var(--color-accent);
+}

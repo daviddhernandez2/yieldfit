@@ -1,0 +1,23 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  background-color: var(--color-bg);
+}
+
+/* Área de contenido principal. Ocupa todo el espacio disponible.
+   En móvil suma padding inferior para no quedar oculto por la tab bar.
+   En desktop ese padding desaparece porque la tab bar se oculta. */
+.content {
+  flex: 1;
+  padding: var(--space-xl);
+  padding-bottom: calc(var(--space-xl) + 80px);
+  overflow-y: auto;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .content {
+    padding: var(--space-2xl);
+    padding-bottom: var(--space-2xl);
+  }
+}

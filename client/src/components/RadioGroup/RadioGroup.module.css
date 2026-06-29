@@ -1,0 +1,61 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  width: 100%;
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.group {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+/* Cada opción es una pill clickeable que ocupa el espacio disponible.
+   El input radio nativo se oculta visualmente con la regla más abajo. */
+.option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: var(--transition-base);
+  min-height: 48px;
+  user-select: none;
+}
+
+.option:hover {
+  border-color: var(--color-text-muted);
+}
+
+/* Estado seleccionado: borde y texto en verde, fondo ligeramente teñido.
+   No usamos fondo sólido para mantener coherencia con los inputs adyacentes. */
+.selected {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background-color: rgba(62, 248, 126, 0.05);
+}
+
+/* Ocultamos el input radio nativo manteniéndolo accesible para lectores de pantalla. */
+.input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.errorMessage {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}

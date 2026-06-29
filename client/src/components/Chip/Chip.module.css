@@ -1,0 +1,23 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  transition: var(--transition-base);
+}
+
+.chip:hover {
+  color: var(--color-text);
+}
+
+.selected {
+  background-color: rgba(62, 248, 126, 0.08);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

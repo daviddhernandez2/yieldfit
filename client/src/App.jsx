@@ -1,19 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
+import Layout from './components/Layout/Layout.jsx';
 import Welcome from './pages/Welcome/Welcome.jsx';
 import Login from './pages/Login/Login.jsx';
+import Register from './pages/Register/Register.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
-
-// Placeholder para la pantalla de Register. Lo implementaremos en el Bloque 3.2.
-function RegisterPlaceholder() {
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Register</h1>
-      <p>Formulario pendiente. Lo implementaremos en el siguiente bloque.</p>
-    </div>
-  );
-}
+import Exercises from './pages/Exercises/Exercises.jsx';
 
 function App() {
   return (
@@ -23,14 +16,26 @@ function App() {
           {/* Rutas públicas */}
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<RegisterPlaceholder />} />
+          <Route path="/register" element={<Register />} />
 
-          {/* Ruta privada */}
+          {/* Rutas privadas. Cada una se envuelve con PrivateRoute para protegerla. */}
+     <Route
+  path="/dashboard"
+  element={
+    <PrivateRoute>
+      <Layout>
+        <Dashboard />
+      </Layout>
+    </PrivateRoute>
+  }
+/>
           <Route
-            path="/dashboard"
+            path="/exercises"
             element={
               <PrivateRoute>
-                <Dashboard />
+                <Layout>
+                  <Exercises />
+                </Layout>
               </PrivateRoute>
             }
           />

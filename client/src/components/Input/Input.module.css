@@ -40,3 +40,16 @@
   font-size: var(--font-size-sm);
   color: var(--color-error);
 }
+
+/* Estilización del input type="date" para que encaje con el design system.
+   El calendario emergente sigue siendo el del sistema (varía entre navegadores). */
+.input[type='date'] {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+/* Webkit muestra un icono por defecto; lo recoloreamos al verde de marca. */
+.input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(74%) sepia(83%) saturate(530%) hue-rotate(76deg) brightness(105%);
+  cursor: pointer;
+}

@@ -1,6 +1,6 @@
-/* Reset básico: cero margen y padding por defecto en todos los elementos.
-   Box-sizing border-box hace que el padding NO sume al ancho declarado,
-   lo que simplifica el cálculo de layouts. */
+@import './styles/variables.css';
+
+/* Reset básico y configuración global del body. */
 *,
 *::before,
 *::after {
@@ -9,16 +9,31 @@
   padding: 0;
 }
 
-/* Fuente del sistema por ahora. Cuando lleguemos al diseño aplicaremos Geist. */
+html, body, #root {
+  height: 100%;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
 }
 
-/* Por defecto los enlaces heredan el color del texto.
-   Cuando definamos el design system fijaremos colores propios. */
 a {
   color: inherit;
   text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input {
+  font-family: inherit;
 }

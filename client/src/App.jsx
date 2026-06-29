@@ -1,22 +1,31 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
+import Welcome from './pages/Welcome/Welcome.jsx';
 import Login from './pages/Login/Login.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
 
-// Componente raíz de la aplicación.
-// Envuelve toda la app en el AuthProvider para que cualquier componente
-// del árbol pueda acceder al contexto de autenticación.
-// El router define las rutas: públicas (login) y privadas (resto).
+// Placeholder para la pantalla de Register. Lo implementaremos en el Bloque 3.2.
+function RegisterPlaceholder() {
+  return (
+    <div style={{ padding: '2rem' }}>
+      <h1>Register</h1>
+      <p>Formulario pendiente. Lo implementaremos en el siguiente bloque.</p>
+    </div>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Ruta pública: accesible sin autenticación. */}
+          {/* Rutas públicas */}
+          <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<RegisterPlaceholder />} />
 
-          {/* Ruta privada: protegida con PrivateRoute. */}
+          {/* Ruta privada */}
           <Route
             path="/dashboard"
             element={
@@ -26,9 +35,8 @@ function App() {
             }
           />
 
-          {/* Cualquier otra URL redirige a /dashboard.
-              Si el usuario no está autenticado, PrivateRoute lo enviará a /login. */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* Cualquier URL desconocida vuelve a Welcome. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

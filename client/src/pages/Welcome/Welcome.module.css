@@ -1,0 +1,60 @@
+.container {
+  /* Pantalla completa con fondo. El gradiente sutil hacia abajo evoca
+     la estética de las gráficas de trading: oscuro arriba, ligero halo verde abajo. */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-2xl) var(--space-xl);
+  background:
+    radial-gradient(
+      ellipse at center bottom,
+      rgba(62, 248, 126, 0.08) 0%,
+      transparent 60%
+    ),
+    var(--color-bg);
+}
+
+.logoSection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.logoIcon {
+  color: var(--color-accent);
+  font-size: 2rem;
+  transform: translateY(2px);
+}
+
+.logoText {
+  color: var(--color-text);
+}
+
+.logoSuffix {
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-bottom: var(--space-2xl);
+  max-width: 320px;
+  width: 100%;
+  margin: 0 auto;
+}

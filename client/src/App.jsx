@@ -8,6 +8,17 @@ import Register from './pages/Register/Register.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import Exercises from './pages/Exercises/Exercises.jsx';
 import ExerciseForm from './pages/ExerciseForm/ExerciseForm.jsx';
+import Workouts from './pages/Workouts/Workouts.jsx';
+
+// Placeholder para WorkoutForm. Se implementará en el Bloque 3.4b.
+function WorkoutFormPlaceholder() {
+  return (
+    <div style={{ padding: '2rem' }}>
+      <h1>Formulario de rutina</h1>
+      <p>Pendiente en el siguiente bloque.</p>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -19,7 +30,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Rutas privadas envueltas con Layout para sidebar/tabbar. */}
+          {/* Rutas privadas */}
           <Route
             path="/dashboard"
             element={
@@ -56,6 +67,36 @@ function App() {
               <PrivateRoute>
                 <Layout>
                   <ExerciseForm />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/workouts"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <Workouts />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/workouts/new"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <WorkoutFormPlaceholder />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/workouts/:id/edit"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <WorkoutFormPlaceholder />
                 </Layout>
               </PrivateRoute>
             }

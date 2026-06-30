@@ -1,0 +1,142 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+/* Botón "+" del header para crear rutina. Outline verde sobre fondo elevado. */
+.addButton {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 1.5px solid var(--color-border-accent);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.addButton:hover {
+  background-color: rgba(62, 248, 126, 0.08);
+}
+
+.feedback {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-xl);
+}
+
+.feedbackError {
+  text-align: center;
+  color: var(--color-error);
+  padding: var(--space-xl);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.emptyHint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Cada rutina como una card alargada tipo pill grande.
+   Diseño coherente con los wireframes: borde sutil, fondo elevado, redondeo pill. */
+.card {
+  display: grid;
+  grid-template-columns: 1fr 40px;
+  align-items: center;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  transition: var(--transition-base);
+}
+
+.card:hover {
+  border-color: var(--color-text-muted);
+}
+
+.cardMain {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: transparent;
+  border: none;
+  text-align: left;
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+/* Badge circular verde con iniciales. Tamaño fijo para uniformidad visual. */
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(62, 248, 126, 0.12);
+  border-radius: 50%;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.cardName {
+  font-weight: var(--font-weight-medium);
+}
+
+.deleteIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  margin-right: var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-base);
+}
+
+.deleteIcon:hover {
+  color: var(--color-error);
+  background-color: rgba(255, 48, 0, 0.08);
+}

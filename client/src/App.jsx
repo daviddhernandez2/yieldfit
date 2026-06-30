@@ -9,16 +9,7 @@ import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import Exercises from './pages/Exercises/Exercises.jsx';
 import ExerciseForm from './pages/ExerciseForm/ExerciseForm.jsx';
 import Workouts from './pages/Workouts/Workouts.jsx';
-
-// Placeholder para WorkoutForm. Se implementará en el Bloque 3.4b.
-function WorkoutFormPlaceholder() {
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Formulario de rutina</h1>
-      <p>Pendiente en el siguiente bloque.</p>
-    </div>
-  );
-}
+import WorkoutForm from './pages/WorkoutForm/WorkoutForm.jsx';
 
 function App() {
   return (
@@ -86,7 +77,7 @@ function App() {
             element={
               <PrivateRoute>
                 <Layout>
-                  <WorkoutFormPlaceholder />
+                  <WorkoutForm />
                 </Layout>
               </PrivateRoute>
             }
@@ -96,7 +87,7 @@ function App() {
             element={
               <PrivateRoute>
                 <Layout>
-                  <WorkoutFormPlaceholder />
+                  <WorkoutForm />
                 </Layout>
               </PrivateRoute>
             }

@@ -7,6 +7,12 @@ import {
   updateWorkout,
   deleteWorkout,
 } from '../../api/workouts.js';
+import {
+  readActiveSession,
+  writeActiveSession,
+  clearActiveSession,
+  buildActiveSessionFromWorkout,
+} from '../../utils/activeSession.js';
 import Input from '../../components/Input/Input.jsx';
 import Button from '../../components/Button/Button.jsx';
 import Chip from '../../components/Chip/Chip.jsx';
@@ -23,12 +29,9 @@ const GRUPOS_MUSCULARES = [
   'Cardio',
 ];
 
-// Valores por defecto al añadir un ejercicio a la rutina.
-// El usuario puede ajustarlos después en la zona de añadidos.
 const DEFAULT_NUM_SERIES = 3;
 const DEFAULT_DESCANSO = 90;
 
-// Icono inline X para el botón de quitar ejercicio de la rutina.
 const IconClose = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18" />
@@ -36,16 +39,12 @@ const IconClose = () => (
   </svg>
 );
 
-// Icono check para marcar ejercicios ya añadidos en el catálogo.
 const IconCheck = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 
-// Pantalla unificada para crear o editar rutinas.
-// Detecta modo según haya parámetro :id.
-// La UI integra dos zonas: ejercicios añadidos arriba y catálogo filtrable abajo.
 export default function WorkoutForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -63,9 +62,8 @@ export default function WorkoutForm() {
   const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [conflictoSesion, setConflictoSesion] = useState(false);
 
-  // Carga inicial: el catálogo de ejercicios siempre, y la rutina si estamos editando.
-  // Las dos peticiones se hacen en paralelo para reducir tiempo de carga.
   useEffect(() => {
     const cargar = async () => {
       try {
@@ -89,14 +87,10 @@ export default function WorkoutForm() {
     cargar();
   }, [id, isEditMode, navigate]);
 
-  // Indice por _id para acceso O(1) al nombre del exercise desde un exerciseId.
-  // useMemo evita recalcular en cada render del componente.
   const catalogoById = useMemo(() => {
     return new Map(catalogo.map((ex) => [ex._id, ex]));
   }, [catalogo]);
 
-  // Filtrado del catálogo en cliente: cuando el catálogo es chico (50-60 items),
-  // filtrar en cliente es instantáneo y evita llamadas extras al backend.
   const catalogoFiltrado = useMemo(() => {
     return catalogo.filter((ex) => {
       if (grupoSeleccionado && ex.grupoMuscular !== grupoSeleccionado) return false;
@@ -105,7 +99,6 @@ export default function WorkoutForm() {
     });
   }, [catalogo, search, grupoSeleccionado]);
 
-  // Set de exerciseIds ya añadidos para chequear pertenencia en O(1).
   const exerciseIdsAñadidos = useMemo(() => {
     return new Set(ejercicios.map((ej) => ej.exerciseId));
   }, [ejercicios]);
@@ -114,8 +107,6 @@ export default function WorkoutForm() {
     setGrupoSeleccionado((actual) => (actual === grupo ? null : grupo));
   };
 
-  // Toggle: si el exercise ya está en la rutina, lo quita.
-  // Si no, lo añade con valores por defecto al final del array.
   const handleToggleExercise = (exerciseId) => {
     if (exerciseIdsAñadidos.has(exerciseId)) {
       setEjercicios((prev) => prev.filter((ej) => ej.exerciseId !== exerciseId));
@@ -135,8 +126,6 @@ export default function WorkoutForm() {
     setEjercicios((prev) => prev.filter((ej) => ej.exerciseId !== exerciseId));
   };
 
-  // Actualiza un campo (numSeries o descansoSegundos) de un ejercicio añadido.
-  // Identificamos por exerciseId porque no hay duplicados (es un toggle).
   const handleUpdateEjercicio = (exerciseId, campo, valor) => {
     setEjercicios((prev) =>
       prev.map((ej) =>
@@ -188,6 +177,39 @@ export default function WorkoutForm() {
     } finally {
       setDeleting(false);
     }
+  };
+
+  // Inicia una sesión basada en esta rutina.
+  // Si ya hay una sesión activa en localStorage, primero muestra un diálogo
+  // pidiendo confirmación para descartarla.
+  const handleStartSession = () => {
+    const activa = readActiveSession();
+    if (activa) {
+      setConflictoSesion(true);
+      return;
+    }
+    iniciarSesion();
+  };
+
+  // Crea el objeto de sesión activa en localStorage y navega a la pantalla.
+  // Refrescamos la rutina por si el usuario cambió algo tras cargar la pantalla
+  // sin guardar; nos aseguramos de arrancar con lo que realmente está en la BD.
+  const iniciarSesion = async () => {
+    try {
+      const response = await getWorkout(id);
+      const wo = response.data.workout;
+      const nuevaSesion = buildActiveSessionFromWorkout(wo);
+      writeActiveSession(nuevaSesion);
+      navigate('/sessions/active');
+    } catch {
+      setErrorMessage('No se pudo iniciar la sesión. Inténtalo de nuevo.');
+    }
+  };
+
+  const handleConfirmDescartar = () => {
+    clearActiveSession();
+    setConflictoSesion(false);
+    iniciarSesion();
   };
 
   if (loading) {
@@ -344,6 +366,18 @@ export default function WorkoutForm() {
         {isEditMode && (
           <Button
             type="button"
+            variant="primary"
+            fullWidth
+            onClick={handleStartSession}
+            disabled={submitting || deleting}
+          >
+            Empezar sesión
+          </Button>
+        )}
+
+        {isEditMode && (
+          <Button
+            type="button"
             variant="danger"
             fullWidth
             onClick={() => setConfirmOpen(true)}
@@ -363,6 +397,17 @@ export default function WorkoutForm() {
         confirmVariant="danger"
         onConfirm={handleConfirmDelete}
         onCancel={() => setConfirmOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={conflictoSesion}
+        title="¿Descartar la sesión activa?"
+        message="Tienes una sesión de entrenamiento sin terminar. Si continúas, la perderás."
+        confirmLabel="Descartar y empezar nueva"
+        cancelLabel="Cancelar"
+        confirmVariant="danger"
+        onConfirm={handleConfirmDescartar}
+        onCancel={() => setConflictoSesion(false)}
       />
     </div>
   );

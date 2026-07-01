@@ -10,6 +10,7 @@ import Exercises from './pages/Exercises/Exercises.jsx';
 import ExerciseForm from './pages/ExerciseForm/ExerciseForm.jsx';
 import Workouts from './pages/Workouts/Workouts.jsx';
 import WorkoutForm from './pages/WorkoutForm/WorkoutForm.jsx';
+import ActiveSession from './pages/ActiveSession/ActiveSession.jsx';
 
 function App() {
   return (
@@ -88,6 +89,16 @@ function App() {
               <PrivateRoute>
                 <Layout>
                   <WorkoutForm />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sessions/active"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <ActiveSession />
                 </Layout>
               </PrivateRoute>
             }

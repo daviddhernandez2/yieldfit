@@ -44,7 +44,6 @@ export const buildActiveSessionFromWorkout = (workout) => {
       sets: Array.from({ length: ej.numSeries }, () => ({
         peso: '',
         reps: '',
-        excluido: false,
         completada: false,
       })),
     })),

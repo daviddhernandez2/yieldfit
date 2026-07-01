@@ -1,0 +1,152 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 700px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.backButton {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  transition: var(--transition-base);
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  border-color: var(--color-text-muted);
+}
+
+.headerText {
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-xs);
+  text-transform: capitalize;
+}
+
+/* Fila de estadísticas resumen del entrenamiento. Grid de 3 columnas iguales. */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.statBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  align-items: center;
+  text-align: center;
+}
+
+.statLabel {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.statValue {
+  color: var(--color-accent);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.exercisesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.exerciseCard {
+  padding: var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.exerciseName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Mini-tabla de series: cabecera + filas alineadas en 3 columnas. */
+.setsTable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.setsHeader {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.setsRow {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  align-items: center;
+}
+
+.setNum {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.setValue {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.feedback {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-2xl);
+}
+
+.feedbackError {
+  text-align: center;
+  color: var(--color-error);
+  padding: var(--space-2xl);
+}

@@ -96,11 +96,11 @@ export default function ActiveSession() {
         i !== exerciseIndex
           ? ej
           : {
-              ...ej,
-              sets: ej.sets.map((set, j) =>
-                j !== setIndex ? set : { ...set, ...cambios }
-              ),
-            }
+            ...ej,
+            sets: ej.sets.map((set, j) =>
+              j !== setIndex ? set : { ...set, ...cambios }
+            ),
+          }
       ),
     }));
   };
@@ -136,12 +136,12 @@ export default function ActiveSession() {
         i !== exerciseIndex
           ? ej
           : {
-              ...ej,
-              sets: [
-                ...ej.sets,
-                { peso: '', reps: '', excluido: false, completada: false },
-              ],
-            }
+            ...ej,
+            sets: [
+              ...ej.sets,
+              { peso: '', reps: '', completada: false },
+            ],
+          }
       ),
     }));
   };
@@ -205,7 +205,6 @@ export default function ActiveSession() {
                 numeroSerie: idx + 1,
                 peso: Number(s.peso) || 0,
                 reps: Number(s.reps) || 0,
-                excluido: s.excluido,
                 completada: s.completada,
               }))
               .filter((s) => s.completada)

@@ -11,6 +11,9 @@ import ExerciseForm from './pages/ExerciseForm/ExerciseForm.jsx';
 import Workouts from './pages/Workouts/Workouts.jsx';
 import WorkoutForm from './pages/WorkoutForm/WorkoutForm.jsx';
 import ActiveSession from './pages/ActiveSession/ActiveSession.jsx';
+import History from './pages/History/History.jsx';
+import SessionDetail from './pages/SessionDetail/SessionDetail.jsx';
+import Profile from './pages/Profile/Profile.jsx';
 
 function App() {
   return (
@@ -99,6 +102,36 @@ function App() {
               <PrivateRoute>
                 <Layout>
                   <ActiveSession />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <History />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/history/:id"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <SessionDetail />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <Profile />
                 </Layout>
               </PrivateRoute>
             }

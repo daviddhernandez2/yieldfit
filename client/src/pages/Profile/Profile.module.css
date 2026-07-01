@@ -1,0 +1,103 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+/* Bloque de identidad centrado con avatar circular grande. */
+.identityBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl) 0;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  background-color: rgba(62, 248, 126, 0.12);
+  color: var(--color-accent);
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.handle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+}
+
+/* Sección de datos personales: tarjeta con lista de campos. */
+.detailsSection {
+  padding: var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.detailsTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+.detailsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0;
+}
+
+/* Cada fila: label a la izquierda, valor a la derecha. */
+.detailRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-md);
+  align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailKey {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.detailValue {
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  text-align: right;
+  margin: 0;
+}

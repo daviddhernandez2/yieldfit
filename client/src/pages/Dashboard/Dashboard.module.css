@@ -1,0 +1,166 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.feedback {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-xl);
+}
+
+.feedbackError {
+  text-align: center;
+  color: var(--color-error);
+  padding: var(--space-xl);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.emptyHint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Card del grupo: contiene cabecera, gráfica y lista de ejercicios.
+   Estructura tipo card con relleno generoso para dar aire visual. */
+.groupCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.groupName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Porcentaje grande del grupo con flecha + valor.
+   El color viene de la clase auxiliar (positive/negative/neutral). */
+.groupPercent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Contenedor de la gráfica de Recharts. Recharts se adapta al contenedor
+   con su ResponsiveContainer. */
+.chart {
+  width: 100%;
+}
+
+.chartEmpty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--space-md);
+}
+
+/* Lista de ejercicios individuales con su rendimiento.
+   Grid de 3 columnas: badge, nombre, porcentaje. */
+.exerciseList {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-border);
+}
+
+.exerciseRow {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: var(--space-md);
+  align-items: center;
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.exerciseRow:last-child {
+  border-bottom: none;
+}
+
+/* Badge circular con iniciales, coherente con el usado en Workouts. */
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(62, 248, 126, 0.12);
+  border-radius: 50%;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.exerciseName {
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exercisePercent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Clases utilitarias de color según el signo del porcentaje. */
+.positive {
+  color: var(--color-accent);
+}
+
+.negative {
+  color: var(--color-error);
+}
+
+.neutral {
+  color: var(--color-text-muted);
+}
+
+/* Botón de features futuras (Nuevo grupo). Deshabilitado como placeholder. */
+.futureActions {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-md);
+}

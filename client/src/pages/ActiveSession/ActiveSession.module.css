@@ -111,10 +111,11 @@
   padding-top: var(--space-md);
 }
 
-/* Cabecera de la mini-tabla de sets. Columnas alineadas con setRow. */
+/* Cabecera de la mini-tabla de sets. Columnas alineadas con setRow.
+   Quitamos la columna "Excl", ahora son 5 columnas. */
 .setsHeader {
   display: grid;
-  grid-template-columns: 24px 1fr 1fr 36px 36px 28px;
+  grid-template-columns: 24px 1fr 1fr 36px 28px;
   gap: var(--space-sm);
   align-items: center;
   padding: 0 var(--space-xs);
@@ -126,7 +127,7 @@
 /* Fila de serie: usa position relative para posicionar el timerBar debajo. */
 .setRow {
   display: grid;
-  grid-template-columns: 24px 1fr 1fr 36px 36px 28px;
+  grid-template-columns: 24px 1fr 1fr 36px 28px;
   gap: var(--space-sm);
   align-items: center;
   padding: var(--space-sm) var(--space-xs);
@@ -141,8 +142,7 @@
   text-align: center;
 }
 
-/* Inputs peso/reps: minimalistas para no romper el ritmo visual.
-   Sin border en estado normal, borde verde al enfocar. */
+/* Inputs peso/reps: minimalistas para no romper el ritmo visual. */
 .setInput {
   padding: var(--space-sm);
   background-color: var(--color-bg);
@@ -160,36 +160,6 @@
 .setInput:focus {
   outline: none;
   border-color: var(--color-border-accent);
-}
-
-/* Ocultamos el checkbox nativo. Usamos un cuadrado personalizado.
-   Mismo patrón que en RadioGroup para coherencia. */
-.excluidaLabel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.excluidaInput {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.excluidaMark {
-  display: block;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-bg);
-  transition: var(--transition-base);
-}
-
-.excluidaInput:checked + .excluidaMark {
-  background-color: var(--color-text-muted);
-  border-color: var(--color-text-muted);
 }
 
 /* Botón de completar: círculo vacío / check verde. */

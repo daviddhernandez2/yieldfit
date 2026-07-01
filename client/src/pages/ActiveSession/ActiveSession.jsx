@@ -88,7 +88,7 @@ export default function ActiveSession() {
   const elapsedSeconds = Math.floor((Date.now() - session.startTime) / 1000);
 
   // Helper para modificar un set concreto dentro del array anidado.
-  // React necesita nuevas referencias para detectar cambios: hacemos map en todos los niveles.
+  // React necesita nuevas referencias para detectar cambios: map en todos los niveles.
   const updateSet = (exerciseIndex, setIndex, cambios) => {
     setSession((prev) => ({
       ...prev,
@@ -105,7 +105,7 @@ export default function ActiveSession() {
     }));
   };
 
-  // Toggle de completada. Si se marca completada, arranca el restTimer.
+  // Toggle de completada. Si se marca, arranca el restTimer.
   // Si se desmarca, se limpia el restTimer si era el de esa serie.
   const handleToggleCompletada = (exerciseIndex, setIndex) => {
     const set = session.ejercicios[exerciseIndex].sets[setIndex];
@@ -114,7 +114,6 @@ export default function ActiveSession() {
     updateSet(exerciseIndex, setIndex, { completada: nuevaCompletada });
 
     if (nuevaCompletada) {
-      // Arranca el timer de descanso para esta serie.
       setRestTimer({
         exerciseIndex,
         setIndex,
@@ -125,7 +124,6 @@ export default function ActiveSession() {
       restTimer.exerciseIndex === exerciseIndex &&
       restTimer.setIndex === setIndex
     ) {
-      // Si se desmarcó la serie del timer activo, lo limpiamos.
       setRestTimer(null);
     }
   };
@@ -141,7 +139,7 @@ export default function ActiveSession() {
               ...ej,
               sets: [
                 ...ej.sets,
-                { peso: '', reps: '', excluida: false, completada: false },
+                { peso: '', reps: '', excluido: false, completada: false },
               ],
             }
       ),
@@ -174,7 +172,6 @@ export default function ActiveSession() {
     setExpandedIndex((actual) => (actual === index ? actual : index));
   };
 
-  // Cálculos previos al modal de terminar: resumen de la sesión para mostrar.
   const resumen = calcularResumen(session);
 
   const handleAbrirTerminar = () => {
@@ -201,27 +198,24 @@ export default function ActiveSession() {
           .map((ej) => ({
             exerciseId: ej.exerciseId,
             // Asignamos numeroSerie ANTES de filtrar para preservar el índice original.
-            // Ejemplo: usuario completa serie 1 y 3 pero no la 2 → payload envía
-            // numeroSerie: 1 y numeroSerie: 3, no 1 y 2. Esto refleja la realidad
-            // del entrenamiento en el historial.
+            // Ejemplo: si el usuario completa serie 1 y 3 pero no la 2, el payload envía
+            // numeroSerie: 1 y numeroSerie: 3. Esto refleja la realidad del entrenamiento.
             sets: ej.sets
               .map((s, idx) => ({
                 numeroSerie: idx + 1,
                 peso: Number(s.peso) || 0,
                 reps: Number(s.reps) || 0,
-                excluida: s.excluida,
+                excluido: s.excluido,
                 completada: s.completada,
               }))
               .filter((s) => s.completada)
-              // Descartamos "completada" del payload final: es un flag interno
-              // del cliente, el backend no lo necesita.
+              // Quitamos "completada" del payload final: es un flag interno del cliente.
               .map(({ completada, ...resto }) => resto),
           })),
       };
 
       await createSession(payload);
       clearActiveSession();
-      // El bloque 3.5b creará /history. De momento, volvemos a workouts.
       navigate('/workouts');
     } catch (err) {
       const data = err.response?.data;
@@ -279,7 +273,6 @@ export default function ActiveSession() {
                     <span>#</span>
                     <span>Peso (kg)</span>
                     <span>Reps</span>
-                    <span title="Excluir del cálculo del récord">Excl</span>
                     <span></span>
                     <span></span>
                   </div>
@@ -302,11 +295,6 @@ export default function ActiveSession() {
                         }
                         onChangeReps={(v) =>
                           updateSet(exerciseIndex, setIndex, { reps: v })
-                        }
-                        onToggleExcluida={() =>
-                          updateSet(exerciseIndex, setIndex, {
-                            excluida: !set.excluida,
-                          })
                         }
                         onToggleCompletada={() =>
                           handleToggleCompletada(exerciseIndex, setIndex)
@@ -360,8 +348,7 @@ export default function ActiveSession() {
 }
 
 // Componente aparte para cada fila de serie.
-// Extraerlo del componente padre reduce ruido en el render principal
-// y facilita razonar sobre los props que necesita.
+// Extraerlo del componente padre reduce ruido en el render principal.
 function SetRow({
   setIndex,
   set,
@@ -369,7 +356,6 @@ function SetRow({
   timerActivo,
   onChangePeso,
   onChangeReps,
-  onToggleExcluida,
   onToggleCompletada,
   onQuitar,
 }) {
@@ -404,15 +390,6 @@ function SetRow({
         onChange={(e) => onChangeReps(e.target.value)}
         placeholder="—"
       />
-      <label className={styles.excluidaLabel}>
-        <input
-          type="checkbox"
-          checked={set.excluida}
-          onChange={onToggleExcluida}
-          className={styles.excluidaInput}
-        />
-        <span className={styles.excluidaMark}></span>
-      </label>
       <button
         type="button"
         onClick={onToggleCompletada}

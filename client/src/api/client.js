@@ -5,7 +5,7 @@ import axios from 'axios';
 // En desarrollo el backend corre en localhost:3000; en producción se
 // sustituirá por la URL del despliegue (lo haremos en la Semana 3).
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
 });
 
 // Interceptor de request: se ejecuta antes de enviar cualquier petición.

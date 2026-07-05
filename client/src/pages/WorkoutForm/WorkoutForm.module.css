@@ -68,8 +68,6 @@
   flex-direction: column;
   gap: var(--space-md);
   padding: var(--space-md);
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
@@ -152,8 +150,6 @@
 .catalogo {
   display: flex;
   flex-direction: column;
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   max-height: 320px;
   overflow-y: auto;

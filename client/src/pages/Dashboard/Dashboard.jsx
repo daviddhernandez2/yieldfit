@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -14,7 +14,6 @@ import {
   mediaGrupo,
   serieAgregadaTodos,
 } from '../../utils/performance.js';
-import Button from '../../components/Button/Button.jsx';
 import styles from './Dashboard.module.css';
 
 // Formatea un número decimal como porcentaje con signo: 3.14 → "+3,1%".
@@ -54,6 +53,14 @@ const IconTrend = ({ value }) => {
   );
 };
 
+// Icono + para el botón "Nuevo grupo" del header.
+const IconPlus = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
 // Pantalla principal del progreso.
 // En MVP muestra un único grupo por defecto llamado "Todos" que agrupa
 // todos los ejercicios con al menos 2 sesiones registradas.
@@ -78,7 +85,6 @@ export default function Dashboard() {
     cargar();
   }, []);
 
-  // Cálculos derivados de las sesiones. useMemo evita recalcular en cada render.
   const progresoPorEjercicio = useMemo(
     () => calcularProgresoTodos(sesiones),
     [sesiones]
@@ -104,8 +110,20 @@ export default function Dashboard() {
 
   return (
     <div className={styles.page}>
+      {/* Header con título a la izquierda y botón de nuevo grupo a la derecha
+          como acción principal de la pantalla. Deshabilitado en MVP hasta
+          que se implemente el sistema completo de Charts personalizados. */}
       <header className={styles.header}>
         <h1 className={styles.title}>Progreso</h1>
+        <button
+          type="button"
+          className={styles.newGroupButton}
+          disabled
+          title="Próximamente"
+        >
+          <IconPlus />
+          <span>Nuevo grupo</span>
+        </button>
       </header>
 
       {sesiones.length === 0 ? (
@@ -116,7 +134,7 @@ export default function Dashboard() {
           </p>
         </div>
       ) : (
-        <section className={styles.groupCard}>
+        <section className={`${styles.groupCard} glassCard`}>
           <div className={styles.groupHeader}>
             <h2 className={styles.groupName}>Todos</h2>
             {mediaTotal !== null && (
@@ -130,11 +148,12 @@ export default function Dashboard() {
           {serieGrafica.length >= 2 ? (
             <div className={styles.chart}>
               <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={serieGrafica} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={serieGrafica} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#3EF87E" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="#3EF87E" stopOpacity={1} />
+                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3EF87E" stopOpacity={0.6} />
+                      <stop offset="50%" stopColor="#3EF87E" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="#3EF87E" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="#1f1f1f" vertical={false} />
@@ -163,15 +182,16 @@ export default function Dashboard() {
                     formatter={(value) => [`${Math.round(value)} kg`, '1RM medio']}
                     labelStyle={{ color: '#888888' }}
                   />
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="media1RM"
-                    stroke="url(#lineGradient)"
+                    stroke="#3EF87E"
                     strokeWidth={2.5}
-                    dot={{ fill: '#3EF87E', r: 3 }}
-                    activeDot={{ r: 5 }}
+                    fill="url(#areaGradient)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: '#3EF87E' }}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           ) : (
@@ -200,12 +220,6 @@ export default function Dashboard() {
           )}
         </section>
       )}
-
-      <div className={styles.futureActions}>
-        <Button variant="outline" disabled title="Próximamente">
-          + Nuevo grupo
-        </Button>
-      </div>
     </div>
   );
 }

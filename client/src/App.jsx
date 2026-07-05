@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import Layout from './components/Layout/Layout.jsx';
+import Intro from './components/Intro/Intro.jsx';
 import Welcome from './pages/Welcome/Welcome.jsx';
 import Login from './pages/Login/Login.jsx';
 import Register from './pages/Register/Register.jsx';
@@ -16,8 +18,22 @@ import SessionDetail from './pages/SessionDetail/SessionDetail.jsx';
 import Profile from './pages/Profile/Profile.jsx';
 
 function App() {
+  // Intro cinemática:
+  //   - Si el usuario NO tiene sesión activa (no hay token en localStorage),
+  //     el intro aparece en cada refresco de la app.
+  //   - Si el usuario está logueado, no aparece: agilizamos el uso diario
+  //     para quien ya conoce la marca y usa la app con normalidad.
+  const [mostrarIntro, setMostrarIntro] = useState(() => {
+    return !localStorage.getItem('yieldfit_token');
+  });
+
+  const finalizarIntro = () => {
+    setMostrarIntro(false);
+  };
+
   return (
     <AuthProvider>
+      {mostrarIntro && <Intro onFinish={finalizarIntro} />}
       <BrowserRouter>
         <Routes>
           {/* Rutas públicas */}

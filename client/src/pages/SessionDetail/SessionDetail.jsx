@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSession, deleteSession } from '../../api/sessions.js';
-import Button from '../../components/Button/Button.jsx';
+import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
 import styles from './SessionDetail.module.css';
 
@@ -13,7 +13,9 @@ const formatDuracion = (segundos) => {
   return `${horas}h ${minutos} min`;
 };
 
-// Formatea fecha + hora: "Sábado, 16 de mayo de 2026 · 18:34"
+// Formatea fecha + hora: "sábado, 16 de mayo de 2026 · 18:34".
+// Se mantiene en minúsculas para coherencia con el resto de textos de fecha
+// de la app, en línea con el uso natural del español.
 const formatFecha = (fecha) => {
   const d = new Date(fecha);
   const fechaStr = d.toLocaleDateString('es-ES', {
@@ -28,6 +30,14 @@ const formatFecha = (fecha) => {
   });
   return `${fechaStr} · ${horaStr}`;
 };
+
+// Icono chevron-left para el botón de volver, alineado con el
+// estilo de iconografía del resto de la app.
+const IconChevronLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
 
 // Detalle de una sesión pasada. Solo lectura.
 // Los datos vienen del backend con snapshots (nombreSnapshot del ejercicio),
@@ -76,7 +86,6 @@ export default function SessionDetail() {
   if (error) return <p className={styles.feedbackError}>{error}</p>;
   if (!session) return null;
 
-  // Cálculos para las métricas del header.
   const pesoTotal = session.ejercicios.reduce((total, ej) => {
     return total + ej.sets.reduce((sub, set) => sub + (set.peso || 0) * (set.reps || 0), 0);
   }, 0);
@@ -85,14 +94,20 @@ export default function SessionDetail() {
 
   return (
     <div className={styles.page}>
+      {/* Header: título + fecha a la izquierda, botón atrás a la derecha.
+          Se invierte respecto al patrón habitual porque el foco principal
+          en esta vista es el nombre de la sesión, no la navegación. */}
+      {/* Header: botón atrás delante, título y fecha a la derecha del botón.
+          Es un patrón más convencional para pantallas de detalle: la
+          navegación queda pegada al inicio de la línea de lectura. */}
       <header className={styles.header}>
         <button
           type="button"
           onClick={() => navigate('/history')}
           className={styles.backButton}
-          aria-label="Volver"
+          aria-label="Volver al historial"
         >
-          ←
+          <IconChevronLeft />
         </button>
         <div className={styles.headerText}>
           <h1 className={styles.title}>{session.nombre}</h1>
@@ -101,15 +116,15 @@ export default function SessionDetail() {
       </header>
 
       <div className={styles.statsRow}>
-        <div className={styles.statBox}>
+        <div className={`${styles.statBox} glassCard`}>
           <span className={styles.statLabel}>Duración</span>
           <span className={styles.statValue}>{formatDuracion(session.duracionSegundos)}</span>
         </div>
-        <div className={styles.statBox}>
+        <div className={`${styles.statBox} glassCard`}>
           <span className={styles.statLabel}>Peso total</span>
           <span className={styles.statValue}>{pesoTotal.toLocaleString('es-ES')} kg</span>
         </div>
-        <div className={styles.statBox}>
+        <div className={`${styles.statBox} glassCard`}>
           <span className={styles.statLabel}>Series</span>
           <span className={styles.statValue}>{totalSets}</span>
         </div>
@@ -117,7 +132,7 @@ export default function SessionDetail() {
 
       <div className={styles.exercisesList}>
         {session.ejercicios.map((ej) => (
-          <div key={ej._id} className={styles.exerciseCard}>
+          <div key={ej._id} className={`${styles.exerciseCard} glassCard`}>
             <h2 className={styles.exerciseName}>{ej.nombreSnapshot}</h2>
 
             <div className={styles.setsTable}>
@@ -138,15 +153,14 @@ export default function SessionDetail() {
         ))}
       </div>
 
-      <Button
-        type="button"
-        variant="danger"
-        fullWidth
-        onClick={() => setConfirmOpen(true)}
-        disabled={deleting}
-      >
-        Eliminar sesión
-      </Button>
+      {/* Acción destructiva discreta al final, alineada a la derecha.
+          Usa el DeleteButton estándar de la app en lugar del antiguo botón
+          rojo grande, mucho más agresivo visualmente. */}
+      <div className={styles.deleteWrapper}>
+        <DeleteButton onClick={() => setConfirmOpen(true)} disabled={deleting}>
+          Eliminar sesión
+        </DeleteButton>
+      </div>
 
       <ConfirmDialog
         open={confirmOpen}

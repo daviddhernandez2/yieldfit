@@ -1,60 +1,75 @@
-.container {
-  /* Pantalla completa con fondo. El gradiente sutil hacia abajo evoca
-     la estética de las gráficas de trading: oscuro arriba, ligero halo verde abajo. */
+/* Contenedor de página completo. Ocupa toda la altura del viewport y
+   centra el contenido en ambos ejes. min-height con svh (small viewport
+   height) evita el salto en móvil cuando aparece/desaparece la barra de
+   navegación del sistema. */
+.page {
+  position: relative;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: var(--space-2xl) var(--space-xl);
-  background:
-    radial-gradient(
-      ellipse at center bottom,
-      rgba(62, 248, 126, 0.08) 0%,
-      transparent 60%
-    ),
-    var(--color-bg);
-}
-
-.logoSection {
-  flex: 1;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--space-lg);
+  background-color: var(--color-bg);
+  overflow: hidden;
 }
 
-.logo {
+/* Aurora verde inferior. Es un pseudoelemento posicionado por debajo del
+   contenido (z-index: 0) que aporta profundidad al fondo negro sin restarle
+   legibilidad. aria-hidden en el JSX porque es puramente decorativo. */
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 130% 80% at 50% 115%,
+      rgba(62, 248, 126, 0.28) 0%,
+      rgba(62, 248, 126, 0.12) 30%,
+      rgba(62, 248, 126, 0.04) 55%,
+      transparent 85%
+    ),
+    radial-gradient(
+      ellipse 70% 100% at 50% 100%,
+      rgba(62, 248, 126, 0.35) 0%,
+      rgba(62, 248, 126, 0.10) 45%,
+      transparent 96%
+    );
+  filter: blur(80px);
+}
+/* Bloque central: logo + botones. Ancho controlado para que en escritorio
+   los botones no se estiren desproporcionadamente y en móvil ocupen el
+   espacio disponible con márgenes cómodos. */
+.content {
+  position: relative;
+  z-index: 1;
   display: flex;
-  align-items: baseline;
-  gap: var(--space-xs);
-  font-size: 2.5rem;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: -0.02em;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xl);
+  width: 100%;
+  max-width: 360px;
 }
 
-.logoIcon {
-  color: var(--color-accent);
-  font-size: 2rem;
-  transform: translateY(2px);
+/* Ancho del logo responsive: nunca demasiado pequeño ni demasiado grande.
+   clamp() define un mínimo, un valor preferido (60% del viewport) y un
+   máximo, resolviendo la responsividad sin media queries. */
+.logo {
+  width: clamp(220px, 60vw, 100px);
+  height: auto;
 }
 
-.logoText {
-  color: var(--color-text);
-}
-
-.logoSuffix {
-  color: var(--color-text);
-  font-size: 1rem;
-  font-weight: var(--font-weight-medium);
-  align-self: flex-start;
-  margin-top: 0.5rem;
-}
-
+/* Contenedor de acciones. Los enlaces son bloque para que fullWidth del
+   Button funcione correctamente. */
 .actions {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  padding-bottom: var(--space-2xl);
-  max-width: 320px;
   width: 100%;
-  margin: 0 auto;
+}
+
+.action {
+  display: block;
+  text-decoration: none;
 }

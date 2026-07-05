@@ -2,50 +2,88 @@
    Cambiar un valor aquí se propaga a toda la app. */
 
 :root {
-  /* Colores base */
-  --color-bg: #000000;
-  --color-bg-elevated: #0a0a0a;
-  --color-text: #ffffff;
-  --color-text-muted: #888888;
+   /* Colores base */
+   --color-bg: #000000;
+   --color-bg-elevated: #0a0a0a;
+   --color-text: #ffffff;
+   --color-text-muted: #888888;
 
-  /* Color de acento principal (verde tipo trading subiendo) */
-  --color-accent: #3EF87E;
-  --color-accent-hover: #2dd968;
-  --color-accent-text: #000000;
+   /* Color de acento principal (verde tipo trading subiendo) */
+   --color-accent: #3EF87E;
+   --color-accent-hover: #2dd968;
+   --color-accent-text: #000000;
 
-  /* Color de error / pérdida */
-  --color-error: #FF3000;
+   /* Color de error / pérdida */
+   --color-error: #FF3000;
 
-  /* Bordes */
-  --color-border: #1f1f1f;
-  --color-border-accent: #3EF87E;
+   /* Bordes */
+   --color-border: #1f1f1f;
+   --color-border-accent: #3EF87E;
 
-  /* Tipografía. Geist se sustituirá aquí cuando llegue el pulido. */
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.5rem;
-  --font-size-2xl: 2rem;
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-bold: 600;
+   /* Tipografía. Geist se sustituirá aquí cuando llegue el pulido. */
+   --font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+   --font-size-sm: 0.875rem;
+   --font-size-base: 1rem;
+   --font-size-lg: 1.125rem;
+   --font-size-xl: 1.5rem;
+   --font-size-2xl: 2rem;
+   --font-weight-regular: 400;
+   --font-weight-medium: 500;
+   --font-weight-bold: 600;
 
-  /* Escala de espaciado consistente.
+   /* Escala de espaciado consistente.
      Usar siempre estas variables en lugar de px hardcodeados. */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
+   --space-xs: 0.25rem;
+   --space-sm: 0.5rem;
+   --space-md: 1rem;
+   --space-lg: 1.5rem;
+   --space-xl: 2rem;
+   --space-2xl: 3rem;
 
-  /* Radios de borde */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
-  --radius-pill: 999px;
+   /* Radios de borde */
+   --radius-sm: 8px;
+   --radius-md: 12px;
+   --radius-lg: 24px;
+   --radius-pill: 999px;
 
-  /* Transiciones por defecto */
-  --transition-base: all 0.15s ease;
+   /* Transiciones por defecto */
+   --transition-base: all 0.15s ease;
+}
+
+/* Utilidad de glass morphism para cards grandes.
+   Uso: aplicar en background/border/backdrop-filter, o extender con composes.
+   Fondo translúcido con blur medio y borde muy suave con luz interna. */
+.card-glass {
+  background: rgba(20, 20, 20, 0.55);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 20px 60px -20px rgba(0, 0, 0, 0.5);
+}
+
+/* Elimina el outline azul del navegador y lo sustituye por uno verde
+   visible solo con navegación por teclado. */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Clase reutilizable de glass morphism. Se importa desde los CSS Modules
+   con `composes: glassCard from global`. Cualquier cambio futuro al look
+   glass se hace aquí y se propaga a toda la app. */
+.glassCard {
+  background: rgba(30, 30, 30, 0.35);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+    0 20px 60px -20px rgba(0, 0, 0, 0.5);
 }

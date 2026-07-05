@@ -7,10 +7,18 @@
   width: 100%;
 }
 
+/* Header: botón atrás a la izquierda, seguido de título+fecha.
+   align-items: flex-start alinea el botón con la línea del título
+   (no con el subtítulo), que queda visualmente más equilibrado. */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-md);
+}
+
+.headerText {
+  min-width: 0;
+  flex: 1;
 }
 
 .backButton {
@@ -33,10 +41,6 @@
   border-color: var(--color-text-muted);
 }
 
-.headerText {
-  min-width: 0;
-}
-
 .title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
@@ -47,9 +51,9 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   margin-top: var(--space-xs);
-  text-transform: capitalize;
+  /* Antes: text-transform: capitalize (mayúscula en cada palabra).
+     Quitado: la fecha luce mejor en minúsculas como "miércoles, 1 jul 2026". */
 }
-
 /* Fila de estadísticas resumen del entrenamiento. Grid de 3 columnas iguales. */
 .statsRow {
   display: grid;
@@ -62,8 +66,6 @@
   flex-direction: column;
   gap: var(--space-xs);
   padding: var(--space-md);
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   align-items: center;
   text-align: center;
@@ -90,8 +92,6 @@
 
 .exerciseCard {
   padding: var(--space-md);
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;

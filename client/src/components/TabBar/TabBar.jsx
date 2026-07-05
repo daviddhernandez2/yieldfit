@@ -2,8 +2,10 @@ import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from '../NavItems.jsx';
 import styles from './TabBar.module.css';
 
-// Tab bar inferior para pantallas móviles. Se oculta en >=768px.
-// Cada item es vertical (icono encima del label, formato típico de apps móviles).
+// TabBar inferior para móvil. Solo visible por debajo de 768px.
+// Diseñada como pill flotante con blur, coherente con el mockup:
+// cada item apila icono + label, y el activo se marca con un pill
+// verde translúcido que respeta el radio del contenedor.
 export default function TabBar() {
   return (
     <nav className={styles.tabbar}>

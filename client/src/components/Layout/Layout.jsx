@@ -1,18 +1,16 @@
 import Sidebar from '../Sidebar/Sidebar.jsx';
 import TabBar from '../TabBar/TabBar.jsx';
+import MiniSession from '../MiniSession/MiniSession.jsx';
 import styles from './Layout.module.css';
 
-// Layout principal para rutas autenticadas. Envuelve el contenido y muestra
-// la navegación adecuada según el tamaño de pantalla:
-// - <768px: barra de pestañas inferior (mobile).
-// - >=768px: sidebar vertical izquierdo (desktop).
-// CSS decide qué se ve mediante media queries, no JavaScript.
 export default function Layout({ children }) {
   return (
     <div className={styles.layout}>
+      <div className={styles.glow} aria-hidden="true" />
       <Sidebar />
-      <main className={styles.content}>{children}</main>
+      <main className={styles.main}>{children}</main>
       <TabBar />
+      <MiniSession />
     </div>
   );
 }

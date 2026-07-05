@@ -1,58 +1,46 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listWorkouts, deleteWorkout } from '../../api/workouts.js';
-import Button from '../../components/Button/Button.jsx';
+import { listWorkouts } from '../../api/workouts.js';
+import { useStartSession } from '../../hooks/useStartSession.js';
+import WorkoutActionsModal from '../../components/WorkoutActionsModal/WorkoutActionsModal.jsx';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
 import styles from './Workouts.module.css';
 
 // Genera un badge de 2 letras a partir del nombre de la rutina.
-// Por ejemplo "Push" → "PU", "Día de empuje" → "DE".
-// Se basa en las palabras del nombre para que reflejen el contenido visualmente.
 const generarBadge = (nombre) => {
   const palabras = nombre.trim().split(/\s+/);
-  if (palabras.length === 1) {
-    return palabras[0].slice(0, 2).toUpperCase();
-  }
+  if (palabras.length === 1) return palabras[0].slice(0, 2).toUpperCase();
   return (palabras[0][0] + palabras[1][0]).toUpperCase();
 };
 
-// Icono inline de papelera. Igual que en Exercises para coherencia visual.
-const IconTrash = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="3 6 5 6 21 6" />
-    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-    <path d="M10 11v6" />
-    <path d="M14 11v6" />
-    <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+const IconPlus = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
 
-// Pantalla principal de rutinas. Muestra una lista de cards y permite
-// crear nuevas, editar existentes (click en card) o eliminarlas (icono papelera).
+const IconChevronRight = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
+
+// Pantalla principal de rutinas. Al pulsar una rutina se abre el modal
+// de acciones (Editar / Iniciar). El borrado se hace desde el formulario
+// de edición, no desde esta lista, para reducir clicks accidentales.
 export default function Workouts() {
   const navigate = useNavigate();
+  const { start, conflicto, confirmarDescartar, cancelarConflicto, error: startError } =
+    useStartSession();
 
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  const [workoutToDelete, setWorkoutToDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     const cargar = async () => {
-      setLoading(true);
-      setError('');
       try {
         const response = await listWorkouts();
         setWorkouts(response.data.workouts);
@@ -64,26 +52,19 @@ export default function Workouts() {
       }
     };
     cargar();
-  }, [refreshKey]);
+  }, []);
 
-  const handleAskDelete = (workout, e) => {
-    e.stopPropagation();
-    setWorkoutToDelete(workout);
+  const handleEdit = () => {
+    if (!selected) return;
+    navigate(`/workouts/${selected._id}/edit`);
+    setSelected(null);
   };
 
-  const handleConfirmDelete = async () => {
-    if (!workoutToDelete) return;
-    setDeleting(true);
-    try {
-      await deleteWorkout(workoutToDelete._id);
-      setWorkoutToDelete(null);
-      setRefreshKey((k) => k + 1);
-    } catch (err) {
-      const message = err.response?.data?.message || 'Error al eliminar la rutina.';
-      setError(message);
-    } finally {
-      setDeleting(false);
-    }
+  const handleStart = () => {
+    if (!selected) return;
+    const id = selected._id;
+    setSelected(null);
+    start(id);
   };
 
   return (
@@ -92,17 +73,19 @@ export default function Workouts() {
         <h1 className={styles.title}>Entrenamiento</h1>
         <button
           type="button"
-          className={styles.addButton}
+          className={styles.newButton}
           onClick={() => navigate('/workouts/new')}
-          aria-label="Nueva rutina"
         >
-          +
+          <IconPlus />
+          <span>Nuevo entrenamiento</span>
         </button>
       </header>
 
       {loading && <p className={styles.feedback}>Cargando...</p>}
 
-      {error && <p className={styles.feedbackError}>{error}</p>}
+      {(error || startError) && (
+        <p className={styles.feedbackError}>{error || startError}</p>
+      )}
 
       {!loading && !error && workouts.length === 0 && (
         <div className={styles.emptyState}>
@@ -114,41 +97,39 @@ export default function Workouts() {
       {!loading && !error && workouts.length > 0 && (
         <div className={styles.list}>
           {workouts.map((wo) => (
-            <div key={wo._id} className={styles.card}>
-              <button
-                type="button"
-                className={styles.cardMain}
-                onClick={() => navigate(`/workouts/${wo._id}/edit`)}
-              >
-                <span className={styles.badge}>{generarBadge(wo.nombre)}</span>
-                <span className={styles.cardName}>{wo.nombre}</span>
-              </button>
-              <button
-                type="button"
-                className={styles.deleteIcon}
-                onClick={(e) => handleAskDelete(wo, e)}
-                aria-label={`Eliminar ${wo.nombre}`}
-              >
-                <IconTrash />
-              </button>
-            </div>
+            <button
+              key={wo._id}
+              type="button"
+              className={`${styles.card} glassCard`}
+              onClick={() => setSelected(wo)}
+            >
+              <span className={styles.badge}>{generarBadge(wo.nombre)}</span>
+              <span className={styles.cardName}>{wo.nombre}</span>
+              <span className={styles.chevron}>
+                <IconChevronRight />
+              </span>
+            </button>
           ))}
         </div>
       )}
 
+      <WorkoutActionsModal
+        open={Boolean(selected)}
+        workout={selected}
+        onEdit={handleEdit}
+        onStart={handleStart}
+        onClose={() => setSelected(null)}
+      />
+
       <ConfirmDialog
-        open={Boolean(workoutToDelete)}
-        title="¿Eliminar esta rutina?"
-        message={
-          workoutToDelete
-            ? `"${workoutToDelete.nombre}" se eliminará. Las sesiones basadas en ella no se verán afectadas.`
-            : ''
-        }
-        confirmLabel={deleting ? 'Eliminando...' : 'Eliminar'}
+        open={conflicto}
+        title="¿Descartar la sesión activa?"
+        message="Tienes una sesión de entrenamiento sin terminar. Si continúas, la perderás."
+        confirmLabel="Descartar y empezar nueva"
         cancelLabel="Cancelar"
         confirmVariant="danger"
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setWorkoutToDelete(null)}
+        onConfirm={confirmarDescartar}
+        onCancel={cancelarConflicto}
       />
     </div>
   );

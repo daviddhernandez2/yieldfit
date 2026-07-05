@@ -1,22 +1,51 @@
+/* Contenedor raíz del layout. Flex horizontal para sidebar + main.
+   IMPORTANTE: sin overflow aquí. Cualquier overflow en el ancestro rompe
+   el position: sticky del sidebar. El overflow se contiene en .glow. */
 .layout {
-  min-height: 100vh;
+  position: relative;
   display: flex;
+  min-height: 100vh;
+  min-height: 100svh;
   background-color: var(--color-bg);
 }
 
-/* Área de contenido principal. Ocupa todo el espacio disponible.
-   En móvil suma padding inferior para no quedar oculto por la tab bar.
-   En desktop ese padding desaparece porque la tab bar se oculta. */
-.content {
+/* Glow verde global. fixed lo ancla al viewport, así ambienta toda la
+   app sin depender del scroll. El overflow queda contenido aquí porque
+   .layout no puede tenerlo si queremos sticky en el sidebar. */
+.glow {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 140% 85% at 50% 115%,
+      rgba(62, 248, 126, 0.28) 0%,
+      rgba(62, 248, 126, 0.14) 30%,
+      rgba(62, 248, 126, 0.05) 55%,
+      transparent 85%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 50% 108%,
+      rgba(62, 248, 126, 0.38) 0%,
+      rgba(62, 248, 126, 0.12) 45%,
+      transparent 85%
+    );
+  filter: blur(55px);
+}
+
+.main {
+  position: relative;
+  z-index: 1;
   flex: 1;
-  padding: var(--space-xl);
-  padding-bottom: calc(var(--space-xl) + 80px);
-  overflow-y: auto;
   min-width: 0;
+  padding: var(--space-lg);
+  padding-bottom: calc(var(--space-lg) + 80px);
 }
 
 @media (min-width: 768px) {
-  .content {
+  .main {
     padding: var(--space-2xl);
     padding-bottom: var(--space-2xl);
   }

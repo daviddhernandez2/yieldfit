@@ -1,95 +1,92 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  getExercise,
-  createExercise,
-  updateExercise,
-  deleteExercise,
-} from '../../api/exercises.js';
+import { createExercise, getExercise, updateExercise, deleteExercise } from '../../api/exercises.js';
 import Input from '../../components/Input/Input.jsx';
 import Select from '../../components/Select/Select.jsx';
 import Button from '../../components/Button/Button.jsx';
+import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
 import styles from './ExerciseForm.module.css';
 
-// Opciones sincronizadas con los enums del modelo Exercise del backend.
-// Si en el modelo se ampliaran, hay que actualizar también aquí.
-const GRUPO_OPTIONS = [
-  { value: 'Pecho', label: 'Pecho' },
-  { value: 'Espalda', label: 'Espalda' },
-  { value: 'Hombros', label: 'Hombros' },
-  { value: 'Brazos', label: 'Brazos' },
-  { value: 'Piernas', label: 'Piernas' },
-  { value: 'Core', label: 'Core' },
-  { value: 'Cardio', label: 'Cardio' },
+const GRUPOS = [
+  { value: 'pecho', label: 'Pecho' },
+  { value: 'espalda', label: 'Espalda' },
+  { value: 'hombros', label: 'Hombros' },
+  { value: 'brazos', label: 'Brazos' },
+  { value: 'piernas', label: 'Piernas' },
+  { value: 'core', label: 'Core' },
+  { value: 'cardio', label: 'Cardio' },
 ];
 
-const TIPO_OPTIONS = [
-  { value: 'Peso corporal', label: 'Peso corporal' },
-  { value: 'Pesas libres', label: 'Pesas libres' },
-  { value: 'Maquinas', label: 'Máquinas' },
-  { value: 'Poleas', label: 'Poleas' },
-  { value: 'Cardio', label: 'Cardio' },
+const TIPOS = [
+  { value: 'pesas_libres', label: 'Pesas libres' },
+  { value: 'maquinas', label: 'Máquinas' },
+  { value: 'poleas', label: 'Poleas' },
+  { value: 'peso_corporal', label: 'Peso corporal' },
+  { value: 'cardio', label: 'Cardio' },
 ];
 
-// Pantalla unificada para crear o editar ejercicios.
-// Detecta el modo según haya parámetro :id en la URL.
-// - Sin id: crea un nuevo ejercicio.
-// - Con id: carga el existente y permite editarlo o borrarlo.
+const IconChevronLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
+
+// Formulario unificado para crear y editar ejercicios.
+// El modo se detecta por la presencia del :id en la URL. Si existe, se
+// precarga el ejercicio; si no, arranca en blanco. Así reutilizamos toda
+// la lógica de validación y submit para ambos flujos.
 export default function ExerciseForm() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const isEditMode = Boolean(id);
+  const editMode = Boolean(id);
 
-  const [formData, setFormData] = useState({
-    nombre: '',
-    grupoMuscular: '',
-    tipo: '',
-  });
-  const [loading, setLoading] = useState(isEditMode);
+  const [form, setForm] = useState({ nombre: '', grupoMuscular: 'pecho', tipo: 'pesas_libres' });
+  const [loading, setLoading] = useState(editMode);
   const [submitting, setSubmitting] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
-  // En modo edición, cargamos los datos del ejercicio existente.
-  // Si la API devuelve 404 (ya no existe o es ajeno), redirigimos al listado.
+  // Precarga en modo edición.
   useEffect(() => {
-    if (!isEditMode) return;
+    if (!editMode) return;
     const cargar = async () => {
       try {
         const response = await getExercise(id);
-        const { nombre, grupoMuscular, tipo } = response.data.exercise;
-        setFormData({ nombre, grupoMuscular, tipo });
-      } catch {
-        navigate('/exercises', { replace: true });
+        const ex = response.data.exercise;
+        setForm({
+          nombre: ex.nombre,
+          grupoMuscular: ex.grupoMuscular,
+          tipo: ex.tipo,
+        });
+      } catch (err) {
+        const message = err.response?.data?.message || 'Error al cargar el ejercicio.';
+        setErrorMessage(message);
       } finally {
         setLoading(false);
       }
     };
     cargar();
-  }, [id, isEditMode, navigate]);
+  }, [editMode, id]);
 
-  const updateField = (field) => (e) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleChange = (campo) => (e) => {
+    setForm((f) => ({ ...f, [campo]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
     setSubmitting(true);
-
+    setErrorMessage('');
     try {
-      if (isEditMode) {
-        await updateExercise(id, formData);
+      if (editMode) {
+        await updateExercise(id, form);
       } else {
-        await createExercise(formData);
+        await createExercise(form);
       }
       navigate('/exercises');
     } catch (err) {
       const data = err.response?.data;
-      const message =
-        data?.details?.[0] || data?.message || 'Error al guardar el ejercicio.';
+      const message = data?.details?.[0] || data?.message || 'Error al guardar.';
       setErrorMessage(message);
     } finally {
       setSubmitting(false);
@@ -97,112 +94,102 @@ export default function ExerciseForm() {
   };
 
   const handleConfirmDelete = async () => {
-    setDeleting(true);
+    setSubmitting(true);
     try {
       await deleteExercise(id);
       navigate('/exercises');
     } catch (err) {
-      const message =
-        err.response?.data?.message || 'Error al eliminar el ejercicio.';
+      const message = err.response?.data?.message || 'Error al eliminar.';
       setErrorMessage(message);
-      setConfirmOpen(false);
+      setConfirmDeleteOpen(false);
     } finally {
-      setDeleting(false);
+      setSubmitting(false);
     }
   };
 
-  if (loading) {
-    return <p className={styles.feedback}>Cargando...</p>;
-  }
-
-  const camposObligatoriosOk =
-    formData.nombre && formData.grupoMuscular && formData.tipo;
+  if (loading) return <p className={styles.feedback}>Cargando...</p>;
 
   return (
     <div className={styles.page}>
+      {/* Header: botón atrás + título. Mismo patrón que SessionDetail y
+          otras vistas de detalle: la navegación queda pegada al inicio
+          de la línea de lectura. */}
       <header className={styles.header}>
         <button
           type="button"
           onClick={() => navigate('/exercises')}
           className={styles.backButton}
-          aria-label="Volver"
+          aria-label="Volver al listado de ejercicios"
         >
-          ←
+          <IconChevronLeft />
         </button>
         <h1 className={styles.title}>
-          {isEditMode ? 'Editar ejercicio' : 'Nuevo ejercicio'}
+          {editMode ? 'Editar ejercicio' : 'Nuevo ejercicio'}
         </h1>
       </header>
 
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <form className={styles.form} onSubmit={handleSubmit}>
         <Input
-          id="nombre"
           label="Nombre"
-          type="text"
-          placeholder="Ej. Press banca con barra"
-          value={formData.nombre}
-          onChange={updateField('nombre')}
+          value={form.nombre}
+          onChange={handleChange('nombre')}
           required
-          autoFocus={!isEditMode}
+          maxLength={40}
+          placeholder="p.ej. Press banca con barra"
         />
 
         <Select
-          id="grupoMuscular"
           label="Grupo muscular"
-          value={formData.grupoMuscular}
-          onChange={updateField('grupoMuscular')}
-          options={GRUPO_OPTIONS}
-          placeholder="Selecciona un grupo"
-          required
+          value={form.grupoMuscular}
+          onChange={handleChange('grupoMuscular')}
+          options={GRUPOS}
         />
 
         <Select
-          id="tipo"
           label="Tipo"
-          value={formData.tipo}
-          onChange={updateField('tipo')}
-          options={TIPO_OPTIONS}
-          placeholder="Selecciona un tipo"
-          required
+          value={form.tipo}
+          onChange={handleChange('tipo')}
+          options={TIPOS}
         />
 
         {errorMessage && (
-          <div className={styles.errorBanner} role="alert">
-            {errorMessage}
-          </div>
+          <div className={styles.errorBanner} role="alert">{errorMessage}</div>
         )}
 
-        <Button
-          type="submit"
-          variant="primary"
-          fullWidth
-          disabled={submitting || !camposObligatoriosOk}
-        >
-          {submitting ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear ejercicio'}
-        </Button>
-
-        {isEditMode && (
-          <Button
-            type="button"
-            variant="danger"
-            fullWidth
-            onClick={() => setConfirmOpen(true)}
-            disabled={submitting || deleting}
-          >
-            Eliminar ejercicio
+        {/* Botón principal centrado y con ancho contenido, coherente con
+            el resto de la app. Sin fullWidth para no dominar la pantalla. */}
+        <div className={styles.submitWrapper}>
+          <Button variant="primary" type="submit" disabled={submitting}>
+            {submitting ? 'Guardando...' : editMode ? 'Guardar cambios' : 'Crear ejercicio'}
           </Button>
-        )}
+        </div>
       </form>
 
+      {/* Zona de eliminación (solo en modo edición). DeleteButton estándar
+          discreto, alineado a la derecha. Estandarizado con SessionDetail. */}
+      {editMode && (
+        <div className={styles.deleteWrapper}>
+          <DeleteButton
+            onClick={() => setConfirmDeleteOpen(true)}
+            disabled={submitting}
+          >
+            Eliminar ejercicio
+          </DeleteButton>
+        </div>
+      )}
+
       <ConfirmDialog
-        open={confirmOpen}
+        open={confirmDeleteOpen}
         title="¿Eliminar este ejercicio?"
-        message="Las sesiones que lo contengan perderán esta referencia. Esta acción no se puede deshacer."
-        confirmLabel={deleting ? 'Eliminando...' : 'Eliminar'}
+        message={
+          `"${form.nombre}" se eliminará. También se retirará de las rutinas y ` +
+          `grupos que lo incluyan. Las sesiones antiguas conservarán el nombre.`
+        }
+        confirmLabel={submitting ? 'Eliminando...' : 'Eliminar'}
         cancelLabel="Cancelar"
         confirmVariant="danger"
         onConfirm={handleConfirmDelete}
-        onCancel={() => setConfirmOpen(false)}
+        onCancel={() => setConfirmDeleteOpen(false)}
       />
     </div>
   );

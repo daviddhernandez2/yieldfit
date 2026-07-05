@@ -1,0 +1,66 @@
+/* Fondo semitransparente que cubre toda la pantalla y bloquea la
+   interacción con el contenido de detrás. Blur ligero para dar
+   profundidad y ayudar a que el modal destaque. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  animation: fadeIn 200ms ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Panel central del modal. glassCard le aporta el fondo translúcido con
+   blur. Ancho máximo para que en escritorio no se estire demasiado. */
+.panel {
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  animation: slideDown 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: 0;
+  margin-top: calc(var(--space-sm) * -1);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* En pantallas anchas, los dos botones se colocan lado a lado. */
+@media (min-width: 480px) {
+  .actions {
+    flex-direction: row;
+  }
+}

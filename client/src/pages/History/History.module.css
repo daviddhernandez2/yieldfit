@@ -11,12 +11,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-md);
 }
 
 .title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.02em;
+}
+
+/* Botón "Exportar datos" del header. Estilo pill outline verde con icono.
+   Deshabilitado en MVP hasta que se implemente la exportación. */
+.exportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-base);
+  white-space: nowrap;
+}
+
+.exportButton:hover:not(:disabled) {
+  background-color: rgba(62, 248, 126, 0.08);
+}
+
+.exportButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .feedback {
@@ -51,35 +80,30 @@
   gap: var(--space-md);
 }
 
-/* Card de sesión: layout de 3 zonas horizontal: texto | stats | chevron. */
+/* Card de sesión completa. Ahora es un <button> clicable en toda su superficie:
+   texto | stats | chevron. Sin botón de eliminar (se hace desde el detalle). */
 .card {
-  display: grid;
-  grid-template-columns: 1fr 40px;
-  align-items: center;
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: var(--transition-base);
-}
-
-.card:hover {
-  border-color: var(--color-text-muted);
-}
-
-.cardMain {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md);
-  background: transparent;
+  border-radius: var(--radius-md);
   border: none;
   text-align: left;
   color: var(--color-text);
+  font-family: inherit;
   font-size: var(--font-size-base);
   cursor: pointer;
+  transition: var(--transition-base);
   min-width: 0;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 24px 70px -20px rgba(0, 0, 0, 0.6);
 }
 
 .cardText {
@@ -96,10 +120,8 @@
 .cardDate {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-  text-transform: capitalize;
 }
 
-/* Stats: pills verdes discretas con la métrica. */
 .cardStats {
   display: flex;
   gap: var(--space-sm);
@@ -122,33 +144,4 @@
   align-items: center;
   color: var(--color-text-muted);
   flex-shrink: 0;
-}
-
-.deleteIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  margin-right: var(--space-sm);
-  border-radius: var(--radius-sm);
-  transition: var(--transition-base);
-}
-
-.deleteIcon:hover {
-  color: var(--color-error);
-  background-color: rgba(255, 48, 0, 0.08);
-}
-
-/* Botones de features futuras. Deshabilitados como placeholder visible. */
-.futureActions {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-md);
-  padding-top: var(--space-md);
-  flex-wrap: wrap;
 }

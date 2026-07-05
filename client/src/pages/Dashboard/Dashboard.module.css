@@ -11,12 +11,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-md);
 }
 
 .title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.02em;
+}
+
+/* Botón "Nuevo grupo" del header. Estilo pill outline verde con icono.
+   Deshabilitado en MVP hasta que se implemente el sistema de Charts. */
+.newGroupButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-base);
+  white-space: nowrap;
+}
+
+.newGroupButton:hover:not(:disabled) {
+  background-color: rgba(62, 248, 126, 0.08);
+}
+
+.newGroupButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .feedback {
@@ -45,15 +74,11 @@
   font-size: var(--font-size-sm);
 }
 
-/* Card del grupo: contiene cabecera, gráfica y lista de ejercicios.
-   Estructura tipo card con relleno generoso para dar aire visual. */
 .groupCard {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
   padding: var(--space-lg);
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
@@ -68,8 +93,6 @@
   font-weight: var(--font-weight-bold);
 }
 
-/* Porcentaje grande del grupo con flecha + valor.
-   El color viene de la clase auxiliar (positive/negative/neutral). */
 .groupPercent {
   display: flex;
   align-items: center;
@@ -79,8 +102,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Contenedor de la gráfica de Recharts. Recharts se adapta al contenedor
-   con su ResponsiveContainer. */
 .chart {
   width: 100%;
 }
@@ -92,12 +113,10 @@
   padding: var(--space-md);
 }
 
-/* Lista de ejercicios individuales con su rendimiento.
-   Grid de 3 columnas: badge, nombre, porcentaje. */
 .exerciseList {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .exerciseRow {
@@ -106,14 +125,13 @@
   gap: var(--space-md);
   align-items: center;
   padding: var(--space-md) 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .exerciseRow:last-child {
   border-bottom: none;
 }
 
-/* Badge circular con iniciales, coherente con el usado en Workouts. */
 .badge {
   display: flex;
   align-items: center;
@@ -145,7 +163,6 @@
   white-space: nowrap;
 }
 
-/* Clases utilitarias de color según el signo del porcentaje. */
 .positive {
   color: var(--color-accent);
 }
@@ -156,11 +173,4 @@
 
 .neutral {
   color: var(--color-text-muted);
-}
-
-/* Botón de features futuras (Nuevo grupo). Deshabilitado como placeholder. */
-.futureActions {
-  display: flex;
-  justify-content: center;
-  padding-top: var(--space-md);
 }

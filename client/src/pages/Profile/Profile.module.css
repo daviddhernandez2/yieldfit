@@ -7,25 +7,14 @@
   width: 100%;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: -0.02em;
-}
-
-/* Bloque de identidad centrado con avatar circular grande. */
+/* Bloque de identidad centrado con avatar circular grande. Sin fondo,
+   destaca por posición (arriba del todo) y por el tamaño del avatar. */
 .identityBlock {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-xl) 0;
+  padding: var(--space-xl) 0 var(--space-md);
 }
 
 .avatar {
@@ -52,20 +41,51 @@
   font-size: var(--font-size-base);
 }
 
-/* Sección de datos personales: tarjeta con lista de campos. */
+/* Card de datos personales. Recibe glass desde la clase global. */
 .detailsSection {
   padding: var(--space-md);
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
+/* Cabecera del card: título a la izquierda, botón "⋯" a la derecha. */
+.detailsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .detailsTitle {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
+}
+
+/* Botón "⋯" discreto para acceder a la edición. Cuadrado sin fondo,
+   solo icono. Al hover muestra un fondo sutil. */
+.moreButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.moreButton:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+}
+
+.moreButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .detailsList {
@@ -75,14 +95,13 @@
   margin: 0;
 }
 
-/* Cada fila: label a la izquierda, valor a la derecha. */
 .detailRow {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: var(--space-md);
   align-items: center;
   padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .detailRow:last-child {
@@ -100,4 +119,13 @@
   font-weight: var(--font-weight-medium);
   text-align: right;
   margin: 0;
+}
+
+/* Wrapper del botón "Cerrar sesión" dentro del card. Alineado a la derecha
+   como acción destructiva discreta al final del contenido. */
+.logoutWrapper {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }

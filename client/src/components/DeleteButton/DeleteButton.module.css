@@ -1,0 +1,28 @@
+/* Botón discreto de eliminación. Sin fondo, solo texto rojo con icono.
+   Hover eleva el color a un rojo más intenso y muestra un fondo tenue
+   para dar feedback visual. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-error);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.button:hover:not(:disabled) {
+  background: rgba(255, 48, 0, 0.08);
+  color: var(--color-error);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

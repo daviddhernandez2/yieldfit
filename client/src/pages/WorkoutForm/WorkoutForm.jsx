@@ -7,12 +7,7 @@ import {
   updateWorkout,
   deleteWorkout,
 } from '../../api/workouts.js';
-import {
-  readActiveSession,
-  writeActiveSession,
-  clearActiveSession,
-  buildActiveSessionFromWorkout,
-} from '../../utils/activeSession.js';
+import { useStartSession } from '../../hooks/useStartSession.js';
 import Input from '../../components/Input/Input.jsx';
 import Button from '../../components/Button/Button.jsx';
 import Chip from '../../components/Chip/Chip.jsx';
@@ -62,7 +57,12 @@ export default function WorkoutForm() {
   const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [conflictoSesion, setConflictoSesion] = useState(false);
+  const {
+    start: startSession,
+    conflicto: conflictoSesion,
+    confirmarDescartar,
+    cancelarConflicto,
+  } = useStartSession();
 
   useEffect(() => {
     const cargar = async () => {
@@ -183,14 +183,9 @@ export default function WorkoutForm() {
   // Si ya hay una sesión activa en localStorage, primero muestra un diálogo
   // pidiendo confirmación para descartarla.
   const handleStartSession = () => {
-    const activa = readActiveSession();
-    if (activa) {
-      setConflictoSesion(true);
-      return;
-    }
-    iniciarSesion();
+    if (!id) return;
+    startSession(id);
   };
-
   // Crea el objeto de sesión activa en localStorage y navega a la pantalla.
   // Refrescamos la rutina por si el usuario cambió algo tras cargar la pantalla
   // sin guardar; nos aseguramos de arrancar con lo que realmente está en la BD.
@@ -253,7 +248,7 @@ export default function WorkoutForm() {
               {ejercicios.map((ej) => {
                 const exercise = catalogoById.get(ej.exerciseId);
                 return (
-                  <div key={ej.exerciseId} className={styles.addedItem}>
+                  <div key={ej.exerciseId} className={`${styles.addedItem} glassCard`}>
                     <div className={styles.addedItemHeader}>
                       <span className={styles.addedItemName}>
                         {exercise?.nombre || 'Ejercicio'}
@@ -322,7 +317,7 @@ export default function WorkoutForm() {
             </div>
           </div>
 
-          <div className={styles.catalogo}>
+          <div className={`${styles.catalogo} glassCard`}>
             {catalogoFiltrado.length === 0 && (
               <p className={styles.feedback}>No hay ejercicios con esos filtros.</p>
             )}

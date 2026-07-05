@@ -1,30 +1,32 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import Logo from '../../components/Logo/Logo.jsx';
 import Button from '../../components/Button/Button.jsx';
 import styles from './Welcome.module.css';
 
-// Pantalla de bienvenida. Es la primera vista al entrar sin sesión.
-// Da dos caminos: registrarse (usuario nuevo) o iniciar sesión (usuario existente).
-// No tiene formulario propio; solo enruta al flujo correspondiente.
+// Pantalla de bienvenida. Presenta la marca y ofrece dos rutas: crear cuenta
+// o iniciar sesión. El diseño replica el mockup de Figma: bloque central
+// con logo + botones, y un glow verde inferior que refuerza la identidad
+// sin competir con el contenido.
 export default function Welcome() {
-  const navigate = useNavigate();
-
   return (
-    <div className={styles.container}>
-      <div className={styles.logoSection}>
-        <div className={styles.logo}>
-          <span className={styles.logoIcon}>▲</span>
-          <span className={styles.logoText}>Yield</span>
-          <span className={styles.logoSuffix}>FIT</span>
-        </div>
-      </div>
+    <div className={styles.page}>
+      <div className={styles.glow} aria-hidden="true" />
 
-      <div className={styles.actions}>
-        <Button variant="primary" fullWidth onClick={() => navigate('/register')}>
-          Registrarse
-        </Button>
-        <Button variant="outline" fullWidth onClick={() => navigate('/login')}>
-          Iniciar sesión
-        </Button>
+      <div className={styles.content}>
+        <Logo className={styles.logo} />
+
+        <div className={styles.actions}>
+          <Link to="/register" className={styles.action}>
+            <Button variant="primary" fullWidth>
+              Registrarse
+            </Button>
+          </Link>
+          <Link to="/login" className={styles.action}>
+            <Button variant="outline" fullWidth>
+              Iniciar sesión
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

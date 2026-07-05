@@ -1,10 +1,7 @@
 import { useAuth } from '../../hooks/useAuth.js';
-import Button from '../../components/Button/Button.jsx';
+import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
 import styles from './Profile.module.css';
 
-// Formatea una fecha ISO a formato legible español: "16 de mayo de 1993".
-// Se aplica solo si la fecha existe (el campo fechaNacimiento es obligatorio,
-// pero por si acaso hacemos defensive coding).
 const formatFecha = (fecha) => {
   if (!fecha) return '—';
   return new Date(fecha).toLocaleDateString('es-ES', {
@@ -14,28 +11,33 @@ const formatFecha = (fecha) => {
   });
 };
 
-// Etiqueta legible para cada valor de género almacenado.
 const GENERO_LABEL = {
   masculino: 'Masculino',
   femenino: 'Femenino',
   otro: 'Otro',
 };
 
-// Genera el "@handle" a partir del email: parte antes del @.
-// Es un guiño de estilo tipo redes sociales, cuadra con el wireframe.
 const generarHandle = (email) => {
   if (!email) return '';
   const parte = email.split('@')[0];
   return `@${parte}`;
 };
 
-// Iniciales del nombre para el avatar placeholder.
 const generarIniciales = (nombreCompleto) => {
   if (!nombreCompleto) return '?';
   const palabras = nombreCompleto.trim().split(/\s+/);
   if (palabras.length === 1) return palabras[0].slice(0, 2).toUpperCase();
   return (palabras[0][0] + palabras[1][0]).toUpperCase();
 };
+
+// Icono ⋯ (three-dots horizontal) para el botón de editar del card.
+const IconMore = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="19" cy="12" r="1" />
+    <circle cx="5" cy="12" r="1" />
+  </svg>
+);
 
 // Pantalla de perfil del usuario. Solo lectura en MVP.
 // La edición de datos se dejará para el pulido de la Semana 5.
@@ -46,22 +48,32 @@ export default function Profile() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Perfil</h1>
-      </header>
-
-      {/* Bloque de identidad: avatar + nombre + handle. */}
+      {/* Bloque de identidad: avatar + nombre + handle. Va arriba del todo,
+          fuera del card de datos personales, para dar protagonismo visual. */}
       <section className={styles.identityBlock}>
         <div className={styles.avatar}>
           {generarIniciales(user.nombreCompleto)}
         </div>
-        <h2 className={styles.name}>{user.nombreCompleto}</h2>
+        <h1 className={styles.name}>{user.nombreCompleto}</h1>
         <p className={styles.handle}>{generarHandle(user.email)}</p>
       </section>
 
-      {/* Datos personales: lista de pares clave-valor. */}
-      <section className={styles.detailsSection}>
-        <h3 className={styles.detailsTitle}>Datos personales</h3>
+      {/* Card de datos personales. Cabecera con título a la izquierda y
+          botón "⋯" a la derecha como acceso a la edición. */}
+      <section className={`${styles.detailsSection} glassCard`}>
+        <div className={styles.detailsHeader}>
+          <h2 className={styles.detailsTitle}>Datos personales</h2>
+          <button
+            type="button"
+            className={styles.moreButton}
+            disabled
+            title="Editar (próximamente)"
+            aria-label="Editar datos personales"
+          >
+            <IconMore />
+          </button>
+        </div>
+
         <dl className={styles.detailsList}>
           <div className={styles.detailRow}>
             <dt className={styles.detailKey}>Email</dt>
@@ -90,16 +102,13 @@ export default function Profile() {
             </dd>
           </div>
         </dl>
+
+        {/* Botón "Cerrar sesión" dentro del card, discreto y alineado a la
+            derecha con el estilo DeleteButton estándar. */}
+        <div className={styles.logoutWrapper}>
+          <DeleteButton onClick={logout}>Cerrar sesión</DeleteButton>
+        </div>
       </section>
-
-      {/* Botón de edición como placeholder para pulido. */}
-      <Button variant="outline" fullWidth disabled title="Próximamente">
-        Editar datos
-      </Button>
-
-      <Button variant="danger" fullWidth onClick={logout}>
-        Cerrar sesión
-      </Button>
     </div>
   );
 }

@@ -140,7 +140,7 @@ export default function Exercises() {
       )}
 
       {!loading && !error && exercises.length > 0 && (
-        <div className={styles.list}>
+    <div className={`${styles.list} glassCard`}>
           <div className={styles.listHeader}>
             <span>Nombre</span>
             <span>Tipo</span>

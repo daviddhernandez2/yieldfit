@@ -1,46 +1,63 @@
+/* Pill flotante fijo en la parte inferior del viewport. backdrop-filter
+   con blur da el efecto "glass" tipo iOS. z-index alto para quedar por
+   encima de todo el contenido pero por debajo de modales (si los hubiera
+   con z-index mayor). */
 .tabbar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: var(--space-md);
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: space-around;
-  align-items: stretch;
-  padding: var(--space-sm) var(--space-md);
-  background-color: var(--color-bg-elevated);
-  border-top: 1px solid var(--color-border);
+  gap: 2px;
+  padding: 6px;
+  background-color: rgba(15, 15, 15, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
   z-index: 100;
+  /* Evita que se salga por los bordes en pantallas muy estrechas. */
+  max-width: calc(100vw - var(--space-md) * 2);
 }
 
-/* En desktop la tab bar desaparece, su lugar lo ocupa el sidebar. */
+/* En escritorio la barra desaparece, la navegación la asume el Sidebar. */
 @media (min-width: 768px) {
   .tabbar {
     display: none;
   }
 }
 
+/* Cada item apila icono + label en columna. min-width fijo para que
+   todos los items ocupen el mismo espacio independientemente de la
+   longitud del texto. */
 .item {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: var(--space-sm) var(--space-xs);
+  justify-content: center;
+  gap: 2px;
+  padding: 10px var(--space-md);
+  border-radius: var(--radius-pill);
   color: var(--color-text-muted);
-  font-size: 0.7rem;
-  font-weight: var(--font-weight-medium);
+  text-decoration: none;
   transition: var(--transition-base);
+  min-width: 60px;
 }
 
-.item:hover {
-  color: var(--color-text);
-}
-
-.active {
-  color: var(--color-accent);
+.item svg {
+  width: 20px;
+  height: 20px;
 }
 
 .label {
-  font-size: 0.7rem;
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
   line-height: 1;
+}
+
+/* Item activo: pill verde translúcido. currentColor propaga el verde
+   tanto al texto como al icono. */
+.active {
+  color: var(--color-accent);
+  background-color: rgba(62, 248, 126, 0.12);
 }

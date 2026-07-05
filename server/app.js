@@ -9,7 +9,18 @@ import sessionRoutes from './routes/sessionRoutes.js';
 
 const app = express();
 
-app.use(cors());
+// CORS configurable por variable de entorno. Acepta una lista separada por comas
+// en CLIENT_ORIGINS. En desarrollo se usa localhost; en producción, la URL de Vercel.
+const clientOrigins = (process.env.CLIENT_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map((s) => s.trim());
+
+app.use(
+  cors({
+    origin: clientOrigins,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.get('/', (req, res) => {

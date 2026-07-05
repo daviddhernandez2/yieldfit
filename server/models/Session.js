@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 
-// Subschema más anidado: cada serie individual
-// excluido = true significa "guarda esta serie pero NO la uses para calcular rendimiento"
+// Subschema más anidado: cada serie individual del ejercicio.
 const setSchema = new mongoose.Schema(
   {
     numeroSerie: {
@@ -32,18 +31,15 @@ const setSchema = new mongoose.Schema(
       min: 0,
       max: 10,
     },
-    excluido: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     _id: true,
   }
 );
 
-// Subschema intermedio: cada ejercicio dentro de la sesión
+// Subschema intermedio: cada ejercicio dentro de la sesión.
 // Guarda snapshots del nombre y tracking para que el historial sea inmutable
+// aunque el Exercise original se renombre o se elimine.
 const sessionExerciseSchema = new mongoose.Schema(
   {
     exerciseId: {
@@ -86,7 +82,7 @@ const sessionExerciseSchema = new mongoose.Schema(
   }
 );
 
-// Schema principal: la sesión de entrenamiento registrada
+// Schema principal: la sesión de entrenamiento registrada.
 const sessionSchema = new mongoose.Schema(
   {
     userId: {
@@ -130,8 +126,9 @@ const sessionSchema = new mongoose.Schema(
   }
 );
 
-// Índice compuesto crítico para el cálculo dinámico de rendimiento
-// Permite encontrar rápidamente la "sesión anterior del mismo usuario" ordenando por fecha
+// Índice compuesto crítico para el cálculo dinámico de rendimiento.
+// Permite encontrar rápidamente la "sesión anterior del mismo usuario"
+// ordenando por fecha descendente.
 sessionSchema.index({ userId: 1, fecha: -1 });
 
 const Session = mongoose.model('Session', sessionSchema);

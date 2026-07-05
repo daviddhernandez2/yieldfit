@@ -1,0 +1,129 @@
+/* Barra flotante inferior. Fixed al viewport para acompañar al usuario
+   en cualquier scroll o navegación. En escritorio tiene ancho mínimo
+   y va centrada; en móvil se estira lateralmente para aprovechar el
+   ancho de la pantalla sin robar bordes. */
+.bar {
+  position: fixed;
+  bottom: var(--space-md);
+  left: var(--space-md);
+  right: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px var(--space-md);
+  background: rgba(20, 20, 20, 0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(62, 248, 126, 0.3);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: var(--transition-base);
+  box-shadow:
+    0 20px 60px -20px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  z-index: 90;
+  animation: slideUp 300ms ease-out;
+  /* Safe area para iPhones con notch/home indicator inferior. */
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+/* Desde 768px pasamos a modo escritorio: la barra vuelve a estar centrada
+   con un ancho fijo cómodo, no estirada. */
+@media (min-width: 768px) {
+  .bar {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    min-width: 360px;
+    max-width: 480px;
+    padding: 10px var(--space-md);
+    padding-bottom: 10px;
+  }
+  .bar:hover {
+    transform: translateX(-50%) translateY(-2px);
+    border-color: rgba(62, 248, 126, 0.5);
+  }
+}
+
+/* En móvil (<768px), la TabBar flotante está a bottom con padding var(--space-md).
+   Elevamos la MiniSession por encima para que no se solape. */
+@media (max-width: 767px) {
+  .bar {
+    bottom: 97px;
+  }
+  /* Hover con solo translateY porque en móvil no hay :hover, pero por si
+     alguien usa un ratón externo o un iPad con trackpad. */
+  .bar:hover {
+    border-color: rgba(62, 248, 126, 0.5);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Cronómetro con estilo pill discreto en verde de marca.
+   Ancho fijo para que no dance visualmente al pasar de 09:59 a 10:00. */
+.timer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  min-width: 60px;
+  background-color: rgba(62, 248, 126, 0.12);
+  border: 1px solid rgba(62, 248, 126, 0.25);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Bloque de texto: rutina arriba (más discreto) + ejercicio abajo (destacado).
+   Similar al reproductor de música minimizado. */
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.15;
+  gap: 1px;
+}
+
+.workoutName {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.exerciseName {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}

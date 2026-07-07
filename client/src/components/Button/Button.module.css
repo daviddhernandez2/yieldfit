@@ -8,6 +8,7 @@
   font-weight: var(--font-weight-medium);
   transition: var(--transition-base);
   min-height: 48px;
+  white-space: nowrap;
 }
 
 .button:disabled {

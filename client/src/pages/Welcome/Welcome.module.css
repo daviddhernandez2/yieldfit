@@ -61,12 +61,15 @@
   letter-spacing: -0.03em;
   text-align: center;
   line-height: 1.05;
-  margin-bottom: 10%;
   max-width: 900px;
   color: var(--color-text);
   /* Sombra ligera para separar el texto del fondo animado y garantizar
      legibilidad sobre los momentos más brillantes del ColorBends. */
   text-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+
+  @media (min-width: 768px) {
+    margin-bottom: 10%;
+  }
 }
 
 /* Footer solo visible en móvil, con botones en dos columnas iguales. */

@@ -1,68 +1,44 @@
-/* Contenedor fullscreen. Fondo negro del pen (#131313, no #000 puro). */
+/* Contenedor a pantalla completa con fondo negro puro. z-index muy alto
+   para taparlo todo mientras dure el intro. */
 .intro {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  overflow: hidden;
-  background-color: #131313;
-  transition: opacity 600ms ease-out;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 500ms ease-out;
 }
 
-/* Salida con fade suave. */
+/* Estado de salida: fade suave del intro completo. La app aparece por
+   debajo sin sobresaltos porque también tiene fondo negro. */
 .saliendo {
   opacity: 0;
 }
 
-/* Wrapper del canvas + overlay + logo. Es lo que se dimensiona y donde
-   el JS lee offsetWidth/Height para el tamaño del canvas. */
-.shimmerContainer {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-/* Canvas: dimensiones controladas por JS. transform: translateZ(0) fuerza
-   composición en GPU para que la animación de la máscara vaya fluida. */
-.canvas {
-  width: 100%;
-  height: 100%;
-  transform: translateZ(0);
-}
-
-/* Viñeteado radial: oscurece los bordes y destaca el centro donde va el
-   logo. Valores idénticos a los del pen. */
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at center,
-    rgba(19, 19, 19, 0.8) 15%,
-    rgba(19, 19, 19, 0.4) 30%,
-    rgba(19, 19, 19, 0) 70%
-  );
-  z-index: 5;
-  pointer-events: none;
-}
-
-/* Logo por encima de todo, centrado, con fade-in inicial breve. */
+/* Wrapper del logo. Fade-in inicial breve para que el símbolo entre con
+   suavidad en lugar de aparecer de golpe. */
 .logoWrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
   opacity: 0;
-  animation: introLogoIn 500ms ease-out 200ms forwards;
-  pointer-events: none;
+  animation: introLogoIn 600ms ease-out forwards;
 }
 
 @keyframes introLogoIn {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
-  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
+/* Accesibilidad: si el usuario tiene "reducir movimiento" activado,
+   sin transición de escala. */
 @media (prefers-reduced-motion: reduce) {
-  .canvas { animation: none !important; }
-  .logoWrapper { animation-duration: 100ms; }
+  .logoWrapper {
+    animation-duration: 150ms;
+  }
 }

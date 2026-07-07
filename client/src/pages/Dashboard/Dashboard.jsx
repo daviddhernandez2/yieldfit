@@ -115,14 +115,15 @@ export default function Dashboard() {
           que se implemente el sistema completo de Charts personalizados. */}
       <header className={styles.header}>
         <h1 className={styles.title}>Progreso</h1>
-        <button
+       <button
           type="button"
           className={styles.newGroupButton}
           disabled
           title="Próximamente"
+          aria-label="Nuevo grupo"
         >
           <IconPlus />
-          <span>Nuevo grupo</span>
+          <span className={styles.newGroupButtonLabel}>Nuevo grupo</span>
         </button>
       </header>
 

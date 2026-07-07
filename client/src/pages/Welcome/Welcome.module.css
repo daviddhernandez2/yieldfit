@@ -1,75 +1,164 @@
-/* Contenedor de página completo. Ocupa toda la altura del viewport y
-   centra el contenido en ambos ejes. min-height con svh (small viewport
-   height) evita el salto en móvil cuando aparece/desaparece la barra de
-   navegación del sistema. */
+/* Contenedor a pantalla completa. Grid con tres filas: header, main, footer.
+   svh evita saltos en móvil al mostrarse/ocultarse la barra del sistema. */
 .page {
   position: relative;
   min-height: 100vh;
   min-height: 100svh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-lg);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: var(--space-md);
   background-color: var(--color-bg);
   overflow: hidden;
 }
 
-/* Aurora verde inferior. Es un pseudoelemento posicionado por debajo del
-   contenido (z-index: 0) que aporta profundidad al fondo negro sin restarle
-   legibilidad. aria-hidden en el JSX porque es puramente decorativo. */
-.glow {
+/* Fondo ColorBends a pantalla completa, detrás de todo. */
+.background {
   position: absolute;
   inset: 0;
-  pointer-events: none;
   z-index: 0;
-  background:
-    radial-gradient(
-      ellipse 130% 80% at 50% 115%,
-      rgba(62, 248, 126, 0.28) 0%,
-      rgba(62, 248, 126, 0.12) 30%,
-      rgba(62, 248, 126, 0.04) 55%,
-      transparent 85%
-    ),
-    radial-gradient(
-      ellipse 70% 100% at 50% 100%,
-      rgba(62, 248, 126, 0.35) 0%,
-      rgba(62, 248, 126, 0.10) 45%,
-      transparent 96%
-    );
-  filter: blur(80px);
+  pointer-events: none;
 }
-/* Bloque central: logo + botones. Ancho controlado para que en escritorio
-   los botones no se estiren desproporcionadamente y en móvil ocupen el
-   espacio disponible con márgenes cómodos. */
-.content {
+
+/* Header en móvil: sin fondo glass, solo el logo centrado.
+   La barra pill glass aparece únicamente en desktop (media query abajo). */
+.header {
   position: relative;
   z-index: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-2xl);
-  width: 100%;
-  max-width: 360px;
+  justify-content: center;
+  padding: var(--space-sm) var(--space-md);
 }
 
-/* Ancho del logo responsive: nunca demasiado pequeño ni demasiado grande.
-   clamp() define un mínimo, un valor preferido (60% del viewport) y un
-   máximo, resolviendo la responsividad sin media queries. */
-.logo {
-  width: clamp(220px, 60vw, 100px);
-  height: auto;
+/* Botones del header ocultos por defecto (móvil). Se muestran en desktop. */
+.headerActions {
+  display: none;
 }
 
-/* Contenedor de acciones. Los enlaces son bloque para que fullWidth del
-   Button funcione correctamente. */
-.actions {
+/* Titular central. Grande y responsive: crece con el viewport pero con tope. */
+.main {
+  position: relative;
+  z-index: 1;
   display: flex;
+  align-items: center;
+  justify-content: center;
   flex-direction: column;
-  gap: var(--space-md);
-  width: 100%;
+  margin: 30px auto;
+  padding: var(--space-lg);
 }
 
-.action {
+/* Logo responsive.
+   - Móvil (<768px): tamaño fijo cómodo para pantallas estrechas.
+   - Desktop (≥768px): escala con el viewport dentro de la barra pill. */
+.logo {
+  width: 140px !important;
+  height: auto !important;
+}
+
+.headline {
+  font-size: clamp(2.5rem, 8vw, 3rem);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.03em;
+  text-align: center;
+  line-height: 1.05;
+  margin-bottom: 10%;
+  max-width: 900px;
+  color: var(--color-text);
+  /* Sombra ligera para separar el texto del fondo animado y garantizar
+     legibilidad sobre los momentos más brillantes del ColorBends. */
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Footer solo visible en móvil, con botones en dos columnas iguales. */
+.footer {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+.linkWrapper {
   display: block;
   text-decoration: none;
 }
+
+/* Desktop: reorganizamos el layout para el header como barra pill glass
+   con logo a la izquierda y botones a la derecha, y ocultamos el footer. */
+@media (min-width: 768px) {
+  .page {
+    padding: var(--space-lg);
+  }
+
+  .header {
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    background: rgba(30, 30, 30, 0.35);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-pill);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+      0 20px 60px -20px rgba(0, 0, 0, 0.5);
+    max-width: 900px;
+    width: 100%;
+    margin: var(--space-md) auto 0;
+  }
+
+  .logo {
+    width: clamp(80px, 8vw, 140px) !important;
+  }
+
+  .headerActions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .headerActions button {
+    padding-top: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    min-height: auto;
+    font-size: var(--font-size-sm);
+  }
+
+  .footer {
+    display: none;
+  }
+
+  .main {
+    padding: 0;
+  }
+}
+
+/* Gradient inferior de oscurecimiento solo visible en móvil.
+   Sirve para separar los botones del footer del fondo animado y garantizar
+   que sean legibles independientemente de dónde caiga el patrón ColorBends
+   en ese momento. Se posiciona por encima del fondo pero por debajo del
+   contenido (header, main, footer). */
+.page::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* En desktop no hace falta porque el pill glass del header ya aísla
+   los botones y el titular queda en el centro sobre el fondo abierto. */
+@media (min-width: 768px) {
+  .page::after {
+    display: none;
+  }
+}
+

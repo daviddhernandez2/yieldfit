@@ -48,6 +48,16 @@
   cursor: not-allowed;
 }
 
+.newGroupButtonLabel {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .newGroupButtonLabel {
+    display: inline;
+  }
+}
+
 .feedback {
   text-align: center;
   color: var(--color-text-muted);

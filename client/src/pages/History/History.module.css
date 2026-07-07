@@ -48,6 +48,15 @@
   cursor: not-allowed;
 }
 
+.exportButtonLabel {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .exportButtonLabel {
+    display: inline;
+  }
+}
 .feedback {
   text-align: center;
   color: var(--color-text-muted);

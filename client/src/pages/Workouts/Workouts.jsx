@@ -75,9 +75,10 @@ export default function Workouts() {
           type="button"
           className={styles.newButton}
           onClick={() => navigate('/workouts/new')}
+          aria-label="Nuevo entrenamiento"
         >
           <IconPlus />
-          <span>Nuevo entrenamiento</span>
+          <span className={styles.newButtonLabel}>Nuevo entrenamiento</span>
         </button>
       </header>
 

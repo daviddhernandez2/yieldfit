@@ -31,6 +31,13 @@ function App() {
     setMostrarIntro(false);
   };
 
+  // Permite reactivar la intro desde cualquier parte de la app.
+  // La exponemos como función global en window para que el componente Logo
+  // pueda llamarla sin necesidad de Context ni propagación de props.
+  if (typeof window !== 'undefined') {
+    window.__yieldfitReplayIntro = () => setMostrarIntro(true);
+  }
+
   return (
     <AuthProvider>
       {mostrarIntro && <Intro onFinish={finalizarIntro} />}

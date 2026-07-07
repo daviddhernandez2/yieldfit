@@ -1,6 +1,5 @@
 /* Contenedor raíz del layout. Flex horizontal para sidebar + main.
-   IMPORTANTE: sin overflow aquí. Cualquier overflow en el ancestro rompe
-   el position: sticky del sidebar. El overflow se contiene en .glow. */
+   Sin overflow aquí para no romper el position: sticky del sidebar. */
 .layout {
   position: relative;
   display: flex;
@@ -9,30 +8,16 @@
   background-color: var(--color-bg);
 }
 
-/* Glow verde global. fixed lo ancla al viewport, así ambienta toda la
-   app sin depender del scroll. El overflow queda contenido aquí porque
-   .layout no puede tenerlo si queremos sticky en el sidebar. */
-.glow {
+/* Wrapper del DarkVeil. Fijo al viewport, cubre toda la pantalla sin
+   depender del scroll. Debajo del contenido (z-index 0) para que actúe
+   como fondo. pointer-events: none para no capturar clicks. overflow
+   contenido aquí y no en .layout (que rompería el sidebar sticky). */
+.veil {
   position: fixed;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  background:
-    radial-gradient(
-      ellipse 140% 85% at 50% 115%,
-      rgba(62, 248, 126, 0.28) 0%,
-      rgba(62, 248, 126, 0.14) 30%,
-      rgba(62, 248, 126, 0.05) 55%,
-      transparent 85%
-    ),
-    radial-gradient(
-      ellipse 70% 50% at 50% 108%,
-      rgba(62, 248, 126, 0.38) 0%,
-      rgba(62, 248, 126, 0.12) 45%,
-      transparent 85%
-    );
-  filter: blur(55px);
 }
 
 .main {
@@ -41,6 +26,8 @@
   flex: 1;
   min-width: 0;
   padding: var(--space-lg);
+  /* Espacio inferior extra en móvil para que la TabBar flotante no tape
+     el contenido. En escritorio no hace falta porque no hay TabBar. */
   padding-bottom: calc(var(--space-lg) + 80px);
 }
 

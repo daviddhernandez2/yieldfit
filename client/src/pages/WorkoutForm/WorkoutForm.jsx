@@ -7,9 +7,9 @@ import {
   updateWorkout,
   deleteWorkout,
 } from '../../api/workouts.js';
-import { useStartSession } from '../../hooks/useStartSession.js';
 import Input from '../../components/Input/Input.jsx';
 import Button from '../../components/Button/Button.jsx';
+import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
 import Chip from '../../components/Chip/Chip.jsx';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
 import styles from './WorkoutForm.module.css';
@@ -27,6 +27,12 @@ const GRUPOS_MUSCULARES = [
 const DEFAULT_NUM_SERIES = 3;
 const DEFAULT_DESCANSO = 90;
 
+const IconChevronLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
+
 const IconClose = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18" />
@@ -40,6 +46,11 @@ const IconCheck = () => (
   </svg>
 );
 
+// Formulario unificado para crear y editar rutinas.
+// El modo se detecta por la presencia del :id en la URL. Si existe, precarga
+// la rutina; si no, arranca en blanco. Ya NO gestiona el arranque de sesión
+// activa: esa acción vive en el modal de Workouts, más natural para el usuario
+// y evitando duplicar lógica de conflicto.
 export default function WorkoutForm() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -57,12 +68,6 @@ export default function WorkoutForm() {
   const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const {
-    start: startSession,
-    conflicto: conflictoSesion,
-    confirmarDescartar,
-    cancelarConflicto,
-  } = useStartSession();
 
   useEffect(() => {
     const cargar = async () => {
@@ -179,48 +184,22 @@ export default function WorkoutForm() {
     }
   };
 
-  // Inicia una sesión basada en esta rutina.
-  // Si ya hay una sesión activa en localStorage, primero muestra un diálogo
-  // pidiendo confirmación para descartarla.
-  const handleStartSession = () => {
-    if (!id) return;
-    startSession(id);
-  };
-  // Crea el objeto de sesión activa en localStorage y navega a la pantalla.
-  // Refrescamos la rutina por si el usuario cambió algo tras cargar la pantalla
-  // sin guardar; nos aseguramos de arrancar con lo que realmente está en la BD.
-  const iniciarSesion = async () => {
-    try {
-      const response = await getWorkout(id);
-      const wo = response.data.workout;
-      const nuevaSesion = buildActiveSessionFromWorkout(wo);
-      writeActiveSession(nuevaSesion);
-      navigate('/sessions/active');
-    } catch {
-      setErrorMessage('No se pudo iniciar la sesión. Inténtalo de nuevo.');
-    }
-  };
-
-  const handleConfirmDescartar = () => {
-    clearActiveSession();
-    setConflictoSesion(false);
-    iniciarSesion();
-  };
-
   if (loading) {
     return <p className={styles.feedback}>Cargando...</p>;
   }
 
   return (
     <div className={styles.page}>
+      {/* Header: botón atrás delante del título, mismo patrón que
+          SessionDetail y ExerciseForm. */}
       <header className={styles.header}>
         <button
           type="button"
           onClick={() => navigate('/workouts')}
           className={styles.backButton}
-          aria-label="Volver"
+          aria-label="Volver al listado de rutinas"
         >
-          ←
+          <IconChevronLeft />
         </button>
         <h1 className={styles.title}>
           {isEditMode ? 'Editar rutina' : 'Nueva rutina'}
@@ -349,39 +328,31 @@ export default function WorkoutForm() {
           </div>
         )}
 
-        <Button
-          type="submit"
-          variant="primary"
-          fullWidth
-          disabled={submitting || !nombre.trim() || ejercicios.length === 0}
-        >
-          {submitting ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear rutina'}
-        </Button>
-
-        {isEditMode && (
+        {/* Botón principal centrado y con ancho contenido, coherente con
+            ExerciseForm. Sin fullWidth para no dominar la pantalla. */}
+        <div className={styles.submitWrapper}>
           <Button
-            type="button"
+            type="submit"
             variant="primary"
-            fullWidth
-            onClick={handleStartSession}
-            disabled={submitting || deleting}
+            disabled={submitting || !nombre.trim() || ejercicios.length === 0}
           >
-            Empezar sesión
+            {submitting ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear rutina'}
           </Button>
-        )}
+        </div>
+      </form>
 
-        {isEditMode && (
-          <Button
-            type="button"
-            variant="danger"
-            fullWidth
+      {/* Zona de eliminación (solo en modo edición). DeleteButton estándar
+          discreto, alineado a la derecha, mismo patrón que ExerciseForm. */}
+      {isEditMode && (
+        <div className={styles.deleteWrapper}>
+          <DeleteButton
             onClick={() => setConfirmOpen(true)}
             disabled={submitting || deleting}
           >
             Eliminar rutina
-          </Button>
-        )}
-      </form>
+          </DeleteButton>
+        </div>
+      )}
 
       <ConfirmDialog
         open={confirmOpen}
@@ -392,17 +363,6 @@ export default function WorkoutForm() {
         confirmVariant="danger"
         onConfirm={handleConfirmDelete}
         onCancel={() => setConfirmOpen(false)}
-      />
-
-      <ConfirmDialog
-        open={conflictoSesion}
-        title="¿Descartar la sesión activa?"
-        message="Tienes una sesión de entrenamiento sin terminar. Si continúas, la perderás."
-        confirmLabel="Descartar y empezar nueva"
-        cancelLabel="Cancelar"
-        confirmVariant="danger"
-        onConfirm={handleConfirmDescartar}
-        onCancel={() => setConflictoSesion(false)}
       />
     </div>
   );

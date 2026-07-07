@@ -22,6 +22,9 @@
 
 /* Botón "Nuevo entrenamiento" del header. Estilo pill outline verde con
    icono. Sustituye el botón redondo "+" antiguo por uno más explícito. */
+/* Botón "Nuevo entrenamiento" del header. Estilo pill outline verde con
+   icono. En móvil solo muestra el icono para no romper el layout;
+   en escritorio muestra icono + texto. */
 .newButton {
   display: inline-flex;
   align-items: center;
@@ -37,12 +40,24 @@
   cursor: pointer;
   transition: var(--transition-base);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .newButton:hover {
   background-color: rgba(62, 248, 126, 0.08);
 }
 
+/* En móvil ocultamos el texto para que el botón solo muestre el "+".
+   Con aria-label en el JSX conservamos la accesibilidad. */
+.newButtonLabel {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .newButtonLabel {
+    display: inline;
+  }
+}
 .feedback {
   text-align: center;
   color: var(--color-text-muted);

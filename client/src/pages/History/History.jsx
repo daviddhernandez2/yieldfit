@@ -91,9 +91,10 @@ export default function History() {
             className={styles.exportButton}
             disabled
             title="Próximamente"
+            aria-label="Exportar datos"
           >
             <IconDownload />
-            <span>Exportar datos</span>
+            <span className={styles.exportButtonLabel}>Exportar datos</span>
           </button>
         )}
       </header>

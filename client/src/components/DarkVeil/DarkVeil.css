@@ -1,0 +1,17 @@
+.color-bends-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.veil {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  /* Convierte todo el veil a escala de grises. Como el fondo del layout
+     es negro, el resultado son gradientes en tonos grises/blancos. */
+  filter: saturate(0);
+}

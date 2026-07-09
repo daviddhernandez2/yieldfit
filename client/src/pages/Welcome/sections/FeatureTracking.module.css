@@ -1,0 +1,258 @@
+/* Bloque 2 de la landing: trackea tu entrenamiento. Grid con texto e
+   ilustración animada del acordeón de ActiveSession. En móvil apilado
+   con texto arriba y mock debajo, en desktop en dos columnas. */
+.section {
+    position: relative;
+    padding: 80px var(--space-md);
+    background-color: var(--color-bg);
+}
+
+.section {
+    position: relative;
+    padding: 80px var(--space-md);
+    background-color: var(--color-bg);
+    /* Altura mínima que reserve el espacio del bloque completo con el
+     acordeón desplegado, evitando el salto visual al animar. */
+    min-height: 620px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+    max-width: 1000px;
+    margin: 0 auto;
+    align-items: center;
+}
+
+.texto {
+    color: var(--color-text);
+    text-align: right;
+}
+
+.titulo {
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 var(--space-md) 0;
+    text-align: center;
+}
+
+.parrafo {
+    font-size: var(--font-size-md);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 auto;
+    text-align: center;
+    max-width: 300px;
+}
+
+/* Mockup del acordeón de ActiveSession con glass sutil. */
+.mock {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    background: rgba(20, 20, 20, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+    /* Altura mínima fija: reserva espacio para el acordeón abierto desde el
+     inicio para que al desplegarse no empuje el contenido de abajo. La
+     medida contempla los 3 acordeones + el body abierto + paddings. */
+    min-height: 380px;
+}
+
+.acordeon {
+    background: rgba(30, 30, 30, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.acordeonActivo {
+    border-color: rgba(62, 248, 126, 0.15);
+}
+
+.acordeonHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.acordeonRight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+}
+
+.serieCount {
+    font-variant-numeric: tabular-nums;
+}
+
+.chevron {
+    display: inline-block;
+    transition: transform 400ms ease;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+/* Acordeón body: cerrado por defecto (max-height 0), se abre con la
+   animación coreografiada desde el JSX. */
+.acordeonBody {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    /* Transición con el mismo timing en apertura y cierre, algo más lenta
+     para dar tiempo a percibir el cambio sin sentirse abrupto. */
+    transition: max-height 600ms cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 500ms ease 100ms;
+}
+
+.acordeonBodyOpen {
+    max-height: 250px;
+    opacity: 1;
+}
+
+.tabla {
+    padding: 0 8px 12px;
+}
+
+.tablaHead {
+    display: grid;
+    grid-template-columns: 24px 1fr 1fr 60px 24px;
+    gap: 6px;
+    padding: 8px 4px;
+    color: var(--color-text-secondary);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tablaRow {
+    display: grid;
+    grid-template-columns: 24px 1fr 1fr 60px 24px;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 4px;
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+}
+
+.tablaRowActiva {
+    border-radius: 4px;
+    background: rgba(62, 248, 126, 0.06);
+}
+
+.inputMock {
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Barra de descanso con relleno animado y texto encima. */
+.timerBar {
+    position: relative;
+    height: 22px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.timerFill {
+    position: absolute;
+    inset: 0;
+    right: auto;
+    background: rgba(62, 248, 126, 0.25);
+    transition: width 1800ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timerTexto {
+    position: relative;
+    display: block;
+    text-align: center;
+    line-height: 22px;
+    font-size: 10px;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.check {
+    color: var(--color-accent);
+    text-align: center;
+}
+
+.checkPend {
+    color: var(--color-text-secondary);
+    text-align: center;
+    opacity: 0.5;
+}
+
+@media (min-width: 768px) {
+    .section {
+        padding: 0px 160px 160px 160px
+    }
+
+    .grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 100px;
+    }
+
+    .titulo {
+        text-align: right;
+        max-width: 500px;
+    }
+
+    .texto {
+        text-align: right;
+    }
+
+    .parrafo {
+        margin: 0;
+        text-align: right;
+        max-width: 500px;
+    }
+}
+
+/* Título y párrafo: fade + translateY al entrar en viewport. El texto
+   arranca antes que la ilustración (200ms de delay respecto a la
+   entrada de la sección) para guiar la lectura: primero el "qué",
+   luego la prueba visual. */
+.titulo {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+        opacity 700ms cubic-bezier(0.16, 1, 0.3, 1) 200ms,
+        transform 700ms cubic-bezier(0.16, 1, 0.3, 1) 200ms;
+}
+
+.parrafo {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+        opacity 700ms cubic-bezier(0.16, 1, 0.3, 1) 350ms,
+        transform 700ms cubic-bezier(0.16, 1, 0.3, 1) 350mss;
+}
+
+.textoVisible .titulo,
+.textoVisible .parrafo {
+    opacity: 1;
+    transform: translateY(0);
+}

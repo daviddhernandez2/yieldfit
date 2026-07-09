@@ -1,0 +1,155 @@
+/* Bloque 1 de la landing: crea rutinas. Sección con padding vertical
+   generoso y grid interno que apila en móvil (chips arriba, texto abajo)
+   y dispone en dos columnas en desktop (chips izquierda, texto derecha). */
+.section {
+  position: relative;
+  padding: 80px var(--space-md);
+  background-color: var(--color-bg);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2xl);
+  max-width: 1000px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+/* Contenedor de los chips: apilados verticalmente, centrados en móvil,
+   pegados a la izquierda en desktop. */
+/* En móvil: texto arriba, chips debajo. Se logra con order en flex/grid
+   items. En desktop se resetea el orden para que sean columnas paralelas. */
+.chips {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: center;
+  order: 2;
+}
+
+.texto {
+  color: var(--color-text);
+  text-align: center;
+  order: 1;
+}
+/* Chip individual: pill oscuro con borde sutil, sigla circular verde
+   a la izquierda y nombre a la derecha. Aparece con fade+translateY
+   con delay escalonado desde el JSX. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 18px 10px 8px;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Estado activo: los chips heredan el delay inline del JSX y se muestran. */
+.chipsVisible .chip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Sigla circular verde a la izquierda del chip. */
+.sigla {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(62, 248, 126, 0.15);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.nombre {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Texto de la derecha: centrado en móvil, izquierda en desktop. */
+.texto {
+  color: var(--color-text);
+  text-align: center;
+}
+
+.titulo {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 var(--space-md) 0;
+}
+
+.parrafo {
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0 auto;
+  max-width: 300px;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 160px var(--space-lg);
+  }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+  }
+
+  .chips {
+    align-items: center;
+    order: 1;
+  }
+
+  .texto {
+    text-align: left;
+    order: 2;
+    max-width: 500px;
+  }
+
+  .parrafo {
+    margin: 0;
+  }
+}
+
+/* Título y párrafo: fade + translateY al entrar en viewport. El texto
+   arranca antes que la ilustración (200ms de delay respecto a la
+   entrada de la sección) para guiar la lectura: primero el "qué",
+   luego la prueba visual. */
+.titulo {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1) 400ms,
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1) cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.parrafo {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1) 650ms,
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1) 650mss;
+}
+
+.textoVisible .titulo,
+.textoVisible .parrafo {
+  opacity: 1;
+  transform: translateY(0);
+}

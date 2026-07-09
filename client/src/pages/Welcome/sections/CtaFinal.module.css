@@ -1,0 +1,46 @@
+/* CTA final: sección con padding vertical amplio, botón centrado que
+   aparece con fade + scale al entrar en viewport. */
+.section {
+    position: relative;
+    padding: 10px var(--space-md) 160px;
+    background-color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wrapper {
+    opacity: 0;
+    transform: scale(0.95);
+    transition:
+        opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.linkWrapper {
+    display: block;
+    text-decoration: none;
+}
+
+/* Botón grande y protagonista: sobreescribe padding y font-size del
+   Button base para que sea el elemento visualmente central del CTA. */
+.linkWrapper button {
+    padding: 16px 48px;
+    font-size: var(--font-size-md);
+}
+
+@media (min-width: 768px) {
+    .section {
+        padding: 150px var(--space-lg) 200px;
+    }
+
+    .linkWrapper button {
+        padding: 18px 64px;
+        font-size: 1.05rem;
+    }
+}

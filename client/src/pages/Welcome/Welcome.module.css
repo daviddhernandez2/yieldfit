@@ -1,17 +1,25 @@
-/* Contenedor a pantalla completa. Grid con tres filas: header, main, footer.
-   svh evita saltos en móvil al mostrarse/ocultarse la barra del sistema. */
+/* Contenedor de la landing. Solo controla el fondo global y evita scroll
+   horizontal accidental. La estructura visual la marcan las secciones. */
 .page {
   position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
+  background-color: var(--color-bg);
+  overflow-x: hidden;
+}
+
+/* Hero: pantalla completa con Dither de fondo, header pill glass, titular
+   central y footer con botones (solo móvil). Fuerza altura 100vh porque
+   sin ella el grid interno colapsaría. */
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  padding: var(--space-md);
-  background-color: var(--color-bg);
+  padding: 0;
   overflow: hidden;
 }
 
-/* Fondo ColorBends a pantalla completa, detrás de todo. */
+/* Fondo Dither a pantalla completa detrás del contenido del hero. */
 .background {
   position: absolute;
   inset: 0;
@@ -19,8 +27,27 @@
   pointer-events: none;
 }
 
-/* Header en móvil: sin fondo glass, solo el logo centrado.
-   La barra pill glass aparece únicamente en desktop (media query abajo). */
+/* Gradient inferior de oscurecimiento solo en móvil. Sirve para separar
+   los botones del footer del patrón animado. En desktop no hace falta. */
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Header en móvil: sin fondo glass, solo el logo centrado. La barra pill
+   glass aparece únicamente en desktop (media query abajo). */
 .header {
   position: relative;
   z-index: 1;
@@ -28,6 +55,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-sm) var(--space-md);
+  margin: var(--space-md);
 }
 
 /* Botones del header ocultos por defecto (móvil). Se muestran en desktop. */
@@ -43,13 +71,9 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin: 30px auto;
   padding: var(--space-lg);
 }
 
-/* Logo responsive.
-   - Móvil (<768px): tamaño fijo cómodo para pantallas estrechas.
-   - Desktop (≥768px): escala con el viewport dentro de la barra pill. */
 .logo {
   width: 140px !important;
   height: auto !important;
@@ -63,13 +87,7 @@
   line-height: 1.05;
   max-width: 900px;
   color: var(--color-text);
-  /* Sombra ligera para separar el texto del fondo animado y garantizar
-     legibilidad sobre los momentos más brillantes del ColorBends. */
   text-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
-
-  @media (min-width: 768px) {
-    margin-bottom: 10%;
-  }
 }
 
 /* Footer solo visible en móvil, con botones en dos columnas iguales. */
@@ -80,6 +98,7 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--space-sm);
   padding: var(--space-md);
+  margin: 0 var(--space-md) var(--space-md);
 }
 
 .linkWrapper {
@@ -90,8 +109,8 @@
 /* Desktop: reorganizamos el layout para el header como barra pill glass
    con logo a la izquierda y botones a la derecha, y ocultamos el footer. */
 @media (min-width: 768px) {
-  .page {
-    padding: var(--space-lg);
+  .hero::after {
+    display: none;
   }
 
   .header {
@@ -106,7 +125,7 @@
       inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
       0 20px 60px -20px rgba(0, 0, 0, 0.5);
     max-width: 900px;
-    width: 100%;
+    width: calc(100% - var(--space-lg) * 2);
     margin: var(--space-md) auto 0;
   }
 
@@ -133,35 +152,8 @@
   .main {
     padding: 0;
   }
-}
 
-/* Gradient inferior de oscurecimiento solo visible en móvil.
-   Sirve para separar los botones del footer del fondo animado y garantizar
-   que sean legibles independientemente de dónde caiga el patrón ColorBends
-   en ese momento. Se posiciona por encima del fondo pero por debajo del
-   contenido (header, main, footer). */
-.page::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 40%;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 40%,
-    rgba(0, 0, 0, 0.85) 100%
-  );
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* En desktop no hace falta porque el pill glass del header ya aísla
-   los botones y el titular queda en el centro sobre el fondo abierto. */
-@media (min-width: 768px) {
-  .page::after {
-    display: none;
+  .headline {
+    margin-bottom: 5%;
   }
 }
-

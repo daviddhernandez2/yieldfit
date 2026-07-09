@@ -1,0 +1,162 @@
+/* Bloque 3: gráfico animado a la izquierda, texto a la derecha. */
+.section {
+    position: relative;
+    padding: 80px var(--space-md);
+    background-color: var(--color-bg);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+    max-width: 1000px;
+    margin: 0 auto;
+    align-items: center;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: rgba(20, 20, 20, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+    order: 2;
+}
+
+.grafico {
+    width: 100%;
+    height: 140px;
+    display: block;
+}
+
+/* Línea del gráfico: pintada con stroke-dashoffset alto para que arranque
+   invisible y se dibuje progresivamente al entrar en viewport. */
+.linea {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    transition: stroke-dashoffset 3000ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Área bajo la línea: aparece con fade-in tras el trazo. */
+.area {
+    opacity: 0;
+    transition: opacity 800ms ease 1000ms;
+}
+
+.cardVisible .linea {
+    stroke-dashoffset: 0;
+}
+
+.cardVisible .area {
+    opacity: 1;
+}
+
+/* Lista de ejercicios con porcentaje de mejora. Cada fila aparece con
+   delay inline (transitionDelay en el JSX). */
+.ejercicios {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.ejercicio {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-md);
+    padding: 8px 4px;
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+        opacity 500ms ease,
+        transform 500ms ease;
+}
+
+.cardVisible .ejercicio {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.ejSigla {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(62, 248, 126, 0.15);
+    color: var(--color-accent);
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+}
+
+.ejNombre {
+    font-weight: var(--font-weight-medium);
+}
+
+.ejPct {
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-medium);
+}
+
+.texto {
+    color: var(--color-text);
+    text-align: center;
+    order: 1;
+}
+
+.titulo {
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 var(--space-md) 0;
+}
+
+.parrafo {
+    font-size: var(--font-size-md);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 auto;
+    max-width: 300px;
+}
+
+@media (min-width: 768px) {
+    .section {
+        padding: 0px 160px 10px 160px
+    }
+
+    .grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 100px;
+    }
+
+    .texto {
+        text-align: left;
+        max-width: 500px;
+    }
+
+    .parrafo {
+        margin: 0;
+        max-width: 500px;
+    }
+
+    .card {
+        order: 1;
+    }
+
+    .texto {
+        order: 2;
+    }
+}

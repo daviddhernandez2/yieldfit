@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext.jsx';
+import { AuthProvider } from '@/context/AuthContext.jsx';
 import PrivateRoute from '@/components/PrivateRoute.jsx';
 import Layout from '@/components/Layout/Layout.jsx';
 import Intro from '@/components/Intro/Intro.jsx';

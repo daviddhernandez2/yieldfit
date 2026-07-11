@@ -1,36 +1,63 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   readActiveSession,
   writeActiveSession,
   clearActiveSession,
-} from '../../utils/activeSession.js';
-import { createSession } from '../../api/sessions.js';
-import Button from '../../components/Button/Button.jsx';
-import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
-import styles from './ActiveSession.module.css';
+} from "../../utils/activeSession.js";
+import { createSession } from "../../api/sessions.js";
+import Button from "../../components/Button/Button.jsx";
+import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog.jsx";
+import styles from "./ActiveSession.module.css";
 
 // Formatea segundos como MM:SS. Sigue creciendo pasada la hora (65:30).
 const formatTiempo = (segundos) => {
   const mm = Math.floor(segundos / 60);
   const ss = segundos % 60;
-  return `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+  return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
 };
 
 const IconChevronDown = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 
 const IconCheck = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 
 const IconTrash = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polyline points="3 6 5 6 21 6" />
     <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
     <path d="M10 11v6" />
@@ -52,7 +79,7 @@ export default function ActiveSession() {
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [restTimer, setRestTimer] = useState(null);
   const [confirmTerminar, setConfirmTerminar] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const [, setTick] = useState(0);
@@ -60,7 +87,7 @@ export default function ActiveSession() {
   useEffect(() => {
     const activa = readActiveSession();
     if (!activa) {
-      navigate('/workouts', { replace: true });
+      navigate("/workouts", { replace: true });
       return;
     }
     setSession(activa);
@@ -87,11 +114,11 @@ export default function ActiveSession() {
         i !== exerciseIndex
           ? ej
           : {
-            ...ej,
-            sets: ej.sets.map((set, j) =>
-              j !== setIndex ? set : { ...set, ...cambios }
-            ),
-          }
+              ...ej,
+              sets: ej.sets.map((set, j) =>
+                j !== setIndex ? set : { ...set, ...cambios },
+              ),
+            },
       ),
     }));
   };
@@ -130,9 +157,17 @@ export default function ActiveSession() {
         i !== exerciseIndex
           ? ej
           : {
-            ...ej,
-            sets: [...ej.sets, { peso: '', reps: '', completada: false }],
-          }
+              ...ej,
+              sets: [
+                ...ej.sets,
+                {
+                  id: crypto.randomUUID(),
+                  peso: "",
+                  reps: "",
+                  completada: false,
+                },
+              ],
+            },
       ),
     }));
   };
@@ -143,7 +178,7 @@ export default function ActiveSession() {
       ejercicios: prev.ejercicios.map((ej, i) =>
         i !== exerciseIndex
           ? ej
-          : { ...ej, sets: ej.sets.filter((_, j) => j !== setIndex) }
+          : { ...ej, sets: ej.sets.filter((_, j) => j !== setIndex) },
       ),
     }));
 
@@ -163,9 +198,11 @@ export default function ActiveSession() {
   const resumen = calcularResumen(session);
 
   const handleAbrirTerminar = () => {
-    setErrorMessage('');
+    setErrorMessage("");
     if (resumen.setsCompletados === 0) {
-      setErrorMessage('No has completado ninguna serie. Marca alguna antes de terminar.');
+      setErrorMessage(
+        "No has completado ninguna serie. Marca alguna antes de terminar.",
+      );
       return;
     }
     setConfirmTerminar(true);
@@ -197,10 +234,11 @@ export default function ActiveSession() {
 
       await createSession(payload);
       clearActiveSession();
-      navigate('/history');
+      navigate("/history");
     } catch (err) {
       const data = err.response?.data;
-      const message = data?.details?.[0] || data?.message || 'Error al guardar la sesión.';
+      const message =
+        data?.details?.[0] || data?.message || "Error al guardar la sesión.";
       setErrorMessage(message);
       setConfirmTerminar(false);
     } finally {
@@ -214,11 +252,11 @@ export default function ActiveSession() {
         <div className={styles.headerText}>
           <h1 className={styles.title}>{session.nombre}</h1>
           <p className={styles.subtitle}>
-            {new Date(session.startTime).toLocaleDateString('es-ES', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
+            {new Date(session.startTime).toLocaleDateString("es-ES", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
             })}
           </p>
         </div>
@@ -232,8 +270,8 @@ export default function ActiveSession() {
 
           return (
             <div
-              key={exerciseIndex}
-              className={`${styles.exerciseCard} glassCard ${setsCompletados === ej.sets.length && ej.sets.length > 0 ? styles.exerciseCardCompleted : ''}`}
+              key={ej.exerciseId}
+              className={`${styles.exerciseCard} glassCard ${setsCompletados === ej.sets.length && ej.sets.length > 0 ? styles.exerciseCardCompleted : ""}`}
             >
               <button
                 type="button"
@@ -245,7 +283,7 @@ export default function ActiveSession() {
                   {setsCompletados}/{ej.sets.length}
                 </span>
                 <span
-                  className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`}
+                  className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ""}`}
                 >
                   <IconChevronDown />
                 </span>
@@ -270,16 +308,26 @@ export default function ActiveSession() {
 
                     return (
                       <SetRow
-                        key={setIndex}
+                        key={set.id}
                         setIndex={setIndex}
                         set={set}
                         descansoSegundos={ej.descansoSegundos}
                         timerActivo={timerActivoEnEsta ? restTimer : null}
-                        onChangePeso={(v) => updateSet(exerciseIndex, setIndex, { peso: v })}
-                        onChangeReps={(v) => updateSet(exerciseIndex, setIndex, { reps: v })}
-                        onToggleCompletada={() => handleToggleCompletada(exerciseIndex, setIndex)}
-                        onReiniciarDescanso={() => handleReiniciarDescanso(exerciseIndex, setIndex)}
-                        onQuitar={() => handleQuitarSerie(exerciseIndex, setIndex)}
+                        onChangePeso={(v) =>
+                          updateSet(exerciseIndex, setIndex, { peso: v })
+                        }
+                        onChangeReps={(v) =>
+                          updateSet(exerciseIndex, setIndex, { reps: v })
+                        }
+                        onToggleCompletada={() =>
+                          handleToggleCompletada(exerciseIndex, setIndex)
+                        }
+                        onReiniciarDescanso={() =>
+                          handleReiniciarDescanso(exerciseIndex, setIndex)
+                        }
+                        onQuitar={() =>
+                          handleQuitarSerie(exerciseIndex, setIndex)
+                        }
                       />
                     );
                   })}
@@ -317,7 +365,7 @@ export default function ActiveSession() {
           `Resumen: ${resumen.ejerciciosCompletados} ejercicios · ${resumen.setsCompletados} series · ` +
           `${formatTiempo(elapsedSeconds)}. Se guardará y no podrás editarla.`
         }
-        confirmLabel={submitting ? 'Guardando...' : 'Terminar y guardar'}
+        confirmLabel={submitting ? "Guardando..." : "Terminar y guardar"}
         cancelLabel="Cancelar"
         confirmVariant="primary"
         onConfirm={handleConfirmTerminar}
@@ -367,14 +415,14 @@ function SetRow({
   // de descanso. No dispara si el click viene de los inputs o botones.
   const handleRowClick = (e) => {
     if (!set.completada) return;
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-    if (e.target.closest('button')) return;
+    if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") return;
+    if (e.target.closest("button")) return;
     onReiniciarDescanso();
   };
 
   return (
     <div
-      className={`${styles.setRow} ${set.completada ? styles.setRowCompleted : ''}`}
+      className={`${styles.setRow} ${set.completada ? styles.setRowCompleted : ""}`}
       onClick={handleRowClick}
     >
       <span className={styles.setIndex}>{setIndex + 1}</span>
@@ -402,7 +450,7 @@ function SetRow({
           - En el resto: descanso total en gris como referencia. */}
       {tiempoLabel ? (
         <span
-          className={`${styles.restPill} ${timerCorriendo ? styles.restPillActive : ''}`}
+          className={`${styles.restPill} ${timerCorriendo ? styles.restPillActive : ""}`}
           aria-hidden="true"
         >
           {tiempoLabel}
@@ -413,10 +461,18 @@ function SetRow({
       <button
         type="button"
         onClick={onToggleCompletada}
-        className={`${styles.completeButton} ${set.completada ? styles.completed : ''}`}
-        aria-label={set.completada ? 'Desmarcar como completada' : 'Marcar como completada'}
+        className={`${styles.completeButton} ${set.completada ? styles.completed : ""}`}
+        aria-label={
+          set.completada
+            ? "Desmarcar como completada"
+            : "Marcar como completada"
+        }
       >
-        {set.completada ? <IconCheck /> : <span className={styles.circle}></span>}
+        {set.completada ? (
+          <IconCheck />
+        ) : (
+          <span className={styles.circle}></span>
+        )}
       </button>
       <button
         type="button"
@@ -431,7 +487,10 @@ function SetRow({
           borde inferior de la fila y se rellena de izquierda a derecha. */}
       {timerActivo && (
         <div className={styles.timerTrack} aria-hidden="true">
-          <div className={styles.timerFill} style={{ width: `${progresoPct}%` }} />
+          <div
+            className={styles.timerFill}
+            style={{ width: `${progresoPct}%` }}
+          />
         </div>
       )}
     </div>

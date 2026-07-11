@@ -2,12 +2,12 @@
 // Centralizar aquí la clave y los métodos evita errores de tipeo
 // y facilita cambios futuros (por ejemplo, migrar a IndexedDB).
 
-const STORAGE_KEY = 'yieldfit_active_session';
+const STORAGE_KEY = "yieldfit_active_session";
 
 // Evento personalizado que se dispara en la misma pestaña cuando la
 // sesión activa cambia. El hook useActiveSession lo escucha para
 // mantenerse sincronizado.
-const EVENT_NAME = 'yieldfit:active-session-changed';
+const EVENT_NAME = "yieldfit:active-session-changed";
 
 // Lee la sesión activa. Devuelve null si no hay o si el JSON está corrupto.
 export const readActiveSession = () => {
@@ -45,7 +45,10 @@ export const clearActiveSession = () => {
 // (objeto con nombre) o sin popular (solo el ObjectId), soportamos los dos
 // casos. Adicionalmente se acepta un mapa opcional exerciseNombreById para
 // resolver el nombre por ID cuando la rutina viene sin popular.
-export const buildActiveSessionFromWorkout = (workout, exerciseNombreById = null) => {
+export const buildActiveSessionFromWorkout = (
+  workout,
+  exerciseNombreById = null,
+) => {
   return {
     startTime: Date.now(),
     workoutId: workout._id,
@@ -54,26 +57,32 @@ export const buildActiveSessionFromWorkout = (workout, exerciseNombreById = null
       // Normalizamos el exerciseId a string (viene como objeto si el
       // backend hizo populate, o como string plano si no).
       const exerciseIdStr =
-        typeof ej.exerciseId === 'string' ? ej.exerciseId : ej.exerciseId._id;
+        typeof ej.exerciseId === "string" ? ej.exerciseId : ej.exerciseId._id;
 
       // Resolvemos el nombre por prioridad:
       // 1. El nombre del ejercicio populado en la rutina, si existe.
       // 2. El nombre del mapa de catálogo pasado como argumento.
       // 3. Fallback "Ejercicio" (no debería ocurrir en producción).
       const nombreDesdePopulate =
-        typeof ej.exerciseId === 'object' ? ej.exerciseId.nombre : null;
+        typeof ej.exerciseId === "object" ? ej.exerciseId.nombre : null;
       const nombreDesdeMapa = exerciseNombreById
         ? exerciseNombreById.get(exerciseIdStr)
         : null;
-      const exerciseNombre = nombreDesdePopulate || nombreDesdeMapa || 'Ejercicio';
+      const exerciseNombre =
+        nombreDesdePopulate || nombreDesdeMapa || "Ejercicio";
 
       return {
         exerciseId: exerciseIdStr,
         exerciseNombre,
         descansoSegundos: ej.descansoSegundos,
+        // Cada set recibe un id local estable (no confundir con el _id de Mongo,
+        // que solo existe tras persistir). Se usa como key de React para que
+        // añadir/quitar series en medio de la lista no desincronice el estado
+        // interno de los inputs de las filas siguientes.
         sets: Array.from({ length: ej.numSeries }, () => ({
-          peso: '',
-          reps: '',
+          id: crypto.randomUUID(),
+          peso: "",
+          reps: "",
           completada: false,
         })),
       };

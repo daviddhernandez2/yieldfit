@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.js';
-import Button from '../../components/Button/Button.jsx';
-import Input from '../../components/Input/Input.jsx';
-import styles from './Login.module.css';
+import { useAuth } from '@/hooks/useAuth.js';
+import Button from '@/components/Button/Button.jsx';
+import Input from '@/components/Input/Input.jsx';
+import styles from '@/pages/Login/Login.module.css';
 
 // Pantalla de login. Formulario con email + password.
 // Usa la función login() del AuthContext, que se encarga de guardar el token

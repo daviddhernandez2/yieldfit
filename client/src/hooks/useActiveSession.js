@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { readActiveSession } from '../utils/activeSession.js';
+import { readActiveSession } from '@/utils/activeSession.js';
 
 // Hook global de sesión activa. Devuelve la sesión activa actual o null.
 // Se sincroniza con localStorage tanto para cambios locales (evento

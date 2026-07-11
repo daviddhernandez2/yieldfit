@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import Button from '../../../components/Button/Button.jsx';
-import useInView from '../../../hooks/useInView.js';
-import styles from './CtaFinal.module.css';
+import Button from '@/components/Button/Button.jsx';
+import useInView from '@/hooks/useInView.js';
+import styles from '@/pages/Welcome/sections/CtaFinal.module.css';
 
 // CTA final de la landing: botón grande "Empieza ya" que lleva al registro.
 // Aparece con fade + scale al entrar en viewport y tiene padding vertical

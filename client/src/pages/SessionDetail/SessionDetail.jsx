@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getSession, deleteSession } from '../../api/sessions.js';
-import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
-import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
-import styles from './SessionDetail.module.css';
+import { getSession, deleteSession } from '@/api/sessions.js';
+import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import styles from '@/pages/SessionDetail/SessionDetail.module.css';
 
 const formatDuracion = (segundos) => {
   const totalMin = Math.floor(segundos / 60);

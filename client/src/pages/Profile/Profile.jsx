@@ -1,6 +1,6 @@
-import { useAuth } from '../../hooks/useAuth.js';
-import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
-import styles from './Profile.module.css';
+import { useAuth } from '@/hooks/useAuth.js';
+import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
+import styles from '@/pages/Profile/Profile.module.css';
 
 const formatFecha = (fecha) => {
   if (!fecha) return '—';

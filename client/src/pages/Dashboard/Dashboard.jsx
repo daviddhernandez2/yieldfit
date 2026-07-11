@@ -8,13 +8,13 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { listSessions } from '../../api/sessions.js';
+import { listSessions } from '@/api/sessions.js';
 import {
   calcularProgresoTodos,
   mediaGrupo,
   serieAgregadaTodos,
-} from '../../utils/performance.js';
-import styles from './Dashboard.module.css';
+} from '@/utils/performance.js';
+import styles from '@/pages/Dashboard/Dashboard.module.css';
 
 // Formatea un número decimal como porcentaje con signo: 3.14 → "+3,1%".
 const formatPorcentaje = (n) => {

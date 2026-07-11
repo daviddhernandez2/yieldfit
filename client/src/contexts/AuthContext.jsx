@@ -1,5 +1,5 @@
 import { createContext, useReducer, useEffect } from 'react';
-import { getMe, login as loginApi, register as registerApi } from '../api/auth.js';
+import { getMe, login as loginApi, register as registerApi } from '@/api/auth.js';
 
 // Estado inicial del contexto.
 // status indica en qué fase está la autenticación; el frontend lo usa para

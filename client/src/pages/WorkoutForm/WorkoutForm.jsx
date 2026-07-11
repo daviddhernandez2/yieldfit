@@ -1,18 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { listExercises } from '../../api/exercises.js';
+import { listExercises } from '@/api/exercises.js';
 import {
   getWorkout,
   createWorkout,
   updateWorkout,
   deleteWorkout,
-} from '../../api/workouts.js';
-import Input from '../../components/Input/Input.jsx';
-import Button from '../../components/Button/Button.jsx';
-import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
-import Chip from '../../components/Chip/Chip.jsx';
-import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
-import styles from './WorkoutForm.module.css';
+} from '@/api/workouts.js';
+import Input from '@/components/Input/Input.jsx';
+import Button from '@/components/Button/Button.jsx';
+import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
+import Chip from '@/components/Chip/Chip.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import styles from '@/pages/WorkoutForm/WorkoutForm.module.css';
 
 const GRUPOS_MUSCULARES = [
   'Pecho',

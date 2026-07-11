@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import useInView from '../../../hooks/useInView.js';
-import styles from './FeatureTracking.module.css';
+import useInView from '@/hooks/useInView.js';
+import styles from '@/pages/Welcome/sections/FeatureTracking.module.css';
 
 // Bloque 2: presenta el tracking activo del entrenamiento con un mockup
 // estático de la pantalla ActiveSession. Al entrar en viewport dispara

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import Button from '../Button/Button.jsx';
-import styles from './ConfirmDialog.module.css';
+import Button from '@/components/Button/Button.jsx';
+import styles from '@/components/ConfirmDialog/ConfirmDialog.module.css';
 
 // Diálogo de confirmación reutilizable. Aparece como overlay sobre el contenido.
 // Casos típicos: confirmar borrados, salir sin guardar, acciones destructivas.

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useActiveSession } from '../../hooks/useActiveSession.js';
-import styles from './MiniSession.module.css';
+import { useActiveSession } from '@/hooks/useActiveSession.js';
+import styles from '@/components/MiniSession/MiniSession.module.css';
 
 // Formatea segundos como MM:SS o HH:MM:SS según duración.
 const formatTiempo = (segundos) => {

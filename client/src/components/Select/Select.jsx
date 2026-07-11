@@ -1,4 +1,4 @@
-import styles from './Select.module.css';
+import styles from '@/components/Select/Select.module.css';
 
 // Select reutilizable con label encima y mensaje de error opcional debajo.
 // Mantiene el patrón visual de Input para coherencia visual del formulario.

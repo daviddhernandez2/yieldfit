@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
-import { NAV_ITEMS } from '../NavItems.jsx';
-import Logo from '../Logo/Logo.jsx';
-import styles from './Sidebar.module.css';
+import { NAV_ITEMS } from '@/components/NavItems.jsx';
+import Logo from '@/components/Logo/Logo.jsx';
+import styles from '@/components/Sidebar/Sidebar.module.css';
 
 // Sidebar vertical para pantallas desktop. Solo se muestra en >=768px.
 // El logo va arriba, fuera del card de navegación; los items dentro del card

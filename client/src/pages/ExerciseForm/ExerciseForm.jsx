@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createExercise, getExercise, updateExercise, deleteExercise } from '../../api/exercises.js';
-import Input from '../../components/Input/Input.jsx';
-import Select from '../../components/Select/Select.jsx';
-import Button from '../../components/Button/Button.jsx';
-import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
-import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
-import styles from './ExerciseForm.module.css';
+import { createExercise, getExercise, updateExercise, deleteExercise } from '@/api/exercises.js';
+import Input from '@/components/Input/Input.jsx';
+import Select from '@/components/Select/Select.jsx';
+import Button from '@/components/Button/Button.jsx';
+import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import styles from '@/pages/ExerciseForm/ExerciseForm.module.css';
 
 const GRUPOS = [
   { value: 'pecho', label: 'Pecho' },

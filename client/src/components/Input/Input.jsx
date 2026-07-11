@@ -1,4 +1,4 @@
-import styles from './Input.module.css';
+import styles from '@/components/Input/Input.module.css';
 
 // Input reutilizable con label encima y mensaje de error opcional debajo.
 // Acepta cualquier prop estándar de <input> a través de ...rest.

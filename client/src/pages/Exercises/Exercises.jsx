@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listExercises, deleteExercise } from '../../api/exercises.js';
-import Chip from '../../components/Chip/Chip.jsx';
-import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
-import styles from './Exercises.module.css';
+import { listExercises, deleteExercise } from '@/api/exercises.js';
+import Chip from '@/components/Chip/Chip.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import styles from '@/pages/Exercises/Exercises.module.css';
 
 const FILTROS = [
   { value: 'todos', label: 'Todos' },

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import Button from '../Button/Button.jsx';
-import styles from './WorkoutActionsModal.module.css';
+import Button from '@/components/Button/Button.jsx';
+import styles from '@/components/WorkoutActionsModal/WorkoutActionsModal.module.css';
 
 // Modal de acciones sobre una rutina. Aparece al pulsar sobre una rutina
 // desde la lista y presenta dos acciones: Editar (va al formulario) e

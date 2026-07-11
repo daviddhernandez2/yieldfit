@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getWorkout } from '../api/workouts.js';
-import { listExercises } from '../api/exercises.js';
+import { getWorkout } from '@/api/workouts.js';
+import { listExercises } from '@/api/exercises.js';
 import {
   readActiveSession,
   writeActiveSession,
   clearActiveSession,
   buildActiveSessionFromWorkout,
-} from '../utils/activeSession.js';
+} from '@/utils/activeSession.js';
 
 // Hook para arrancar una sesión de entrenamiento desde una rutina.
 // Encapsula todo el flujo, incluyendo la carga del catálogo de ejercicios

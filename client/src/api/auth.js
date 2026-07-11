@@ -1,4 +1,4 @@
-import apiClient from './client.js';
+import apiClient from '@/api/client.js';
 
 // POST /api/auth/register
 // Registra un nuevo usuario. Devuelve { message, token, user }.

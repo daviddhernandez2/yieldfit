@@ -1,5 +1,5 @@
-import useInView from '../../../hooks/useInView.js';
-import styles from './FeatureRutinas.module.css';
+import useInView from '@/hooks/useInView.js';
+import styles from '@/pages/Welcome/sections/FeatureRutinas.module.css';
 
 // Bloque 1 de la landing: presenta la funcionalidad de creación de rutinas.
 // A la izquierda muestra tres chips (Pecho, Espalda, Pierna) que aparecen

@@ -1,4 +1,4 @@
-import apiClient from './client.js';
+import apiClient from '@/api/client.js';
 
 // GET /api/exercises
 // Devuelve la lista de ejercicios del usuario.

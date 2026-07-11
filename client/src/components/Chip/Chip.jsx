@@ -1,4 +1,4 @@
-import styles from './Chip.module.css';
+import styles from '@/components/Chip/Chip.module.css';
 
 // Chip seleccionable, típicamente usado en filtros.
 // Visualmente: pill que cambia de gris (no seleccionado) a verde (seleccionado).

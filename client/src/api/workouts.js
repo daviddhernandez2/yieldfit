@@ -1,4 +1,4 @@
-import apiClient from './client.js';
+import apiClient from '@/api/client.js';
 
 // GET /api/workouts
 // Devuelve las rutinas del usuario, ordenadas por createdAt descendente.

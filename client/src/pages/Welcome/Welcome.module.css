@@ -55,7 +55,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-sm) var(--space-md);
-  margin: var(--space-md);
+  margin: var(--space-xl);
 }
 
 /* Botones del header ocultos por defecto (móvil). Se muestran en desktop. */
@@ -126,7 +126,7 @@
       0 20px 60px -20px rgba(0, 0, 0, 0.5);
     max-width: 900px;
     width: calc(100% - var(--space-lg) * 2);
-    margin: var(--space-md) auto 0;
+    margin: var(--space-xl) auto 0;
   }
 
   .logo {

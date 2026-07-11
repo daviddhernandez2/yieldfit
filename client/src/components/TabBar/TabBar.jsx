@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { NAV_ITEMS } from '../NavItems.jsx';
-import styles from './TabBar.module.css';
+import { NAV_ITEMS } from '@/components/NavItems.jsx';
+import styles from '@/components/TabBar/TabBar.module.css';
 
 // TabBar inferior para móvil. Solo visible por debajo de 768px.
 // Diseñada como pill flotante con blur, coherente con el mockup:

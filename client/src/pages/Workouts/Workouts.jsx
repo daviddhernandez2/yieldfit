@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listWorkouts } from '../../api/workouts.js';
-import { useStartSession } from '../../hooks/useStartSession.js';
-import WorkoutActionsModal from '../../components/WorkoutActionsModal/WorkoutActionsModal.jsx';
-import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
-import styles from './Workouts.module.css';
+import { listWorkouts } from '@/api/workouts.js';
+import { useStartSession } from '@/hooks/useStartSession.js';
+import WorkoutActionsModal from '@/components/WorkoutActionsModal/WorkoutActionsModal.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import styles from '@/pages/Workouts/Workouts.module.css';
 
 // Genera un badge de 2 letras a partir del nombre de la rutina.
 const generarBadge = (nombre) => {

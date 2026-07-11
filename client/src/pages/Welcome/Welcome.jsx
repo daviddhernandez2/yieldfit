@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
-import Dither from '../../components/Dither/Dither.jsx';
-import Logo from '../../components/Logo/Logo.jsx';
-import Button from '../../components/Button/Button.jsx';
-import FeatureRutinas from './sections/FeatureRutinas.jsx';
-import FeatureTracking from './sections/FeatureTracking.jsx';
-import FeatureProgreso from './sections/FeatureProgreso.jsx';
-import CtaFinal from './sections/CtaFinal.jsx';
-import styles from './Welcome.module.css';
+import Dither from '@/components/Dither/Dither.jsx';
+import Logo from '@/components/Logo/Logo.jsx';
+import Button from '@/components/Button/Button.jsx';
+import FeatureRutinas from '@/pages/Welcome/sections/FeatureRutinas.jsx';
+import FeatureTracking from '@/pages/Welcome/sections/FeatureTracking.jsx';
+import FeatureProgreso from '@/pages/Welcome/sections/FeatureProgreso.jsx';
+import CtaFinal from '@/pages/Welcome/sections/CtaFinal.jsx';
+import styles from '@/pages/Welcome/Welcome.module.css';
 
 // Pantalla de bienvenida. Fondo Dither (WebGL) a pantalla completa en el
 // hero superior, seguido por tres bloques de feature que aparecen con

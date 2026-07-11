@@ -1,4 +1,4 @@
-import styles from './DeleteButton.module.css';
+import styles from '@/components/DeleteButton/DeleteButton.module.css';
 
 // Botón de eliminación estándar de la app.
 // Diseñado como texto rojo con icono, discreto pero identificable.

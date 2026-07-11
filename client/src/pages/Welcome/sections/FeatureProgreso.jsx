@@ -1,5 +1,5 @@
-import useInView from '../../../hooks/useInView.js';
-import styles from './FeatureProgreso.module.css';
+import useInView from '@/hooks/useInView.js';
+import styles from '@/pages/Welcome/sections/FeatureProgreso.module.css';
 
 // Bloque 3: presenta la visualización del progreso con una card que
 // contiene un gráfico de área SVG que se dibuja al entrar en viewport.

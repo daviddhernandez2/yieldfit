@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.js';
-import Button from '../../components/Button/Button.jsx';
-import Input from '../../components/Input/Input.jsx';
-import RadioGroup from '../../components/RadioGroup/RadioGroup.jsx';
-import styles from './Register.module.css';
+import { useAuth } from '@/hooks/useAuth.js';
+import Button from '@/components/Button/Button.jsx';
+import Input from '@/components/Input/Input.jsx';
+import RadioGroup from '@/components/RadioGroup/RadioGroup.jsx';
+import styles from '@/pages/Register/Register.module.css';
 
 // Opciones del campo género. Los valores coinciden con el enum del modelo User
 // del backend. Si en el modelo se ampliaran, hay que sincronizar este array.

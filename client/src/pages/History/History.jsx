@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listSessions } from '../../api/sessions.js';
-import styles from './History.module.css';
+import { listSessions } from '@/api/sessions.js';
+import styles from '@/pages/History/History.module.css';
 
 // Formatea segundos como "1h 24 min" o "24 min" según duración.
 const formatDuracion = (segundos) => {

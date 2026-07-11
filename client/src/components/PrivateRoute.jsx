@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth.js';
+import { useAuth } from '@/hooks/useAuth.js';
 
 // Componente envoltorio para rutas que requieren autenticación.
 // Tres comportamientos según el estado del contexto:

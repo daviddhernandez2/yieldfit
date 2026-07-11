@@ -1,4 +1,4 @@
-import apiClient from './client.js';
+import apiClient from '@/api/client.js';
 
 // POST /api/sessions
 // Crea una nueva sesión finalizada. El backend genera snapshots inmutables.

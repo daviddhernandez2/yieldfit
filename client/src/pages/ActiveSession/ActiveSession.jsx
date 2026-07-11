@@ -4,11 +4,11 @@ import {
   readActiveSession,
   writeActiveSession,
   clearActiveSession,
-} from "../../utils/activeSession.js";
-import { createSession } from "../../api/sessions.js";
-import Button from "../../components/Button/Button.jsx";
-import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog.jsx";
-import styles from "./ActiveSession.module.css";
+} from "@/utils/activeSession.js";
+import { createSession } from "@/api/sessions.js";
+import Button from "@/components/Button/Button.jsx";
+import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
+import styles from "@/pages/ActiveSession/ActiveSession.module.css";
 
 // Formatea segundos como MM:SS. Sigue creciendo pasada la hora (65:30).
 const formatTiempo = (segundos) => {

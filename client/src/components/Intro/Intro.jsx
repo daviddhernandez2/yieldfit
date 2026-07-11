@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import styles from './Intro.module.css';
+import styles from '@/components/Intro/Intro.module.css';
 
 // Intro cinemática mínima: fondo negro con el símbolo de la marca centrado.
 // Fade-in del símbolo al aparecer y fade-out al terminar, sin efectos de

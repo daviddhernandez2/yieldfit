@@ -1,4 +1,4 @@
-import styles from './RadioGroup.module.css';
+import styles from '@/components/RadioGroup/RadioGroup.module.css';
 
 // Grupo de radio buttons estilizado. Recibe un array de opciones (value + label)
 // y gestiona la selección mediante el patrón controlado de React.

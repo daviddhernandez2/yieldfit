@@ -1,8 +1,8 @@
-import Sidebar from '../Sidebar/Sidebar.jsx';
-import TabBar from '../TabBar/TabBar.jsx';
-import MiniSession from '../MiniSession/MiniSession.jsx';
-import DarkVeil from '../DarkVeil/DarkVeil.jsx';
-import styles from './Layout.module.css';
+import Sidebar from '@/components/Sidebar/Sidebar.jsx';
+import TabBar from '@/components/TabBar/TabBar.jsx';
+import MiniSession from '@/components/MiniSession/MiniSession.jsx';
+import DarkVeil from '@/components/DarkVeil/DarkVeil.jsx';
+import styles from '@/components/Layout/Layout.module.css';
 
 // Layout de las rutas privadas.
 // El fondo animado DarkVeil actúa como capa ambiental global de toda la app,

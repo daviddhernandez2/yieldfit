@@ -1,21 +1,21 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext.jsx';
-import PrivateRoute from './components/PrivateRoute.jsx';
-import Layout from './components/Layout/Layout.jsx';
-import Intro from './components/Intro/Intro.jsx';
-import Welcome from './pages/Welcome/Welcome.jsx';
-import Login from './pages/Login/Login.jsx';
-import Register from './pages/Register/Register.jsx';
-import Dashboard from './pages/Dashboard/Dashboard.jsx';
-import Exercises from './pages/Exercises/Exercises.jsx';
-import ExerciseForm from './pages/ExerciseForm/ExerciseForm.jsx';
-import Workouts from './pages/Workouts/Workouts.jsx';
-import WorkoutForm from './pages/WorkoutForm/WorkoutForm.jsx';
-import ActiveSession from './pages/ActiveSession/ActiveSession.jsx';
-import History from './pages/History/History.jsx';
-import SessionDetail from './pages/SessionDetail/SessionDetail.jsx';
-import Profile from './pages/Profile/Profile.jsx';
+import { AuthProvider } from '@/contexts/AuthContext.jsx';
+import PrivateRoute from '@/components/PrivateRoute.jsx';
+import Layout from '@/components/Layout/Layout.jsx';
+import Intro from '@/components/Intro/Intro.jsx';
+import Welcome from '@/pages/Welcome/Welcome.jsx';
+import Login from '@/pages/Login/Login.jsx';
+import Register from '@/pages/Register/Register.jsx';
+import Dashboard from '@/pages/Dashboard/Dashboard.jsx';
+import Exercises from '@/pages/Exercises/Exercises.jsx';
+import ExerciseForm from '@/pages/ExerciseForm/ExerciseForm.jsx';
+import Workouts from '@/pages/Workouts/Workouts.jsx';
+import WorkoutForm from '@/pages/WorkoutForm/WorkoutForm.jsx';
+import ActiveSession from '@/pages/ActiveSession/ActiveSession.jsx';
+import History from '@/pages/History/History.jsx';
+import SessionDetail from '@/pages/SessionDetail/SessionDetail.jsx';
+import Profile from '@/pages/Profile/Profile.jsx';
 
 function App() {
   // Intro cinemática:

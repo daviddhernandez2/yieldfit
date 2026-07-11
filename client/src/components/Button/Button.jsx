@@ -1,4 +1,4 @@
-import styles from './Button.module.css';
+import styles from '@/components/Button/Button.module.css';
 
 // Botón reutilizable con dos variantes visuales:
 // - "primary": fondo verde sólido, texto oscuro. Para CTAs principales.

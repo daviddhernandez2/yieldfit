@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/logo.svg" alt="Yield Fit" width="120" />
+<img src="./client/public/favicon.svg" alt="Yield Fit" width="80" />
 
 # Yield Fit
 
@@ -49,12 +49,11 @@ La propuesta de Yield Fit es trasladar esa lógica visual al dominio del entrena
 - **Vercel** — hosting del frontend con despliegue automático
 - **Render** (Frankfurt) — hosting del backend 
 - **MongoDB Atlas** (M0 gratuito) — base de datos en la nube.
-- **Dominio propio** — [yieldfit.app](https://yieldfit.app).
-
 ---
 
 ## Estructura del monorepo
 
+```
 yieldfit/
 ├── client/                      # Frontend React + Vite
 │   ├── src/
@@ -70,17 +69,14 @@ yieldfit/
 │   ├── controllers/             # Lógica de negocio por recurso
 │   ├── routes/                  # Definición de rutas Express
 │   ├── models/                  # Esquemas Mongoose
-│   ├── middleware/              # auth, propiedad, 404, error handler
-│   └── index.js                 # Entry point
+│   ├── middlewares/             # auth, propiedad, 404, error handler
+│   └── app.js                   # Entry point
 │
 └── docs/                        # Recursos del README y memoria
+```
 
 ---
 
-## Memoria del proyecto
 
-📄 **[Descargar memoria (PDF)](./docs/memoria-yieldfit.pdf)**
-
----
 
 

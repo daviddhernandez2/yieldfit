@@ -321,3 +321,13 @@
   min-width: 200px;
   max-width: 280px;
 }
+
+/* Zona de acción destructiva, separada del botón principal por una línea
+   sutil. Alineada a la derecha, mismo patrón que SessionDetail y ExerciseForm. */
+.deleteWrapper {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-md);
+  margin-top: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}

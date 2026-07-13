@@ -1,33 +1,51 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { createExercise, getExercise, updateExercise, deleteExercise } from '@/api/exercises.js';
-import Input from '@/components/Input/Input.jsx';
-import Select from '@/components/Select/Select.jsx';
-import Button from '@/components/Button/Button.jsx';
-import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
-import styles from '@/pages/ExerciseForm/ExerciseForm.module.css';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  createExercise,
+  getExercise,
+  updateExercise,
+  deleteExercise,
+} from "@/api/exercises.js";
+import Input from "@/components/Input/Input.jsx";
+import Select from "@/components/Select/Select.jsx";
+import Button from "@/components/Button/Button.jsx";
+import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
+import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
+import styles from "@/pages/ExerciseForm/ExerciseForm.module.css";
 
+// Los valores deben coincidir EXACTAMENTE con los enums del modelo Exercise
+// del backend (models/Exercise.js). El backend valida contra ellos y rechaza
+// cualquier variante: 'pecho' o 'pesas_libres' devuelven un 400.
+// El label es lo que ve el usuario; el value es lo que viaja a la API.
 const GRUPOS = [
-  { value: 'pecho', label: 'Pecho' },
-  { value: 'espalda', label: 'Espalda' },
-  { value: 'hombros', label: 'Hombros' },
-  { value: 'brazos', label: 'Brazos' },
-  { value: 'piernas', label: 'Piernas' },
-  { value: 'core', label: 'Core' },
-  { value: 'cardio', label: 'Cardio' },
+  { value: "Pecho", label: "Pecho" },
+  { value: "Espalda", label: "Espalda" },
+  { value: "Hombros", label: "Hombros" },
+  { value: "Brazos", label: "Brazos" },
+  { value: "Piernas", label: "Piernas" },
+  { value: "Core", label: "Core" },
+  { value: "Cardio", label: "Cardio" },
 ];
 
 const TIPOS = [
-  { value: 'pesas_libres', label: 'Pesas libres' },
-  { value: 'maquinas', label: 'Máquinas' },
-  { value: 'poleas', label: 'Poleas' },
-  { value: 'peso_corporal', label: 'Peso corporal' },
-  { value: 'cardio', label: 'Cardio' },
+  { value: "Pesas libres", label: "Pesas libres" },
+  { value: "Maquinas", label: "Máquinas" },
+  { value: "Poleas", label: "Poleas" },
+  { value: "Peso corporal", label: "Peso corporal" },
+  { value: "Cardio", label: "Cardio" },
 ];
 
 const IconChevronLeft = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
@@ -41,10 +59,14 @@ export default function ExerciseForm() {
   const { id } = useParams();
   const editMode = Boolean(id);
 
-  const [form, setForm] = useState({ nombre: '', grupoMuscular: 'pecho', tipo: 'pesas_libres' });
+  const [form, setForm] = useState({
+    nombre: "",
+    grupoMuscular: "Pecho",
+    tipo: "Pesas libres",
+  });
   const [loading, setLoading] = useState(editMode);
   const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   // Precarga en modo edición.
@@ -60,7 +82,8 @@ export default function ExerciseForm() {
           tipo: ex.tipo,
         });
       } catch (err) {
-        const message = err.response?.data?.message || 'Error al cargar el ejercicio.';
+        const message =
+          err.response?.data?.message || "Error al cargar el ejercicio.";
         setErrorMessage(message);
       } finally {
         setLoading(false);
@@ -76,17 +99,18 @@ export default function ExerciseForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setErrorMessage('');
+    setErrorMessage("");
     try {
       if (editMode) {
         await updateExercise(id, form);
       } else {
         await createExercise(form);
       }
-      navigate('/exercises');
+      navigate("/exercises");
     } catch (err) {
       const data = err.response?.data;
-      const message = data?.details?.[0] || data?.message || 'Error al guardar.';
+      const message =
+        data?.details?.[0] || data?.message || "Error al guardar.";
       setErrorMessage(message);
     } finally {
       setSubmitting(false);
@@ -97,9 +121,9 @@ export default function ExerciseForm() {
     setSubmitting(true);
     try {
       await deleteExercise(id);
-      navigate('/exercises');
+      navigate("/exercises");
     } catch (err) {
-      const message = err.response?.data?.message || 'Error al eliminar.';
+      const message = err.response?.data?.message || "Error al eliminar.";
       setErrorMessage(message);
       setConfirmDeleteOpen(false);
     } finally {
@@ -117,14 +141,14 @@ export default function ExerciseForm() {
       <header className={styles.header}>
         <button
           type="button"
-          onClick={() => navigate('/exercises')}
+          onClick={() => navigate("/exercises")}
           className={styles.backButton}
           aria-label="Volver al listado de ejercicios"
         >
           <IconChevronLeft />
         </button>
         <h1 className={styles.title}>
-          {editMode ? 'Editar ejercicio' : 'Nuevo ejercicio'}
+          {editMode ? "Editar ejercicio" : "Nuevo ejercicio"}
         </h1>
       </header>
 
@@ -132,7 +156,7 @@ export default function ExerciseForm() {
         <Input
           label="Nombre"
           value={form.nombre}
-          onChange={handleChange('nombre')}
+          onChange={handleChange("nombre")}
           required
           maxLength={40}
           placeholder="p.ej. Press banca con barra"
@@ -141,26 +165,32 @@ export default function ExerciseForm() {
         <Select
           label="Grupo muscular"
           value={form.grupoMuscular}
-          onChange={handleChange('grupoMuscular')}
+          onChange={handleChange("grupoMuscular")}
           options={GRUPOS}
         />
 
         <Select
           label="Tipo"
           value={form.tipo}
-          onChange={handleChange('tipo')}
+          onChange={handleChange("tipo")}
           options={TIPOS}
         />
 
         {errorMessage && (
-          <div className={styles.errorBanner} role="alert">{errorMessage}</div>
+          <div className={styles.errorBanner} role="alert">
+            {errorMessage}
+          </div>
         )}
 
         {/* Botón principal centrado y con ancho contenido, coherente con
             el resto de la app. Sin fullWidth para no dominar la pantalla. */}
         <div className={styles.submitWrapper}>
           <Button variant="primary" type="submit" disabled={submitting}>
-            {submitting ? 'Guardando...' : editMode ? 'Guardar cambios' : 'Crear ejercicio'}
+            {submitting
+              ? "Guardando..."
+              : editMode
+                ? "Guardar cambios"
+                : "Crear ejercicio"}
           </Button>
         </div>
       </form>
@@ -185,7 +215,7 @@ export default function ExerciseForm() {
           `"${form.nombre}" se eliminará. También se retirará de las rutinas y ` +
           `grupos que lo incluyan. Las sesiones antiguas conservarán el nombre.`
         }
-        confirmLabel={submitting ? 'Eliminando...' : 'Eliminar'}
+        confirmLabel={submitting ? "Eliminando..." : "Eliminar"}
         cancelLabel="Cancelar"
         confirmVariant="danger"
         onConfirm={handleConfirmDelete}

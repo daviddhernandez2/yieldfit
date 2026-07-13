@@ -7,6 +7,7 @@ import {
 } from "@/utils/activeSession.js";
 import { createSession } from "@/api/sessions.js";
 import Button from "@/components/Button/Button.jsx";
+import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
 import styles from "@/pages/ActiveSession/ActiveSession.module.css";
 
@@ -79,6 +80,7 @@ export default function ActiveSession() {
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [restTimer, setRestTimer] = useState(null);
   const [confirmTerminar, setConfirmTerminar] = useState(false);
+  const [confirmDescartar, setConfirmDescartar] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -246,6 +248,16 @@ export default function ActiveSession() {
     }
   };
 
+  // Descartar la sesión: abandona el entrenamiento en curso sin guardarlo.
+  // Pensado para cuando el usuario arranca una rutina por error. No llama a
+  // la API porque la sesión aún no existe en el backend: solo vive en
+  // localStorage. clearActiveSession dispara además el evento que hace
+  // desaparecer la MiniSession del resto de la app.
+  const handleConfirmDescartar = () => {
+    clearActiveSession();
+    navigate("/workouts");
+  };
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -358,6 +370,19 @@ export default function ActiveSession() {
         </Button>
       </div>
 
+      {/* Acción destructiva discreta al final, alineada a la derecha.
+          Mismo patrón que SessionDetail y ExerciseForm: DeleteButton estándar
+          en lugar de un botón rojo grande. Permite abandonar una sesión
+          arrancada por error sin tener que completarla para salir de ella. */}
+      <div className={styles.deleteWrapper}>
+        <DeleteButton
+          onClick={() => setConfirmDescartar(true)}
+          disabled={submitting}
+        >
+          Descartar sesión
+        </DeleteButton>
+      </div>
+
       <ConfirmDialog
         open={confirmTerminar}
         title="¿Terminar la sesión?"
@@ -370,6 +395,21 @@ export default function ActiveSession() {
         confirmVariant="primary"
         onConfirm={handleConfirmTerminar}
         onCancel={() => setConfirmTerminar(false)}
+      />
+
+      {/* Diálogo de descarte. Verbo intencionadamente distinto al de
+          SessionDetail ("Eliminar"): allí se borra un registro histórico ya
+          guardado en la base de datos; aquí se tira un entrenamiento que
+          nunca llegó a guardarse. */}
+      <ConfirmDialog
+        open={confirmDescartar}
+        title="¿Descartar esta sesión?"
+        message="Se perderá todo lo que hayas registrado en este entrenamiento. Esta acción no se puede deshacer."
+        confirmLabel="Descartar"
+        cancelLabel="Cancelar"
+        confirmVariant="danger"
+        onConfirm={handleConfirmDescartar}
+        onCancel={() => setConfirmDescartar(false)}
       />
     </div>
   );

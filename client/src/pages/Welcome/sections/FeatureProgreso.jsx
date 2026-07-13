@@ -1,5 +1,5 @@
-import useInView from '@/hooks/useInView.js';
-import styles from '@/pages/Welcome/sections/FeatureProgreso.module.css';
+import useInView from "@/hooks/useInView.js";
+import styles from "@/pages/Welcome/sections/FeatureProgreso.module.css";
 
 // Bloque 3: presenta la visualización del progreso con una card que
 // contiene un gráfico de área SVG que se dibuja al entrar en viewport.
@@ -12,7 +12,7 @@ export default function FeatureProgreso() {
   return (
     <section ref={ref} className={styles.section}>
       <div className={styles.grid}>
-        <div className={`${styles.card} ${visible ? styles.cardVisible : ''}`}>
+        <div className={`${styles.card} ${visible ? styles.cardVisible : ""}`}>
           <svg
             className={styles.grafico}
             viewBox="0 0 400 140"
@@ -43,12 +43,18 @@ export default function FeatureProgreso() {
           </svg>
 
           <div className={styles.ejercicios}>
-            <div className={styles.ejercicio} style={{ transitionDelay: '1400ms' }}>
+            <div
+              className={styles.ejercicio}
+              style={{ transitionDelay: "1400ms" }}
+            >
               <span className={styles.ejSigla}>SL</span>
               <span className={styles.ejNombre}>Sentadilla Libre</span>
               <span className={styles.ejPct}>↑ 5,2%</span>
             </div>
-            <div className={styles.ejercicio} style={{ transitionDelay: '1600ms' }}>
+            <div
+              className={styles.ejercicio}
+              style={{ transitionDelay: "1600ms" }}
+            >
               <span className={styles.ejSigla}>PB</span>
               <span className={styles.ejNombre}>Press banca</span>
               <span className={styles.ejPct}>↑ 8,6%</span>
@@ -56,7 +62,9 @@ export default function FeatureProgreso() {
           </div>
         </div>
 
-        <div className={styles.texto}>
+        <div
+          className={`${styles.texto} ${visible ? styles.textoVisible : ""}`}
+        >
           <h2 className={styles.titulo}>Visualiza tu progreso</h2>
           <p className={styles.parrafo}>
             Analiza de un vistazo tu progresión en el entrenamiento utilizando

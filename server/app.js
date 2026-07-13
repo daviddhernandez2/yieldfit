@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
 import { notFoundHandler, errorHandler } from './middlewares/errorHandlers.js';
 import authRoutes from './routes/authRoutes.js';
 import exerciseRoutes from './routes/exerciseRoutes.js';
@@ -8,6 +10,17 @@ import workoutRoutes from './routes/workoutRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 
 const app = express();
+
+// Helmet añade cabeceras HTTP de seguridad por defecto (X-Content-Type-Options,
+// X-Frame-Options, Strict-Transport-Security, etc.) sin necesidad de configurarlas
+// una a una manualmente.
+app.use(helmet());
+
+// Morgan registra cada petición HTTP (método, ruta, status, tiempo de respuesta).
+// 'dev' es compacto y coloreado, pensado para desarrollo; en producción usamos
+// 'combined' (formato Apache, más detallado) para facilitar la depuración en los
+// logs del PaaS.
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // CORS configurable por variable de entorno. Acepta una lista separada por comas
 // en CLIENT_ORIGINS. En desarrollo se usa localhost; en producción, la URL de Vercel.

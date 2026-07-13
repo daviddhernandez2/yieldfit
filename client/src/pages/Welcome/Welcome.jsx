@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "@/components/Logo/Logo.jsx";
 import Button from "@/components/Button/Button.jsx";
@@ -16,21 +16,46 @@ import styles from "@/pages/Welcome/Welcome.module.css";
 // inicializa en paralelo, sin bloquear el primer render.
 const Dither = lazy(() => import("@/components/Dither/Dither.jsx"));
 
+// requestIdleCallback no existe en Safari; el fallback con setTimeout(fn, 1)
+// consigue el mismo efecto práctico (ceder el hilo principal) aunque sin la
+// garantía de "solo cuando el navegador esté libre" que da la API real.
+const runWhenIdle =
+  typeof window !== "undefined" && window.requestIdleCallback
+    ? window.requestIdleCallback
+    : (cb) => setTimeout(cb, 1);
+
 // Pantalla de bienvenida. Fondo Dither (WebGL) a pantalla completa en el
 // hero superior, seguido por tres bloques de feature que aparecen con
 // animaciones al hacer scroll y un CTA final. Cada sección posterior al
 // hero es un componente propio en /sections/ para mantener este archivo
 // manejable y facilitar futuras iteraciones.
 export default function Welcome() {
+  // Dither no se monta hasta que el navegador esté libre (requestIdleCallback).
+  // Aplazamos esto un paso más allá del lazy-loading: el hero (texto + botones)
+  // pinta y queda interactivo de inmediato, y el fondo WebGL se inicializa un
+  // instante después, sin competir por el hilo principal durante el primer
+  // render. Medido con Lighthouse: reduce el Total Blocking Time.
+  const [mostrarDither, setMostrarDither] = useState(false);
+
+  useEffect(() => {
+    const id = runWhenIdle(() => setMostrarDither(true));
+    return () => {
+      if (window.cancelIdleCallback) window.cancelIdleCallback(id);
+      else clearTimeout(id);
+    };
+  }, []);
+
   return (
     <div className={styles.page}>
       <div className={styles.hero}>
         {/* Fondo animado a pantalla completa. Va como primera capa (z-index 0)
             y todo lo demás lo tapa desde encima. */}
         <div className={styles.background} aria-hidden="true">
-          <Suspense fallback={null}>
-            <Dither />
-          </Suspense>
+          {mostrarDither && (
+            <Suspense fallback={null}>
+              <Dither />
+            </Suspense>
+          )}
         </div>
         {/* Header: en desktop se ve como una barra superior con logo a la
             izquierda y botones a la derecha. En móvil el logo queda centrado

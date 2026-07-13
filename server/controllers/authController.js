@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Exercise from '../models/Exercise.js';
 import { signToken } from '../utils/jwt.js';
@@ -15,7 +16,9 @@ const derivarTracking = (grupoMuscular, tipo) => {
 
 // Clona el catálogo de ejercicios preset al nuevo usuario en una única
 // operación bulk. Más eficiente que recorrer la lista con save() individuales.
-const clonarPresetsAUsuario = async (userId) => {
+// Recibe la sesión de la transacción para que quede atada a la misma
+// operación atómica que la creación del usuario.
+const clonarPresetsAUsuario = async (userId, session) => {
   const documentos = exercisePresets.map((preset) => ({
     userId,
     nombre: preset.nombre,
@@ -24,7 +27,7 @@ const clonarPresetsAUsuario = async (userId) => {
     tracking: derivarTracking(preset.grupoMuscular, preset.tipo),
   }));
 
-  await Exercise.insertMany(documentos);
+  await Exercise.insertMany(documentos, { session });
 };
 
 // POST /api/auth/register
@@ -43,22 +46,32 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // El middleware pre('save') del modelo User hashea la contraseña automáticamente.
-    const user = new User({
-      email,
-      password,
-      nombreCompleto,
-      fechaNacimiento,
-      peso,
-      altura,
-      genero,
-    });
-    await user.save();
+    // Creación del usuario + clonado del catálogo de ejercicios preset dentro
+    // de una transacción de MongoDB: o se completan las dos operaciones, o no
+    // se completa ninguna. Antes se hacían por separado y un fallo en el
+    // clonado dejaba usuarios creados sin ejercicios; con la transacción esa
+    // situación ya no puede ocurrir.
+    const session = await mongoose.startSession();
+    let user;
+    try {
+      await session.withTransaction(async () => {
+        // El middleware pre('save') del modelo User hashea la contraseña automáticamente.
+        user = new User({
+          email,
+          password,
+          nombreCompleto,
+          fechaNacimiento,
+          peso,
+          altura,
+          genero,
+        });
+        await user.save({ session });
 
-    // Una vez creado el usuario, se le copia el catálogo inicial.
-    // Si esto fallara, el usuario quedaría creado sin ejercicios. Decisión consciente:
-    // no es crítico, podría reintentar el clonado desde un script de mantenimiento.
-    await clonarPresetsAUsuario(user._id);
+        await clonarPresetsAUsuario(user._id, session);
+      });
+    } finally {
+      await session.endSession();
+    }
 
     // El token se emite también en el registro para que el cliente quede logueado
     // automáticamente sin necesidad de una segunda petición a /login.

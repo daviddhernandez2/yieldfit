@@ -114,9 +114,17 @@ export const mediaGrupo = (progresosPorEjercicio) => {
 };
 
 // Serie temporal para la gráfica agregada del grupo "Todos".
-// Para cada sesión, calcula el 1RM medio de todos sus ejercicios como
-// representación del "estado de forma general" en ese día.
+// Solo se consideran los ejercicios con >= 2 sesiones, el mismo criterio
+// que usa la lista de progreso: un ejercicio con una sola medición no
+// aporta variación y distorsionaría la media del día.
 export const serieAgregadaTodos = (sesiones) => {
+  // 1. Determinamos qué ejercicios son elegibles (>= 2 sesiones)
+  const mapa = agruparPorEjercicio(sesiones);
+  const elegibles = new Set();
+  for (const [key, grupo] of mapa) {
+    if (grupo.sesiones.length >= 2) elegibles.add(key);
+  }
+
   const puntos = [];
   const sesionesOrdenadas = [...sesiones].sort(
     (a, b) => new Date(a.fecha) - new Date(b.fecha)
@@ -126,6 +134,7 @@ export const serieAgregadaTodos = (sesiones) => {
     let sumaEj = 0;
     let numEj = 0;
     for (const ej of sesion.ejercicios) {
+      if (!elegibles.has(String(ej.exerciseId))) continue; // ← el filtro nuevo
       const mejor = mejor1RMDeSets(ej.sets);
       if (mejor > 0) {
         sumaEj += mejor;

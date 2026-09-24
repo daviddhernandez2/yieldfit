@@ -37,10 +37,11 @@ activo, cada sesión una operación, y el progreso se lee como rendimiento de ca
    - la entrada correspondiente en `DECISIONS.md`,
    - la actualización de la página correspondiente de `/docs`,
    - el mensaje de commit.
-8. **Git con confirmación.** Al cerrar cada paso confirmado, antes de ejecutar nada,
-   enseña a David: rama y remoto, los archivos exactos de cada commit (`git add` con rutas
-   explícitas, nunca `git add .`) y el mensaje de cada commit con el formato de la sección
-   Git. Solo tras su confirmación explícita, ejecuta `git add`, `git commit` y `git push`.
+8. **Git con confirmación.** Al cerrar cada paso confirmado, prepara los comandos completos
+   (`pwd`, `git add` con rutas explícitas —nunca `git add .`—, `git commit -m "..."` con el
+   formato de la sección Git, `git push`) y enséñaselos a David. Ejecútalos solo cuando él
+   los haya verificado y confirmado. **Nunca** ejecutes un comando de git que modifique el
+   repo o el remoto sin su confirmación explícita para ese comando concreto.
 9. **Nunca** leas, muestres ni edites archivos `.env`. Usa los `.env.example`.
 10. Sé directo. Si una petición es una mala decisión técnica, dilo y explica por qué.
 11. **El repo es público.** `/docs`, `DECISIONS.md` y los README nunca contienen secretos,
@@ -51,7 +52,7 @@ activo, cada sesión una operación, y el progreso se lee como rendimiento de ca
 | Capa | Tecnología |
 |---|---|
 | Frontend | React 19, Vite 8, react-router-dom 7, axios, Recharts, CSS Modules, Geist (fontsource) |
-| Efectos | three.js + @react-three/fiber + postprocessing, ogl (solo Welcome/Intro) |
+| Efectos | three.js + @react-three/fiber + postprocessing (Dither, solo Welcome); ogl (DarkVeil, fondo global en `Layout`) |
 | Backend | Node 20, Express 5 (ESM), Mongoose 9, bcrypt, jsonwebtoken, helmet, cors, morgan |
 | Lint | oxlint (cliente) |
 | Tests | No hay todavía |
@@ -150,6 +151,8 @@ Fuente de verdad visual: Figma, fileKey `FM0tXObXUAJsRipf0D0gXs` (arquitectura d
 
 Aplicar en cada cambio y avisar cuando algo existente no los cumpla:
 
+- **Estabilidad a largo plazo** (ver `DECISIONS.md`): la app registra datos durante años y debe
+  funcionar igual con 5 años de historial que con 5 semanas.
 - Las consultas que crecen con el historial deben estar indexadas y, si devuelven listas, limitadas o paginadas.
 - Las fuentes de verdad no se duplican: si un enum existe en el backend, el frontend no lo reescribe a mano.
 - Lógica de negocio fuera de los componentes (en `utils/`, hooks o backend), UI solo presenta.
@@ -161,20 +164,26 @@ Aplicar en cada cambio y avisar cuando algo existente no los cumpla:
 No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 
 - `GET /api/sessions` devuelve **todas** las sesiones sin paginar, y el progreso se calcula
-  en el cliente (`utils/performance.js`) sobre esa lista completa.
+  en el cliente (`utils/performance.js`) sobre esa lista completa. Bloque 4.
 - `TIPOS` y `GRUPOS_MUSCULARES` están duplicados: enum en `server/models/Exercise.js` y
   lista a mano en `client/src/pages/ExerciseForm/ExerciseForm.jsx`.
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
+  Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
 - Cold start de Render (plan gratuito): se resuelve en el bloque 3.
-- **Bug de integridad**: al borrar un Exercise, `exerciseController.remove` hace `$pull` de ese
-  ejercicio en todas las sesiones. Contradice el diseño de snapshots (historial inmutable),
-  borra historial y puede dejar sesiones con `ejercicios: []` (updateMany no valida). Bloque 1.
+- **Cascada `$pull` al borrar un Exercise** (decisión deliberada, ver `DECISIONS.md`):
+  `exerciseController.remove` quita ese ejercicio de todas las sesiones del usuario.
+  Consecuencias pendientes de resolver en el bloque 1: sesiones que pueden quedar con
+  `ejercicios: []` (`updateMany` no pasa las validaciones de Mongoose), borrado irreversible
+  del historial sin aviso al usuario, y Workouts y Charts con `exerciseIds` huérfanos
+  (la cascada no los limpia).
 - Fallbacks de URL en env vars: `VITE_API_URL || 'http://localhost...'` (acaba en el bundle) y
   `CLIENT_ORIGINS || 'http://localhost:5173'`. Si falta la variable, debe fallar con un error claro.
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
   flujo de React Router).
-- `components/Dither/Dither.jsx` contiene comentarios pegados de un tutorial ("Asegúrate de tener...").
+- `components/Dither/` y `components/DarkVeil/` son código de terceros copiado de React Bits
+  (reactbits.dev, licencia MIT + Commons Clause) sin atribución ni aviso de copyright, que la
+  licencia exige.
 - Licencia incoherente: badge MIT sin archivo `LICENSE`; `server/package.json` dice ISC.
 - READMEs: el raíz no explica instalación, arranque ni variables; `client/README.md` es la plantilla de Vite.
 - Comentarios obsoletos del curso (p. ej. "lo haremos en la Semana 3" en `api/client.js`).
@@ -194,9 +203,10 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
 
 - [ ] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, web de documentación en `/docs`
       (sitio aparte, desplegado en Vercel con protección de acceso).
-- [ ] **1 — Saneamiento**: corregir la cascada `$pull` al borrar ejercicios (decidir qué debe
-      pasar con el historial), quitar fallbacks de URL en env vars, cierre ordenado del
-      servidor con SIGTERM (Render lo envía en cada deploy), limpiar Dither y comentarios
+- [ ] **1 — Saneamiento**: resolver las consecuencias de la cascada `$pull` al borrar
+      ejercicios (si cambia la decisión, entrada nueva en `DECISIONS.md`), quitar fallbacks de URL en env vars, cierre ordenado del
+      servidor con SIGTERM (Render lo envía en cada deploy), marcar Dither y DarkVeil como
+      código de terceros (React Bits) con atribución y licencia, limpiar comentarios
       obsoletos del curso, completar README raíz y sustituir el de `client/`, resolver la licencia (el README enlaza
       un `LICENSE` MIT inexistente y `server/package.json` declara ISC).
 - [ ] **2 — Máquina de discos**: nuevo valor en los tipos de ejercicio.
@@ -205,14 +215,18 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       pub-sub `utils/wakingUp.js`, hook `useServerWakingUp`, cambios mínimos en
       `PrivateRoute.jsx`, `Login.jsx` y `Register.jsx`. Incluye sustituir el
       `window.location` del interceptor 401 por navegación de React Router.
-- [ ] **4 — Serie anterior**: mostrar en cada serie de la sesión activa lo hecho en la sesión anterior.
-- [ ] **5 — Reemplazar ejercicio en sesión activa**: cambiar un ejercicio por otro sin salir de la
+- [ ] **4 — Historial escalable**: cálculo del progreso en el backend, 1RM precalculado al
+      guardar la sesión (con migración de las sesiones existentes), `GET /api/sessions` paginado.
+- [ ] **5 — Serie anterior**: mostrar en cada serie de la sesión activa lo hecho en la sesión anterior.
+- [ ] **6 — Reemplazar ejercicio en sesión activa**: cambiar un ejercicio por otro sin salir de la
       sesión. Valorar antes pasar el estado de `ActiveSession.jsx` a `useReducer`.
-- [ ] **6 — Exportar CSV**: historial exportable, generado en el backend.
-- [ ] **7 — Calendario de días entrenados**: endpoint que devuelva solo fechas por rango
+- [ ] **7 — Exportar CSV**: historial exportable, generado en el backend.
+- [ ] **8 — Calendario de días entrenados**: endpoint que devuelva solo fechas por rango
       (sin traer sesiones completas).
-- [ ] **8 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;
+- [ ] **9 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;
       misma lógica de cálculo que el grupo "Todos", aplicada a los ejercicios seleccionados.
-- [ ] **9 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
-- [ ] **10 — App iPhone**: Capacitor + notificaciones locales (fin de descanso; aviso de
-      entrenamiento activo sin actividad).
+- [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
+- [ ] **11 — Auth robusta**: access token corto + refresh token.
+- [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
+      entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
+      sincronización híbrida de la sesión activa y revisión de DarkVeil (batería).

@@ -2,10 +2,11 @@ import axios from 'axios';
 
 // Instancia de axios configurada para el backend de Yield Fit.
 // Usamos baseURL para no repetir la URL completa en cada llamada.
-// En desarrollo el backend corre en localhost:3000; en producción se
-// sustituirá por la URL del despliegue (lo haremos en la Semana 3).
+// VITE_API_URL viene de client/.env en local y de las variables de Vercel en
+// producción. No hay valor por defecto: vite.config.js ya impide arrancar o
+// compilar si falta, así que aquí siempre está definida.
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 // Interceptor de request: se ejecuta antes de enviar cualquier petición.

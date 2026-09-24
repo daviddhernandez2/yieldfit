@@ -24,7 +24,15 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // CORS configurable por variable de entorno. Acepta una lista separada por comas
 // en CLIENT_ORIGINS. En desarrollo se usa localhost; en producción, la URL de Vercel.
-const clientOrigins = (process.env.CLIENT_ORIGINS || 'http://localhost:5173')
+// Sin valor por defecto a propósito: si la variable falta en producción, un fallback
+// a localhost haría que el servidor arrancase "bien" pero rechazara todas las
+// peticiones del frontend real por CORS. Es preferible no arrancar y ver el motivo
+// en los logs, igual que ya ocurre con MONGO_URI y JWT_SECRET.
+if (!process.env.CLIENT_ORIGINS) {
+  throw new Error('CLIENT_ORIGINS no está definida en las variables de entorno');
+}
+
+const clientOrigins = process.env.CLIENT_ORIGINS
   .split(',')
   .map((s) => s.trim());
 

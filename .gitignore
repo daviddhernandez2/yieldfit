@@ -31,3 +31,7 @@ out/
 # Caché
 .cache/
 .npm/
+
+# Postman (colecciones y environments locales; pueden contener tokens)
+.postman/
+postman/

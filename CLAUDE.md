@@ -124,7 +124,9 @@ ownership de los ids referenciados. Mantener siempre ese patrón.
 
 ## Git
 
-- Un commit por paso confirmado, push al terminar cada paso. No acumular cambios de varios pasos.
+- Un commit por paso confirmado. No acumular cambios de varios pasos en un commit.
+- `git push` solo con cambios relevantes (código o cierre de un paso de desarrollo); los commits
+  menores de documentación se quedan en local y suben con el siguiente push.
 - Formato de mensaje (Conventional Commits, deducido del historial):
 
   ```
@@ -204,7 +206,7 @@ falta de `runValidators` (las actualizaciones usan `save()`), `JSON.parse` sin t
 
 Estado: marcar `[x]` solo cuando David confirme el cierre.
 
-- [ ] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, documentación en Markdown en `/docs`
+- [x] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, documentación en Markdown en `/docs`
       (leída en GitHub, sin dependencias ni despliegue; índice en `docs/README.md`).
 - [ ] **1 — Saneamiento**: resolver las consecuencias de la cascada `$pull` al borrar
       ejercicios (si cambia la decisión, entrada nueva en `DECISIONS.md`), eliminar

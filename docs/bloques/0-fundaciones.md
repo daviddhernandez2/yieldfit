@@ -2,7 +2,7 @@
 
 [← Índice](../README.md)
 
-Estado: en curso
+Estado: cerrado (2026-09-24)
 
 ## Objetivo
 

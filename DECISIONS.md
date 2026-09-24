@@ -31,9 +31,10 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0010 | CSS Modules + tokens en `variables.css` | vigente |
 | 0011 | Fondos WebGL copiados de React Bits | vigente |
 | 0012 | Repo público y documentación sin secretos | vigente |
-| 0013 | Documentación con VitePress en `/docs` | vigente |
+| 0013 | Documentación con VitePress en `/docs` | sustituida por 0016 |
 | 0014 | Conventional Commits en español y Git con confirmación | vigente |
 | 0015 | Principio de estabilidad a largo plazo | vigente |
+| 0016 | Documentación en Markdown en `/docs`, leída en GitHub | vigente |
 
 ---
 
@@ -49,8 +50,8 @@ combinación por las dos cosas: coste cero y que era la que se usaba en el curso
 datos en MongoDB Atlas M0. Cada parte se despliega por separado desde el mismo repo.
 
 **Alternativas descartadas** (análisis a posteriori):
-- Backend en Vercel como funciones serverless: evita el cold start de Render, pero obliga a
-  gestionar la conexión a MongoDB por invocación.
+- Backend en Vercel como funciones serverless: cold start mucho más corto (un segundo o menos),
+  pero obliga a gestionar la conexión a MongoDB por invocación.
 - Railway / Fly.io: sin plan gratuito comparable.
 
 **Consecuencias:**
@@ -355,7 +356,7 @@ secretos, URLs de conexión ni datos de usuarios. `.postman/` y `postman/` queda
 
 ## 0013 — Documentación con VitePress en `/docs`
 
-Fecha: 2026-09-24 · Estado: vigente · Bloque: 0
+Fecha: 2026-09-24 · Estado: sustituida por 0016 · Bloque: 0
 
 **Contexto:** se necesita documentación navegable con diagramas mermaid, separada de la app.
 
@@ -421,3 +422,30 @@ CLAUDE.md.
   (serie anterior, CSV, calendario, grupos).
 - Los cambios de modelo de datos llevan migración de los documentos existentes, no solo código
   nuevo.
+
+---
+
+## 0016 — Documentación en Markdown en `/docs`, leída en GitHub
+
+Fecha: 2026-09-24 · Estado: vigente · Bloque: 0 · Sustituye a: 0013
+
+**Contexto:** VitePress (0013) suponía dependencias, configuración y un segundo proyecto en
+Vercel antes de tener contenido. Además, la protección de acceso de Vercel no aporta privacidad
+real porque el repo es público (0012): el mismo contenido se lee en GitHub.
+
+**Decisión:** la documentación son archivos Markdown en `/docs`, leídos directamente en GitHub,
+que renderiza mermaid de forma nativa. `docs/README.md` hace de índice. Las decisiones no se
+duplican: la doc enlaza a `../DECISIONS.md`. El motivo es la simplicidad: sin dependencias, sin
+build y sin despliegue.
+
+**Alternativas descartadas:**
+- VitePress desplegado en Vercel (0013): demasiada infraestructura para empezar.
+- Wiki de GitHub: vive en un repo git aparte, así que la doc no va en los mismos commits que el
+  código que describe.
+
+**Consecuencias:**
+- Cero mantenimiento de infraestructura: la doc se actualiza en el mismo commit que el código.
+- Sin buscador ni barra lateral; la navegación va por enlaces relativos desde `docs/README.md`.
+- Migrar a VitePress en el futuro no tiene coste de contenido: reutiliza los mismos `.md`
+  (mermaid necesitaría un plugin).
+- Ya no aplica la consecuencia de 0012 sobre la protección del sitio de docs: no hay sitio.

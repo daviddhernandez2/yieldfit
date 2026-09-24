@@ -31,8 +31,8 @@ activo, cada sesión una operación, y el progreso se lee como rendimiento de ca
 5. **Deuda de comprensión.** Si ves código que David probablemente no sabría explicar,
    o que es frágil/confuso, dilo explícitamente aunque no forme parte de la tarea.
 6. **Diagramas.** Para cambios con cierta complejidad (flujo de auth, modelo de datos,
-   flujo de una feature, arquitectura de componentes) genera un diagrama mermaid para
-   `/docs`.
+   flujo de una feature, arquitectura de componentes) genera un diagrama mermaid en el `.md`
+   correspondiente de `/docs` (GitHub lo renderiza de forma nativa).
 7. **Cierre de bloque.** Al terminar un bloque, propone:
    - la entrada correspondiente en `DECISIONS.md`,
    - la actualización de la página correspondiente de `/docs`,
@@ -177,6 +177,9 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
   `ejercicios: []` (`updateMany` no pasa las validaciones de Mongoose), borrado irreversible
   del historial sin aviso al usuario, y Workouts y Charts con `exerciseIds` huérfanos
   (la cascada no los limpia).
+- `PUT /api/sessions/:id` regenera los snapshots si recibe `ejercicios`
+  (`construirEjerciciosConSnapshots` copia los nombres actuales): contradice el historial
+  inmutable para sesiones editadas. Hoy no ocurre porque el cliente no usa el endpoint. Bloque 1.
 - Fallbacks de URL en env vars: `VITE_API_URL || 'http://localhost...'` (acaba en el bundle) y
   `CLIENT_ORIGINS || 'http://localhost:5173'`. Si falta la variable, debe fallar con un error claro.
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
@@ -201,10 +204,11 @@ falta de `runValidators` (las actualizaciones usan `save()`), `JSON.parse` sin t
 
 Estado: marcar `[x]` solo cuando David confirme el cierre.
 
-- [ ] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, web de documentación en `/docs`
-      (sitio aparte, desplegado en Vercel con protección de acceso).
+- [ ] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, documentación en Markdown en `/docs`
+      (leída en GitHub, sin dependencias ni despliegue; índice en `docs/README.md`).
 - [ ] **1 — Saneamiento**: resolver las consecuencias de la cascada `$pull` al borrar
-      ejercicios (si cambia la decisión, entrada nueva en `DECISIONS.md`), quitar fallbacks de URL en env vars, cierre ordenado del
+      ejercicios (si cambia la decisión, entrada nueva en `DECISIONS.md`), eliminar
+      `PUT /api/sessions/:id` mientras no se use o corregirlo para que conserve los snapshots, quitar fallbacks de URL en env vars, cierre ordenado del
       servidor con SIGTERM (Render lo envía en cada deploy), marcar Dither y DarkVeil como
       código de terceros (React Bits) con atribución y licencia, limpiar comentarios
       obsoletos del curso, completar README raíz y sustituir el de `client/`, resolver la licencia (el README enlaza
@@ -226,7 +230,8 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
 - [ ] **9 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;
       misma lógica de cálculo que el grupo "Todos", aplicada a los ejercicios seleccionados.
 - [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
-- [ ] **11 — Auth robusta**: access token corto + refresh token.
+- [ ] **11 — Auth robusta**: rate limiting en login y registro (prioritario), access token
+      corto + refresh token.
 - [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
       entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
       sincronización híbrida de la sesión activa y revisión de DarkVeil (batería).

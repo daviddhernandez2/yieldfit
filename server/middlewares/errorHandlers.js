@@ -11,10 +11,20 @@ export const notFoundHandler = (req, res, next) => {
 // Express detecta los middlewares de error porque tienen CUATRO parámetros (err, req, res, next)
 // Captura cualquier error que se haya pasado con next(error) o lanzado en un handler async con try/catch
 export const errorHandler = (err, req, res, next) => {
+  // El log siempre lleva el error completo: es donde se depura (logs de Render).
   console.error('Error capturado:', err);
 
   const status = err.status || 500;
-  const message = err.message || 'Error interno del servidor';
+
+  // Un 500 es un fallo nuestro, no del usuario, y su mensaje puede revelar detalles
+  // internos (p. ej. "user is not allowed to do action [find] on [yieldfit.users]").
+  // Como el cliente muestra response.data.message en pantalla, en producción lo
+  // sustituimos por uno genérico. Los errores < 500 (p. ej. un 400 por JSON mal
+  // formado) sí describen lo que el usuario hizo mal y se devuelven tal cual.
+  const ocultarDetalle = status >= 500 && process.env.NODE_ENV === 'production';
+  const message = ocultarDetalle
+    ? 'Error interno del servidor. Inténtalo de nuevo.'
+    : err.message || 'Error interno del servidor';
 
   res.status(status).json({
     error: status === 500 ? 'Internal Server Error' : 'Error',

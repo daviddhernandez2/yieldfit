@@ -94,6 +94,12 @@ flowchart TB
 | `/api/sessions` | `sessionRoutes.js` | `requireAuth` a nivel router |
 | `/api/charts` | `chartRoutes.js` | `requireAuth` a nivel router (sin uso en el cliente todavía) |
 
+**Errores:** los controladores pasan los errores inesperados con `next(error)` a `errorHandler`.
+En producción, un 500 responde siempre con un mensaje genérico, porque el cliente muestra
+`response.data.message` y el mensaje original puede revelar detalles internos. El error completo
+queda en los logs de Render. En desarrollo se devuelven el mensaje real y el `stack`. Los errores
+< 500 (p. ej. un 400 por JSON mal formado) se devuelven tal cual.
+
 Todos los recursos siguen el mismo patrón: cada query filtra por `userId: req.user._id` y, cuando
 un documento referencia otros ids (`exerciseId`, `workoutId`), el controlador comprueba que
 pertenecen al usuario antes de guardar.

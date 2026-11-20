@@ -185,9 +185,6 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - `PUT /api/sessions/:id` regenera los snapshots si recibe `ejercicios`
   (`construirEjerciciosConSnapshots` copia los nombres actuales): contradice el historial
   inmutable para sesiones editadas. Hoy no ocurre porque el cliente no usa el endpoint. Bloque 1.
-- `errorHandler` devuelve `err.message` en los 500 también en producción: detalles internos
-  (p. ej. errores de permisos de MongoDB) llegan tal cual al usuario, porque el cliente muestra
-  `response.data.message`. En producción, los 500 deben llevar un mensaje genérico. Bloque 1.
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
   flujo de React Router).
 - `components/Dither/` y `components/DarkVeil/` son código de terceros copiado de React Bits

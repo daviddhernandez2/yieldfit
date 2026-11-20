@@ -72,16 +72,24 @@ const exerciseSchema = new mongoose.Schema(
   }
 );
 
-// Deriva el tracking en función del grupo y el tipo antes de cada guardado.
-// Solo los ejercicios que son simultáneamente de grupo Cardio Y tipo Cardio
-// se miden por tiempo/distancia. El resto (incluyendo cardio en máquinas
-// usadas como fuerza) se mide por 1RM estimado.
-exerciseSchema.pre('save', function () {
-  if (this.grupoMuscular === 'Cardio' && this.tipo === 'Cardio') {
-    this.tracking = 'tiempo_distancia';
-  } else {
-    this.tracking = '1RM';
+// Regla única para saber cómo se mide un ejercicio. Solo los ejercicios que son
+// simultáneamente de grupo Cardio Y tipo Cardio se miden por tiempo/distancia.
+// El resto (incluyendo cardio en máquinas usadas como fuerza) se mide por 1RM
+// estimado.
+// Se exporta porque hay caminos que no pasan por pre('save'): insertMany (el
+// clonado de presets) no ejecuta middlewares de documento. Antes esos caminos
+// tenían su propia copia de la regla; ahora todos llaman a esta función.
+export const derivarTracking = (grupoMuscular, tipo) => {
+  if (grupoMuscular === 'Cardio' && tipo === 'Cardio') {
+    return 'tiempo_distancia';
   }
+  return '1RM';
+};
+
+// Recalcula el tracking antes de cada guardado, para que nunca quede
+// desalineado si se edita el grupo o el tipo.
+exerciseSchema.pre('save', function () {
+  this.tracking = derivarTracking(this.grupoMuscular, this.tipo);
 });
 
 const Exercise = mongoose.model('Exercise', exerciseSchema);

@@ -1,34 +1,7 @@
 import mongoose from 'mongoose';
 import User from '../models/User.js';
-import Exercise from '../models/Exercise.js';
 import { signToken } from '../utils/jwt.js';
-import { exercisePresets } from '../data/exercisePresets.js';
-
-// Replica la lógica del middleware pre('save') del modelo Exercise.
-// Es necesario duplicarla porque insertMany NO ejecuta los middlewares
-// de documento. Se sacrifica DRY a cambio de poder usar la operación bulk.
-const derivarTracking = (grupoMuscular, tipo) => {
-  if (grupoMuscular === 'Cardio' && tipo === 'Cardio') {
-    return 'tiempo_distancia';
-  }
-  return '1RM';
-};
-
-// Clona el catálogo de ejercicios preset al nuevo usuario en una única
-// operación bulk. Más eficiente que recorrer la lista con save() individuales.
-// Recibe la sesión de la transacción para que quede atada a la misma
-// operación atómica que la creación del usuario.
-const clonarPresetsAUsuario = async (userId, session) => {
-  const documentos = exercisePresets.map((preset) => ({
-    userId,
-    nombre: preset.nombre,
-    grupoMuscular: preset.grupoMuscular,
-    tipo: preset.tipo,
-    tracking: derivarTracking(preset.grupoMuscular, preset.tipo),
-  }));
-
-  await Exercise.insertMany(documentos, { session });
-};
+import { clonarPresetsAUsuario } from '../utils/presets.js';
 
 // POST /api/auth/register
 // Crea un nuevo usuario, le clona los ejercicios preset y devuelve token JWT.

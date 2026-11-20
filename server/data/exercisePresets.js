@@ -1,8 +1,9 @@
 // Lista de ejercicios preestablecidos que se clonan a cada usuario nuevo al registrarse.
 // Cada usuario recibirá su propia copia editable de estos ejercicios.
 //
-// El campo `tracking` se omite a propósito: lo deriva el middleware pre('save')
-// del modelo Exercise a partir de grupoMuscular y tipo.
+// El campo `tracking` se omite a propósito: lo calcula derivarTracking (en
+// models/Exercise.js) a partir de grupoMuscular y tipo al clonarlos
+// (utils/presets.js).
 
 export const exercisePresets = [
   // ───────────── PECHO ─────────────

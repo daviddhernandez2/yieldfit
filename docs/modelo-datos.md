@@ -103,9 +103,9 @@ flowchart LR
     A -- no --> C["tracking = 1RM"]
 ```
 
-⚠️ Esta regla está **duplicada** en `derivarTracking` (`authController.js`), porque el clonado de
-presets usa `insertMany`, que no ejecuta `pre('save')`. Si cambia la regla, hay que cambiarla en
-los dos sitios.
+La regla vive en una sola función, `derivarTracking`, exportada desde `models/Exercise.js`. La
+usan el `pre('save')` y el clonado de presets (`utils/presets.js`). El clonado no puede depender
+del middleware porque usa `insertMany`, que no ejecuta `pre('save')`.
 
 ### Workout
 Plantilla de rutina. `ejercicios[]` embebido, con al menos 1 elemento (validador del schema).

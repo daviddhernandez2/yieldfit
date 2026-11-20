@@ -35,6 +35,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0014 | Conventional Commits en español y Git con confirmación | vigente |
 | 0015 | Principio de estabilidad a largo plazo | vigente |
 | 0016 | Documentación en Markdown en `/docs`, leída en GitHub | vigente |
+| 0017 | Base de datos de desarrollo separada de producción | vigente |
 
 ---
 
@@ -449,3 +450,47 @@ build y sin despliegue.
 - Migrar a VitePress en el futuro no tiene coste de contenido: reutiliza los mismos `.md`
   (mermaid necesitaría un plugin).
 - Ya no aplica la consecuencia de 0012 sobre la protección del sitio de docs: no hay sitio.
+
+---
+
+## 0017 — Base de datos de desarrollo separada de producción
+
+Fecha: 2026-09-29 · Estado: vigente · Bloque: 1
+
+**Contexto:** el `.env` local y el de Render apuntan a la misma base de datos (`yieldfit`) del
+mismo clúster de Atlas. Todo lo que se prueba en local (registros, sesiones, borrados) escribe
+en datos reales. El bloque 4 migrará todas las sesiones existentes, y esa migración no se puede
+probar por primera vez en producción.
+
+**Decisión:**
+- Base de desarrollo `yieldfit-dev` en el **mismo clúster** M0.
+- Un **usuario de Atlas propio para desarrollo**, con permiso `readWrite` solo sobre
+  `yieldfit-dev`. Aunque el `.env` local apuntase por error a `yieldfit`, Atlas rechazaría la
+  conexión. Además, la contraseña del usuario de producción deja de estar en el `.env` local.
+- Datos de desarrollo con un **script de seed** (`server/scripts/seed.js`): usuario de prueba,
+  presets y sesiones sintéticas repartidas en varios años. El script se niega a ejecutarse si la
+  base no termina en `-dev`.
+- Para probar la migración del bloque 4: **copia puntual solo de las sesiones de producción**,
+  sin la colección de usuarios, en una base temporal.
+- **Comprobación al arrancar que bloquea** (`config/database.js`): si `NODE_ENV` no es
+  `production` y la base conectada es `yieldfit`, el servidor no arranca.
+- Debe estar hecho antes del bloque 4.
+
+**Alternativas descartadas:**
+- *Otro clúster M0:* Atlas solo permite un M0 por proyecto, así que habría que crear otro
+  proyecto a cambio de un aislamiento que el usuario de desarrollo ya da.
+- *MongoDB local (Docker o Homebrew):* sin coste de Atlas y sin conexión, pero el registro usa
+  transacciones, que exigen un *replica set*. Un `mongod` local básico no las soporta y habría que
+  configurar un replica set de un nodo.
+- *Copiar producción a desarrollo* (`mongodump`/`mongorestore`): datos realistas, pero lleva
+  emails, fechas de nacimiento y hashes de contraseñas de usuarios reales al portátil, y se queda
+  desactualizada. Para probar la migración del bloque 4 con documentos reales, se valorará una
+  copia puntual de las sesiones sin la colección de usuarios.
+- *Solo un aviso al arrancar:* un aviso se acaba ignorando.
+
+**Consecuencias:**
+- Probar en local deja de tocar datos reales.
+- La base de desarrollo cuenta para los 512 MB del M0; el seed debe ser razonable.
+- El seed hay que mantenerlo cuando cambie el modelo de datos.
+- La comprobación al arrancar depende de que Render tenga `NODE_ENV=production` (verificado por
+  David el 2026-09-29). Si alguien la quitara, producción no arrancaría.

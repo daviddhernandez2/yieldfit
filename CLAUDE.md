@@ -65,9 +65,10 @@ Cualquier librería nueva o cambio de stack es una decisión consciente: justif�
 No hay `package.json` en la raíz; cada parte se gestiona por separado.
 
 ```bash
-# Backend (desde /server) — requiere server/.env (ver .env.example)
+# Backend (desde /server) — requiere server/.env (ver .env.example), base yieldfit-dev
 npm run dev      # nodemon, http://localhost:3000
 npm start
+npm run seed     # BORRA yieldfit-dev y la rellena con datos de prueba (--anios N)
 
 # Frontend (desde /client) — requiere client/.env con VITE_API_URL
 npm run dev      # http://localhost:5173
@@ -92,7 +93,8 @@ server/
   routes/       # un router por recurso; requireAuth aplicado a nivel router
   middlewares/  # requireAuth, notFoundHandler, errorHandler
   data/         # exercisePresets.js — ejercicios clonados a cada usuario al registrarse
-  utils/        # jwt.js
+  utils/        # jwt.js, presets.js (clonado de presets)
+  scripts/      # seed.js — datos de prueba para la base de desarrollo (npm run seed)
 ```
 
 Import alias en cliente: `@` → `client/src`.
@@ -173,6 +175,7 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
 - Cold start de Render (plan gratuito): se resuelve en el bloque 3.
+- **Sin backups de producción:** Atlas M0 no permite copias automáticas. Bloque 1, antes del bloque 4.
 - **Cascada `$pull` al borrar un Exercise** (decisión deliberada, ver `DECISIONS.md`):
   `exerciseController.remove` quita ese ejercicio de todas las sesiones del usuario.
   Consecuencias pendientes de resolver en el bloque 1: sesiones que pueden quedar con
@@ -182,8 +185,9 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - `PUT /api/sessions/:id` regenera los snapshots si recibe `ejercicios`
   (`construirEjerciciosConSnapshots` copia los nombres actuales): contradice el historial
   inmutable para sesiones editadas. Hoy no ocurre porque el cliente no usa el endpoint. Bloque 1.
-- Fallbacks de URL en env vars: `VITE_API_URL || 'http://localhost...'` (acaba en el bundle) y
-  `CLIENT_ORIGINS || 'http://localhost:5173'`. Si falta la variable, debe fallar con un error claro.
+- `errorHandler` devuelve `err.message` en los 500 también en producción: detalles internos
+  (p. ej. errores de permisos de MongoDB) llegan tal cual al usuario, porque el cliente muestra
+  `response.data.message`. En producción, los 500 deben llevar un mensaje genérico. Bloque 1.
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
   flujo de React Router).
 - `components/Dither/` y `components/DarkVeil/` son código de terceros copiado de React Bits
@@ -211,7 +215,9 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
 - [ ] **1 — Saneamiento**: resolver las consecuencias de la cascada `$pull` al borrar
       ejercicios (si cambia la decisión, entrada nueva en `DECISIONS.md`), eliminar
       `PUT /api/sessions/:id` mientras no se use o corregirlo para que conserve los snapshots, quitar fallbacks de URL en env vars, cierre ordenado del
-      servidor con SIGTERM (Render lo envía en cada deploy), marcar Dither y DarkVeil como
+      servidor con SIGTERM (Render lo envía en cada deploy), separar la base de datos de
+      desarrollo de la de producción (ver `DECISIONS.md`), backups de producción (Atlas M0 no
+      los incluye), marcar Dither y DarkVeil como
       código de terceros (React Bits) con atribución y licencia, limpiar comentarios
       obsoletos del curso, completar README raíz y sustituir el de `client/`, resolver la licencia (el README enlaza
       un `LICENSE` MIT inexistente y `server/package.json` declara ISC).
@@ -223,6 +229,8 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       `window.location` del interceptor 401 por navegación de React Router.
 - [ ] **4 — Historial escalable**: cálculo del progreso en el backend, 1RM precalculado al
       guardar la sesión (con migración de las sesiones existentes), `GET /api/sessions` paginado.
+      Requiere del bloque 1 la base de desarrollo separada (la migración no se prueba en
+      producción) y un backup completo de producción justo antes de migrar.
 - [ ] **5 — Serie anterior**: mostrar en cada serie de la sesión activa lo hecho en la sesión anterior.
 - [ ] **6 — Reemplazar ejercicio en sesión activa**: cambiar un ejercicio por otro sin salir de la
       sesión. Valorar antes pasar el estado de `ActiveSession.jsx` a `useReducer`.

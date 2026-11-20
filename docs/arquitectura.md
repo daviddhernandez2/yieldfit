@@ -30,6 +30,44 @@ flowchart LR
 - **Cold start:** Render duerme el servicio tras un periodo sin tráfico; la primera petición
   tarda decenas de segundos. Se aborda en el bloque 3.
 
+## Entornos
+
+Desarrollo y producción usan bases distintas dentro del mismo clúster de Atlas
+([0017](../DECISIONS.md)).
+
+```mermaid
+flowchart LR
+    subgraph Local["Portátil (NODE_ENV=development)"]
+        DEV["server/ local"]
+        SEED["npm run seed"]
+    end
+    subgraph Render["Render (NODE_ENV=production)"]
+        PROD["server/ producción"]
+    end
+    subgraph Atlas["Clúster Atlas M0"]
+        DBDEV[("yieldfit-dev")]
+        DBPROD[("yieldfit")]
+    end
+
+    DEV -- "usuario yieldfit-dev<br/>(readWrite solo sobre yieldfit-dev)" --> DBDEV
+    SEED -- "vacía y rellena" --> DBDEV
+    PROD -- "usuario de producción" --> DBPROD
+    DEV -. "bloqueado" .-x DBPROD
+```
+
+Tres barreras impiden que el entorno local escriba en producción:
+
+| Barrera | Dónde | Qué hace |
+|---|---|---|
+| Permisos de Atlas | usuario `yieldfit-dev` | solo tiene `readWrite` sobre `yieldfit-dev`; Atlas rechaza cualquier operación sobre `yieldfit` |
+| Comprobación al arrancar | `server/config/database.js` | si `NODE_ENV` no es `production` y la base es `yieldfit`, el servidor no arranca |
+| Seed | `server/scripts/seed.js` | se niega a ejecutarse si la base no termina en `-dev` |
+
+**Datos de desarrollo:** `npm run seed` (desde `server/`) vacía `yieldfit-dev` y crea un usuario de
+prueba (`dev@yieldfit.test` / `desarrollo123`), los presets, tres rutinas, un grupo de progreso y
+unas 3 sesiones por semana durante 2 años (`npm run seed -- --anios 5` para más historial). Los
+datos son deterministas: siempre los mismos para los mismos argumentos.
+
 ## Backend (`server/`)
 
 ```mermaid

@@ -71,6 +71,7 @@ npm start
 npm run seed     # BORRA yieldfit-dev y la rellena con datos de prueba (--anios N)
 npm run backup   # backup de producción (ver docs/operaciones.md)
 npm run backup:restore-test
+npm run diagnostico:borrados   # solo lectura en producción (usuario de backup); -- --desarrollo para yieldfit-dev
 
 # Frontend (desde /client) — requiere client/.env con VITE_API_URL
 npm run dev      # http://localhost:5173
@@ -96,7 +97,7 @@ server/
   middlewares/  # requireAuth, notFoundHandler, errorHandler
   data/         # exercisePresets.js — ejercicios clonados a cada usuario al registrarse
   utils/        # jwt.js, presets.js (clonado de presets)
-  scripts/      # seed.js (datos de desarrollo), backup.sh y restore-test.sh (producción);
+  scripts/      # seed.js (datos de desarrollo), backup.sh, restore-test.sh y diagnostico-borrados.js;
                 # lib/ (credenciales.sh oculta la URI; recuentos.sh lee los logs)
 ```
 
@@ -130,8 +131,8 @@ ownership de los ids referenciados. Mantener siempre ese patrón.
 ## Git
 
 - Un commit por paso confirmado. No acumular cambios de varios pasos en un commit.
-- `git push` solo con cambios relevantes (código o cierre de un paso de desarrollo); los commits
-  menores de documentación se quedan en local y suben con el siguiente push.
+- **Push siempre**, al cerrar cada paso confirmado, sea un cambio menor o no. No se dejan commits
+  sin subir.
 - Formato de mensaje (Conventional Commits, deducido del historial):
 
   ```

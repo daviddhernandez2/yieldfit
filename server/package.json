@@ -9,7 +9,8 @@
     "dev": "nodemon index.js",
     "seed": "node scripts/seed.js",
     "backup": "bash scripts/backup.sh",
-    "backup:restore-test": "bash scripts/restore-test.sh"
+    "backup:restore-test": "bash scripts/restore-test.sh",
+    "diagnostico:borrados": "node scripts/diagnostico-borrados.js"
   },
   "keywords": [],
   "author": "David Hernández Pérez",

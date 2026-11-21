@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { listExercises, deleteExercise } from '@/api/exercises.js';
 import Chip from '@/components/Chip/Chip.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from '@/utils/borradoEjercicio.js';
 import styles from '@/pages/Exercises/Exercises.module.css';
 
 const FILTROS = [
@@ -42,6 +43,10 @@ export default function Exercises() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Error al borrar, separado del error de carga: `error` oculta la lista entera, y un
+  // borrado rechazado (p. ej. 409 "es el único ejercicio de la rutina…") no debe
+  // hacer desaparecer los ejercicios.
+  const [errorBorrado, setErrorBorrado] = useState('');
   const [busqueda, setBusqueda] = useState('');
   const [filtro, setFiltro] = useState('todos');
   const [confirmDelete, setConfirmDelete] = useState(null);
@@ -77,14 +82,16 @@ export default function Exercises() {
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
     setSubmitting(true);
+    setErrorBorrado('');
     try {
       await deleteExercise(confirmDelete._id);
       setExercises((prev) => prev.filter((ex) => ex._id !== confirmDelete._id));
-      setConfirmDelete(null);
     } catch (err) {
       const message = err.response?.data?.message || 'Error al eliminar el ejercicio.';
-      setError(message);
+      setErrorBorrado(message);
     } finally {
+      // El diálogo se cierra en los dos casos: si falla, el motivo se ve sobre la lista.
+      setConfirmDelete(null);
       setSubmitting(false);
     }
   };
@@ -132,6 +139,8 @@ export default function Exercises() {
 
       {error && <p className={styles.feedbackError}>{error}</p>}
 
+      {errorBorrado && <p className={styles.feedbackError}>{errorBorrado}</p>}
+
       {!loading && !error && ejerciciosFiltrados.length === 0 && (
         <p className={styles.feedback}>
           No hay ejercicios que coincidan con los filtros.
@@ -173,12 +182,8 @@ export default function Exercises() {
 
       <ConfirmDialog
         open={Boolean(confirmDelete)}
-        title="¿Eliminar este ejercicio?"
-        message={
-          confirmDelete
-            ? `"${confirmDelete.nombre}" se eliminará. También se retirará de las rutinas y grupos que lo incluyan. Las sesiones antiguas conservarán el nombre.`
-            : ''
-        }
+        title={confirmDelete ? tituloBorrarEjercicio(confirmDelete.nombre) : ''}
+        message={MENSAJE_BORRAR_EJERCICIO}
         confirmLabel={submitting ? 'Eliminando...' : 'Eliminar'}
         cancelLabel="Cancelar"
         confirmVariant="danger"

@@ -11,6 +11,7 @@ import Select from "@/components/Select/Select.jsx";
 import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
+import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from "@/utils/borradoEjercicio.js";
 import styles from "@/pages/ExerciseForm/ExerciseForm.module.css";
 
 // Los valores deben coincidir EXACTAMENTE con los enums del modelo Exercise
@@ -210,11 +211,8 @@ export default function ExerciseForm() {
 
       <ConfirmDialog
         open={confirmDeleteOpen}
-        title="¿Eliminar este ejercicio?"
-        message={
-          `"${form.nombre}" se eliminará. También se retirará de las rutinas y ` +
-          `grupos que lo incluyan. Las sesiones antiguas conservarán el nombre.`
-        }
+        title={tituloBorrarEjercicio(form.nombre)}
+        message={MENSAJE_BORRAR_EJERCICIO}
         confirmLabel={submitting ? "Eliminando..." : "Eliminar"}
         cancelLabel="Cancelar"
         confirmVariant="danger"

@@ -12,6 +12,7 @@ renderiza los diagramas mermaid de forma nativa (ver [0016](../DECISIONS.md)).
 | [Arquitectura](arquitectura.md) | Despliegue, capas del backend y del cliente, recorrido de una petición |
 | [Modelo de datos](modelo-datos.md) | Colecciones, qué va embebido y qué referenciado, snapshots, índices |
 | [Autenticación](auth.md) | Registro, login, `requireAuth` y cómo el cliente guarda y usa el token |
+| [Operaciones](operaciones.md) | Backups de producción y prueba de restauración |
 | [Decisiones](../DECISIONS.md) | Registro de decisiones técnicas y de producto (fuente única, no se duplica aquí) |
 
 ## Bloques del roadmap

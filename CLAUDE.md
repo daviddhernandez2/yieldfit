@@ -69,6 +69,8 @@ No hay `package.json` en la raíz; cada parte se gestiona por separado.
 npm run dev      # nodemon, http://localhost:3000
 npm start
 npm run seed     # BORRA yieldfit-dev y la rellena con datos de prueba (--anios N)
+npm run backup   # backup de producción (ver docs/operaciones.md)
+npm run backup:restore-test
 
 # Frontend (desde /client) — requiere client/.env con VITE_API_URL
 npm run dev      # http://localhost:5173
@@ -94,7 +96,8 @@ server/
   middlewares/  # requireAuth, notFoundHandler, errorHandler
   data/         # exercisePresets.js — ejercicios clonados a cada usuario al registrarse
   utils/        # jwt.js, presets.js (clonado de presets)
-  scripts/      # seed.js — datos de prueba para la base de desarrollo (npm run seed)
+  scripts/      # seed.js (datos de desarrollo), backup.sh y restore-test.sh (producción);
+                # lib/ (credenciales.sh oculta la URI; recuentos.sh lee los logs)
 ```
 
 Import alias en cliente: `@` → `client/src`.
@@ -175,7 +178,6 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
 - Cold start de Render (plan gratuito): se resuelve en el bloque 3.
-- **Sin backups de producción:** Atlas M0 no permite copias automáticas. Bloque 1, antes del bloque 4.
 - **Cascada `$pull` al borrar un Exercise** (decisión deliberada, ver `DECISIONS.md`):
   `exerciseController.remove` quita ese ejercicio de todas las sesiones del usuario.
   Consecuencias pendientes de resolver en el bloque 1: sesiones que pueden quedar con

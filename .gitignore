@@ -35,3 +35,6 @@ out/
 # Postman (colecciones y environments locales; pueden contener tokens)
 .postman/
 postman/
+
+# Backups de MongoDB (se guardan fuera del repo; esto es solo una red de seguridad)
+*.archive.gz

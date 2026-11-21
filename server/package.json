@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "backup": "bash scripts/backup.sh",
+    "backup:restore-test": "bash scripts/restore-test.sh"
   },
   "keywords": [],
   "author": "David Hernández Pérez",

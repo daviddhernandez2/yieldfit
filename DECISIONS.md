@@ -36,6 +36,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0015 | Principio de estabilidad a largo plazo | vigente |
 | 0016 | Documentación en Markdown en `/docs`, leída en GitHub | vigente |
 | 0017 | Base de datos de desarrollo separada de producción | vigente |
+| 0018 | Backups manuales de producción con `mongodump` | vigente |
 
 ---
 
@@ -494,3 +495,55 @@ probar por primera vez en producción.
 - El seed hay que mantenerlo cuando cambie el modelo de datos.
 - La comprobación al arrancar depende de que Render tenga `NODE_ENV=production` (verificado por
   David el 2026-09-29). Si alguien la quitara, producción no arrancaría.
+
+---
+
+## 0018 — Backups manuales de producción con `mongodump`
+
+Fecha: 2026-11-20 · Estado: vigente · Bloque: 1
+
+**Contexto:** Atlas M0 no permite activar backups ("You can't enable backups on Free clusters").
+El bloque 4 migrará todas las sesiones existentes y necesita una copia completa, verificada y
+restaurable antes de empezar.
+
+**Decisión:** backups manuales desde el portátil con `npm run backup` (`server/scripts/backup.sh`):
+- `mongodump` de la base `yieldfit` en un único archivo comprimido (`--archive --gzip`), en
+  `~/yieldfit-backups/AAAA-MM-DD_HHMM/`, fuera del repo y con permisos `700`.
+- Usuario de Atlas `yieldfit-backup` con `read` sobre `yieldfit` (no puede modificar producción)
+  y `readWrite` solo sobre `yieldfit-restore-test`.
+- La URI se lee del **Llavero de macOS** dentro del script: no existe en ningún archivo.
+- La URI se pasa a las herramientas con `--config=<(…)` (un descriptor temporal), no con `--uri`:
+  los argumentos de un proceso los ve `ps`.
+- **Toda la salida de `mongodump` y `mongorestore` pasa por un filtro** que sustituye las
+  credenciales por `***`, tanto en la URI como la contraseña suelta (codificada y decodificada).
+  Motivo: en la primera prueba real, un fallo de conexión imprimió la URI completa con la
+  contraseña en la terminal (las herramientas no la ocultan). Se rotó la contraseña.
+- Integridad del archivo con `gzip -t` (lo descomprime entero y comprueba el CRC) y huella
+  SHA-256. No se usa `mongorestore --dryRun`: termina con "0 document(s) restored" y no demuestra
+  que el archivo se haya leído entero. Que el backup se puede restaurar solo lo demuestra la
+  prueba de restauración.
+- Los scripts nunca terminan en silencio: si no pueden leer los recuentos de los logs, fallan
+  con un mensaje explícito, y un `trap ERR` avisa de cualquier parada inesperada.
+- Segunda copia opcional en `BACKUP_COPIA_DIR` (p. ej. el NAS), comprobada por SHA-256. Si la
+  variable no existe, el script avisa; si existe pero el destino no está disponible, falla.
+- Prueba de restauración en `yieldfit-restore-test` (`npm run backup:restore-test`), comparando
+  documentos por colección.
+- Requisito: FileVault activado.
+
+**Alternativas descartadas:**
+- *Automático con GitHub Actions + almacenamiento externo cifrado:* más robusto, pero añade
+  secretos y piezas que mantener; con el repo público, los *artifacts* de Actions no sirven para
+  guardar backups. Queda como revisión prevista.
+- *Cron job en Render:* de pago, y seguiría necesitando almacenamiento externo.
+- *Subir de plan en Atlas (snapshots gestionados):* coste mensual para un proyecto personal.
+- *Script en Node con el driver o `mongoexport` a JSON:* reimplementan peor lo que `mongodump` ya
+  hace; JSON pierde tipos (fechas, ObjectId) e índices.
+- *URI en un `.env.backup`:* volvería a dejar credenciales de producción en un archivo del portátil.
+
+**Consecuencias:**
+- Hay una copia restaurable antes de cualquier migración.
+- Depende de la disciplina de David (mensual y antes de cada migración).
+- Sin `BACKUP_COPIA_DIR`, la única copia está en el mismo portátil.
+- Solo funciona en macOS (Llavero, `shasum`, `stat`).
+- **Revisión prevista:** backups automáticos fuera del portátil (opción GitHub Actions +
+  almacenamiento externo cifrado) cuando la app tenga usuarios reales además de David.

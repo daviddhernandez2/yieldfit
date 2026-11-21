@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
 import Exercise from '../models/Exercise.js';
-import Session from '../models/Session.js';
+import Workout from '../models/Workout.js';
+import Chart from '../models/Chart.js';
 
 // GET /api/exercises
 // Lista los ejercicios del usuario autenticado.
@@ -131,31 +133,81 @@ export const update = async (req, res, next) => {
 };
 
 // DELETE /api/exercises/:id
-// Borra un ejercicio y cascada: elimina ese ejercicio de todas las sesiones que
-// lo referencien (sin borrar las sesiones enteras). Decisión de producto: si el
-// usuario borra un ejercicio, no quiere que aparezca en su progreso histórico.
+// Borra un ejercicio de verdad y lo quita de las rutinas y grupos del usuario.
+// Las sesiones NO se tocan: conservan el ejercicio con su nombre gracias a los
+// snapshots, y es el cálculo de progreso el que ignora los ejercicios borrados
+// (ver DECISIONS.md, 0020).
+//
+// Si el ejercicio es el único de alguna rutina, no se borra nada y se responde 409
+// con el nombre de la rutina: el modelo exige al menos un ejercicio por rutina y no
+// borramos una rutina que el usuario no ha pedido borrar.
 export const remove = async (req, res, next) => {
+  const session = await mongoose.startSession();
   try {
-    const result = await Exercise.deleteOne({
-      _id: req.params.id,
-      userId: req.user._id,
+    const userId = req.user._id;
+    // Lo que hay que responder se decide dentro de la transacción y se envía fuera.
+    let respuesta = { status: 204 };
+
+    // Transacción: borrar el ejercicio y quitarlo de rutinas y grupos ocurre todo o
+    // nada. Sin ella, un fallo a mitad podría dejar el ejercicio borrado pero aún
+    // dentro de alguna rutina (justo el problema que estamos corrigiendo).
+    // withTransaction puede reintentar la función ante errores transitorios, por eso
+    // `respuesta` se reasigna en cada camino.
+    await session.withTransaction(async () => {
+      const exercise = await Exercise.findOne({ _id: req.params.id, userId }).session(session);
+      if (!exercise) {
+        respuesta = { status: 404, body: { error: 'Not Found', message: 'Ejercicio no encontrado' } };
+        return;
+      }
+
+      // Rutinas que contienen este ejercicio y NINGÚN otro distinto. No basta con
+      // "rutinas de un solo ejercicio": la API permite repetir un ejercicio en una
+      // rutina ([X, X]), y al quitar X también se quedaría vacía.
+      const rutinasQueQuedarianVacias = await Workout.find(
+        {
+          userId,
+          'ejercicios.exerciseId': exercise._id,
+          ejercicios: { $not: { $elemMatch: { exerciseId: { $ne: exercise._id } } } },
+        },
+        { nombre: 1 }
+      ).session(session);
+
+      if (rutinasQueQuedarianVacias.length > 0) {
+        const nombres = rutinasQueQuedarianVacias.map((r) => `«${r.nombre}»`);
+        const deLasRutinas =
+          nombres.length === 1 ? `de la rutina ${nombres[0]}` : `de las rutinas ${nombres.join(', ')}`;
+        respuesta = {
+          status: 409,
+          body: {
+            error: 'Conflict',
+            message: `«${exercise.nombre}» es el único ejercicio ${deLasRutinas}. Edítala o bórrala primero.`,
+          },
+        };
+        return;
+      }
+
+      await Exercise.deleteOne({ _id: exercise._id }, { session });
+
+      // updateMany no pasa las validaciones de Mongoose, pero aquí ya hemos
+      // comprobado que ninguna rutina se queda sin ejercicios.
+      await Workout.updateMany(
+        { userId, 'ejercicios.exerciseId': exercise._id },
+        { $pull: { ejercicios: { exerciseId: exercise._id } } },
+        { session }
+      );
+
+      // Un grupo sí puede quedarse vacío: el modelo Chart lo permite.
+      await Chart.updateMany(
+        { userId, exerciseIds: exercise._id },
+        { $pull: { exerciseIds: exercise._id } },
+        { session }
+      );
+
+      respuesta = { status: 204 };
     });
 
-    if (result.deletedCount === 0) {
-      return res.status(404).json({
-        error: 'Not Found',
-        message: 'Ejercicio no encontrado',
-      });
-    }
-
-    // Cascada: quitar el subdocumento del ejercicio de todas las sesiones del usuario.
-    // $pull elimina elementos del array que cumplan el filtro.
-    await Session.updateMany(
-      { userId: req.user._id },
-      { $pull: { ejercicios: { exerciseId: req.params.id } } }
-    );
-
-    res.status(204).send();
+    if (respuesta.status === 204) return res.status(204).send();
+    return res.status(respuesta.status).json(respuesta.body);
   } catch (error) {
     if (error.name === 'CastError') {
       return res.status(404).json({
@@ -164,5 +216,7 @@ export const remove = async (req, res, next) => {
       });
     }
     next(error);
+  } finally {
+    await session.endSession();
   }
 };

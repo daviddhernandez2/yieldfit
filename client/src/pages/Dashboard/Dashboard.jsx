@@ -9,10 +9,12 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { listSessions } from '@/api/sessions.js';
+import { listExercises } from '@/api/exercises.js';
 import {
   calcularProgresoTodos,
   mediaGrupo,
   serieAgregadaTodos,
+  quitarEjerciciosBorrados,
 } from '@/utils/performance.js';
 import styles from '@/pages/Dashboard/Dashboard.module.css';
 
@@ -67,14 +69,21 @@ const IconPlus = () => (
 // El sistema de Charts personalizados se implementará en pulido.
 export default function Dashboard() {
   const [sesiones, setSesiones] = useState([]);
+  // Ids de los ejercicios que existen hoy: los borrados no cuentan en el progreso.
+  const [idsExistentes, setIdsExistentes] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const cargar = async () => {
       try {
-        const response = await listSessions();
-        setSesiones(response.data.sessions);
+        // Las dos peticiones en paralelo: una no depende de la otra.
+        const [sesionesRes, ejerciciosRes] = await Promise.all([
+          listSessions(),
+          listExercises(),
+        ]);
+        setSesiones(sesionesRes.data.sessions);
+        setIdsExistentes(new Set(ejerciciosRes.data.exercises.map((ex) => ex._id)));
       } catch (err) {
         const message = err.response?.data?.message || 'Error al cargar el progreso.';
         setError(message);
@@ -85,9 +94,16 @@ export default function Dashboard() {
     cargar();
   }, []);
 
+  // Sesiones sin los ejercicios borrados: es lo único que se usa para el progreso.
+  // `sesiones` (completas) sigue sirviendo para saber si el usuario ha entrenado.
+  const sesionesParaProgreso = useMemo(
+    () => quitarEjerciciosBorrados(sesiones, idsExistentes),
+    [sesiones, idsExistentes]
+  );
+
   const progresoPorEjercicio = useMemo(
-    () => calcularProgresoTodos(sesiones),
-    [sesiones]
+    () => calcularProgresoTodos(sesionesParaProgreso),
+    [sesionesParaProgreso]
   );
 
   const mediaTotal = useMemo(
@@ -96,8 +112,8 @@ export default function Dashboard() {
   );
 
   const serieGrafica = useMemo(
-    () => serieAgregadaTodos(sesiones),
-    [sesiones]
+    () => serieAgregadaTodos(sesionesParaProgreso),
+    [sesionesParaProgreso]
   );
 
   if (loading) {

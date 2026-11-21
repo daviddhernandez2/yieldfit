@@ -46,6 +46,19 @@ export const mediaVariaciones = (serieTemporal) => {
   return variaciones.reduce((s, v) => s + v, 0) / variaciones.length;
 };
 
+// Devuelve las sesiones sin los ejercicios que el usuario ha borrado.
+// Al borrar un ejercicio, sus sesiones pasadas lo conservan (es su historial, con el
+// nombre guardado en nombreSnapshot), pero ya no debe contar en el progreso
+// (DECISIONS.md, 0020). `idsExistentes` es un Set con los _id de los ejercicios que
+// existen hoy. No modifica las sesiones originales: crea copias.
+// Cuando el cálculo pase al backend (bloque 4), este filtro se hará allí.
+export const quitarEjerciciosBorrados = (sesiones, idsExistentes) => {
+  return sesiones.map((sesion) => ({
+    ...sesion,
+    ejercicios: sesion.ejercicios.filter((ej) => idsExistentes.has(String(ej.exerciseId))),
+  }));
+};
+
 // Agrupa las sesiones por ejercicio.
 // Recibe el array de sesiones tal cual viene del backend y devuelve un Map:
 //   Map<exerciseId, { nombreSnapshot, sesiones: [{fecha, sets}] }>

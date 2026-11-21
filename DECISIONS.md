@@ -37,6 +37,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0016 | Documentación en Markdown en `/docs`, leída en GitHub | vigente |
 | 0017 | Base de datos de desarrollo separada de producción | vigente |
 | 0018 | Backups manuales de producción con `mongodump` | vigente |
+| 0019 | Backups solo en el portátil y riesgos aceptados | vigente |
 
 ---
 
@@ -547,3 +548,33 @@ restaurable antes de empezar.
 - Solo funciona en macOS (Llavero, `shasum`, `stat`).
 - **Revisión prevista:** backups automáticos fuera del portátil (opción GitHub Actions +
   almacenamiento externo cifrado) cuando la app tenga usuarios reales además de David.
+
+---
+
+## 0019 — Backups solo en el portátil y riesgos aceptados
+
+Fecha: 2026-11-21 · Estado: vigente · Bloque: 1 · Matiza a: 0018
+
+**Contexto:** la 0018 dejaba como opción una segunda copia en `BACKUP_COPIA_DIR` (p. ej. un NAS),
+con aviso si no estaba definida. Al repasar `backup.sh` línea a línea apareció además una
+exposición residual: la contraseña de `yieldfit-backup` está en el entorno del proceso `perl` del
+filtro mientras dura el backup (en macOS lo ven el propio usuario y root, con `ps -E`).
+
+**Decisión** (de David):
+- **Sin segunda copia: los backups se quedan solo en el portátil.** `BACKUP_COPIA_DIR` se mantiene
+  en el script, desactivada y sin aviso, por si se cambia de idea.
+- **Se acepta la exposición de la contraseña en el entorno de `perl`.** Ocultarla no protegería
+  nada: quien pudiera verla también podría abrir directamente `~/yieldfit-backups`, que contiene
+  todos los datos.
+
+**Alternativas descartadas:**
+- *Segunda copia en un NAS:* protege frente a la pérdida del portátil, pero David prefiere no
+  mantener otro destino.
+- *Pasar la contraseña a `perl` por un descriptor, como la URI a `mongodump`:* más código para
+  proteger frente a alguien que ya tendría acceso a los propios backups.
+
+**Consecuencias:**
+- Riesgo asumido: si el portátil se pierde o se estropea, se pierden también los backups. FileVault
+  protege los datos frente a terceros, pero no los recupera.
+- La revisión prevista en la 0018 (backups automáticos fuera del portátil cuando haya usuarios
+  reales) sigue vigente y cubriría este riesgo.

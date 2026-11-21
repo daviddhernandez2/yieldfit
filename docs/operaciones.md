@@ -38,12 +38,6 @@ desde el portátil ([0018](../DECISIONS.md)).
 > argumentos se ven con `ps`), y filtran toda su salida, terminal y logs, sustituyendo la
 > contraseña por `***`. No ejecutes `mongodump` o `mongorestore` a mano con `--uri`: usa los
 > scripts.
-5. **Segunda copia (recomendado):** define `BACKUP_COPIA_DIR` en `~/.zshrc` con una carpeta fuera
-   del portátil (p. ej. del NAS):
-   ```bash
-   export BACKUP_COPIA_DIR="/Volumes/NAS/yieldfit-backups"
-   ```
-
 ## Hacer un backup
 
 ```bash
@@ -56,10 +50,6 @@ flowchart TD
     A["Llavero → URI de yieldfit-backup"] --> B["mongodump --db yieldfit<br/>→ yieldfit.archive.gz"]
     B --> C["gzip -t<br/>(descomprime en memoria y comprueba el CRC)"]
     C --> D["huella SHA-256"]
-    D --> E{"¿BACKUP_COPIA_DIR?"}
-    E -- "no definida" --> F["aviso: solo copia local"]
-    E -- "no disponible" --> G["error: local OK, externa fallida"]
-    E -- "disponible" --> H["copia + comprobación SHA-256"]
 ```
 
 `gzip -t` demuestra que el archivo está **íntegro**; que se puede **restaurar** solo lo demuestra la
@@ -71,7 +61,7 @@ Resultado en `~/yieldfit-backups/AAAA-MM-DD_HHMM/` (permisos `700`, solo tu usua
 | Archivo | Contenido |
 |---|---|
 | `yieldfit.archive.gz` | la base completa, comprimida |
-| `yieldfit.archive.gz.sha256` | huella para comprobar que una copia es idéntica |
+| `yieldfit.archive.gz.sha256` | huella para comprobar que el archivo no ha cambiado |
 | `mongodump.log` | documentos volcados por colección |
 
 ## Probar la restauración
@@ -96,6 +86,12 @@ es una copia de producción y ocupa espacio de los 512 MB del M0.
 Solo en caso de pérdida de datos. Es una operación manual y deliberada, sin script: hace falta un
 usuario con escritura sobre `yieldfit` (el de producción) y `mongorestore --drop` sobre esa base.
 Antes, haz un backup del estado actual, aunque esté dañado.
+
+## Dónde se guardan
+
+**Solo en este portátil** ([0019](../DECISIONS.md)): es una decisión consciente. Si el portátil se
+pierde o se estropea, se pierden también los backups. FileVault protege los datos si alguien se lo
+lleva, pero no los recupera.
 
 ## Mantenimiento
 

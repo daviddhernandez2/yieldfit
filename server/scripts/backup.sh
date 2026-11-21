@@ -12,8 +12,8 @@
 #   3. Comprueba que el archivo está íntegro (gzip -t lo descomprime entero en memoria
 #      y verifica su CRC) y guarda su huella SHA-256. Que además se puede RESTAURAR
 #      solo lo demuestra `npm run backup:restore-test`.
-#   4. Si BACKUP_COPIA_DIR está definida (p. ej. una carpeta del NAS), copia ahí el
-#      backup y comprueba que la copia es idéntica. Si no lo está, avisa.
+#   4. Opcional (desactivado por decisión, ver 0019): si BACKUP_COPIA_DIR está
+#      definida, copia ahí el backup y comprueba que la copia es idéntica.
 #
 # Requisitos: mongodb-database-tools (brew) y la URI guardada en el Llavero con el
 # servicio "yieldfit-backup".
@@ -84,23 +84,22 @@ echo "Archivo íntegro (gzip -t) y huella SHA-256 guardada."
 echo "Backup local: $DIR"
 echo "Pendiente: demostrar que se puede restaurar → npm run backup:restore-test"
 
-# --- Segunda copia fuera del portátil ---
-if [ -z "${BACKUP_COPIA_DIR:-}" ]; then
-  echo
-  echo "AVISO: BACKUP_COPIA_DIR no está definida. Solo existe la copia local de este portátil."
-  exit 0
+# --- Segunda copia (opcional, desactivada) ---
+# Decisión actual (DECISIONS.md, 0019): las copias se quedan solo en el portátil.
+# La opción se mantiene por si cambia: si se define BACKUP_COPIA_DIR, el backup se
+# copia ahí y se comprueba que la copia es idéntica.
+if [ -n "${BACKUP_COPIA_DIR:-}" ]; then
+  # Si la variable está definida pero el destino no está disponible, la copia local
+  # es válida pero la externa ha fallado: lo tratamos como error para que no pase
+  # desapercibido.
+  [ -d "$BACKUP_COPIA_DIR" ] && [ -w "$BACKUP_COPIA_DIR" ] \
+    || error "la copia local está bien ($DIR), pero BACKUP_COPIA_DIR ($BACKUP_COPIA_DIR) no existe o no se puede escribir"
+
+  DESTINO="$BACKUP_COPIA_DIR/$FECHA"
+  mkdir -p "$DESTINO"
+  cp "$ARCHIVO" "$ARCHIVO.sha256" "$DIR/mongodump.log" "$DESTINO/"
+  (cd "$DESTINO" && shasum -a 256 -c "$BASE.archive.gz.sha256" >/dev/null) \
+    || error "la copia en $DESTINO no coincide con el original"
+
+  echo "Segunda copia verificada: $DESTINO"
 fi
-
-# Si la variable está definida pero el destino no está disponible (p. ej. el NAS
-# no está montado), la copia local es válida pero la externa ha fallado: lo
-# tratamos como error para que no pase desapercibido.
-[ -d "$BACKUP_COPIA_DIR" ] && [ -w "$BACKUP_COPIA_DIR" ] \
-  || error "la copia local está bien ($DIR), pero BACKUP_COPIA_DIR ($BACKUP_COPIA_DIR) no existe o no se puede escribir. ¿Está montado el NAS?"
-
-DESTINO="$BACKUP_COPIA_DIR/$FECHA"
-mkdir -p "$DESTINO"
-cp "$ARCHIVO" "$ARCHIVO.sha256" "$DIR/mongodump.log" "$DESTINO/"
-(cd "$DESTINO" && shasum -a 256 -c "$BASE.archive.gz.sha256" >/dev/null) \
-  || error "la copia en $DESTINO no coincide con el original"
-
-echo "Segunda copia verificada: $DESTINO"

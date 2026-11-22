@@ -92,8 +92,22 @@ Todos los modelos tienen además `createdAt` y `updatedAt` (`timestamps: true`).
 ### Exercise
 - **Por usuario:** al registrarse, se clonan 58 presets de `server/data/exercisePresets.js`
   ([0002](../DECISIONS.md)).
-- `grupoMuscular` y `tipo` son enums. ⚠️ Están duplicados a mano en
-  `client/src/pages/ExerciseForm/ExerciseForm.jsx` (deuda técnica).
+- `grupoMuscular` y `tipo` son enums. Sus valores, con el texto que ve el usuario, viven
+  **solo** en `models/Exercise.js` (`OPCIONES_GRUPO_MUSCULAR`, `OPCIONES_TIPO`). El cliente los
+  pide a `GET /api/exercises/opciones` con el hook `useOpcionesEjercicio`
+  ([0024](../DECISIONS.md)):
+
+```mermaid
+flowchart LR
+    M["models/Exercise.js<br/>OPCIONES_* { value, label }"] -->|"enum"| S["schema de Exercise<br/>(valida al guardar)"]
+    M -->|"GET /api/exercises/opciones"| H["useOpcionesEjercicio<br/>(una petición por carga)"]
+    H --> F1["ExerciseForm<br/>selects"]
+    H --> F2["WorkoutForm<br/>chips de grupo"]
+    H --> F3["Exercises<br/>filtros + columna Tipo"]
+```
+
+  `value` es lo que se guarda y no se cambia nunca; `label` es solo presentación (por eso
+  `Maquinas` se muestra como "Máquinas").
 - `tracking` no lo elige el usuario: lo calcula `pre('save')` ([0006](../DECISIONS.md)).
 
 ```mermaid

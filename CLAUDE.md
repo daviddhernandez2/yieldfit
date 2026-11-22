@@ -183,8 +183,6 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 
 - `GET /api/sessions` devuelve **todas** las sesiones sin paginar, y el progreso se calcula
   en el cliente (`utils/performance.js`) sobre esa lista completa. Bloque 4.
-- `TIPOS` y `GRUPOS_MUSCULARES` están duplicados: enum en `server/models/Exercise.js` y
-  lista a mano en `client/src/pages/ExerciseForm/ExerciseForm.jsx`.
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).

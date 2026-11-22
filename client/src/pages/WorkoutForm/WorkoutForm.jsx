@@ -12,17 +12,8 @@ import Button from '@/components/Button/Button.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import Chip from '@/components/Chip/Chip.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import useOpcionesEjercicio, { etiquetaDe } from '@/hooks/useOpcionesEjercicio.js';
 import styles from '@/pages/WorkoutForm/WorkoutForm.module.css';
-
-const GRUPOS_MUSCULARES = [
-  'Pecho',
-  'Espalda',
-  'Hombros',
-  'Brazos',
-  'Piernas',
-  'Core',
-  'Cardio',
-];
 
 const DEFAULT_NUM_SERIES = 3;
 const DEFAULT_DESCANSO = 90;
@@ -68,6 +59,8 @@ export default function WorkoutForm() {
   const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Grupos musculares para los chips de filtro, tal como los define el servidor.
+  const { opciones, error: errorOpciones } = useOpcionesEjercicio();
 
   useEffect(() => {
     const cargar = async () => {
@@ -184,7 +177,11 @@ export default function WorkoutForm() {
     }
   };
 
-  if (loading) {
+  if (errorOpciones) {
+    return <p className={styles.feedback}>{errorOpciones}</p>;
+  }
+
+  if (loading || !opciones) {
     return <p className={styles.feedback}>Cargando...</p>;
   }
 
@@ -285,12 +282,12 @@ export default function WorkoutForm() {
 
           <div className={styles.filtersScroll}>
             <div className={styles.filters}>
-              {GRUPOS_MUSCULARES.map((grupo) => (
+              {opciones.gruposMusculares.map((grupo) => (
                 <Chip
-                  key={grupo}
-                  label={grupo}
-                  selected={grupoSeleccionado === grupo}
-                  onClick={() => handleGrupoClick(grupo)}
+                  key={grupo.value}
+                  label={grupo.label}
+                  selected={grupoSeleccionado === grupo.value}
+                  onClick={() => handleGrupoClick(grupo.value)}
                 />
               ))}
             </div>
@@ -310,7 +307,9 @@ export default function WorkoutForm() {
                   className={`${styles.catalogoItem} ${isSelected ? styles.catalogoItemSelected : ''}`}
                 >
                   <span className={styles.catalogoItemName}>{ex.nombre}</span>
-                  <span className={styles.catalogoItemMeta}>{ex.grupoMuscular}</span>
+                  <span className={styles.catalogoItemMeta}>
+                    {etiquetaDe(opciones.gruposMusculares, ex.grupoMuscular)}
+                  </span>
                   {isSelected && (
                     <span className={styles.catalogoItemCheck}>
                       <IconCheck />

@@ -12,29 +12,8 @@ import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
 import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from "@/utils/borradoEjercicio.js";
+import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import styles from "@/pages/ExerciseForm/ExerciseForm.module.css";
-
-// Los valores deben coincidir EXACTAMENTE con los enums del modelo Exercise
-// del backend (models/Exercise.js). El backend valida contra ellos y rechaza
-// cualquier variante: 'pecho' o 'pesas_libres' devuelven un 400.
-// El label es lo que ve el usuario; el value es lo que viaja a la API.
-const GRUPOS = [
-  { value: "Pecho", label: "Pecho" },
-  { value: "Espalda", label: "Espalda" },
-  { value: "Hombros", label: "Hombros" },
-  { value: "Brazos", label: "Brazos" },
-  { value: "Piernas", label: "Piernas" },
-  { value: "Core", label: "Core" },
-  { value: "Cardio", label: "Cardio" },
-];
-
-const TIPOS = [
-  { value: "Pesas libres", label: "Pesas libres" },
-  { value: "Maquinas", label: "Máquinas" },
-  { value: "Poleas", label: "Poleas" },
-  { value: "Peso corporal", label: "Peso corporal" },
-  { value: "Cardio", label: "Cardio" },
-];
 
 const IconChevronLeft = () => (
   <svg
@@ -69,6 +48,8 @@ export default function ExerciseForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  // Grupos y tipos vienen del servidor: sus values son los únicos que acepta la API.
+  const { opciones, error: errorOpciones } = useOpcionesEjercicio();
 
   // Precarga en modo edición.
   useEffect(() => {
@@ -132,7 +113,8 @@ export default function ExerciseForm() {
     }
   };
 
-  if (loading) return <p className={styles.feedback}>Cargando...</p>;
+  if (errorOpciones) return <p className={styles.feedback}>{errorOpciones}</p>;
+  if (loading || !opciones) return <p className={styles.feedback}>Cargando...</p>;
 
   return (
     <div className={styles.page}>
@@ -167,14 +149,14 @@ export default function ExerciseForm() {
           label="Grupo muscular"
           value={form.grupoMuscular}
           onChange={handleChange("grupoMuscular")}
-          options={GRUPOS}
+          options={opciones.gruposMusculares}
         />
 
         <Select
           label="Tipo"
           value={form.tipo}
           onChange={handleChange("tipo")}
-          options={TIPOS}
+          options={opciones.tipos}
         />
 
         {errorMessage && (

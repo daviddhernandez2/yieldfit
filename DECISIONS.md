@@ -42,6 +42,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0021 | Atribución del código de React Bits | vigente |
 | 0022 | Repositorio público sin licencia | vigente |
 | 0023 | Hook que pide confirmación para git dentro de cualquier comando | vigente |
+| 0024 | Grupos musculares y tipos: el servidor es la única fuente | vigente |
 
 ---
 
@@ -743,3 +744,37 @@ modifique el repo. Claude Code la incumplió dos veces:
 - Al cambiar el hook hay que repetir su batería de pruebas: los dos incidentes, heredocs,
   `-C ruta`, comillas escapadas y los casos que no deben preguntar (`.git/`, `.gitignore`,
   `github.com`) con `node .claude/hooks/confirmar-git.test.mjs`.
+
+---
+
+## 0024 — Grupos musculares y tipos: el servidor es la única fuente
+
+Fecha: 2026-11-22 · Estado: vigente · Bloque: 2
+
+**Contexto:** los valores de `grupoMuscular` y `tipo` estaban en el enum del modelo y, además,
+copiados a mano en tres sitios del cliente (`ExerciseForm`, `WorkoutForm`, `Exercises`). Las
+copias ya se habían separado: los filtros de `Exercises` usaban `'pecho'` en minúsculas y nunca
+coincidían con lo guardado (`'Pecho'`), y la columna Tipo mostraba `Maquinas` sin tilde. El
+bloque 2 añade un tipo, lo que habría obligado a tocar servidor y cliente y desplegarlos a la vez.
+
+**Decisión** (de David, opción A):
+- `models/Exercise.js` define `OPCIONES_GRUPO_MUSCULAR` y `OPCIONES_TIPO` como listas de
+  `{ value, label }`. El enum del schema se deriva de los `value`.
+- `GET /api/exercises/opciones` (con `requireAuth`, antes de `/:id` en el router) las devuelve.
+- En el cliente, el hook `useOpcionesEjercicio` hace una sola petición por carga de la app,
+  compartida entre pantallas, y `etiquetaDe` traduce un valor guardado a su texto.
+- `value` no se cambia nunca (hay documentos que lo usan); `label` se puede cambiar libremente.
+
+**Alternativas descartadas:**
+- *Archivo compartido que importan cliente y servidor:* Vercel compila solo `client/`; leer un
+  archivo de fuera depende de una opción del proyecto y es frágil. Y como se despliegan por
+  separado, podrían desincronizarse igual.
+- *Mantener las copias y comprobarlas con un script:* la duplicación sigue; solo avisa al
+  olvidarla.
+
+**Consecuencias:**
+- Un grupo o tipo nuevo solo exige desplegar el servidor: el cliente lo muestra sin cambios.
+- Una petición más al abrir un formulario o la lista de ejercicios (una por carga de la app).
+  Las pantallas esperan a tenerla y muestran un error si falla.
+- El valor por defecto del formulario de ejercicio nuevo (`Pecho`, `Pesas libres`) sigue escrito
+  en el cliente; es válido mientras esos valores existan, y no se borran nunca.

@@ -7,6 +7,13 @@ export const listExercises = (params = {}) => {
   return apiClient.get('/exercises', { params });
 };
 
+// GET /api/exercises/opciones
+// Grupos musculares y tipos válidos, cada uno { value, label }. Mejor usar el hook
+// useOpcionesEjercicio, que hace una sola petición aunque varias pantallas lo pidan.
+export const getOpcionesEjercicio = () => {
+  return apiClient.get('/exercises/opciones');
+};
+
 // GET /api/exercises/:id
 export const getExercise = (id) => {
   return apiClient.get(`/exercises/${id}`);

@@ -4,18 +4,12 @@ import { listExercises, deleteExercise } from '@/api/exercises.js';
 import Chip from '@/components/Chip/Chip.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from '@/utils/borradoEjercicio.js';
+import useOpcionesEjercicio, { etiquetaDe } from '@/hooks/useOpcionesEjercicio.js';
 import styles from '@/pages/Exercises/Exercises.module.css';
 
-const FILTROS = [
-  { value: 'todos', label: 'Todos' },
-  { value: 'pecho', label: 'Pecho' },
-  { value: 'espalda', label: 'Espalda' },
-  { value: 'hombros', label: 'Hombros' },
-  { value: 'brazos', label: 'Brazos' },
-  { value: 'piernas', label: 'Piernas' },
-  { value: 'core', label: 'Core' },
-  { value: 'cardio', label: 'Cardio' },
-];
+// "Todos" no es un grupo muscular: es la ausencia de filtro. El resto de chips son
+// los grupos que envía el servidor.
+const FILTRO_TODOS = { value: 'todos', label: 'Todos' };
 
 
 const IconPlus = () => (
@@ -51,6 +45,11 @@ export default function Exercises() {
   const [filtro, setFiltro] = useState('todos');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  // Antes los filtros eran una copia a mano con valores en minúsculas ('pecho'), que
+  // nunca coincidían con los guardados ('Pecho'): filtrar siempre daba una lista vacía.
+  // Con los values del servidor coinciden por construcción.
+  const { opciones, error: errorOpciones } = useOpcionesEjercicio();
+  const filtros = opciones ? [FILTRO_TODOS, ...opciones.gruposMusculares] : [FILTRO_TODOS];
 
   useEffect(() => {
     const cargar = async () => {
@@ -78,6 +77,10 @@ export default function Exercises() {
     }
     return arr;
   }, [exercises, filtro, busqueda]);
+
+  // La lista se pinta cuando están los ejercicios Y las opciones (de ellas salen los
+  // nombres de los tipos), y no ha fallado ninguna de las dos cargas.
+  const listo = !loading && !error && opciones && !errorOpciones;
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
@@ -124,7 +127,7 @@ export default function Exercises() {
 
       <div className={styles.filtersScroll}>
         <div className={styles.filters}>
-          {FILTROS.map((f) => (
+          {filtros.map((f) => (
             <Chip
               key={f.value}
               label={f.label}
@@ -135,19 +138,21 @@ export default function Exercises() {
         </div>
       </div>
 
-      {loading && <p className={styles.feedback}>Cargando...</p>}
+      {(loading || (!opciones && !errorOpciones)) && <p className={styles.feedback}>Cargando...</p>}
 
       {error && <p className={styles.feedbackError}>{error}</p>}
 
+      {errorOpciones && <p className={styles.feedbackError}>{errorOpciones}</p>}
+
       {errorBorrado && <p className={styles.feedbackError}>{errorBorrado}</p>}
 
-      {!loading && !error && ejerciciosFiltrados.length === 0 && (
+      {listo && ejerciciosFiltrados.length === 0 && (
         <p className={styles.feedback}>
           No hay ejercicios que coincidan con los filtros.
         </p>
       )}
 
-      {!loading && !error && ejerciciosFiltrados.length > 0 && (
+      {listo && ejerciciosFiltrados.length > 0 && (
         <div className={`${styles.list} glassCard`}>
           {/* Cabecera con 3 columnas: Nombre / Tipo / (hueco para papelera). */}
           <div className={styles.listHeader}>
@@ -165,7 +170,8 @@ export default function Exercises() {
                 onClick={() => navigate(`/exercises/${ex._id}/edit`)}
               >
                 <span className={styles.rowName}>{ex.nombre}</span>
-                <span className={styles.rowType}>{ex.tipo}</span>              </button>
+                <span className={styles.rowType}>{etiquetaDe(opciones.tipos, ex.tipo)}</span>
+              </button>
               {/* Papelera separada como acción destructiva individual. */}
               <button
                 type="button"

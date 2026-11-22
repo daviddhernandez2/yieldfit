@@ -40,6 +40,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0019 | Backups solo en el portátil y riesgos aceptados | vigente |
 | 0020 | Borrar un ejercicio conserva el historial | vigente |
 | 0021 | Atribución del código de React Bits | vigente |
+| 0022 | Repositorio público sin licencia | vigente |
 
 ---
 
@@ -667,3 +668,34 @@ también es una copia.
 - Cualquier código de terceros que se copie en el futuro sigue el mismo patrón (convención en
   `CLAUDE.md`).
 - Al modificar `Dither` o `DarkVeil`, hay que actualizar la lista de cambios de su cabecera.
+
+---
+
+## 0022 — Repositorio público sin licencia
+
+Fecha: 2026-11-22 · Estado: vigente · Bloque: 1
+
+**Contexto:** el README mostraba un badge MIT que enlazaba a un `LICENSE` inexistente, y
+`server/package.json` declaraba ISC. Dos licencias contradictorias y ninguna elegida a propósito.
+
+**Decisión** (de David): **sin licencia**. El repositorio sigue siendo público (0012) para que
+se pueda leer, pero sin licencia rigen los derechos de autor por defecto: nadie puede copiar,
+modificar ni distribuir el código sin permiso. Los términos de GitHub solo permiten verlo y
+hacer fork dentro de GitHub.
+- Se quita el badge MIT del README y se añade un apartado "Licencia" que lo explica.
+- `"license": "UNLICENSED"` en los dos `package.json` (y en sus lockfiles), y `"private": true`
+  también en el servidor, para que npm no permita publicarlo por error.
+- No se crea archivo `LICENSE`.
+
+**Alternativas descartadas:**
+- *MIT (lo que decía el badge):* el motivo principal es que cualquiera podría copiar el proyecto
+  y publicarlo como app propia. Como David piensa publicar la app de iPhone y hacerla crecer,
+  prefiere conservar todos los derechos. Además, pasar a MIT se puede hacer más adelante, pero
+  al revés no: el código publicado con MIT ya no se puede retirar.
+- *Repositorio privado:* el repo público forma parte del portfolio de David (0012).
+
+**Consecuencias:**
+- Quien lea el código no puede reutilizarlo legalmente sin pedir permiso.
+- El código de terceros mantiene su propia licencia (`THIRD_PARTY_NOTICES.md`, 0021).
+- **Decisión revisable:** más adelante se puede pasar a MIT u otra licencia, o hacer el repo
+  privado. Cualquiera de los dos cambios se registra en una entrada nueva.

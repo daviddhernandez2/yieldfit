@@ -187,7 +187,6 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - Cold start de Render (plan gratuito): se resuelve en el bloque 3.
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
   flujo de React Router).
-- Licencia incoherente: badge MIT sin archivo `LICENSE`; `server/package.json` dice ISC.
 - READMEs: el raíz no explica instalación, arranque ni variables; `client/README.md` es la plantilla de Vite.
 - Comentarios obsoletos del curso (p. ej. "lo haremos en la Semana 3" en `api/client.js`).
   En el mismo paso del bloque 1: corregir los comentarios falsos de `Dither.jsx` (dicen que el

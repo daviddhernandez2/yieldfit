@@ -1,5 +1,6 @@
 {
   "name": "yieldfit-server",
+  "private": true,
   "version": "1.0.0",
   "description": "API REST para Yield Fit, aplicación de seguimiento de entrenamiento",
   "main": "index.js",
@@ -15,7 +16,7 @@
   },
   "keywords": [],
   "author": "David Hernández Pérez",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",

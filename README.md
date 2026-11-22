@@ -10,7 +10,6 @@
 [![Node](https://img.shields.io/badge/node-20.x-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![React](https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![MongoDB](https://img.shields.io/badge/mongodb-atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
-[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 **[🌐 Ver la app en producción](https://yieldfit.app)**
 
@@ -77,6 +76,10 @@ yieldfit/
 
 ---
 
+## Licencia
 
+Sin licencia: **todos los derechos reservados**. El código es público para que se pueda leer,
+pero no se concede permiso para copiarlo, modificarlo ni distribuirlo
+([DECISIONS.md, 0022](DECISIONS.md)).
 
-
+Incluye código de terceros con su propia licencia: ver [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

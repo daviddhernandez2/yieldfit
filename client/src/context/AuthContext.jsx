@@ -1,5 +1,6 @@
 import { createContext, useReducer, useEffect } from 'react';
 import { getMe, login as loginApi, register as registerApi } from '@/api/auth.js';
+import { alCaducarSesion } from '@/api/client.js';
 
 // Estado inicial del contexto.
 // status indica en qué fase está la autenticación; el frontend lo usa para
@@ -64,6 +65,11 @@ export function AuthProvider({ children }) {
     };
     verificarSesion();
   }, []);
+
+  // Si cualquier petición recibe un 401 con token, api/client.js lo anuncia y aquí
+  // se cierra la sesión. PrivateRoute ve 'unauthenticated' y redirige a /login sin
+  // recargar la página. El return da de baja la suscripción al desmontar.
+  useEffect(() => alCaducarSesion(() => dispatch({ type: 'LOGOUT' })), []);
 
   // Función login: llama a la API, guarda el token y actualiza el estado.
   const login = async (credentials) => {

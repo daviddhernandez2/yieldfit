@@ -24,20 +24,29 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor de response: si el backend responde 401 (Unauthorized),
-// asumimos que el token caducó o es inválido. Limpiamos el storage y
-// redirigimos a /login. El componente que dispara la petición no necesita
-// gestionar este caso a mano.
+// Avisos de "sesión caducada". Este archivo vive fuera de React y no puede navegar
+// ni cambiar el estado de la app, así que solo anuncia el hecho: AuthContext se
+// suscribe con alCaducarSesion() y cierra la sesión; después PrivateRoute, que ya
+// redirige a /login cuando no hay sesión, hace la navegación con React Router.
+// Antes se hacía window.location.href = '/login', que recargaba la app entera.
+const oyentesSesionCaducada = new Set();
+
+// Registra una función que se llamará cuando la sesión caduque. Devuelve otra
+// función para darse de baja (la que usa el return de un useEffect).
+export const alCaducarSesion = (oyente) => {
+  oyentesSesionCaducada.add(oyente);
+  return () => oyentesSesionCaducada.delete(oyente);
+};
+
+// Interceptor de response: un 401 en una petición que LLEVABA token significa que
+// el token caducó o es inválido. Un 401 sin token (p. ej. contraseña incorrecta en
+// el login) no es una sesión caducada: no hay sesión, y el formulario muestra el error.
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && error.config?.headers?.Authorization) {
       localStorage.removeItem('yieldfit_token');
-      // window.location recarga la app entera (se pierde el estado de React).
-      // Pasará a navegación de React Router en el bloque 3 (ver CLAUDE.md).
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
+      oyentesSesionCaducada.forEach((oyente) => oyente());
     }
     return Promise.reject(error);
   }

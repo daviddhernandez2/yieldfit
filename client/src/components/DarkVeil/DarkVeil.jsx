@@ -9,11 +9,12 @@
  *
  * Modificado para Yield Fit:
  * - El shader convierte el color a monocromo (luminancia Rec. 709).
+ * - Sin DarkVeil.css: sus reglas no se aplicaban (el contenedor y su estilo están en
+ *   Layout.module.css; el canvas toma su tamaño del renderer de ogl).
  * - Imports con el alias @.
  */
 import { useRef, useEffect } from 'react';
 import { Renderer, Program, Mesh, Triangle, Vec2 } from 'ogl';
-import '@/components/DarkVeil/DarkVeil.css';
 const vertex = `
 attribute vec2 position;
 void main(){gl_Position=vec4(position,0.0,1.0);}

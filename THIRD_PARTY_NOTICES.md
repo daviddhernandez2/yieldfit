@@ -10,7 +10,7 @@ traen su propia licencia en `node_modules` y no se repiten aquí.
   https://github.com/DavidHDev/react-bits
 - **Componentes:**
   - `client/src/components/Dither/` (`Dither.jsx`, `Dither.css`)
-  - `client/src/components/DarkVeil/` (`DarkVeil.jsx`, `DarkVeil.css`)
+  - `client/src/components/DarkVeil/` (`DarkVeil.jsx`; su `.css` se eliminó por no usarse)
 - **Copiados el:** 2026-07-07. Se modificaron después; los cambios están en la cabecera de cada
   `.jsx`.
 - **Licencia:** MIT + Commons Clause License Condition v1.0. Se puede usar como parte de una

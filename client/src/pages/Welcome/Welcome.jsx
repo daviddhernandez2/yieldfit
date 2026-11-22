@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { despertarServidor } from "@/api/health.js";
 import Logo from "@/components/Logo/Logo.jsx";
 import Button from "@/components/Button/Button.jsx";
 import FeatureRutinas from "@/pages/Welcome/sections/FeatureRutinas.jsx";
@@ -36,6 +37,13 @@ export default function Welcome() {
   // instante después, sin competir por el hilo principal durante el primer
   // render. Medido con Lighthouse: reduce el Total Blocking Time.
   const [mostrarDither, setMostrarDither] = useState(false);
+
+  // Despierta el servidor nada más abrir la portada (arranque en frío de Render):
+  // cuando el usuario llegue al login, lo normal es que ya esté arrancado. Si
+  // falla no importa: es solo una ayuda, así que el error se ignora a propósito.
+  useEffect(() => {
+    despertarServidor().catch(() => {});
+  }, []);
 
   useEffect(() => {
     const id = runWhenIdle(() => setMostrarDither(true));

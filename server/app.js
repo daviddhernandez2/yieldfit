@@ -59,6 +59,13 @@ app.get('/', (req, res) => {
   });
 });
 
+// Despertador del cliente (bloque 3): la portada lo llama al abrirse para que el
+// servidor arranque mientras el usuario lee. Sin auth y sin base de datos: solo
+// tiene que responder.
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/charts', chartRoutes);

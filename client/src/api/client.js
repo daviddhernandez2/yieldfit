@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { vigilarPeticion } from '@/utils/wakingUp.js';
 
 // Instancia de axios configurada para el backend de Yield Fit.
 // Usamos baseURL para no repetir la URL completa en cada llamada.
@@ -19,6 +20,10 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Empieza a cronometrar la petición para detectar un arranque en frío del
+    // servidor. La función para parar el cronómetro viaja dentro de la propia
+    // config, que axios devuelve en response.config y en error.config.
+    config.terminarVigilancia = vigilarPeticion();
     return config;
   },
   (error) => Promise.reject(error)
@@ -42,8 +47,13 @@ export const alCaducarSesion = (oyente) => {
 // el token caducó o es inválido. Un 401 sin token (p. ej. contraseña incorrecta en
 // el login) no es una sesión caducada: no hay sesión, y el formulario muestra el error.
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    response.config.terminarVigilancia?.();
+    return response;
+  },
   (error) => {
+    // También al fallar: una petición con error ya no está "esperando".
+    error.config?.terminarVigilancia?.();
     if (error.response?.status === 401 && error.config?.headers?.Authorization) {
       localStorage.removeItem('yieldfit_token');
       oyentesSesionCaducada.forEach((oyente) => oyente());

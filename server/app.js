@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { notFoundHandler, errorHandler } from './middlewares/errorHandlers.js';
+import { crearRetrasoPrueba } from './middlewares/retrasoPrueba.js';
 import authRoutes from './routes/authRoutes.js';
 import exerciseRoutes from './routes/exerciseRoutes.js';
 import chartRoutes from './routes/chartRoutes.js';
@@ -15,6 +16,12 @@ const app = express();
 // X-Frame-Options, Strict-Transport-Security, etc.) sin necesidad de configurarlas
 // una a una manualmente.
 app.use(helmet());
+
+// Solo en local y solo si se pide con RETRASO_PRUEBA_MS: simula el arranque en frío
+// de Render para probar el aviso del cliente. Va al principio para retrasar todas las
+// peticiones, igual que un servidor dormido. Ver middlewares/retrasoPrueba.js.
+const retrasoPrueba = crearRetrasoPrueba();
+if (retrasoPrueba) app.use(retrasoPrueba);
 
 // Morgan registra cada petición HTTP (método, ruta, status, tiempo de respuesta).
 // 'dev' es compacto y coloreado, pensado para desarrollo; en producción usamos

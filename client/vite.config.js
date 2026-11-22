@@ -29,5 +29,16 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
+    build: {
+      rolldownOptions: {
+        output: {
+          // Conserva en el bundle los comentarios /*! ... */ de licencia (Dither y DarkVeil,
+          // código de React Bits): su licencia exige que el aviso de copyright acompañe a
+          // toda copia, y el JavaScript publicado en yieldfit.app es una copia.
+          // Solo los legales: el resto se sigue quitando para no engordar el bundle.
+          comments: { legal: true, annotation: false, jsdoc: false },
+        },
+      },
+    },
   }
 })

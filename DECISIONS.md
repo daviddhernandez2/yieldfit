@@ -39,6 +39,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0018 | Backups manuales de producción con `mongodump` | vigente |
 | 0019 | Backups solo en el portátil y riesgos aceptados | vigente |
 | 0020 | Borrar un ejercicio conserva el historial | vigente |
+| 0021 | Atribución del código de React Bits | vigente |
 
 ---
 
@@ -629,3 +630,40 @@ producción encontró 3 sesiones vacías y 2 rutinas rotas.
 - Si el usuario vuelve a crear un ejercicio con el mismo nombre, es un ejercicio nuevo: su
   progreso empieza de cero y no se une al historial del borrado.
 - La 0004 dice que los snapshots no protegen frente a borrados. Con esta decisión sí lo hacen.
+
+---
+
+## 0021 — Atribución del código de React Bits
+
+Fecha: 2026-11-22 · Estado: vigente · Bloque: 1 · Matiza a: 0011
+
+**Contexto:** la 0011 dejó pendiente la atribución de `Dither` y `DarkVeil`, copiados de React
+Bits el 2026-07-07. Su licencia (MIT + Commons Clause) exige que el aviso de copyright y de
+permisos acompañe a toda copia o parte sustancial, y prohíbe vender o redistribuir los
+componentes por separado. El repositorio es público y el JavaScript servido en yieldfit.app
+también es una copia.
+
+**Decisión:**
+- **`THIRD_PARTY_NOTICES.md` en la raíz** con el texto literal de la licencia en la versión
+  vigente al copiar los componentes (commit `ecdd797` de React Bits). La versión actual añade
+  cláusulas sobre herramientas y sonidos de React Bits que no afectan a estos componentes.
+- **Cabecera `/*! ... */` en cada archivo copiado**, con autor, enlace, licencia y lista de
+  cambios hechos para Yield Fit (los `.css` remiten al `.jsx`).
+- **El build conserva los comentarios legales** (`build.rolldownOptions.output.comments.legal`
+  en `vite.config.js`). Sin esa opción, el minificador quitaba las cabeceras de los `.jsx`. Como
+  efecto secundario, también se conservan los avisos de React, three.js y otras dependencias,
+  que sus licencias exigen igualmente. Coste: unos 2 KB con gzip.
+
+**Alternativas descartadas:**
+- *Solo un archivo de avisos, sin cabeceras:* quien abre `Dither.jsx` no sabría que no es
+  código propio ni qué se ha cambiado.
+- *Copiar la versión actual de la licencia:* no es la que se aceptó al copiar el código.
+- *Servir el texto completo de la licencia como archivo público de la web:* duplica
+  `THIRD_PARTY_NOTICES.md`. La cabecera en el bundle identifica autor y licencia, que es la
+  práctica habitual de las librerías minificadas.
+- *Reescribir los fondos desde cero:* fuera del alcance del bloque 1.
+
+**Consecuencias:**
+- Cualquier código de terceros que se copie en el futuro sigue el mismo patrón (convención en
+  `CLAUDE.md`).
+- Al modificar `Dither` o `DarkVeil`, hay que actualizar la lista de cambios de su cabecera.

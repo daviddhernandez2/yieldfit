@@ -130,6 +130,9 @@ ownership de los ids referenciados. Mantener siempre ese patrón.
   No mezclar idiomas dentro de un mismo concepto.
 - Respuestas de la API: `{ recurso }` / `{ recursos }` en éxito; `{ error, message }` en error.
 - Errores del backend: `next(error)` hacia `errorHandler`; `CastError` de ids se responde como 404.
+- Código de terceros copiado (hoy `Dither` y `DarkVeil`, de React Bits): cabecera `/*! ... */`
+  con autor, licencia y lista de cambios, y entrada en `THIRD_PARTY_NOTICES.md`. Al modificarlo,
+  actualizar la lista de cambios de la cabecera.
 
 ## Git
 
@@ -184,12 +187,15 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - Cold start de Render (plan gratuito): se resuelve en el bloque 3.
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
   flujo de React Router).
-- `components/Dither/` y `components/DarkVeil/` son código de terceros copiado de React Bits
-  (reactbits.dev, licencia MIT + Commons Clause) sin atribución ni aviso de copyright, que la
-  licencia exige.
 - Licencia incoherente: badge MIT sin archivo `LICENSE`; `server/package.json` dice ISC.
 - READMEs: el raíz no explica instalación, arranque ni variables; `client/README.md` es la plantilla de Vite.
 - Comentarios obsoletos del curso (p. ej. "lo haremos en la Semana 3" en `api/client.js`).
+  En el mismo paso del bloque 1: corregir los comentarios falsos de `Dither.jsx` (dicen que el
+  resto del `useFrame` "se queda igual abajo", pero se quitó: que digan qué se quitó y que
+  velocidad, frecuencia, amplitud, color y ratón no reaccionan a cambios de props tras montar),
+  y borrar el CSS muerto de `DarkVeil.css` (`.color-bends-container` y `.veil` no se usan).
+- `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; `prevColor` sin usar).
+  `DarkVeil`: monocromo duplicado (en el shader y con `filter: saturate(0)`). Bloque 12.
 - README indica React Router v6; la dependencia instalada es v7.
 
 ## Informe de corrección del curso (CEI)
@@ -238,4 +244,5 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       corto + refresh token.
 - [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
       entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
-      sincronización híbrida de la sesión activa y revisión de DarkVeil (batería).
+      sincronización híbrida de la sesión activa y revisión de DarkVeil (batería y
+      monocromo duplicado) y del `useFrame` incompleto de Dither.

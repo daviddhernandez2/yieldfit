@@ -1,3 +1,16 @@
+/*!
+ * DarkVeil: basado en el componente "DarkVeil" de React Bits.
+ * https://reactbits.dev · https://github.com/DavidHDev/react-bits
+ *
+ * Copyright (c) 2026 David Haz
+ * MIT + Commons Clause License Condition v1.0. El aviso de copyright y de permisos
+ * completo está en THIRD_PARTY_NOTICES.md, en la raíz del repositorio. La Commons
+ * Clause prohíbe vender o redistribuir el componente por separado.
+ *
+ * Modificado para Yield Fit:
+ * - El shader convierte el color a monocromo (luminancia Rec. 709).
+ * - Imports con el alias @.
+ */
 import { useRef, useEffect } from 'react';
 import { Renderer, Program, Mesh, Triangle, Vec2 } from 'ogl';
 import '@/components/DarkVeil/DarkVeil.css';

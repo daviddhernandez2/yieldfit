@@ -1,3 +1,18 @@
+/*!
+ * Dither: basado en el componente "Dither" de React Bits.
+ * https://reactbits.dev · https://github.com/DavidHDev/react-bits
+ *
+ * Copyright (c) 2026 David Haz
+ * MIT + Commons Clause License Condition v1.0. El aviso de copyright y de permisos
+ * completo está en THIRD_PARTY_NOTICES.md, en la raíz del repositorio. La Commons
+ * Clause prohíbe vender o redistribuir el componente por separado.
+ *
+ * Modificado para Yield Fit:
+ * - OCTAVES de 4 a 2 (menos coste de GPU).
+ * - pixelSize 3 y enableMouseInteraction false por defecto.
+ * - El resize ignora dimensiones 0 y useFrame solo actualiza el tiempo.
+ * - Imports con el alias @.
+ */
 /* eslint-disable react/no-unknown-property */
 import { useRef, useEffect, forwardRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';

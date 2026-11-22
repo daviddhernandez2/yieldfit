@@ -191,10 +191,8 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - Cold start de Render (plan gratuito): se resuelve en el bloque 3.
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
   flujo de React Router).
-- READMEs: el raíz no explica instalación, arranque ni variables; `client/README.md` es la plantilla de Vite.
 - `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; las props no reaccionan tras
   montar y `prevColor` no se usa). Bloque 12.
-- README indica React Router v6; la dependencia instalada es v7.
 
 ## Informe de corrección del curso (CEI)
 
@@ -210,7 +208,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
 
 - [x] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, documentación en Markdown en `/docs`
       (leída en GitHub, sin dependencias ni despliegue; índice en `docs/README.md`).
-- [ ] **1 — Saneamiento**: resolver las consecuencias de la cascada `$pull` al borrar
+- [x] **1 — Saneamiento**: resolver las consecuencias de la cascada `$pull` al borrar
       ejercicios (si cambia la decisión, entrada nueva en `DECISIONS.md`), eliminar
       `PUT /api/sessions/:id` mientras no se use o corregirlo para que conserve los snapshots, quitar fallbacks de URL en env vars, cierre ordenado del
       servidor con SIGTERM (Render lo envía en cada deploy), separar la base de datos de

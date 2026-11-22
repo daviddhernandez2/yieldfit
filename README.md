@@ -27,52 +27,146 @@ La propuesta de Yield Fit es trasladar esa lógica visual al dominio del entrena
 
 ## Stack tecnológico
 
-### Backend
-- **Node.js** + **Express** — API REST 
-- **MongoDB Atlas** + **Mongoose** —  5 modelos y middlewares
-- **bcrypt** — hashing de contraseñas
-- **JWT** — autenticación mediante tokens 
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 19, Vite 8, React Router 7, Axios, Recharts, CSS Modules |
+| Efectos WebGL | three.js + @react-three/fiber + postprocessing (fondo de la bienvenida); ogl (fondo de la app) |
+| Backend | Node.js 20, Express 5, Mongoose 9, bcrypt, JWT, helmet, cors, morgan |
+| Base de datos | MongoDB Atlas |
+| Despliegue | Vercel (frontend), Render en Frankfurt (backend), MongoDB Atlas M0 |
 
-### Frontend
-- **React 19** + **Vite** 
-- **React Router v6** 
-- **Axios** 
-- **Recharts**
-- **CSS Modules** 
-
-### Efectos WebGL
-- **three.js** + **@react-three/fiber** + **@react-three/postprocessing** 
-- **ogl** 
-
-### Despliegue
-- **Vercel** — hosting del frontend con despliegue automático
-- **Render** (Frankfurt) — hosting del backend 
-- **MongoDB Atlas** (M0 gratuito) — base de datos en la nube.
 ---
 
-## Estructura del monorepo
+## Arrancar en local
+
+### Requisitos
+
+- **Node.js 20** o superior.
+- **Un clúster de MongoDB Atlas** (el M0 gratuito sirve). Tiene que ser un *replica set*, como los
+  de Atlas: la app usa transacciones (registro de usuario, borrado de ejercicios) y un MongoDB
+  local sin replica set no las admite.
+- En Atlas, un **usuario de base de datos con `readWrite` solo sobre `yieldfit-dev`**. Nunca uses
+  en local el usuario de producción ([0017](DECISIONS.md)).
+
+### 1. Instalar dependencias
+
+No hay `package.json` en la raíz: cliente y servidor se instalan por separado.
+
+```bash
+cd server && npm install
+cd ../client && npm install
+```
+
+### 2. Variables de entorno
+
+Copia los ejemplos y rellénalos. Los `.env` no se suben al repo.
+
+```bash
+cp server/.env.example server/.env
+cp client/.env.example client/.env
+```
+
+| Variable | Dónde | Qué es |
+|---|---|---|
+| `MONGO_URI` | `server/.env` | URI de Atlas con el usuario de desarrollo y la base `yieldfit-dev` |
+| `JWT_SECRET` | `server/.env` | Secreto para firmar los tokens. Genera uno con `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
+| `JWT_EXPIRES_IN` | `server/.env` | Duración del token (`7d`) |
+| `CLIENT_ORIGINS` | `server/.env` | Orígenes permitidos por CORS (`http://localhost:5173`) |
+| `PORT`, `NODE_ENV` | `server/.env` | `3000` y `development` |
+| `VITE_API_URL` | `client/.env` | URL de la API (`http://localhost:3000/api`) |
+
+Las variables obligatorias no tienen valor por defecto: si falta alguna, el servidor o Vite se
+niegan a arrancar con un mensaje que dice cuál. Además, el servidor no arranca en desarrollo si la
+base es la de producción.
+
+### 3. Datos de prueba
+
+```bash
+cd server
+npm run seed
+```
+
+**Vacía `yieldfit-dev`** y la rellena con un usuario de prueba (`dev@yieldfit.test` /
+`desarrollo123`), los ejercicios predefinidos, tres rutinas y unas 3 sesiones por semana durante 2
+años. `npm run seed -- --anios 5` genera más historial. Se niega a ejecutarse si la base no
+termina en `-dev`.
+
+### 4. Arrancar
+
+En dos terminales:
+
+```bash
+cd server && npm run dev     # API en http://localhost:3000
+cd client && npm run dev     # App en http://localhost:5173
+```
+
+---
+
+## Scripts
+
+**Servidor** (`server/`):
+
+| Script | Qué hace |
+|---|---|
+| `npm run dev` | API con recarga automática (nodemon) |
+| `npm start` | API sin recarga (lo que ejecuta Render) |
+| `npm run seed` | Vacía y rellena `yieldfit-dev` con datos de prueba |
+| `npm run backup` | Backup de producción en el portátil ([docs/operaciones.md](docs/operaciones.md)) |
+| `npm run backup:restore-test` | Prueba que el último backup se puede restaurar |
+| `npm run diagnostico:borrados` | Diagnóstico de solo lectura de datos huérfanos (`-- --desarrollo` para `yieldfit-dev`) |
+| `npm run reparar:borrados` | Reparación puntual de producción; solo simula sin `-- --aplicar` |
+
+Los tres de producción necesitan credenciales en el Llavero de macOS y un procedimiento concreto:
+síguelo en [docs/operaciones.md](docs/operaciones.md).
+
+**Cliente** (`client/`):
+
+| Script | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo de Vite |
+| `npm run build` | Build de producción en `dist/` |
+| `npm run preview` | Sirve el build en local |
+| `npm run lint` | oxlint |
+
+---
+
+## Estructura
 
 ```
 yieldfit/
-├── client/                      # Frontend React + Vite
-│   ├── src/
-│   │   ├── components/          # Componentes reutilizables
-│   │   ├── pages/               # Vistas de nivel superior
-│   │   ├── hooks/               # Hooks personalizados
-│   │   ├── context/             # Contextos React (auth)
-│   │   ├── styles/              # Tokens de diseño (variables.css)
-│   │   └── utils/               # Utilidades (activeSession, performance)
-│   └── vite.config.js
-│
-├── server/                      # Backend Node + Express
-│   ├── controllers/             # Lógica de negocio por recurso
-│   ├── routes/                  # Definición de rutas Express
-│   ├── models/                  # Esquemas Mongoose
-│   ├── middlewares/             # auth, propiedad, 404, error handler
-│   └── app.js                   # Entry point
-│
-└── docs/                        # Recursos del README y memoria
+├── client/                 # Frontend React + Vite
+│   └── src/
+│       ├── api/            # Una capa por recurso sobre axios (client.js)
+│       ├── components/     # Componentes reutilizables (Carpeta/Componente.jsx + .module.css)
+│       ├── pages/          # Una carpeta por vista, cargadas con lazy()
+│       ├── context/        # AuthContext
+│       ├── hooks/          # Hooks propios (sesión activa, arranque de sesión…)
+│       ├── utils/          # Lógica sin UI: cálculo de progreso, sesión activa
+│       └── styles/         # Tokens de diseño (variables.css)
+├── server/                 # Backend Node + Express
+│   ├── index.js            # Punto de entrada: conecta a MongoDB y arranca Express
+│   ├── app.js              # Configuración de Express (middlewares y rutas)
+│   ├── config/             # Conexión a la base de datos
+│   ├── models/             # Esquemas de Mongoose
+│   ├── controllers/        # Lógica por recurso
+│   ├── routes/             # Un router por recurso
+│   ├── middlewares/        # Autenticación, 404 y errores
+│   ├── data/               # Ejercicios predefinidos
+│   ├── utils/              # JWT y clonado de presets
+│   └── scripts/            # Seed, backups, diagnóstico y reparación
+├── docs/                   # Documentación técnica
+├── DECISIONS.md            # Registro de decisiones
+└── THIRD_PARTY_NOTICES.md  # Código de terceros y sus licencias
 ```
+
+---
+
+## Documentación
+
+- **[docs/](docs/README.md):** arquitectura, modelo de datos, autenticación, operaciones (backups)
+  y una página por bloque del roadmap. Los diagramas se ven directamente en GitHub.
+- **[DECISIONS.md](DECISIONS.md):** por qué el proyecto es como es. Cada decisión técnica o de
+  producto, con las alternativas descartadas y sus consecuencias.
 
 ---
 

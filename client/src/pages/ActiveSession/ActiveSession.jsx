@@ -4,8 +4,12 @@ import {
   readActiveSession,
   writeActiveSession,
   clearActiveSession,
+  ejerciciosBorradosConSeries,
+  avisoEjerciciosBorrados,
+  contar,
 } from "@/utils/activeSession.js";
 import { createSession } from "@/api/sessions.js";
+import { listExercises } from "@/api/exercises.js";
 import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
@@ -83,6 +87,9 @@ export default function ActiveSession() {
   const [confirmDescartar, setConfirmDescartar] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // Ejercicios con series hechas que ya no existen: se calculan al pulsar
+  // "Terminar sesión" y no se envían al guardar.
+  const [borrados, setBorrados] = useState([]);
 
   const [, setTick] = useState(0);
 
@@ -199,7 +206,17 @@ export default function ActiveSession() {
 
   const resumen = calcularResumen(session);
 
-  const handleAbrirTerminar = () => {
+  // Ids de los ejercicios que no se enviarán al guardar.
+  const idsBorrados = new Set(borrados.map((ej) => ej.exerciseId));
+  // Resumen de lo que de verdad se va a guardar (sin los ejercicios borrados).
+  const resumenAGuardar = calcularResumen({
+    ...session,
+    ejercicios: session.ejercicios.filter((ej) => !idsBorrados.has(ej.exerciseId)),
+  });
+
+  // Antes de abrir el diálogo se comprueba qué ejercicios siguen existiendo, para
+  // que el aviso de lo que no se guardará aparezca ANTES de guardar.
+  const handleAbrirTerminar = async () => {
     setErrorMessage("");
     if (resumen.setsCompletados === 0) {
       setErrorMessage(
@@ -207,6 +224,30 @@ export default function ActiveSession() {
       );
       return;
     }
+
+    let idsExistentes;
+    try {
+      const res = await listExercises();
+      idsExistentes = new Set(res.data.exercises.map((ex) => ex._id));
+    } catch {
+      setErrorMessage(
+        "No se han podido comprobar tus ejercicios. Revisa la conexión e inténtalo de nuevo. La sesión sigue guardada en este dispositivo.",
+      );
+      return;
+    }
+
+    const nuevosBorrados = ejerciciosBorradosConSeries(session, idsExistentes);
+    const quedaAlgo = session.ejercicios.some(
+      (ej) => ej.sets.some((s) => s.completada) && idsExistentes.has(ej.exerciseId),
+    );
+    if (!quedaAlgo) {
+      setErrorMessage(
+        `${avisoEjerciciosBorrados(nuevosBorrados)} No queda ninguna serie que guardar: descarta la sesión.`,
+      );
+      return;
+    }
+
+    setBorrados(nuevosBorrados);
     setConfirmTerminar(true);
   };
 
@@ -220,6 +261,7 @@ export default function ActiveSession() {
         duracionSegundos: elapsedSeconds,
         ejercicios: session.ejercicios
           .filter((ej) => ej.sets.some((s) => s.completada))
+          .filter((ej) => !idsBorrados.has(ej.exerciseId))
           .map((ej) => ({
             exerciseId: ej.exerciseId,
             sets: ej.sets
@@ -387,8 +429,10 @@ export default function ActiveSession() {
         open={confirmTerminar}
         title="¿Terminar la sesión?"
         message={
-          `Resumen: ${resumen.ejerciciosCompletados} ejercicios · ${resumen.setsCompletados} series · ` +
-          `${formatTiempo(elapsedSeconds)}. Se guardará y no podrás editarla.`
+          `Resumen: ${contar(resumenAGuardar.ejerciciosCompletados, "ejercicio", "ejercicios")} · ` +
+          `${contar(resumenAGuardar.setsCompletados, "serie", "series")} · ` +
+          `${formatTiempo(elapsedSeconds)}. Se guardará y no podrás editarla.` +
+          (borrados.length > 0 ? ` ${avisoEjerciciosBorrados(borrados)}` : "")
         }
         confirmLabel={submitting ? "Guardando..." : "Terminar y guardar"}
         cancelLabel="Cancelar"

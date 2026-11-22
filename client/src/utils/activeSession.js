@@ -89,3 +89,27 @@ export const buildActiveSessionFromWorkout = (
     }),
   };
 };
+
+// Ejercicios de la sesión activa que tienen alguna serie completada pero ya no
+// existen en el catálogo del usuario (se borraron durante el entreno, o la sesión
+// es de antes de que el borrado limpiara las rutinas). El servidor rechazaría la
+// sesión entera con un 400 si se enviaran, así que hay que quitarlos y avisar.
+// `idsExistentes` es un Set con los _id de los ejercicios que existen hoy.
+export const ejerciciosBorradosConSeries = (session, idsExistentes) =>
+  session.ejercicios.filter(
+    (ej) => ej.sets.some((s) => s.completada) && !idsExistentes.has(ej.exerciseId),
+  );
+
+// Aviso exacto de lo que se pierde: una frase por ejercicio, con su nombre.
+export const avisoEjerciciosBorrados = (borrados) =>
+  borrados
+    .map(
+      (ej) =>
+        `No se guardarán las series de «${ej.exerciseNombre}» porque ese ejercicio ya no existe.`,
+    )
+    .join(" ");
+
+// "1 ejercicio" / "3 ejercicios": el número con la palabra en singular o plural.
+// Se pasan las dos formas porque en español no siempre basta con añadir una "s"
+// (p. ej. "1 sesión" / "2 sesiones").
+export const contar = (n, singular, plural) => `${n} ${n === 1 ? singular : plural}`;

@@ -34,7 +34,22 @@ export function useStartSession() {
       // Construimos un mapa {id → nombre} para resolución O(1) durante el build.
       const nombreById = new Map(catalogo.map((ex) => [ex._id, ex.nombre]));
 
-      const nueva = buildActiveSessionFromWorkout(wo, nombreById);
+      // Defensa: una rutina puede apuntar a un ejercicio que ya no existe (rutinas
+      // de antes de que el borrado las limpiara). Si entrara en la sesión, el
+      // servidor rechazaría el entreno entero al guardarlo. Se descarta aquí, sin
+      // aviso: todavía no se ha registrado nada, así que no se pierde nada.
+      const disponibles = wo.ejercicios.filter((ej) =>
+        nombreById.has(String(ej.exerciseId)),
+      );
+      if (disponibles.length === 0) {
+        setError('Esta rutina no tiene ejercicios disponibles. Edítala para añadir alguno.');
+        return;
+      }
+
+      const nueva = buildActiveSessionFromWorkout(
+        { ...wo, ejercicios: disponibles },
+        nombreById,
+      );
       writeActiveSession(nueva);
       navigate('/sessions/active');
     } catch {

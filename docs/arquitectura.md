@@ -127,7 +127,8 @@ flowchart TB
 ```
 
 - **`api/client.js`** es el único punto que habla con el backend: añade el token en cada
-  petición y, si recibe un 401, borra el token y manda a `/login` (ver [auth.md](auth.md)).
+  petición, cronometra las peticiones para detectar el arranque en frío y, si recibe un 401 con
+  token, borra el token y anuncia la sesión caducada (ver [auth.md](auth.md)).
 - **Lógica de negocio fuera de los componentes:** el cálculo del 1RM y del progreso vive en
   `utils/performance.js` ([0007](../DECISIONS.md)); la sesión en curso, en
   `utils/activeSession.js` ([0009](../DECISIONS.md)).
@@ -148,6 +149,42 @@ flowchart TB
 | `/profile` | Profile | sí |
 
 Las rutas privadas van envueltas en `PrivateRoute` + `Layout`. Cualquier otra ruta redirige a `/`.
+
+## Arranque en frío de Render
+
+Con el plan gratuito, Render apaga el servidor tras ~15 minutos sin uso; la siguiente petición
+tarda 30-60 s en responder ([0025](../DECISIONS.md)). El cliente no puede saber si el servidor está
+dormido, pero sí que una petición tarda:
+
+```mermaid
+sequenceDiagram
+    participant UI as Pantalla
+    participant AX as api/client.js
+    participant WU as utils/wakingUp.js
+    participant H as useServerWakingUp
+    participant S as Servidor (dormido)
+
+    UI->>AX: petición
+    AX->>WU: vigilarPeticion() (temporizador de 4 s)
+    AX->>S: petición
+    Note over WU: pasan 4 s sin respuesta
+    WU->>H: despertando = true
+    H->>UI: aparece "Despertando el servidor…"
+    S-->>AX: respuesta (30-60 s después)
+    AX->>WU: terminarVigilancia()
+    WU->>H: despertando = false
+    H->>UI: el aviso desaparece
+```
+
+- **`utils/wakingUp.js`** es un tablón (pub-sub): los interceptores viven fuera de React, y el
+  hook **`useServerWakingUp`** lo lee con `useSyncExternalStore`.
+- **`ServerWakingUp`** muestra el aviso en `PrivateRoute` (validar el token al abrir la app), bajo
+  el botón de Login y Register, y flotante en `Layout` (cualquier pantalla privada, p. ej. al
+  volver tras un rato con la pestaña abierta).
+- **Despertador:** la portada llama a `GET /api/health` al abrirse, para que el servidor vaya
+  arrancando mientras el usuario lee.
+- **Prueba en local:** `RETRASO_PRUEBA_MS=8000 npm run dev` (desde `server/`) retrasa cada
+  petición. Se ignora siempre con `NODE_ENV=production`.
 
 ## Recorrido de una petición: guardar una sesión
 

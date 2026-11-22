@@ -81,6 +81,7 @@ sequenceDiagram
     participant RA as requireAuth
     participant DB as MongoDB
     participant C as Controlador
+    participant CTX as AuthContext
 
     P->>AX: petición
     AX->>AX: interceptor de request:<br/>Authorization: Bearer <token>
@@ -96,8 +97,11 @@ sequenceDiagram
             C-->>AX: respuesta
         end
     end
-    alt respuesta 401
-        AX->>AX: interceptor de response:<br/>borra el token, window.location.href = '/login'
+    alt respuesta 401 y la petición llevaba token
+        AX->>AX: interceptor de response:<br/>borra el token y anuncia "sesión caducada"
+        AX->>CTX: oyente de alCaducarSesion
+        CTX->>CTX: LOGOUT → status = unauthenticated
+        Note over CTX: PrivateRoute redirige a /login<br/>con React Router (sin recargar)
     end
     AX-->>P: respuesta o error
 ```
@@ -113,13 +117,17 @@ flowchart TD
     B -- no --> F["status = unauthenticated"]
     B -- sí --> C["GET /api/auth/me"]
     C -- 200 --> D["status = authenticated<br/>user = respuesta"]
-    C -- 401 --> E["el interceptor borra el token<br/>y recarga en /login"] --> F
+    C -- 401 --> E["el interceptor borra el token<br/>y anuncia sesión caducada"] --> F
     F --> G["PrivateRoute → Navigate a /login"]
     D --> H["PrivateRoute renderiza la página"]
 ```
 
-Mientras `status = loading`, `PrivateRoute` muestra "Cargando...". Con el cold start de Render
-esto puede durar decenas de segundos: es lo que resuelve el bloque 3.
+Mientras `status = loading`, `PrivateRoute` muestra "Cargando...". Si el servidor estaba dormido
+(arranque en frío de Render), debajo aparece el aviso "Despertando el servidor…"; ver
+[arquitectura.md](arquitectura.md#arranque-en-frío-de-render).
+
+Un 401 **sin** token (por ejemplo, contraseña incorrecta en el login) no cierra nada: no había
+sesión, y el formulario muestra el error.
 
 ## Cerrar sesión
 
@@ -135,5 +143,3 @@ es que un token robado sigue siendo válido hasta que caduca.
 - El mismo mensaje de error no impide del todo saber si un email existe: cuando no existe, la
   respuesta llega antes porque se salta bcrypt, que es lento a propósito. Es una enumeración por
   tiempo de respuesta; conviene tenerla en cuenta en el bloque 11.
-- El interceptor 401 usa `window.location.href`, que recarga la app entera. Se sustituye por
-  navegación de React Router en el bloque 3.

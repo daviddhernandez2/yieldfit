@@ -43,6 +43,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0022 | Repositorio público sin licencia | vigente |
 | 0023 | Hook que pide confirmación para git dentro de cualquier comando | vigente |
 | 0024 | Grupos musculares y tipos: el servidor es la única fuente | vigente |
+| 0025 | Aviso de arranque en frío y 401 sin recarga | vigente |
 
 ---
 
@@ -778,3 +779,46 @@ bloque 2 añade un tipo, lo que habría obligado a tocar servidor y cliente y de
   Las pantallas esperan a tenerla y muestran un error si falla.
 - El valor por defecto del formulario de ejercicio nuevo (`Pecho`, `Pesas libres`) sigue escrito
   en el cliente; es válido mientras esos valores existan, y no se borran nunca.
+
+---
+
+## 0025 — Aviso de arranque en frío y 401 sin recarga
+
+Fecha: 2026-11-22 · Estado: vigente · Bloque: 3
+
+**Contexto:** Render (plan gratuito) apaga el servidor tras ~15 minutos sin uso y la siguiente
+petición tarda 30-60 s. La app solo mostraba "Cargando..." o "Entrando..." y parecía rota. Además,
+el interceptor 401 hacía `window.location.href = '/login'`, que recarga la app entera, y lo hacía
+también ante un 401 de contraseña incorrecta.
+
+**Decisión** (arquitectura acordada en el roadmap, concretada en el bloque):
+- **Detección por tiempo:** los interceptores de axios cronometran cada petición; si alguna pasa
+  de 4 s sin respuesta, el estado es "despertando" hasta que terminen todas las lentas.
+- **Tablón fuera de React** (`utils/wakingUp.js`) leído con `useSyncExternalStore`
+  (`useServerWakingUp`), y un componente `ServerWakingUp` en `PrivateRoute`, Login, Register y,
+  flotante, en `Layout`.
+- **Despertador:** la portada llama a `GET /api/health` al abrirse.
+- **401 sin recarga:** el interceptor solo actúa si la petición llevaba token; borra el token y
+  lo anuncia (`alCaducarSesion`). `AuthContext` hace `LOGOUT` y `PrivateRoute` redirige con
+  React Router. `AuthProvider` está fuera de `BrowserRouter`, así que el interceptor no puede
+  usar `navigate`; el anuncio evita reorganizar el enrutado.
+- **Prueba en local:** `RETRASO_PRUEBA_MS` retrasa cada petición; se ignora siempre con
+  `NODE_ENV=production`, aunque esté definida.
+
+**Alternativas descartadas:**
+- *Aviso desde la primera petición, sin umbral:* saldría en cada carga normal.
+- *`timeout` de axios:* el servidor sí responde, solo tarda; cortar haría fallar el login.
+- *`createBrowserRouter` para usar `router.navigate` en el interceptor:* rehacer el enrutado de
+  `App.jsx` solo para esto.
+- *Ping externo cada 10 minutos para que no se duerma:* un servicio más que mantener, y consume
+  las horas gratuitas de Render.
+
+**Consecuencias:**
+- En una red muy lenta (más de 4 s por petición) también sale el aviso. El texto ("puede
+  tardar") no es falso en ese caso.
+- Una petición más por visita a la portada.
+- El aviso flotante también cubre las pantallas privadas, más allá de lo acordado en el roadmap
+  (que solo nombraba `PrivateRoute`, Login y Register): el caso de volver a la app tras un rato
+  con la pestaña abierta también es un arranque en frío.
+- Si el plan de Render cambia a uno sin suspensión, el aviso simplemente no aparecerá; no hay
+  que quitar nada.

@@ -20,6 +20,8 @@ export const OPCIONES_TIPO = [
   { value: 'Peso corporal', label: 'Peso corporal' },
   { value: 'Pesas libres', label: 'Pesas libres' },
   { value: 'Maquinas', label: 'Máquinas' },
+  // Máquinas que se cargan con discos (p. ej. Hammer Strength), no con placas. Bloque 2.
+  { value: 'Maquinas de discos', label: 'Máquinas de discos' },
   { value: 'Poleas', label: 'Poleas' },
   { value: 'Cardio', label: 'Cardio' },
 ];

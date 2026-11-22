@@ -1,0 +1,53 @@
+/* Sin contenido no ocupa sitio: el aviso solo existe mientras el servidor despierta. */
+.aviso {
+  display: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.visible {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+/* En las pantallas privadas: píldora fija abajo, por encima de la TabBar (z-index 100)
+   y de MiniSession (90), para que se vea esté donde esté el usuario. */
+.flotante.visible {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-2xl) * 2);
+  transform: translateX(-50%);
+  z-index: 110;
+  margin: 0;
+  max-width: calc(100vw - var(--space-xl));
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+}
+
+/* Punto verde que late: indica que la app sigue trabajando, no que se ha colgado. */
+.punto {
+  flex-shrink: 0;
+  width: var(--space-sm);
+  height: var(--space-sm);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  animation: latido 1.2s ease-in-out infinite;
+}
+
+@keyframes latido {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Quien pide menos movimiento en su sistema ve el punto quieto. */
+@media (prefers-reduced-motion: reduce) {
+  .punto {
+    animation: none;
+  }
+}

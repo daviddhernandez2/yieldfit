@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth.js';
 import Button from '@/components/Button/Button.jsx';
+import ServerWakingUp from '@/components/ServerWakingUp/ServerWakingUp.jsx';
 import Input from '@/components/Input/Input.jsx';
 import styles from '@/pages/Login/Login.module.css';
 
@@ -79,6 +80,8 @@ export default function Login() {
           >
             {submitting ? 'Entrando...' : 'Iniciar sesión'}
           </Button>
+          {/* Si el servidor estaba dormido, explica por qué el botón tarda. */}
+          <ServerWakingUp />
         </form>
 
         <p className={styles.footer}>

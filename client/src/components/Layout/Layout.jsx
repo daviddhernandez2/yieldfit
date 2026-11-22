@@ -2,6 +2,7 @@ import Sidebar from '@/components/Sidebar/Sidebar.jsx';
 import TabBar from '@/components/TabBar/TabBar.jsx';
 import MiniSession from '@/components/MiniSession/MiniSession.jsx';
 import DarkVeil from '@/components/DarkVeil/DarkVeil.jsx';
+import ServerWakingUp from '@/components/ServerWakingUp/ServerWakingUp.jsx';
 import styles from '@/components/Layout/Layout.module.css';
 
 // Layout de las rutas privadas.
@@ -20,6 +21,7 @@ export default function Layout({ children }) {
       <main className={styles.main}>{children}</main>
       <TabBar />
       <MiniSession />
+      <ServerWakingUp flotante />
     </div>
   );
 }

@@ -10,7 +10,8 @@
     "seed": "node scripts/seed.js",
     "backup": "bash scripts/backup.sh",
     "backup:restore-test": "bash scripts/restore-test.sh",
-    "diagnostico:borrados": "node scripts/diagnostico-borrados.js"
+    "diagnostico:borrados": "node scripts/diagnostico-borrados.js",
+    "reparar:borrados": "node scripts/reparar-borrados.js"
   },
   "keywords": [],
   "author": "David Hernández Pérez",

@@ -72,6 +72,7 @@ npm run seed     # BORRA yieldfit-dev y la rellena con datos de prueba (--anios 
 npm run backup   # backup de producción (ver docs/operaciones.md)
 npm run backup:restore-test
 npm run diagnostico:borrados   # solo lectura en producción (usuario de backup); -- --desarrollo para yieldfit-dev
+npm run reparar:borrados       # ESCRIBE en producción con usuario temporal; simula sin -- --aplicar (ver docs/operaciones.md)
 
 # Frontend (desde /client) — requiere client/.env con VITE_API_URL
 npm run dev      # http://localhost:5173
@@ -97,7 +98,7 @@ server/
   middlewares/  # requireAuth, notFoundHandler, errorHandler
   data/         # exercisePresets.js — ejercicios clonados a cada usuario al registrarse
   utils/        # jwt.js, presets.js (clonado de presets)
-  scripts/      # seed.js (datos de desarrollo), backup.sh, restore-test.sh y diagnostico-borrados.js;
+  scripts/      # seed.js (datos de desarrollo), backup.sh, restore-test.sh, diagnostico-borrados.js y reparar-borrados.js;
                 # lib/ (credenciales.sh oculta la URI; recuentos.sh lee los logs;
                 # conexion.js: conexión y filtro de credenciales de los scripts Node)
 ```

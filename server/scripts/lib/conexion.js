@@ -64,4 +64,7 @@ export const conectar = async ({ desarrollo, servicioLlavero }) => {
   return db;
 };
 
+// Cliente del driver, necesario para abrir transacciones (cliente.startSession()).
+export const obtenerCliente = () => mongoose.connection.getClient();
+
 export const desconectar = () => mongoose.disconnect();

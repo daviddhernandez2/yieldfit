@@ -1,4 +1,4 @@
-# Operaciones: backups y restauración
+# Operaciones: backups, restauración y reparaciones
 
 [← Índice](README.md)
 
@@ -86,6 +86,59 @@ es una copia de producción y ocupa espacio de los 512 MB del M0.
 Solo en caso de pérdida de datos. Es una operación manual y deliberada, sin script: hace falta un
 usuario con escritura sobre `yieldfit` (el de producción) y `mongorestore --drop` sobre esa base.
 Antes, haz un backup del estado actual, aunque esté dañado.
+
+## Reparaciones puntuales de producción
+
+Para corregir datos de producción con un script (p. ej. `npm run reparar:borrados`, que borra
+las sesiones vacías y limpia las rutinas que apuntan a ejercicios inexistentes). Ningún usuario
+permanente puede escribir en producción salvo el de la app, así que cada reparación usa un
+**usuario temporal** que se crea para ella y desaparece después.
+
+1. **Usuario temporal en Atlas** (Security → Database Access → Add New Database User):
+   - nombre `yieldfit-reparacion`, contraseña autogenerada;
+   - *Specific Privileges*: `readWrite` sobre `yieldfit` y nada más;
+   - activa **Temporary User** con duración de **6 horas**. Atlas lo borra solo al caducar,
+     aunque se te olvide hacerlo a mano.
+2. **Su URI en el Llavero:**
+   ```bash
+   security add-generic-password -s yieldfit-reparacion -a "$USER" -w
+   ```
+3. **Backup y prueba de restauración**, justo antes:
+   ```bash
+   npm run backup
+   npm run backup:restore-test
+   ```
+4. **Simulación** (no escribe nada). Comprueba que los ids y los números coinciden con el
+   diagnóstico:
+   ```bash
+   npm run reparar:borrados
+   ```
+5. **Aplicar.** El script se niega si el último backup tiene más de 60 minutos, si encuentra
+   muchos más cambios de los esperados o si alguna rutina se quedaría sin ejercicios. Todo
+   va en una transacción: o se aplica entero o no se aplica nada.
+   ```bash
+   npm run reparar:borrados -- --aplicar
+   ```
+6. **Comprobar**: los apartados 1 y 2 deben salir a 0.
+   ```bash
+   npm run diagnostico:borrados
+   ```
+7. **Limpiar.** Borra el usuario en Atlas (Database Access → Delete) sin esperar a que
+   caduque, y su URI del Llavero:
+   ```bash
+   security delete-generic-password -s yieldfit-reparacion
+   ```
+
+```mermaid
+flowchart TD
+    A["Usuario temporal<br/>(readWrite yieldfit, 6 h)"] --> B["backup + restore-test"]
+    B --> C["simulación"]
+    C -->|"números correctos"| D["--aplicar<br/>(transacción)"]
+    D --> E["diagnóstico = 0"]
+    E --> F["borrar usuario<br/>(Atlas + Llavero)"]
+```
+
+Antes de producción, el script se prueba en desarrollo con `-- --desarrollo` (usa el `.env`).
 
 ## Dónde se guardan
 

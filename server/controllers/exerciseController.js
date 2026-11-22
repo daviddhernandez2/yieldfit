@@ -1,11 +1,21 @@
 import mongoose from 'mongoose';
-import Exercise from '../models/Exercise.js';
+import Exercise, { OPCIONES_GRUPO_MUSCULAR, OPCIONES_TIPO } from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
 import Chart from '../models/Chart.js';
 
 // GET /api/exercises
 // Lista los ejercicios del usuario autenticado.
 // Admite filtros opcionales por query string: grupoMuscular, tipo, search (por nombre).
+// GET /api/exercises/opciones
+// Grupos musculares y tipos válidos, con su texto para mostrar. El cliente construye
+// con esto los selects, los chips y los filtros, así que no repite las listas.
+// Es igual para todos los usuarios y no toca la base de datos.
+export const opciones = (req, res) => {
+  res.status(200).json({
+    opciones: { gruposMusculares: OPCIONES_GRUPO_MUSCULAR, tipos: OPCIONES_TIPO },
+  });
+};
+
 export const list = async (req, res, next) => {
   try {
     const filter = { userId: req.user._id };

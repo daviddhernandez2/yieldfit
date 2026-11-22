@@ -1,24 +1,31 @@
 import mongoose from 'mongoose';
 
-// Listas de valores permitidos. Se extraen como constantes para reutilizarlas
-// como enums en el schema y poder exportarlas al frontend en el futuro.
-const GRUPOS_MUSCULARES = [
-  'Pecho',
-  'Espalda',
-  'Hombros',
-  'Brazos',
-  'Piernas',
-  'Core',
-  'Cardio',
+// Valores permitidos de grupoMuscular y tipo, con el texto que ve el usuario.
+// Son la ÚNICA fuente de verdad: el schema los usa como enum y el cliente los recibe
+// de GET /api/exercises/opciones (DECISIONS.md, 0024). El cliente no tiene copias.
+//   - value: lo que se guarda en la base. No se cambia nunca: hay documentos que lo usan.
+//   - label: lo que se muestra. Se puede cambiar sin migrar nada (p. ej. tildes).
+// Un valor nuevo solo exige desplegar el servidor: el cliente lo mostrará solo.
+export const OPCIONES_GRUPO_MUSCULAR = [
+  { value: 'Pecho', label: 'Pecho' },
+  { value: 'Espalda', label: 'Espalda' },
+  { value: 'Hombros', label: 'Hombros' },
+  { value: 'Brazos', label: 'Brazos' },
+  { value: 'Piernas', label: 'Piernas' },
+  { value: 'Core', label: 'Core' },
+  { value: 'Cardio', label: 'Cardio' },
 ];
 
-const TIPOS = [
-  'Peso corporal',
-  'Pesas libres',
-  'Maquinas',
-  'Poleas',
-  'Cardio',
+export const OPCIONES_TIPO = [
+  { value: 'Peso corporal', label: 'Peso corporal' },
+  { value: 'Pesas libres', label: 'Pesas libres' },
+  { value: 'Maquinas', label: 'Máquinas' },
+  { value: 'Poleas', label: 'Poleas' },
+  { value: 'Cardio', label: 'Cardio' },
 ];
+
+const GRUPOS_MUSCULARES = OPCIONES_GRUPO_MUSCULAR.map((o) => o.value);
+const TIPOS = OPCIONES_TIPO.map((o) => o.value);
 
 const TRACKINGS = ['1RM', 'tiempo_distancia'];
 

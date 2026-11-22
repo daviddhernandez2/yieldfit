@@ -24,6 +24,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 |---|---|
 | 0 — Fundaciones | [bloques/0-fundaciones.md](bloques/0-fundaciones.md) |
 | 1 — Saneamiento | [bloques/1-saneamiento.md](bloques/1-saneamiento.md) |
+| 2 — Máquina de discos | [bloques/2-maquina-de-discos.md](bloques/2-maquina-de-discos.md) |
 
 ## Cómo mantener esta documentación
 

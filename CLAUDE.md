@@ -215,7 +215,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       código de terceros (React Bits) con atribución y licencia, limpiar comentarios
       obsoletos del curso, completar README raíz y sustituir el de `client/`, resolver la licencia (el README enlaza
       un `LICENSE` MIT inexistente y `server/package.json` declara ISC).
-- [ ] **2 — Máquina de discos**: nuevo valor en los tipos de ejercicio.
+- [x] **2 — Máquina de discos**: nuevo valor en los tipos de ejercicio.
 - [ ] **3 — Loader de arranque (cold start de Render)**: arquitectura ya acordada:
       interceptores en `api/client.js` que detectan respuestas lentas (>4 s), módulo
       pub-sub `utils/wakingUp.js`, hook `useServerWakingUp`, cambios mínimos en

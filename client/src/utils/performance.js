@@ -147,7 +147,7 @@ export const serieAgregadaTodos = (sesiones) => {
     let sumaEj = 0;
     let numEj = 0;
     for (const ej of sesion.ejercicios) {
-      if (!elegibles.has(String(ej.exerciseId))) continue; // ← el filtro nuevo
+      if (!elegibles.has(String(ej.exerciseId))) continue; // solo ejercicios con >= 2 sesiones
       const mejor = mejor1RMDeSets(ej.sets);
       if (mejor > 0) {
         sumaEj += mejor;

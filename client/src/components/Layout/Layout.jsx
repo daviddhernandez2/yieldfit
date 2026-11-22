@@ -6,8 +6,8 @@ import styles from '@/components/Layout/Layout.module.css';
 
 // Layout de las rutas privadas.
 // El fondo animado DarkVeil actúa como capa ambiental global de toda la app,
-// unificando visualmente todas las pantallas con el mismo tratamiento estético
-// que Welcome (donde usamos ColorBends). Es fixed y ocupa todo el viewport
+// unificando visualmente todas las pantallas con una estética parecida a la de
+// Welcome (que usa otro fondo, Dither). Es fixed y ocupa todo el viewport
 // independientemente del scroll, por lo que un solo componente cubre toda
 // la experiencia de sesión.
 export default function Layout({ children }) {

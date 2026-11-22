@@ -188,13 +188,8 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
   flujo de React Router).
 - READMEs: el raíz no explica instalación, arranque ni variables; `client/README.md` es la plantilla de Vite.
-- Comentarios obsoletos del curso (p. ej. "lo haremos en la Semana 3" en `api/client.js`).
-  En el mismo paso del bloque 1: corregir los comentarios falsos de `Dither.jsx` (dicen que el
-  resto del `useFrame` "se queda igual abajo", pero se quitó: que digan qué se quitó y que
-  velocidad, frecuencia, amplitud, color y ratón no reaccionan a cambios de props tras montar),
-  y borrar el CSS muerto de `DarkVeil.css` (`.color-bends-container` y `.veil` no se usan).
-- `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; `prevColor` sin usar).
-  `DarkVeil`: monocromo duplicado (en el shader y con `filter: saturate(0)`). Bloque 12.
+- `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; las props no reaccionan tras
+  montar y `prevColor` no se usa). Bloque 12.
 - README indica React Router v6; la dependencia instalada es v7.
 
 ## Informe de corrección del curso (CEI)
@@ -243,5 +238,5 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       corto + refresh token.
 - [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
       entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
-      sincronización híbrida de la sesión activa y revisión de DarkVeil (batería y
-      monocromo duplicado) y del `useFrame` incompleto de Dither.
+      sincronización híbrida de la sesión activa y revisión de DarkVeil (batería) y
+      del `useFrame` incompleto de Dither.

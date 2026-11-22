@@ -33,8 +33,8 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('yieldfit_token');
-      // window.location fuerza una navegación completa.
-      // Más adelante refinaremos esto con el router para una transición suave.
+      // window.location recarga la app entera (se pierde el estado de React).
+      // Pasará a navegación de React Router en el bloque 3 (ver CLAUDE.md).
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

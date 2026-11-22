@@ -51,7 +51,8 @@ const construirEjerciciosConSnapshots = async (ejerciciosInput, userId) => {
 
 // GET /api/sessions
 // Devuelve las sesiones del usuario, ordenadas por fecha descendente.
-// El frontend típicamente pagina o limita esta lista; aquí devolvemos todo.
+// Sin paginar: devuelve TODAS las sesiones, y el cliente calcula el progreso sobre
+// la lista completa. Crece con el historial; se pagina en el bloque 4 (CLAUDE.md).
 export const list = async (req, res, next) => {
   try {
     const sessions = await Session.find({ userId: req.user._id }).sort({ fecha: -1 });

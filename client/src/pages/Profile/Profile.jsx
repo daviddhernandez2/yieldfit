@@ -39,8 +39,8 @@ const IconMore = () => (
   </svg>
 );
 
-// Pantalla de perfil del usuario. Solo lectura en MVP.
-// La edición de datos se dejará para el pulido de la Semana 5.
+// Pantalla de perfil del usuario. Solo lectura: editar los datos del perfil
+// todavía no existe (no está en el roadmap de CLAUDE.md).
 export default function Profile() {
   const { user, logout } = useAuth();
 

@@ -222,22 +222,24 @@ function DitheredWaves({
     }, [size, gl]);
 
     const prevColor = useRef([...waveColor]);
-   // 1. Asegúrate de tener la referencia asignada al mesh en el JSX:
-// <mesh ref={mesh} ...>
 
-// 2. Modifica tu useFrame para que sea así de directo:
+    // Cambio respecto al original de React Bits: este useFrame SOLO avanza el tiempo.
+    // El original copiaba además, en cada frame, waveSpeed, waveFrequency,
+    // waveAmplitude, waveColor, enableMouseInteraction, mouseRadius y la posición del
+    // ratón a los uniforms del shader. Esa parte se quitó, así que esas props solo se
+    // leen al montar el componente: cambiarlas después no tiene efecto, y el ratón no
+    // mueve nada aunque se active (handlePointerMove guarda la posición, pero nadie la
+    // pasa al shader). prevColor quedó sin uso por lo mismo. Revisión en el bloque 12.
 useFrame(({ clock }) => {
-  // Comprobamos que el mesh y su material ya existan en la tarjeta gráfica
+  // Los uniforms del material no existen hasta que el mesh se ha montado.
   if (mesh.current && mesh.current.material) {
     const u = mesh.current.material.uniforms;
     
     if (u && u.time && !disableAnimation) {
-      // Forzamos el paso del tiempo directamente al shader compilado
+      // Avanzar el tiempo es lo que anima las ondas.
       u.time.value = clock.getElapsedTime();
     }
   }
-
-  // ... El resto de tus comprobaciones de color/mouse se quedan igual abajo
 });
 
     const handlePointerMove = e => {

@@ -42,6 +42,10 @@ activo, cada sesión una operación, y el progreso se lee como rendimiento de ca
    formato de la sección Git, `git push`) y enséñaselos a David. Ejecútalos solo cuando él
    los haya verificado y confirmado. **Nunca** ejecutes un comando de git que modifique el
    repo o el remoto sin su confirmación explícita para ese comando concreto.
+   Nunca ejecutar git dentro de otros comandos, scripts, heredocs o subprocesos (Python,
+   Node, etc.). Los mensajes que imprima un comando deben describir lo que hace de verdad.
+   Un hook (`.claude/hooks/confirmar-git.mjs`) pide confirmación como segunda capa; no
+   sustituye a esta regla.
 9. **Nunca** leas, muestres ni edites archivos `.env`. Usa los `.env.example`.
 10. Sé directo. Si una petición es una mala decisión técnica, dilo y explica por qué.
 11. **El repo es público.** `/docs`, `DECISIONS.md` y los README nunca contienen secretos,

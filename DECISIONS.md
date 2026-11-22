@@ -41,6 +41,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0020 | Borrar un ejercicio conserva el historial | vigente |
 | 0021 | Atribución del código de React Bits | vigente |
 | 0022 | Repositorio público sin licencia | vigente |
+| 0023 | Hook que pide confirmación para git dentro de cualquier comando | vigente |
 
 ---
 
@@ -699,3 +700,46 @@ hacer fork dentro de GitHub.
 - El código de terceros mantiene su propia licencia (`THIRD_PARTY_NOTICES.md`, 0021).
 - **Decisión revisable:** más adelante se puede pasar a MIT u otra licencia, o hacer el repo
   privado. Cualquiera de los dos cambios se registra en una entrada nueva.
+
+---
+
+## 0023 — Hook que pide confirmación para git dentro de cualquier comando
+
+Fecha: 2026-11-22 · Estado: vigente · Bloque: 1 · Matiza a: 0014
+
+**Contexto:** la regla 8 de `CLAUDE.md` (0014) exige que David confirme cada comando de git que
+modifique el repo. Claude Code la incumplió dos veces:
+1. Ejecutó `git stash` y `git stash pop` sin confirmación. Se añadieron entonces reglas `ask`
+   en `.claude/settings.json` (`Bash(git stash *)`, etc.).
+2. El 2026-11-22 ejecutó `git rm --cached` metido al final de un comando que empezaba con un
+   heredoc de Python, y el mensaje que imprimía decía "no he hecho git rm". Las reglas `ask` no
+   saltaron: comparan cómo **empieza** el comando, y ese empezaba por `python3`.
+   El efecto se limitó al índice (un archivo marcado como borrado, que el commit siguiente
+   borraba igualmente); no hubo commit ni push.
+
+**Decisión:**
+- **Regla 8 ampliada:** nunca ejecutar git dentro de otros comandos, scripts, heredocs o
+  subprocesos, y los mensajes de un comando deben describir lo que hace de verdad.
+- **Hook `PreToolUse`** (`.claude/hooks/confirmar-git.mjs`, registrado para Bash): recibe el
+  texto completo de cada comando, busca cada `git` suelto y mira el verbo que le sigue
+  (saltando opciones como `-C ruta` y separadores de código como comillas o comas). Si el
+  verbo no está en una **lista de solo lectura** (`status`, `diff`, `log`, `show`…), pide
+  confirmación. Si el propio hook falla, también pide confirmación.
+- Las reglas `ask` se mantienen como segunda capa.
+
+**Alternativas descartadas:**
+- *Solo ampliar la regla escrita:* ya existía y se incumplió; hace falta algo que no dependa de
+  que Claude la recuerde.
+- *Lista de verbos prohibidos en vez de permitidos:* un verbo olvidado pasaría sin preguntar.
+  Con permitidos, el error posible es una pregunta de más.
+- *Bloquear (`deny`) en vez de preguntar:* impediría también los commits que David confirma.
+
+**Consecuencias:**
+- Los comandos de git que David confirma piden confirmación dos veces (regla `ask` y hook) o
+  una más que antes. Es el coste aceptado.
+- Pregunta de más cuando `git push` aparece como texto (un `echo`, un mensaje que lo menciona).
+- **Límite:** no detecta un git construido a trozos (`"g" + "it"`) o guardado en una variable.
+  Protege frente a descuidos, no frente a un intento deliberado de saltárselo.
+- Al cambiar el hook hay que repetir su batería de pruebas: los dos incidentes, heredocs,
+  `-C ruta`, comillas escapadas y los casos que no deben preguntar (`.git/`, `.gitignore`,
+  `github.com`) con `node .claude/hooks/confirmar-git.test.mjs`.

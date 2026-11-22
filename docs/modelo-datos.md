@@ -116,9 +116,9 @@ Entrenamiento realizado.
 - **Snapshots** ([0004](../DECISIONS.md)): al crear la sesión, el controlador lee cada
   `Exercise` y copia `nombre → nombreSnapshot` y `tracking → trackingSnapshot`. Así, renombrar
   un ejercicio no cambia el historial.
-  ⚠️ `PUT /api/sessions/:id` vuelve a generar los snapshots si recibe `ejercicios`, así que una
-  sesión editada tomaría los nombres actuales. El cliente no usa ese endpoint; se resuelve en el
-  bloque 1.
+- **No se editan:** no hay `PUT /api/sessions/:id`. El que había regeneraba los snapshots con
+  los nombres actuales y el cliente nunca lo usó; se eliminó en el bloque 1. Una sesión solo se
+  crea o se borra.
 - **Índice `{ userId: 1, fecha: -1 }`:** sirve para listar las sesiones de un usuario de la más
   reciente a la más antigua, que es la query de `GET /api/sessions`.
 

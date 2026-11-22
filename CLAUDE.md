@@ -182,9 +182,6 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
 - Cold start de Render (plan gratuito): se resuelve en el bloque 3.
-- `PUT /api/sessions/:id` regenera los snapshots si recibe `ejercicios`
-  (`construirEjerciciosConSnapshots` copia los nombres actuales): contradice el historial
-  inmutable para sesiones editadas. Hoy no ocurre porque el cliente no usa el endpoint. Bloque 1.
 - El interceptor 401 de `api/client.js` usa `window.location.href` (recarga completa, rompe el
   flujo de React Router).
 - `components/Dither/` y `components/DarkVeil/` son código de terceros copiado de React Bits

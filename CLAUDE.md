@@ -98,7 +98,8 @@ server/
   data/         # exercisePresets.js — ejercicios clonados a cada usuario al registrarse
   utils/        # jwt.js, presets.js (clonado de presets)
   scripts/      # seed.js (datos de desarrollo), backup.sh, restore-test.sh y diagnostico-borrados.js;
-                # lib/ (credenciales.sh oculta la URI; recuentos.sh lee los logs)
+                # lib/ (credenciales.sh oculta la URI; recuentos.sh lee los logs;
+                # conexion.js: conexión y filtro de credenciales de los scripts Node)
 ```
 
 Import alias en cliente: `@` → `client/src`.

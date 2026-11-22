@@ -18,45 +18,13 @@
 // No usa los modelos de Mongoose a propósito: así no se ejecuta ningún middleware ni se
 // intenta crear ningún índice. Solo hay lecturas (countDocuments, aggregate).
 
-import 'dotenv/config';
-import { execFileSync } from 'node:child_process';
-import mongoose from 'mongoose';
+import { conectar, desconectar, ocultarCredenciales } from './lib/conexion.js';
 
+// Usuario de solo lectura: el diagnóstico no puede modificar producción aunque quisiera.
 const SERVICIO_LLAVERO = 'yieldfit-backup';
-const BASE_PRODUCCION = 'yieldfit';
 const MAX_IDS = 20; // ids que se listan por apartado, para que la salida sea legible
 
 const desarrollo = process.argv.includes('--desarrollo');
-
-// Credenciales que el filtro debe ocultar si aparecen en un mensaje de error.
-let claveSecreta = '';
-
-// Mismo criterio que scripts/lib/credenciales.sh: ningún mensaje de error de MongoDB
-// llega a la terminal sin pasar por aquí, porque podría llevar la URI con la contraseña.
-const ocultarCredenciales = (texto) => {
-  let limpio = String(texto).replace(/(mongodb(?:\+srv)?:\/\/[^:/@\s]+):[^@\s]*@/g, '$1:***@');
-  if (claveSecreta) {
-    for (const forma of [claveSecreta, decodeURIComponent(claveSecreta)]) {
-      limpio = limpio.split(forma).join('***');
-    }
-  }
-  return limpio;
-};
-
-const obtenerConexion = () => {
-  if (desarrollo) {
-    if (!process.env.MONGO_URI) throw new Error('MONGO_URI no está definida en server/.env');
-    // dbName undefined → la base que indique la URI (yieldfit-dev).
-    return { uri: process.env.MONGO_URI, dbName: undefined };
-  }
-  // execFileSync no pasa por un shell: la URI vuelve como texto a este proceso y
-  // nunca aparece en los argumentos de otro proceso.
-  const uri = execFileSync('security', ['find-generic-password', '-s', SERVICIO_LLAVERO, '-w'], {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore'],
-  }).trim();
-  return { uri, dbName: BASE_PRODUCCION };
-};
 
 // Pipeline común: para cada elemento de un array de ids, busca si el ejercicio existe.
 // Devuelve los documentos con la lista de ids que NO existen y cuántos sí.
@@ -88,16 +56,8 @@ const listarIds = (docs) => {
 };
 
 const main = async () => {
-  const { uri, dbName } = obtenerConexion();
-  claveSecreta = uri.match(/^mongodb(?:\+srv)?:\/\/[^:/@]+:([^@]*)@/)?.[1] ?? '';
-
-  await mongoose.connect(uri, { dbName, serverSelectionTimeoutMS: 15000 });
-  const db = mongoose.connection.db;
+  const db = await conectar({ desarrollo, servicioLlavero: SERVICIO_LLAVERO });
   const nombreBase = db.databaseName;
-
-  if (desarrollo && !nombreBase.endsWith('-dev')) {
-    throw new Error(`--desarrollo exige una base "-dev". Base actual: "${nombreBase}"`);
-  }
 
   const col = (nombre) => db.collection(nombre);
 
@@ -150,4 +110,4 @@ main()
     console.error(`Diagnóstico fallido: ${ocultarCredenciales(error.message)}`);
     process.exitCode = 1;
   })
-  .finally(() => mongoose.disconnect());
+  .finally(desconectar);

@@ -213,7 +213,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       obsoletos del curso, completar README raíz y sustituir el de `client/`, resolver la licencia (el README enlaza
       un `LICENSE` MIT inexistente y `server/package.json` declara ISC).
 - [x] **2 — Máquina de discos**: nuevo valor en los tipos de ejercicio.
-- [ ] **3 — Loader de arranque (cold start de Render)**: arquitectura ya acordada:
+- [x] **3 — Loader de arranque (cold start de Render)**: arquitectura ya acordada:
       interceptores en `api/client.js` que detectan respuestas lentas (>4 s), módulo
       pub-sub `utils/wakingUp.js`, hook `useServerWakingUp`, cambios mínimos en
       `PrivateRoute.jsx`, `Login.jsx` y `Register.jsx`. Incluye sustituir el
@@ -222,6 +222,8 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       guardar la sesión (con migración de las sesiones existentes), `GET /api/sessions` paginado.
       Requiere del bloque 1 la base de desarrollo separada (la migración no se prueba en
       producción) y un backup completo de producción justo antes de migrar.
+      **Requisito:** el endpoint de progreso acepta un rango (desde/hasta) desde el principio,
+      para que el selector de rango del bloque 9 no obligue a rehacerlo.
 - [ ] **5 — Serie anterior**: mostrar en cada serie de la sesión activa lo hecho en la sesión anterior.
 - [ ] **6 — Reemplazar ejercicio en sesión activa**: cambiar un ejercicio por otro sin salir de la
       sesión. Valorar antes pasar el estado de `ActiveSession.jsx` a `useReducer`.
@@ -230,6 +232,11 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       (sin traer sesiones completas).
 - [ ] **9 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;
       misma lógica de cálculo que el grupo "Todos", aplicada a los ejercicios seleccionados.
+      Además, en cada grupo (incluido "Todos"):
+      - selector de rango: 1 semana, 1 mes, 1 año, 5 años, 10 años y total. El % se mide desde
+        el primer punto del rango elegido, como en las apps de bolsa;
+      - desplegable para ocultar la lista de ejercicios y dejar solo el gráfico; cada grupo
+        recuerda si está plegado.
 - [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
 - [ ] **11 — Auth robusta**: rate limiting en login y registro (prioritario), access token
       corto + refresh token.

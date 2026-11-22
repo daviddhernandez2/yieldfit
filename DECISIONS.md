@@ -23,7 +23,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0002 | Ejercicios por usuario, clonados desde presets en una transacción | vigente |
 | 0003 | Subdocumentos embebidos en Workout y Session | vigente |
 | 0004 | Snapshots en Session para un historial inmutable | vigente |
-| 0005 | Cascada `$pull` al borrar un ejercicio | vigente |
+| 0005 | Cascada `$pull` al borrar un ejercicio | sustituida por 0020 |
 | 0006 | `tracking` persistido y derivado en `pre('save')` | vigente |
 | 0007 | 1RM estimado con Epley, calculado en el cliente | vigente |
 | 0008 | JWT de 7 días en `localStorage` | vigente |
@@ -38,6 +38,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0017 | Base de datos de desarrollo separada de producción | vigente |
 | 0018 | Backups manuales de producción con `mongodump` | vigente |
 | 0019 | Backups solo en el portátil y riesgos aceptados | vigente |
+| 0020 | Borrar un ejercicio conserva el historial | vigente |
 
 ---
 
@@ -147,7 +148,7 @@ en el momento de registrarla.
 
 ## 0005 — Cascada `$pull` al borrar un ejercicio
 
-Fecha: anterior a la entrega (≤ 2026-07) · Estado: vigente · Bloque: —
+Fecha: anterior a la entrega (≤ 2026-07) · Estado: sustituida por 0020 · Bloque: —
 Origen del porqué: motivo escrito en el código (comentario de cabecera de
 `exerciseController.remove`: "Decisión de producto")
 
@@ -578,3 +579,53 @@ filtro mientras dura el backup (en macOS lo ven el propio usuario y root, con `p
   protege los datos frente a terceros, pero no los recupera.
 - La revisión prevista en la 0018 (backups automáticos fuera del portátil cuando haya usuarios
   reales) sigue vigente y cubriría este riesgo.
+
+---
+
+## 0020 — Borrar un ejercicio conserva el historial
+
+Fecha: 2026-11-22 · Estado: vigente · Bloque: 1 · Sustituye a: 0005
+
+**Contexto:** la cascada de la 0005 quitaba el ejercicio de todas las sesiones del usuario. Tenía
+tres consecuencias pendientes: sesiones que se quedaban con `ejercicios: []`, borrado irreversible
+del historial sin avisar al usuario, y rutinas y grupos con `exerciseIds` que ya no existían. Las
+rutinas rotas no se podían editar ni usar para guardar un entreno (error 400). El diagnóstico de
+producción encontró 3 sesiones vacías y 2 rutinas rotas.
+
+**Decisión** (de David, opción B):
+- **El ejercicio se borra de verdad**, y en la misma transacción se quita de las rutinas y los
+  grupos del usuario (`$pull` sobre `Workout` y `Chart`).
+- **Las sesiones no se tocan.** Conservan el ejercicio con su `nombreSnapshot` (0004): el
+  historial sigue mostrando lo que se hizo.
+- **El progreso ignora los ejercicios borrados.** Hoy lo filtra el cliente
+  (`quitarEjerciciosBorrados` en `utils/performance.js`); en el bloque 4 lo hará el backend.
+- **Regla R2:** si el ejercicio es el único de alguna rutina (también en el caso `[X, X]`), no se
+  borra nada y se responde 409 con el nombre de la rutina. No se borra una rutina que el usuario
+  no ha pedido borrar.
+- **El usuario sabe lo que pasa:** el diálogo de borrado lo explica con un único texto
+  compartido (`utils/borradoEjercicio.js`).
+- **La sesión activa se defiende:** al terminarla se comprueba qué ejercicios siguen existiendo;
+  las series de los borrados no se envían y se avisa con su nombre. Al empezar desde una rutina,
+  los ejercicios inexistentes no entran en la sesión.
+- **Los restos de la cascada antigua se reparan una vez** con `npm run reparar:borrados`, con
+  backup previo y usuario temporal (`docs/operaciones.md`). Aplicado en producción el 2026-11-22.
+
+**Alternativas descartadas:**
+- *Mantener la cascada y solo arreglar sus consecuencias:* seguiría borrando historial real del
+  usuario, que es lo más valioso que guarda la app (0015).
+- *Borrado lógico (`archivado: true`) con opción de restaurar:* obliga a excluir los archivados
+  en todas las consultas de ejercicios (si una lo olvida, reaparecen) y necesita una pantalla de
+  restauración. B conserva el historial con menos código, porque los snapshots ya guardan lo
+  necesario.
+- *Impedir el borrado si el ejercicio tiene sesiones:* con años de historial, casi ningún
+  ejercicio se podría borrar.
+- *Borrar la rutina si se queda vacía:* borraría algo que el usuario no ha pedido borrar.
+
+**Consecuencias:**
+- Las sesiones pueden referenciar ejercicios que ya no existen. Es normal y deliberado: el
+  apartado 4 del diagnóstico deja de ser un error.
+- Todo cálculo de progreso tiene que excluir los ejercicios borrados. Hoy exige que el Dashboard
+  pida también la lista de ejercicios; el bloque 4 lo moverá al backend.
+- Si el usuario vuelve a crear un ejercicio con el mismo nombre, es un ejercicio nuevo: su
+  progreso empieza de cero y no se une al historial del borrado.
+- La 0004 dice que los snapshots no protegen frente a borrados. Con esta decisión sí lo hacen.

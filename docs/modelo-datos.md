@@ -126,24 +126,45 @@ Entrenamiento realizado.
 Grupo de ejercicios para el progreso (`nombre`, `exerciseIds[]`). CRUD hecho en el backend,
 **sin uso en el cliente todavía** (bloque 9).
 
-## Borrar un ejercicio: cascada `$pull`
+## Borrar un ejercicio: el historial se conserva
 
-Decisión de producto ([0005](../DECISIONS.md)): si el usuario borra un ejercicio, no quiere que
-aparezca en su progreso histórico.
+Decisión [0020](../DECISIONS.md), que sustituye a la cascada de la 0005. El ejercicio se borra de
+verdad y desaparece de rutinas y grupos, pero **las sesiones pasadas lo conservan**: su nombre está
+en `nombreSnapshot`. Lo que cambia es que deja de contar en el progreso.
 
 ```mermaid
 sequenceDiagram
     participant C as exerciseController.remove
     participant E as Exercise
-    participant S as Session
-    C->>E: deleteOne({ _id, userId })
-    C->>S: updateMany({ userId }, { $pull: { ejercicios: { exerciseId } } })
-    Note over S: updateMany no ejecuta validadores:<br/>una sesión puede quedar con ejercicios: []
-    Note over C: Workout y Chart no se tocan:<br/>sus exerciseIds quedan huérfanos
+    participant W as Workout
+    participant G as Chart
+    Note over C,G: Todo dentro de una transacción
+    C->>E: findOne({ _id, userId })
+    C->>W: ¿alguna rutina se quedaría vacía? (también [X, X])
+    alt sí
+        C-->>C: 409 con el nombre de la rutina, no se borra nada
+    else no
+        C->>E: deleteOne
+        C->>W: updateMany $pull ejercicios.exerciseId
+        C->>G: updateMany $pull exerciseIds
+        C-->>C: 204
+    end
+    Note over C: Session no se toca
 ```
 
-Las tres consecuencias (sesiones vacías, borrado sin aviso, ids huérfanos) se resuelven en el
-bloque 1.
+Dónde se nota en el cliente:
+
+| Sitio | Qué hace |
+|---|---|
+| Diálogo de borrado (`utils/borradoEjercicio.js`) | Explica que se quita de rutinas y grupos y que el historial se conserva |
+| Dashboard (`quitarEjerciciosBorrados` en `utils/performance.js`) | Excluye del progreso los ejercicios que ya no existen (en el bloque 4 pasa al backend) |
+| Historial | Muestra la sesión tal cual, con el nombre del snapshot |
+| Empezar sesión desde rutina (`useStartSession`) | No incluye ejercicios inexistentes; si no queda ninguno, pide editar la rutina |
+| Terminar sesión activa (`ActiveSession.jsx`) | Comprueba qué ejercicios siguen existiendo; no envía las series de los borrados y avisa con su nombre |
+
+Los restos de la cascada antigua (sesiones vacías, rutinas con ids inexistentes) se detectan con
+`npm run diagnostico:borrados` y se repararon una vez con `npm run reparar:borrados`
+([operaciones.md](operaciones.md)).
 
 ## Qué crece con el tiempo
 

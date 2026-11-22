@@ -109,7 +109,8 @@ Import alias en cliente: `@` → `client/src`.
 
 - **User**: credenciales (bcrypt en `pre('save')`), datos de perfil. `toJSON` elimina `password`.
 - **Exercise**: por usuario. `tipo` y `grupoMuscular` son enums; `tracking` (`1RM` |
-  `tiempo_distancia`) se deriva en `pre('save')`.
+  `tiempo_distancia`) se deriva en `pre('save')`. Borrarlo lo quita de rutinas y grupos,
+  pero las sesiones lo conservan y el progreso lo ignora (0020; 409 si es el único de una rutina).
 - **Workout**: rutina (plantilla) con ejercicios embebidos (`numSeries`, `descansoSegundos`, `orden`).
 - **Session**: entrenamiento realizado. Ejercicios embebidos con **snapshots** (`nombreSnapshot`,
   `trackingSnapshot`) para que el historial sea inmutable. Índice `{ userId: 1, fecha: -1 }`.
@@ -181,12 +182,6 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
 - Cold start de Render (plan gratuito): se resuelve en el bloque 3.
-- **Cascada `$pull` al borrar un Exercise** (decisión deliberada, ver `DECISIONS.md`):
-  `exerciseController.remove` quita ese ejercicio de todas las sesiones del usuario.
-  Consecuencias pendientes de resolver en el bloque 1: sesiones que pueden quedar con
-  `ejercicios: []` (`updateMany` no pasa las validaciones de Mongoose), borrado irreversible
-  del historial sin aviso al usuario, y Workouts y Charts con `exerciseIds` huérfanos
-  (la cascada no los limpia).
 - `PUT /api/sessions/:id` regenera los snapshots si recibe `ejercicios`
   (`construirEjerciciosConSnapshots` copia los nombres actuales): contradice el historial
   inmutable para sesiones editadas. Hoy no ocurre porque el cliente no usa el endpoint. Bloque 1.

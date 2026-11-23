@@ -26,7 +26,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0005 | Cascada `$pull` al borrar un ejercicio | sustituida por 0020 |
 | 0006 | `tracking` persistido y derivado en `pre('save')` | vigente |
 | 0007 | 1RM estimado con Epley, calculado en el cliente | sustituida por 0026 |
-| 0008 | JWT de 7 días en `localStorage` | vigente |
+| 0008 | JWT de 7 días en `localStorage` | sustituida por 0037 |
 | 0009 | Sesión activa persistida en `localStorage` | vigente |
 | 0010 | CSS Modules + tokens en `variables.css` | vigente |
 | 0011 | Fondos WebGL copiados de React Bits | vigente |
@@ -55,6 +55,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0034 | Grupos de progreso con rango, plegado y orden en el dispositivo | vigente |
 | 0035 | Límite de intentos en el login y el registro | vigente |
 | 0036 | Mejoras de uso: crear desde el buscador, etiquetas, selector por pasos, arrastrar y cargas | vigente |
+| 0037 | Token de acceso de 15 minutos en memoria y token de renovación en cookie httpOnly | vigente |
 
 ---
 
@@ -242,7 +243,7 @@ sesión. Se calcula en `client/src/utils/performance.js` a partir de las sesione
 
 ## 0008 — JWT de 7 días en `localStorage`
 
-Fecha: anterior a la entrega (≤ 2026-07) · Estado: vigente · Bloque: —
+Fecha: anterior a la entrega (≤ 2026-07) · Estado: sustituida por 0037 · Bloque: —
 Origen del porqué: guardarlo en `localStorage` está confirmado por David; el contenido del
 payload (solo `userId`) está documentado en `server/utils/jwt.js`
 
@@ -1260,4 +1261,64 @@ forma de cambiar el orden de los ejercicios; y las esperas se veían como un "Ca
   el reducer (`moverEjercicio`), con sus pruebas.
 - Formularios, detalle de sesión y la carga inicial de la app siguen con "Cargando...": no
   estaban en el alcance.
+
+---
+
+## 0037 — Token de acceso de 15 minutos en memoria y token de renovación en cookie httpOnly
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11 (pasos 11.2 y 11.3) · Sustituye a: 0008
+
+**Contexto:** un único JWT de 7 días guardado en `localStorage` (0008): si se filtraba (un XSS lo
+leería), valía una semana entera y no había forma de revocarlo; "cerrar sesión" solo lo borraba
+del navegador. El límite de intentos se hizo antes (11.1, 0035).
+
+**Decisión** (de David, valores propuestos):
+- **Token de acceso:** JWT de **15 minutos**, solo **en memoria** del cliente. La duración es
+  una constante del código (`DURACION_ACCESO`); desaparece `JWT_EXPIRES_IN`.
+- **Token de renovación:** aleatorio de 256 bits, **30 días**, en una **cookie httpOnly**
+  (`Secure` en producción, `SameSite=Lax`, `Path=/api/auth`). En la base solo su huella SHA-256,
+  con índice TTL que borra los caducados.
+- **Rotación:** cada token de renovación sirve una vez; renovar da uno nuevo de la misma
+  **familia**. **Margen de gracia de 30 s** para dos renovaciones casi simultáneas (dos
+  pestañas); fuera de él, un token gastado que reaparece se trata como robado y se borra su
+  familia entera.
+- **Endpoints:** `POST /api/auth/refresh` y `POST /api/auth/logout` (revoca la sesión de este
+  dispositivo). Login y registro emiten los dos tokens.
+- **Cliente:** renueva al abrir la app; ante un 401 con token, renueva **una vez** (las
+  peticiones que fallan a la vez comparten esa renovación) y repite la petición; si no puede,
+  cierra la sesión. La intro usa un indicador sin datos (`yieldfit_con_sesion`).
+- **API en `api.yieldfit.app`** (antes `yieldfit.onrender.com`): mismo sitio que la app, para
+  que el navegador (Safari incluido) envíe la cookie.
+- **Despliegue:** cambio de `JWT_SECRET` en Render, para invalidar los tokens de 7 días ya
+  emitidos. Todos los usuarios vuelven a iniciar sesión una vez (aceptado por David).
+
+**Revisión de BREACH** (pendiente desde la 0028 para cuando la auth usara cookies): BREACH deduce
+un secreto midiendo el tamaño de respuestas **comprimidas** (Render comprime con Brotli) en las
+que aparecen a la vez el secreto y texto que controla el atacante, y para eso necesita que el
+navegador de la víctima haga esas peticiones con sus credenciales desde otra web.
+- La cookie es `SameSite=Lax`: el navegador no la envía en peticiones POST desde otros sitios, y
+  `/refresh` y `/logout` son POST. Una web ajena no puede provocar respuestas autenticadas.
+- La única respuesta con un secreto ligado a la cookie es `/refresh` (el token de acceso), y no
+  refleja nada que envíe el cliente.
+- El resto de la API se autentica con la cabecera `Authorization`, que el navegador nunca añade
+  solo.
+- **Conclusión: BREACH sigue sin aplicar.** Revisar si algún día una respuesta autenticada
+  refleja texto de la petición junto a un secreto, o si la cookie dejara de ser `SameSite`.
+
+**Alternativas descartadas:**
+- *Rotación estricta sin margen:* abrir la app con dos pestañas cerraría la sesión.
+- *Token de renovación en `localStorage`:* un XSS lo leería, que es justo lo que se quiere evitar.
+- *Sesiones en el servidor (cookie de sesión clásica):* una consulta a la base en cada petición
+  para leer la sesión, y no encaja con la app de iPhone del bloque 12.
+- *Mantener `yieldfit.onrender.com`:* sería otro sitio para el navegador y Safari bloquearía la
+  cookie.
+
+**Consecuencias:**
+- Un token de acceso robado vale como mucho 15 minutos; cerrar sesión ya revoca de verdad.
+- Abrir la app hace una petición más (`/refresh`) antes de mostrar nada.
+- Una colección nueva (`refreshtokens`) que no crece: el TTL borra lo caducado.
+- La app de iPhone (bloque 12) necesitará el token de renovación fuera de la cookie
+  (almacenamiento seguro nativo).
+- En local, `DURACION_ACCESO_PRUEBA` acorta el token de acceso para probar la renovación; se
+  ignora en producción.
 

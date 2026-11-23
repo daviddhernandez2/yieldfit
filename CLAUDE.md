@@ -186,9 +186,6 @@ Aplicar en cada cambio y avisar cuando algo existente no los cumpla:
 No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
-- JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token (el límite de intentos ya
-  está, 11.1).
-  Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
 - **Datos huérfanos de usuarios inexistentes:** en producción hay ejercicios de 11 usuarios
   distintos pero solo 7 usuarios (diagnóstico de cardio, 2026-11-23). Parece que se borraron 4
   usuarios a mano sin borrar sus datos: ejercicios y quizá rutinas, sesiones o grupos. Pendiente:

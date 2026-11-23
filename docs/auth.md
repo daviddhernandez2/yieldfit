@@ -45,8 +45,8 @@ sequenceDiagram
         API->>DB: user.save() → pre('save') hashea la contraseña
         API->>DB: Exercise.insertMany(58 presets)
         end
-        API-->>CTX: 201 { token, user }
-        CTX->>CTX: localStorage.setItem('yieldfit_token')<br/>status = authenticated
+        API-->>CTX: 201 { token, user } + cookie de renovación
+        CTX->>CTX: token de acceso en memoria<br/>status = authenticated
     end
 ```
 
@@ -69,8 +69,8 @@ sequenceDiagram
         alt contraseña incorrecta
             API-->>CTX: 401 "Credenciales incorrectas"
         else correcta
-            API-->>CTX: 200 { token, user }
-            CTX->>CTX: guarda token, status = authenticated
+            API-->>CTX: 200 { token, user } + cookie de renovación
+            CTX->>CTX: token de acceso en memoria<br/>status = authenticated
         end
     end
 ```
@@ -104,10 +104,12 @@ sequenceDiagram
         end
     end
     alt respuesta 401 y la petición llevaba token
-        AX->>AX: interceptor de response:<br/>borra el token y anuncia "sesión caducada"
-        AX->>CTX: oyente de alCaducarSesion
-        CTX->>CTX: LOGOUT → status = unauthenticated
-        Note over CTX: PrivateRoute redirige a /login<br/>con React Router (sin recargar)
+        AX->>AX: interceptor de response:<br/>renueva con la cookie y repite la petición<br/>(ver «Cuando el token de acceso caduca»)
+        opt la renovación falla o la repetición vuelve a dar 401
+            AX->>CTX: oyente de alCaducarSesion
+            CTX->>CTX: LOGOUT → status = unauthenticated
+            Note over CTX: PrivateRoute redirige a /login<br/>con React Router (sin recargar)
+        end
     end
     AX-->>P: respuesta o error
 ```

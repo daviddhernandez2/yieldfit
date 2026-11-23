@@ -26,6 +26,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 1 — Saneamiento | [bloques/1-saneamiento.md](bloques/1-saneamiento.md) |
 | 2 — Máquina de discos | [bloques/2-maquina-de-discos.md](bloques/2-maquina-de-discos.md) |
 | 3 — Loader de arranque | [bloques/3-loader-arranque.md](bloques/3-loader-arranque.md) |
+| 4 — Historial escalable | [bloques/4-historial-escalable.md](bloques/4-historial-escalable.md) |
 
 ## Cómo mantener esta documentación
 

@@ -219,7 +219,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       pub-sub `utils/wakingUp.js`, hook `useServerWakingUp`, cambios mínimos en
       `PrivateRoute.jsx`, `Login.jsx` y `Register.jsx`. Incluye sustituir el
       `window.location` del interceptor 401 por navegación de React Router.
-- [ ] **4 — Historial escalable**: cálculo del progreso en el backend, 1RM precalculado al
+- [x] **4 — Historial escalable**: cálculo del progreso en el backend, 1RM precalculado al
       guardar la sesión (con migración de las sesiones existentes), `GET /api/sessions` paginado.
       Requiere del bloque 1 la base de desarrollo separada (la migración no se prueba en
       producción) y un backup completo de producción justo antes de migrar.

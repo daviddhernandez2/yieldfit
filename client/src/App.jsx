@@ -19,6 +19,7 @@ const Workouts = lazy(() => import('@/pages/Workouts/Workouts.jsx'));
 const WorkoutForm = lazy(() => import('@/pages/WorkoutForm/WorkoutForm.jsx'));
 const ActiveSession = lazy(() => import('@/pages/ActiveSession/ActiveSession.jsx'));
 const ReplaceExercise = lazy(() => import('@/pages/ReplaceExercise/ReplaceExercise.jsx'));
+const GroupForm = lazy(() => import('@/pages/GroupForm/GroupForm.jsx'));
 const History = lazy(() => import('@/pages/History/History.jsx'));
 const SessionDetail = lazy(() => import('@/pages/SessionDetail/SessionDetail.jsx'));
 const Profile = lazy(() => import('@/pages/Profile/Profile.jsx'));
@@ -144,6 +145,19 @@ function App() {
                 </PrivateRoute>
               }
             />
+            {['/groups/new', '/groups/:id/edit'].map((ruta) => (
+              <Route
+                key={ruta}
+                path={ruta}
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <GroupForm />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+            ))}
             <Route
               path="/sessions/active/replace/:index"
               element={

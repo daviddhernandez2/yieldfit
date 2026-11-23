@@ -282,8 +282,8 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       reordenar (rutina, sesión activa y grupos del Dashboard) y animaciones de carga
       (esqueletos y ticker de servidor dormido).
 - [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
-- [ ] **11 — Auth robusta**: rate limiting en login y registro (prioritario, **hecho en el 11.1**),
-      access token corto + refresh token (11.2 y 11.3, después del bloque 9b).
+- [x] **11 — Auth robusta**: rate limiting en login y registro (11.1), access token corto +
+      refresh token (11.2 y 11.3) e IP real detrás de los proxies de Render (11.4, 0038).
 - [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
       entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
       sincronización híbrida de la sesión activa y revisión de DarkVeil (batería) y

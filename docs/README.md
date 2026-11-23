@@ -11,7 +11,7 @@ renderiza los diagramas mermaid de forma nativa (ver [0016](../DECISIONS.md)).
 |---|---|
 | [Arquitectura](arquitectura.md) | Despliegue, capas del backend y del cliente, recorrido de una petición |
 | [Modelo de datos](modelo-datos.md) | Colecciones, qué va embebido y qué referenciado, snapshots, índices |
-| [Autenticación](auth.md) | Registro, login, `requireAuth` y cómo el cliente guarda y usa el token |
+| [Autenticación](auth.md) | Registro, login, tokens de acceso y de renovación, límite de intentos e IP real |
 | [Operaciones](operaciones.md) | Backups de producción, prueba de restauración y reparaciones puntuales |
 | [Decisiones](../DECISIONS.md) | Registro de decisiones técnicas y de producto (fuente única, no se duplica aquí) |
 
@@ -33,6 +33,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 8 — Calendario | [bloques/8-calendario.md](bloques/8-calendario.md) |
 | 9 — Grupos de progreso | [bloques/9-grupos-progreso.md](bloques/9-grupos-progreso.md) |
 | 9b — Mejoras de uso | [bloques/9b-mejoras-uso.md](bloques/9b-mejoras-uso.md) |
+| 11 — Auth robusta | [bloques/11-auth-robusta.md](bloques/11-auth-robusta.md) |
 
 ## Cómo mantener esta documentación
 

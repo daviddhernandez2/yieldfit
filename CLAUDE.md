@@ -247,9 +247,25 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
 - [x] **5b — Cardio bloqueado**: el tipo Cardio se marca como no disponible en las opciones del
       servidor y la app lo muestra como "Próximamente" en todos los sitios donde se elige o se
       registra. Desbloquearlo es quitar `disponible: false` en `OPCIONES_TIPO`.
-- [ ] **6 — Reemplazar ejercicio en sesión activa**: cambiar un ejercicio por otro sin salir de la
+- [x] **6 — Reemplazar ejercicio en sesión activa**: cambiar un ejercicio por otro sin salir de la
       sesión. Valorar antes pasar el estado de `ActiveSession.jsx` a `useReducer`.
-- [ ] **7 — Exportar CSV**: historial exportable, generado en el backend.
+- [ ] **7 — Exportar CSV** · **aplazado** (2026-11-23, decisión de David; el botón del Historial
+      sigue con "Próximamente"): historial exportable, generado en el backend. Propuesta:
+      - `GET /api/sessions/export` que escribe el CSV **por partes con un cursor** de MongoDB: la
+        memoria del servidor no crece con el historial (0015).
+      - **Una fila por serie**: `fecha`, `hora`, `sesion`, `ejercicio`, `serie`, `peso_kg`, `reps`,
+        `1rm_estimado_kg`, `tiempo_s`, `distancia_m`, `rpe`, `duracion_sesion_min`. Ejercicios
+        borrados con su nombre del snapshot.
+      - **Formato Excel en español**: separador `;`, decimales con coma y BOM UTF-8. Opción
+        futura: formato internacional (`,` y punto decimal) para programas.
+      - **Zona horaria del cliente** (el cliente la envía, p. ej. `Europe/Madrid`): las fechas
+        se guardan en UTC y el servidor está en Frankfurt.
+      - **Protección contra CSV injection** (OWASP): comilla delante de los valores que empiezan
+        por `=`, `+`, `-` o `@`; escape estándar de comillas, separadores y saltos de línea.
+        Formato en funciones puras con pruebas.
+      - Cliente: descarga con axios (el token va en cabecera, un `<a href>` no lo envía).
+        **Para el bloque 12:** en Capacitor esa descarga no funciona igual; habrá que usar el
+        menú de compartir.
 - [ ] **8 — Calendario de días entrenados**: endpoint que devuelva solo fechas por rango
       (sin traer sesiones completas).
 - [ ] **9 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;

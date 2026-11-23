@@ -49,6 +49,8 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0028 | Sin middleware de compresión: Render ya comprime | vigente |
 | 0029 | Serie anterior: última sesión con el ejercicio, guardada en la sesión activa | vigente |
 | 0030 | Cardio bloqueado con "Próximamente" desde las opciones del servidor | vigente |
+| 0031 | Sesión activa con `useReducer` | vigente |
+| 0032 | Reemplazar un ejercicio en la sesión activa | vigente |
 
 ---
 
@@ -1012,4 +1014,76 @@ usuario), 0 rutinas con cardio y 0 sesiones: el bloqueo no afecta a datos existe
 - Al desbloquear, las sesiones activas que estén en curso en ese momento siguen con la fila
   bloqueada (se decidió al empezar). Es un caso de minutos.
 - Un ejercicio de tipo Cardio en otro grupo (que se mediría por 1RM) también queda bloqueado.
+
+---
+
+## 0031 — Sesión activa con `useReducer`
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 6
+
+**Contexto:** `ActiveSession.jsx` (~620 líneas) cambiaba la sesión con `setSession` y varios
+`map` anidados repartidos por el componente: escribir, marcar, añadir y quitar series, cargar la
+serie anterior. Reemplazar un ejercicio iba a ser otro más.
+
+**Decisión** (de David): todos los cambios de la sesión viven en una sola función pura,
+`sesionReducer` (`client/src/utils/activeSessionReducer.js`), y el componente usa
+`useReducer` y "cuenta lo que ha pasado" con `dispatch`.
+- **Pura:** lo aleatorio o de tiempo (el id de una serie nueva) lo pone el componente en la
+  acción. Devuelve copias, nunca modifica la sesión recibida.
+- **Misma forma de datos que en localStorage** (requisito de David): no añade ni quita campos,
+  así que una sesión a medias sobrevive al deploy.
+- **Pruebas sin React:** `node src/utils/activeSessionReducer.test.js` (desde `client/`), con una
+  sesión con la forma actual y otra de antes de los bloques 5 y 5b leídas como JSON.
+- El temporizador de descanso sigue como estado de la pantalla: no es parte de la sesión.
+- Se hizo como paso propio sin cambios visibles (6.1), comprobado antes de añadir funciones.
+
+**Alternativas descartadas:**
+- *Seguir con `useState`:* cada función nueva añadía otro `map` anidado en el componente y la
+  lógica no se podía probar sin navegador.
+- *Una librería de estado (Redux, Zustand):* dependencia nueva para un estado que vive en una
+  sola pantalla.
+
+**Consecuencias:**
+- Las funciones nuevas de la sesión activa son una acción más en el reducer, con su prueba.
+- El reducer se puede usar fuera de la pantalla: la página de reemplazar (0032) lo aplica sobre
+  la sesión de localStorage.
+- Una acción desconocida lanza un error: un `type` mal escrito se ve enseguida.
+
+---
+
+## 0032 — Reemplazar un ejercicio en la sesión activa
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 6
+
+**Contexto:** si la máquina está ocupada o un ejercicio no se puede hacer ese día, había que
+salir de la sesión o dejarlo vacío.
+
+**Decisión** (de David):
+- Botón **"Reemplazar ejercicio"** bajo las series, que abre una **página propia**
+  (`/sessions/active/replace/:index`). Primero fue una ventana emergente; en el iPhone no cabía
+  bien y se cambió a página completa.
+- Catálogo con `ExercisePicker` (extraído de `WorkoutForm`, compartido): sin los ejercicios que
+  ya están en la sesión y con el cardio como "Próximamente". **Tocar un ejercicio solo lo
+  marca**; el reemplazo se hace con un botón "Reemplazar por «X»" pegado abajo (encima de la
+  TabBar en el móvil), para que un toque por error al hacer scroll no cambie nada.
+- El nuevo ocupa **el mismo sitio, con las mismas series** (mínimo 1) **y el mismo descanso**,
+  y los campos vacíos. **La rutina no cambia**: solo esta sesión.
+- **Lo hecho del ejercicio reemplazado se pierde, con confirmación antes** si había series
+  hechas.
+- La página lee la sesión de localStorage, aplica el reemplazo con `sesionReducer` (0031), la
+  guarda y vuelve. Pide la serie anterior del ejercicio nuevo y espera como mucho 4 s; sin
+  cobertura vuelve sin ella.
+
+**Alternativas descartadas:**
+- *No dejar reemplazar si hay series hechas:* obliga a desmarcarlas una a una.
+- *Conservar lo hecho y añadir el nuevo debajo:* eso es "añadir ejercicio", otra función.
+- *Valores por defecto (3 series, 90 s) para el nuevo:* el hueco de la rutina ya dice cuántas
+  series y cuánto descanso tocan.
+- *Ventana emergente:* primera versión; no se adaptaba al ancho de un iPhone.
+
+**Consecuencias:**
+- El temporizador de descanso no se guarda en localStorage, así que se pierde al ir a la página
+  de reemplazar (igual que al salir de la sesión a cualquier otra pantalla).
+- Si la carga inicial de la serie anterior había fallado, el ejercicio nuevo tampoco la recibe
+  hasta que se reabra la sesión, que entonces las pide todas.
 

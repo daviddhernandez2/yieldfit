@@ -29,6 +29,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 4 — Historial escalable | [bloques/4-historial-escalable.md](bloques/4-historial-escalable.md) |
 | 5 — Serie anterior | [bloques/5-serie-anterior.md](bloques/5-serie-anterior.md) |
 | 5b — Cardio bloqueado | [bloques/5b-cardio-bloqueado.md](bloques/5b-cardio-bloqueado.md) |
+| 6 — Reemplazar ejercicio | [bloques/6-reemplazar-ejercicio.md](bloques/6-reemplazar-ejercicio.md) |
 
 ## Cómo mantener esta documentación
 

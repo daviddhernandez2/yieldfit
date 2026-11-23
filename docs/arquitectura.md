@@ -146,7 +146,7 @@ flowchart TB
 | `/dashboard` | Dashboard | sí |
 | `/exercises`, `/exercises/new`, `/exercises/:id/edit` | Exercises, ExerciseForm | sí |
 | `/workouts`, `/workouts/new`, `/workouts/:id/edit` | Workouts, WorkoutForm | sí |
-| `/sessions/active` | ActiveSession | sí |
+| `/sessions/active`, `/sessions/active/replace/:index` | ActiveSession, ReplaceExercise | sí |
 | `/history`, `/history/:id` | History, SessionDetail | sí |
 | `/profile` | Profile | sí |
 

@@ -56,7 +56,7 @@ activo, cada sesión una operación, y el progreso se lee como rendimiento de ca
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | React 19, Vite 8, react-router-dom 7, axios, Recharts, CSS Modules, Geist (fontsource), dnd-kit (arrastrar) |
+| Frontend | React 19, Vite 8, react-router-dom 7, axios, Recharts, CSS Modules, Geist y Geist Mono (fontsource), dnd-kit (arrastrar) |
 | Efectos | three.js + @react-three/fiber + postprocessing (Dither, solo Welcome); ogl (DarkVeil, fondo global en `Layout`) |
 | Backend | Node 20, Express 5 (ESM), Mongoose 9, bcrypt, jsonwebtoken, helmet, cors, morgan, express-rate-limit |
 | Lint | oxlint (cliente) |
@@ -167,13 +167,21 @@ ownership de los ids referenciados. Mantener siempre ese patrón.
 
 ## Diseño
 
-Dark mode. Verde `#3EF87E` (ganancia) / rojo `#FF3000` (pérdida). Tipografía Geist.
-Colores y espaciados siempre desde `styles/variables.css`, nunca valores sueltos.
+**Fuente de verdad del diseño** (desde el bloque 9c, DECISIONS 0047): el design system de Yield Fit
+en un artefacto de claude.ai, https://claude.ai/artifact/FRZyFL1pqgwGnvcaMCLoR3 (privado). Se lee
+`project/README.md`, `project/tokens.json`, `project/components/<Comp>/README.md` y el CSS compilado
+de `project/components/bundle.css`. Si no se puede leer, se dice y no se inventan valores.
+Figma (fileKey `FM0tXObXUAJsRipf0D0gXs`) queda como referencia histórica, desactualizada.
+
+Tema único **Premium** (valores en `:root`): superficies por niveles (`surface-0..3`), texto
+`#ededed`, botón principal en `color-action` (blanco roto), verde `#3EF87E` para datos, estados,
+selección y foco, y rojo `#dc6b67` para pérdidas, errores y peligro (siempre tonal, nunca sólido).
+Tipografía Geist; cifras y datos técnicos en Geist Mono (`--font-mono`).
+Colores, espaciados, sombras y movimiento siempre desde `styles/variables.css`, nunca valores sueltos.
 **Responsive obligatorio:** todo cambio de interfaz se comprueba a 375 y 390 px de ancho (y en
 escritorio), sin desbordes ni scroll horizontal. Los fallos se arreglan en el componente común,
 no página a página: dos o más botones juntos van siempre en `GrupoBotones` (se apilan a ancho
 completo si no caben); `Input` y `Select` ya se estrechan dentro de una fila.
-Fuente de verdad visual: Figma, fileKey `FM0tXObXUAJsRipf0D0gXs` (arquitectura de variables).
 
 ## Criterios de escalabilidad
 
@@ -293,6 +301,11 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       ("Pecho · Máquinas"), descanso y series con selector por pasos (1:30), arrastrar para
       reordenar (rutina, sesión activa y grupos del Dashboard) y animaciones de carga
       (esqueletos y ticker de servidor dormido).
+- [ ] **9c — Design system Premium** (0047): el tema Premium del design system del artefacto
+      como tema único: tokens nuevos en `variables.css`, Geist Mono, Button (tamaños, `ghost`,
+      `primary` en `color-action`, `danger` tonal), foco suave en campos, iconos de trazo 1.5,
+      componente `Metrica` (fila "Progreso" y "Sesiones" en el Dashboard), transiciones por
+      propiedad, y rgba sueltos y colores de Recharts pasados a tokens.
 - [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
 - [x] **11 — Auth robusta**: rate limiting en login y registro (11.1), access token corto +
       refresh token (11.2 y 11.3) e IP real detrás de los proxies de Render (11.4, 0038).

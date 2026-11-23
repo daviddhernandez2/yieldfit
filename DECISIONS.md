@@ -65,6 +65,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0044 | Nota de privacidad informativa, pública y sin email de contacto | vigente |
 | 0045 | Data router y aviso de cambios sin guardar | vigente |
 | 0046 | Filas de botones que se apilan (`GrupoBotones`) y responsive obligatorio | vigente |
+| 0047 | Design system Premium como tema único y fuente de verdad del diseño | vigente |
 
 ---
 
@@ -1597,4 +1598,42 @@ su propia fila de botones, y Perfil tenía un apaño por ancho de pantalla.
 
 **Consecuencias:**
 - Dos o más botones juntos van siempre en `GrupoBotones`.
+
+---
+
+## 0047 — Design system Premium como tema único y fuente de verdad del diseño
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 9c
+
+**Contexto:** el diseño vivía en `variables.css` y en un archivo de Figma que ya no se mantenía.
+David preparó un design system de Yield Fit en un artefacto de claude.ai, sacado del código real,
+con dos temas: "Oscuro" (los valores de la app) y "Premium" (una propuesta de refinado: mismo
+concepto, menos volumen).
+
+**Decisión** (de David):
+- **Fuente de verdad del diseño:** el design system del artefacto (`project/README.md`,
+  `tokens.json`, los README de cada componente y `bundle.css`). Figma queda como referencia
+  histórica.
+- **Tema único Premium**, con sus valores directamente en `:root`, sin conmutador de tema.
+- Lo que más cambia: el botón principal pasa a `color-action` (blanco roto) y el verde queda para
+  datos, estados, selección y foco; el rojo pasa de `#FF3000` a `#dc6b67`, siempre tonal; las
+  superficies van por niveles y las cifras usan Geist Mono.
+- Componente nuevo `Metrica`, usado en una fila de resumen del Dashboard ("Progreso" y "Sesiones"
+  del grupo "Todos", con datos que el servidor ya devuelve).
+- Los rgba sueltos y los colores de las gráficas de Recharts pasan a tokens cuando coinciden en
+  valor y en uso.
+
+**Alternativas descartadas:**
+- *Dos temas con conmutador:* la app nunca ha tenido otro tema; duplicaría cada valor sin que
+  nadie lo pida.
+- *Seguir con Figma como fuente:* estaba desactualizado y no tenía los tokens nuevos.
+- *Monoespaciada del sistema en lugar de Geist Mono:* se ve distinta en cada dispositivo.
+- *`Metrica` en la cabecera de cada grupo:* una tarjeta dentro de otra, con una gráfica repetida.
+
+**Consecuencias:**
+- Un cambio visual grande en toda la app (botón principal blanco, rojo apagado).
+- Una dependencia más en el cliente (`@fontsource-variable/geist-mono`).
+- El Dashboard hace una petición más al endpoint de progreso para la fila de resumen.
+- Si el artefacto cambia, `variables.css` se actualiza a mano desde él: no hay sincronización
+  automática.
 

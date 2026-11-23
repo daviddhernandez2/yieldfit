@@ -13,6 +13,8 @@ import { haySesionGuardada } from '@/utils/indicadorSesion.js';
 const Welcome = lazy(() => import('@/pages/Welcome/Welcome.jsx'));
 const Login = lazy(() => import('@/pages/Login/Login.jsx'));
 const Register = lazy(() => import('@/pages/Register/Register.jsx'));
+const Recuperar = lazy(() => import('@/pages/Recuperar/Recuperar.jsx'));
+const Restablecer = lazy(() => import('@/pages/Restablecer/Restablecer.jsx'));
 const Dashboard = lazy(() => import('@/pages/Dashboard/Dashboard.jsx'));
 const Exercises = lazy(() => import('@/pages/Exercises/Exercises.jsx'));
 const ExerciseForm = lazy(() => import('@/pages/ExerciseForm/ExerciseForm.jsx'));
@@ -38,9 +40,13 @@ function App() {
   // Intro cinemática:
   //   - Si este dispositivo NO tiene una sesión abierta, la intro aparece en cada refresco.
   //   - Si la tiene, no aparece: agilizamos el uso diario a quien ya conoce la marca.
+  //   - Nunca al abrir el enlace del email de recuperación (/restablecer, bloque 11b): quien
+  //     llega ahí ya conoce la app y viene a una sola cosa.
   // Se decide con un indicador sin datos (utils/indicadorSesion.js): desde el bloque 11 el
   // token vive en memoria y al abrir la app todavía no se sabe si la sesión sigue viva.
-  const [mostrarIntro, setMostrarIntro] = useState(() => !haySesionGuardada());
+  const [mostrarIntro, setMostrarIntro] = useState(
+    () => !haySesionGuardada() && window.location.pathname !== '/restablecer'
+  );
 
   const finalizarIntro = () => {
     setMostrarIntro(false);
@@ -63,6 +69,9 @@ function App() {
             <Route path="/" element={<Welcome />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            {/* Recuperar la contraseña por email (bloque 11b): públicas, sin sesión. */}
+            <Route path="/recuperar" element={<Recuperar />} />
+            <Route path="/restablecer" element={<Restablecer />} />
 
             {/* Rutas privadas */}
             <Route

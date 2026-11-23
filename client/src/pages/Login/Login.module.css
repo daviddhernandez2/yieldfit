@@ -68,3 +68,27 @@
 .link:hover {
   text-decoration: underline;
 }
+/* Aviso positivo encima del formulario (p. ej. "Contraseña cambiada", bloque 11b). Mismo
+   formato que el banner de error, en verde. */
+.avisoBanner {
+  padding: var(--space-md);
+  background-color: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-medium);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+/* "¿Olvidaste tu contraseña?": discreto, debajo del campo de la contraseña. */
+.olvido {
+  align-self: flex-end;
+  margin-top: calc(-1 * var(--space-md));
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.olvido:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}

@@ -34,3 +34,16 @@ export const deleteAccount = (password) => {
 export const changePassword = (actual, nueva) => {
   return apiClient.put('/auth/me/password', { actual, nueva });
 };
+
+// POST /api/auth/forgot-password  { email } → { message }
+// Pide el enlace para restablecer la contraseña (bloque 11b). La respuesta es SIEMPRE la
+// misma, exista o no la cuenta. 429 si se piden demasiados.
+export const forgotPassword = (email) => {
+  return apiClient.post('/auth/forgot-password', { email });
+};
+
+// POST /api/auth/reset-password  { token, password } → { message }
+// Pone la contraseña nueva con el token del enlace del email. 400 si el enlace no vale.
+export const resetPassword = (token, password) => {
+  return apiClient.post('/auth/reset-password', { token, password });
+};

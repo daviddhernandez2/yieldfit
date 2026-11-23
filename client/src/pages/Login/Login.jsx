@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth.js';
 import Button from '@/components/Button/Button.jsx';
 import ServerWakingUp from '@/components/ServerWakingUp/ServerWakingUp.jsx';
@@ -12,7 +12,11 @@ import styles from '@/pages/Login/Login.module.css';
 // éxito, navega al dashboard.
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  // Aviso que deja otra pantalla al traer aquí (p. ej. /restablecer: "Contraseña cambiada").
+  // Va en el estado de la navegación, no en la URL: desaparece al recargar.
+  const aviso = location.state?.aviso;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,6 +48,12 @@ export default function Login() {
         <h1 className={styles.title}>Iniciar sesión</h1>
         <p className={styles.subtitle}>Bienvenido de nuevo a Yield Fit</p>
 
+        {aviso && (
+          <div className={styles.avisoBanner} role="status">
+            {aviso}
+          </div>
+        )}
+
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <Input
             id="email"
@@ -66,6 +76,9 @@ export default function Login() {
             required
             autoComplete="current-password"
           />
+          <Link to="/recuperar" className={styles.olvido}>
+            ¿Olvidaste tu contraseña?
+          </Link>
 
           {errorMessage && (
             <div className={styles.errorBanner} role="alert">

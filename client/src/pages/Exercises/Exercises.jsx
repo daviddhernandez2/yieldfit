@@ -132,7 +132,7 @@ export default function Exercises() {
             <Chip
               key={f.value}
               label={f.label}
-              active={filtro === f.value}
+              selected={filtro === f.value}
               onClick={() => setFiltro(f.value)}
             />
           ))}

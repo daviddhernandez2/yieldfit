@@ -141,6 +141,13 @@ const sessionSchema = new mongoose.Schema(
 // ordenando por fecha descendente.
 sessionSchema.index({ userId: 1, fecha: -1 });
 
+// "Última sesión con este ejercicio" (serie anterior, bloque 5): sin este índice, para un
+// ejercicio que hace mucho que no se hace (o nunca), MongoDB recorrería todo el historial
+// del usuario hacia atrás buscándolo. Con él, salta directo a la sesión más reciente que
+// lo contiene. Es multikey (ejercicios es un array): una entrada por ejercicio de cada
+// sesión, ~6 por sesión (DECISIONS.md, 0029).
+sessionSchema.index({ userId: 1, 'ejercicios.exerciseId': 1, fecha: -1 });
+
 const Session = mongoose.model('Session', sessionSchema);
 
 export default Session;

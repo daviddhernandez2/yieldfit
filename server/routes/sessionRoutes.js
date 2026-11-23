@@ -1,5 +1,5 @@
 import express from 'express';
-import { list, getOne, create, remove } from '../controllers/sessionController.js';
+import { list, getOne, create, remove, previousSets } from '../controllers/sessionController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -7,6 +7,8 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.get('/', list);
+// Antes de '/:id': si no, Express tomaría "previous-sets" por un id.
+router.get('/previous-sets', previousSets);
 router.get('/:id', getOne);
 router.post('/', create);
 // Sin PUT a propósito: una sesión guardada es historial y no se edita. El PUT que

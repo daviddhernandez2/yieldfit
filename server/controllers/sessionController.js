@@ -114,6 +114,64 @@ export const list = async (req, res, next) => {
   }
 };
 
+const MAX_EJERCICIOS_ANTERIORES = 30;
+
+// GET /api/sessions/previous-sets?exerciseIds=a,b,c
+// Para cada ejercicio, las series de la ÚLTIMA sesión guardada que lo incluye, en
+// cualquier rutina (DECISIONS.md, 0029). La sesión activa lo pide al abrirse para
+// mostrar en cada serie lo que se hizo la vez anterior.
+// Devuelve { anteriores: { <exerciseId>: { fecha, sets } } }; los ejercicios que no se
+// han hecho nunca no aparecen. Solo busca en las sesiones del usuario: un id ajeno
+// simplemente no encuentra nada.
+export const previousSets = async (req, res, next) => {
+  try {
+    const ids = [...new Set(String(req.query.exerciseIds ?? '').split(',').filter(Boolean))];
+    if (
+      ids.length === 0 ||
+      ids.length > MAX_EJERCICIOS_ANTERIORES ||
+      !ids.every((id) => mongoose.isValidObjectId(id))
+    ) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: `exerciseIds tiene que ser una lista de 1 a ${MAX_EJERCICIOS_ANTERIORES} ids separados por comas`,
+      });
+    }
+
+    // Una consulta por ejercicio, en paralelo. Cada una usa el índice
+    // { userId, ejercicios.exerciseId, fecha } y lee un solo documento. $elemMatch en la
+    // proyección devuelve solo ese ejercicio de la sesión, no los demás.
+    const ultimas = await Promise.all(
+      ids.map((id) =>
+        Session.findOne(
+          { userId: req.user._id, 'ejercicios.exerciseId': id },
+          { fecha: 1, ejercicios: { $elemMatch: { exerciseId: id } } }
+        )
+          .sort({ fecha: -1 })
+          .lean()
+      )
+    );
+
+    const anteriores = {};
+    ultimas.forEach((sesion, i) => {
+      if (!sesion) return;
+      anteriores[ids[i]] = {
+        fecha: sesion.fecha,
+        sets: sesion.ejercicios[0].sets.map(({ numeroSerie, peso, reps, tiempoSegundos, distanciaMetros }) => ({
+          numeroSerie,
+          peso,
+          reps,
+          tiempoSegundos,
+          distanciaMetros,
+        })),
+      };
+    });
+
+    res.status(200).json({ anteriores });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // GET /api/sessions/:id
 // Devuelve una sesión concreta del usuario.
 export const getOne = async (req, res, next) => {

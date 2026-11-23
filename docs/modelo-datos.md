@@ -192,6 +192,9 @@ Reporte de un fallo enviado con el botón de la app (bloque 11b): `POST /api/rep
 por usuario. El cliente manda `descripcion`, `contexto`, `ruta` y `pantalla`; el navegador lo toma
 el servidor de la cabecera `User-Agent`, y `estado` (`pendiente` por defecto) solo lo cambia el
 admin. Solo texto: nunca capturas de pantalla. Se borran con la cuenta del usuario (11b.4).
+Índices `{ userId, createdAt }`, `{ estado, createdAt }` y `{ createdAt }`: la bandeja de
+`/developer` ordena del más reciente al más antiguo y filtra por usuario, por estado o por fechas,
+paginada por cursor como el Historial.
 
 ## Borrar un ejercicio: el historial se conserva
 

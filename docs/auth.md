@@ -126,6 +126,11 @@ llevan `requireAuth` y después `requireAdmin`; como `requireAuth` lee el usuari
 cada petición, quitar el rol tiene efecto al momento. El cliente recibe `rol` para mostrar u
 ocultar la página de developer, pero quien decide es el servidor (403).
 
+Las rutas de admin son las de `/api/admin` (página `/developer`). Son las únicas que leen datos de
+todos los usuarios, así que devuelven solo lo imprescindible: de cada usuario, nombre, email,
+registro, último acceso, rol y recuentos, con la lista de campos escrita a mano en el `select`
+(nunca fecha de nacimiento, peso, altura ni género).
+
 ## Al abrir la app
 
 El token de acceso vive en memoria, así que al recargar no existe: se pide uno con la cookie.

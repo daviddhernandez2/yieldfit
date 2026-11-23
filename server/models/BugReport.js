@@ -53,10 +53,13 @@ const bugReportSchema = new mongoose.Schema(
   }
 );
 
-// Los reportes de un usuario, del más reciente al más antiguo. Sirve para borrarlos con la
-// cuenta (11b.4) y para filtrar por usuario en /developer (11b.3). Los índices de los demás
-// filtros de /developer se añaden con esas consultas, no antes.
+// Índices para la bandeja de /developer (11b.3), que ordena del más reciente al más antiguo:
+//   - por usuario (también sirve para borrarlos con la cuenta, 11b.4);
+//   - por estado (pendiente/resuelto);
+//   - sin filtros o solo por fechas.
 bugReportSchema.index({ userId: 1, createdAt: -1 });
+bugReportSchema.index({ estado: 1, createdAt: -1 });
+bugReportSchema.index({ createdAt: -1 });
 
 const BugReport = mongoose.model('BugReport', bugReportSchema);
 

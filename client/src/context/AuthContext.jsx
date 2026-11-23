@@ -1,7 +1,13 @@
 import { createContext, useReducer, useEffect } from 'react';
-import { login as loginApi, register as registerApi, logout as logoutApi } from '@/api/auth.js';
+import {
+  login as loginApi,
+  register as registerApi,
+  logout as logoutApi,
+  deleteAccount,
+} from '@/api/auth.js';
 import { alCaducarSesion, ponerTokenAcceso, renovarSesion } from '@/api/client.js';
 import { marcarSesion } from '@/utils/indicadorSesion.js';
+import { borrarDatosLocales } from '@/utils/datosLocales.js';
 
 // Estado de la sesión. `status` dice en qué fase está la autenticación; la app lo usa para
 // decidir qué mostrar (un loader en "loading", la app en "authenticated").
@@ -104,12 +110,22 @@ export function AuthProvider({ children }) {
     salir();
   };
 
+  // Borrar la cuenta (bloque 11b). Si el servidor la rechaza (contraseña incorrecta, límite),
+  // el error sube a la pantalla y no se toca nada. Si la borra, se limpia también lo que
+  // había en este dispositivo y se sale: PrivateRoute lleva a /login.
+  const eliminarCuenta = async (password) => {
+    await deleteAccount(password);
+    borrarDatosLocales();
+    salir();
+  };
+
   const value = {
     user: state.user,
     status: state.status,
     login,
     register,
     logout,
+    eliminarCuenta,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

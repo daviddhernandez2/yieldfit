@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth.js';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
+import EliminarCuenta from '@/pages/Profile/EliminarCuenta.jsx';
 import styles from '@/pages/Profile/Profile.module.css';
 
 const formatFecha = (fecha) => {
@@ -119,6 +120,9 @@ export default function Profile() {
           <span className={styles.developerHint}>Reportes y usuarios</span>
         </Link>
       )}
+
+      {/* Al final de la página, separado de todo lo demás (bloque 11b). */}
+      <EliminarCuenta />
     </div>
   );
 }

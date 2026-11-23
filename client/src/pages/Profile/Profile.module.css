@@ -152,3 +152,61 @@
   font-weight: var(--font-weight-regular);
   color: var(--color-text-muted);
 }
+
+/* --- Eliminar la cuenta (bloque 11b) --- */
+
+/* Cerrado: solo el botón rojo discreto, al final y alineado a la derecha como
+   "Cerrar sesión". */
+.eliminarCerrado {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-md);
+}
+
+.eliminarPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  /* Borde rojo: es la única tarjeta de la app que destruye datos de forma permanente. */
+  border-color: var(--color-error);
+}
+
+.eliminarTitulo {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-error);
+}
+
+.eliminarTexto {
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.eliminarTexto strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+.eliminarFormulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.eliminarAcciones {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.eliminarAcciones > button {
+  flex: 1;
+}
+
+/* En pantallas estrechas, "Eliminar definitivamente" no cabe al lado de Cancelar. */
+@media (max-width: 420px) {
+  .eliminarAcciones {
+    flex-direction: column-reverse;
+  }
+}

@@ -23,47 +23,16 @@
 // Como el diagnóstico: solo imprime ids y números, y no usa los modelos de Mongoose
 // (ningún middleware, ningún índice).
 
-import { existsSync, readdirSync, statSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
 import { conectar, desconectar, obtenerCliente, ocultarCredenciales } from './lib/conexion.js';
+import { comprobarBackupReciente } from './lib/backupReciente.js';
 
 // Usuario temporal con escritura sobre yieldfit (docs/operaciones.md). Ningún otro script
 // lo usa: el de backup sigue siendo de solo lectura.
 const SERVICIO_LLAVERO = 'yieldfit-reparacion';
 const MAX_CAMBIOS = 10;
-const MINUTOS_BACKUP = 60;
 
 const desarrollo = process.argv.includes('--desarrollo');
 const aplicar = process.argv.includes('--aplicar');
-
-// Busca el backup más reciente (misma carpeta que usa backup.sh) y comprueba que tiene
-// el archivo y su huella, y que es de hace menos de MINUTOS_BACKUP. No comprueba que se
-// pueda restaurar: eso lo hace backup:restore-test, que va antes en el procedimiento.
-const comprobarBackupReciente = () => {
-  const carpeta = join(homedir(), 'yieldfit-backups');
-  const backups = existsSync(carpeta)
-    ? readdirSync(carpeta)
-        .filter((nombre) => /^\d{4}-\d{2}-\d{2}_\d{4}$/.test(nombre))
-        .sort()
-    : [];
-  if (backups.length === 0) {
-    throw new Error('No hay ningún backup en ~/yieldfit-backups. Ejecuta antes: npm run backup');
-  }
-  const ultimo = join(carpeta, backups.at(-1));
-  const archivo = join(ultimo, 'yieldfit.archive.gz');
-  if (!existsSync(archivo) || !existsSync(`${archivo}.sha256`)) {
-    throw new Error(`El último backup (${backups.at(-1)}) está incompleto. Ejecuta: npm run backup`);
-  }
-  const minutos = (Date.now() - statSync(archivo).mtimeMs) / 60000;
-  if (minutos > MINUTOS_BACKUP) {
-    throw new Error(
-      `El último backup es de hace ${Math.round(minutos)} minutos (máximo ${MINUTOS_BACKUP}). ` +
-        'Ejecuta antes: npm run backup'
-    );
-  }
-  return { nombre: backups.at(-1), minutos: Math.round(minutos) };
-};
 
 // Busca lo que hay que arreglar. Recibe la sesión de la transacción para que las
 // lecturas y las escrituras vean exactamente el mismo estado de la base.

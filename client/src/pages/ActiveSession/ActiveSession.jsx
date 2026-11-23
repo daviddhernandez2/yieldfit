@@ -15,6 +15,7 @@ import { listExercises } from "@/api/exercises.js";
 import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
+import Proximamente from "@/components/Proximamente/Proximamente.jsx";
 import styles from "@/pages/ActiveSession/ActiveSession.module.css";
 
 // Formatea segundos como MM:SS. Sigue creciendo pasada la hora (65:30).
@@ -122,7 +123,10 @@ export default function ActiveSession() {
   useEffect(() => {
     if (!faltanAnteriores) return;
     let montado = true;
-    getPreviousSets(session.ejercicios.map((ej) => ej.exerciseId))
+    // Los bloqueados (cardio) no tienen series en la sesión: no necesitan "anterior".
+    const ids = session.ejercicios.filter((ej) => !ej.bloqueado).map((ej) => ej.exerciseId);
+    if (ids.length === 0) return;
+    getPreviousSets(ids)
       .then((response) => {
         if (montado) setSession((prev) => ({ ...prev, anteriores: response.data.anteriores }));
       })
@@ -351,6 +355,22 @@ export default function ActiveSession() {
         {session.ejercicios.map((ej, exerciseIndex) => {
           const isExpanded = expandedIndex === exerciseIndex;
           const setsCompletados = ej.sets.filter((s) => s.completada).length;
+
+          // Ejercicio bloqueado (cardio, 0030): se ve en la sesión pero no se abre ni se
+          // registra. No tiene series, así que tampoco cuenta ni se envía al guardar.
+          if (ej.bloqueado) {
+            return (
+              <div
+                key={ej.exerciseId}
+                className={`${styles.exerciseCard} ${styles.exerciseCardBloqueado} glassCard`}
+              >
+                <div className={styles.exerciseHeader}>
+                  <span className={styles.exerciseName}>{ej.exerciseNombre}</span>
+                  <Proximamente />
+                </div>
+              </div>
+            );
+          }
 
           return (
             <div

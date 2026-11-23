@@ -8,6 +8,7 @@ import {
   clearActiveSession,
   buildActiveSessionFromWorkout,
 } from '@/utils/activeSession.js';
+import { cargarOpciones, tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 
 // Hook para arrancar una sesión de entrenamiento desde una rutina.
 // Encapsula todo el flujo, incluyendo la carga del catálogo de ejercicios
@@ -24,9 +25,11 @@ export function useStartSession() {
       // Cargamos rutina y catálogo en paralelo para minimizar latencia.
       // El catálogo se usa para resolver los nombres de los ejercicios de
       // la rutina si el backend no los devuelve populados.
-      const [woRes, catRes] = await Promise.all([
+      // Las opciones (grupos y tipos) dicen qué tipos están bloqueados (cardio).
+      const [woRes, catRes, opciones] = await Promise.all([
         getWorkout(workoutId),
         listExercises(),
+        cargarOpciones(),
       ]);
       const wo = woRes.data.workout;
       const catalogo = catRes.data.exercises;
@@ -46,9 +49,22 @@ export function useStartSession() {
         return;
       }
 
+      // Ejercicios que existen pero aún no se pueden registrar (cardio, 0030). Si la
+      // rutina solo tiene de esos, no hay nada que hacer en la sesión.
+      const bloqueados = new Set(
+        catalogo.filter((ex) => !tipoDisponible(opciones, ex.tipo)).map((ex) => ex._id),
+      );
+      if (disponibles.every((ej) => bloqueados.has(String(ej.exerciseId)))) {
+        setError(
+          'Esta rutina solo tiene ejercicios de cardio, que estarán disponibles próximamente.',
+        );
+        return;
+      }
+
       const nueva = buildActiveSessionFromWorkout(
         { ...wo, ejercicios: disponibles },
         nombreById,
+        bloqueados,
       );
       writeActiveSession(nueva);
       navigate('/sessions/active');

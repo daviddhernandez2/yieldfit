@@ -340,3 +340,13 @@
   margin-top: var(--space-md);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
+
+/* Ejercicio bloqueado (cardio): la tarjeta se ve, atenuada, sin poder abrirse. */
+.exerciseCardBloqueado .exerciseHeader {
+  cursor: default;
+}
+
+.exerciseCardBloqueado .exerciseName {
+  color: var(--color-text-muted);
+}
+

@@ -43,8 +43,9 @@ export default function MiniSession() {
 
   // Detecta el ejercicio "en curso": el primero cuya última serie no está
   // completada, es la mejor heurística de "en qué va el usuario ahora".
+  // Los bloqueados (cardio) no tienen series y no se pueden hacer: no cuentan.
   const ejercicioActual = session.ejercicios.find(
-    (ej) => !ej.sets.every((s) => s.completada)
+    (ej) => !ej.bloqueado && !ej.sets.every((s) => s.completada)
   );
 
   return (

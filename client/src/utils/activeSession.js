@@ -45,9 +45,13 @@ export const clearActiveSession = () => {
 // (objeto con nombre) o sin popular (solo el ObjectId), soportamos los dos
 // casos. Adicionalmente se acepta un mapa opcional exerciseNombreById para
 // resolver el nombre por ID cuando la rutina viene sin popular.
+// bloqueados: Set con los exerciseId que no se pueden registrar todavía (cardio,
+// DECISIONS.md 0030). Se decide al empezar, con las opciones del servidor, y se guarda en
+// la sesión: así la sesión sabe qué filas bloquear aunque se recargue sin cobertura.
 export const buildActiveSessionFromWorkout = (
   workout,
   exerciseNombreById = null,
+  bloqueados = new Set(),
 ) => {
   return {
     startTime: Date.now(),
@@ -71,15 +75,20 @@ export const buildActiveSessionFromWorkout = (
       const exerciseNombre =
         nombreDesdePopulate || nombreDesdeMapa || "Ejercicio";
 
+      // Un ejercicio bloqueado entra en la sesión (se ve que está en la rutina) pero sin
+      // series: no se puede marcar nada, no cuenta en el resumen y no se envía al guardar.
+      const bloqueado = bloqueados.has(exerciseIdStr);
+
       return {
         exerciseId: exerciseIdStr,
         exerciseNombre,
+        bloqueado,
         descansoSegundos: ej.descansoSegundos,
         // Cada set recibe un id local estable (no confundir con el _id de Mongo,
         // que solo existe tras persistir). Se usa como key de React para que
         // añadir/quitar series en medio de la lista no desincronice el estado
         // interno de los inputs de las filas siguientes.
-        sets: Array.from({ length: ej.numSeries }, () => ({
+        sets: Array.from({ length: bloqueado ? 0 : ej.numSeries }, () => ({
           id: crypto.randomUUID(),
           peso: "",
           reps: "",

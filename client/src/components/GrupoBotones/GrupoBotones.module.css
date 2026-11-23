@@ -1,0 +1,16 @@
+/* Ver GrupoBotones.jsx.
+   - flex-wrap: si la suma de los anchos naturales no cabe, el siguiente baja de línea.
+   - wrap-reverse: al bajar, las líneas se apilan hacia arriba, así que el último botón (la
+     acción principal) queda encima. En una sola línea no cambia nada.
+   - flex: 1 1 auto: cada botón parte de su ancho natural (su texto en una línea) y crece
+     para llenar la fila; uno solo en su línea ocupa el ancho completo. */
+.grupo {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  gap: var(--space-sm) var(--space-md);
+  width: 100%;
+}
+
+.grupo > * {
+  flex: 1 1 auto;
+}

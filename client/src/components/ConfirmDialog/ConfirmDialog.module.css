@@ -39,12 +39,7 @@
   line-height: 1.5;
 }
 
+/* Solo el espacio de encima: la fila de botones es GrupoBotones. */
 .actions {
-  display: flex;
-  gap: var(--space-md);
   margin-top: var(--space-md);
-}
-
-.actions > button {
-  flex: 1;
 }

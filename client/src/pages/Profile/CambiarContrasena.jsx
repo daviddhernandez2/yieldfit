@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth.js';
 import Button from '@/components/Button/Button.jsx';
+import GrupoBotones from '@/components/GrupoBotones/GrupoBotones.jsx';
 import Input from '@/components/Input/Input.jsx';
 import styles from '@/pages/Profile/Profile.module.css';
 
@@ -112,14 +113,14 @@ export default function CambiarContrasena() {
             </p>
           )}
 
-          <div className={styles.panelAcciones}>
+          <GrupoBotones>
             <Button type="button" variant="outline" onClick={cerrar} disabled={guardando}>
               Cancelar
             </Button>
             <Button type="submit" disabled={guardando}>
               {guardando ? 'Guardando…' : 'Guardar'}
             </Button>
-          </div>
+          </GrupoBotones>
         </form>
       )}
     </section>

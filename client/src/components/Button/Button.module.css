@@ -8,7 +8,10 @@
   font-weight: var(--font-weight-medium);
   transition: var(--transition-base);
   min-height: 48px;
-  white-space: nowrap;
+  /* Sin nowrap: si un botón no cabe ni a ancho completo, el texto baja de línea en vez de
+     salirse. En filas de botones, quien decide si se apilan es GrupoBotones. */
+  max-width: 100%;
+  text-align: center;
 }
 
 .button:disabled {

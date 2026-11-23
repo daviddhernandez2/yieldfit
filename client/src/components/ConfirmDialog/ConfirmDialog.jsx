@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import Button from '@/components/Button/Button.jsx';
+import GrupoBotones from '@/components/GrupoBotones/GrupoBotones.jsx';
 import styles from '@/components/ConfirmDialog/ConfirmDialog.module.css';
 
 // Diálogo de confirmación reutilizable. Aparece como overlay sobre el contenido.
@@ -44,14 +45,14 @@ export default function ConfirmDialog({
         <h2 className={styles.title}>{title}</h2>
         {message && <p className={styles.message}>{message}</p>}
 
-        <div className={styles.actions}>
+        <GrupoBotones className={styles.actions}>
           <Button variant="outline" onClick={onCancel}>
             {cancelLabel}
           </Button>
           <Button variant={confirmVariant} onClick={onConfirm}>
             {confirmLabel}
           </Button>
-        </div>
+        </GrupoBotones>
       </div>
     </div>
   );

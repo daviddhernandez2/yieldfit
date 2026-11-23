@@ -197,22 +197,6 @@
   gap: var(--space-md);
 }
 
-.panelAcciones {
-  display: flex;
-  gap: var(--space-md);
-}
-
-.panelAcciones > button {
-  flex: 1;
-}
-
-/* En pantallas estrechas, "Eliminar definitivamente" no cabe al lado de Cancelar. */
-@media (max-width: 420px) {
-  .panelAcciones {
-    flex-direction: column-reverse;
-  }
-}
-
 .panelError {
   font-size: var(--font-size-sm);
   color: var(--color-error);

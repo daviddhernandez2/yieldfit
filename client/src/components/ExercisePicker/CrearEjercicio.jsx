@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createExercise } from '@/api/exercises.js';
 import Select from '@/components/Select/Select.jsx';
 import Button from '@/components/Button/Button.jsx';
+import GrupoBotones from '@/components/GrupoBotones/GrupoBotones.jsx';
 import styles from '@/components/ExercisePicker/ExercisePicker.module.css';
 
 // Mini formulario para crear un ejercicio sin salir del buscador (bloque 9b, DECISIONS.md
@@ -66,14 +67,14 @@ export default function CrearEjercicio({ nombreInicial, grupoInicial, opciones, 
         <Select label="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value)} options={opcionesTipo} />
       </div>
       {error && <p className={styles.crearError} role="alert">{error}</p>}
-      <div className={styles.crearAcciones}>
+      <GrupoBotones>
         <Button type="button" variant="outline" onClick={onCancelar} disabled={guardando}>
           Cancelar
         </Button>
         <Button type="button" variant="primary" onClick={crear} disabled={guardando || !nombre.trim()}>
           {guardando ? 'Creando...' : 'Crear y añadir'}
         </Button>
-      </div>
+      </GrupoBotones>
     </div>
   );
 }

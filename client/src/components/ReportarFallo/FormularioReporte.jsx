@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Button from '@/components/Button/Button.jsx';
+import GrupoBotones from '@/components/GrupoBotones/GrupoBotones.jsx';
 import { crearReporte } from '@/api/reports.js';
 import styles from '@/components/ReportarFallo/ReportarFallo.module.css';
 
@@ -124,14 +125,14 @@ export default function FormularioReporte({ ruta, onCerrar }) {
               </p>
             )}
 
-            <div className={styles.acciones}>
+            <GrupoBotones>
               <Button type="button" variant="outline" onClick={onCerrar} disabled={enviando}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={enviando}>
                 {enviando ? 'Enviando…' : 'Enviar'}
               </Button>
-            </div>
+            </GrupoBotones>
           </form>
         )}
       </div>

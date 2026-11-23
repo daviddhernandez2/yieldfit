@@ -169,6 +169,10 @@ ownership de los ids referenciados. Mantener siempre ese patrón.
 
 Dark mode. Verde `#3EF87E` (ganancia) / rojo `#FF3000` (pérdida). Tipografía Geist.
 Colores y espaciados siempre desde `styles/variables.css`, nunca valores sueltos.
+**Responsive obligatorio:** todo cambio de interfaz se comprueba a 375 y 390 px de ancho (y en
+escritorio), sin desbordes ni scroll horizontal. Los fallos se arreglan en el componente común,
+no página a página: dos o más botones juntos van siempre en `GrupoBotones` (se apilan a ancho
+completo si no caben); `Input` y `Select` ya se estrechan dentro de una fila.
 Fuente de verdad visual: Figma, fileKey `FM0tXObXUAJsRipf0D0gXs` (arquitectura de variables).
 
 ## Criterios de escalabilidad

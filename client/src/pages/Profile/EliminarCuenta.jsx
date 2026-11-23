@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth.js';
 import Button from '@/components/Button/Button.jsx';
+import GrupoBotones from '@/components/GrupoBotones/GrupoBotones.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import Input from '@/components/Input/Input.jsx';
 import styles from '@/pages/Profile/Profile.module.css';
@@ -72,14 +73,14 @@ export default function EliminarCuenta() {
           error={error}
           autoFocus
         />
-        <div className={styles.panelAcciones}>
+        <GrupoBotones>
           <Button type="button" variant="outline" onClick={cancelar} disabled={borrando}>
             Cancelar
           </Button>
           <Button type="submit" variant="danger" disabled={borrando}>
             {borrando ? 'Eliminando…' : 'Eliminar definitivamente'}
           </Button>
-        </div>
+        </GrupoBotones>
       </form>
     </section>
   );

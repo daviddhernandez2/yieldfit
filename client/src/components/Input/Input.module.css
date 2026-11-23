@@ -3,6 +3,9 @@
   flex-direction: column;
   gap: var(--space-xs);
   width: 100%;
+  /* Dentro de una fila (dos campos lado a lado), que pueda estrecharse: sin esto, un flex item
+     no baja de su ancho mínimo de contenido y la fila se sale de la pantalla. */
+  min-width: 0;
 }
 
 .label {
@@ -12,6 +15,10 @@
 }
 
 .input {
+  /* Ancho completo de su contenedor, nunca el ancho por defecto del navegador (unos 20
+     caracteres en un <input>), que en el móvil no cabe en media fila. */
+  width: 100%;
+  min-width: 0;
   padding: var(--space-md);
   background-color: var(--color-bg-elevated);
   border: 1px solid var(--color-border);

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import Button from '@/components/Button/Button.jsx';
+import GrupoBotones from '@/components/GrupoBotones/GrupoBotones.jsx';
 import styles from '@/components/WorkoutActionsModal/WorkoutActionsModal.module.css';
 
 // Modal de acciones sobre una rutina. Aparece al pulsar sobre una rutina
@@ -40,14 +41,14 @@ export default function WorkoutActionsModal({
         <h2 className={styles.title}>{workout.nombre}</h2>
         <p className={styles.subtitle}>¿Qué quieres hacer?</p>
 
-        <div className={styles.actions}>
-          <Button variant="outline" fullWidth onClick={onEdit}>
+        <GrupoBotones>
+          <Button variant="outline" onClick={onEdit}>
             Editar
           </Button>
-          <Button variant="primary" fullWidth onClick={onStart}>
+          <Button variant="primary" onClick={onStart}>
             Iniciar
           </Button>
-        </div>
+        </GrupoBotones>
       </div>
     </div>
   );

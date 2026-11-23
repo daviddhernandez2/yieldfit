@@ -240,11 +240,3 @@
   line-height: 1.5;
 }
 
-.acciones {
-  display: flex;
-  gap: var(--space-md);
-}
-
-.acciones > button {
-  flex: 1;
-}

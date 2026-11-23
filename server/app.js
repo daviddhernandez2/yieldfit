@@ -10,6 +10,7 @@ import chartRoutes from './routes/chartRoutes.js';
 import workoutRoutes from './routes/workoutRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import progressRoutes from './routes/progressRoutes.js';
+import diagnosticoRoutes from './routes/diagnosticoRoutes.js'; // TEMPORAL (bloque 11)
 
 const app = express();
 
@@ -80,6 +81,7 @@ app.use('/api/charts', chartRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/diagnostico', diagnosticoRoutes); // TEMPORAL (bloque 11): IP detrás de los proxies
 
 app.use(notFoundHandler);
 app.use(errorHandler);

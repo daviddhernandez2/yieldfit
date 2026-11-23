@@ -208,6 +208,8 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - **Verdes translúcidos sueltos:** la app usa `rgba(62, 248, 126, α)` con 11 opacidades
   distintas en varios CSS. Desde el bloque 8 existen `--color-accent-soft` (0.08) y
   `--color-accent-medium` (0.25) en `variables.css`: sustituir los sueltos por tokens.
+  En el mismo repaso: `TabBar` (`rgba(15, 15, 15, 0.75)`) y `ConfirmDialog` (`rgba(0, 0, 0, 0.7)`)
+  tienen sueltos los valores de `--color-bg-glass` y `--color-overlay` (tokens del bloque 11b).
 - `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; las props no reaccionan tras
   montar y `prevColor` no se usa). Bloque 12.
 

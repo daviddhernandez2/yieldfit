@@ -12,6 +12,8 @@ import Button from '@/components/Button/Button.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ExercisePicker from '@/components/ExercisePicker/ExercisePicker.jsx';
 import NombreEjercicio from '@/components/NombreEjercicio/NombreEjercicio.jsx';
+import SelectorPasos from '@/components/SelectorPasos/SelectorPasos.jsx';
+import { minutosYSegundos, duracionHablada } from '@/utils/tiempo.js';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import useOpcionesEjercicio, { tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
@@ -229,27 +231,31 @@ export default function WorkoutForm() {
                       </button>
                     </div>
                     <div className={styles.addedItemControls}>
-                      <Input
+                      {/* Selectores por pasos (bloque 9b): límites del modelo Workout. */}
+                      <SelectorPasos
                         id={`series-${ej.exerciseId}`}
-                        label="Series"
-                        type="number"
-                        min="1"
-                        max="20"
-                        value={ej.numSeries}
-                        onChange={(e) =>
-                          handleUpdateEjercicio(ej.exerciseId, 'numSeries', e.target.value)
-                        }
+                        etiqueta="Series"
+                        valor={ej.numSeries}
+                        onCambiar={(v) => handleUpdateEjercicio(ej.exerciseId, 'numSeries', v)}
+                        min={1}
+                        max={20}
+                        textoAccesible={(v) => `${v} ${v === 1 ? 'serie' : 'series'}`}
+                        textoMenos="Una serie menos"
+                        textoMas="Una serie más"
                       />
-                      <Input
+                      {/* El descanso se ve en minutos (1:30) y se guarda en segundos (90). */}
+                      <SelectorPasos
                         id={`descanso-${ej.exerciseId}`}
-                        label="Descanso (s)"
-                        type="number"
-                        min="0"
-                        max="900"
-                        value={ej.descansoSegundos}
-                        onChange={(e) =>
-                          handleUpdateEjercicio(ej.exerciseId, 'descansoSegundos', e.target.value)
-                        }
+                        etiqueta="Descanso"
+                        valor={ej.descansoSegundos}
+                        onCambiar={(v) => handleUpdateEjercicio(ej.exerciseId, 'descansoSegundos', v)}
+                        paso={15}
+                        min={0}
+                        max={900}
+                        formato={minutosYSegundos}
+                        textoAccesible={duracionHablada}
+                        textoMenos="Quitar 15 segundos"
+                        textoMas="Añadir 15 segundos"
                       />
                     </div>
                   </div>

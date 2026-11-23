@@ -1,0 +1,52 @@
+/* Misma estructura que Input: etiqueta pequeña arriba y el control debajo. */
+.selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.etiqueta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* "−  1:30  +" en una píldora con la altura de los campos de la app (48 px). */
+.control {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  min-height: 48px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.boton {
+  height: 100%;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.boton:hover:not(:disabled) {
+  color: var(--color-accent);
+}
+
+.boton:disabled {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.valor {
+  text-align: center;
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+}

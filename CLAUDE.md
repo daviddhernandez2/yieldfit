@@ -212,6 +212,9 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
   `--color-accent-medium` (0.25) en `variables.css`: sustituir los sueltos por tokens.
   En el mismo repaso: `TabBar` (`rgba(15, 15, 15, 0.75)`) y `ConfirmDialog` (`rgba(0, 0, 0, 0.7)`)
   tienen sueltos los valores de `--color-bg-glass` y `--color-overlay` (tokens del bloque 11b).
+- **Backups solo en el portátil:** la revisión prevista en la 0018 ("backups automáticos fuera
+  del portátil cuando haya usuarios reales además de David") ya aplica con la beta del 11b. Si
+  el portátil se pierde o se estropea, no hay copia. Desde la 0039 se conservan los 3 últimos.
 - `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; las props no reaccionan tras
   montar y `prevColor` no se usa). Bloque 12.
 

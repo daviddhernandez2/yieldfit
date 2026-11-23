@@ -156,7 +156,12 @@ lleva, pero no los recupera.
 
 ## Mantenimiento
 
-- Los scripts no borran backups antiguos: hazlo a mano.
+- **Rotación automática** ([0039](../DECISIONS.md)): al terminar un backup correcto,
+  `backup.sh` conserva los **3 últimos backups completos** y borra los más antiguos y los que
+  fallaron a medias. Con la rutina mensual, unos 3 meses: es lo que promete la nota de
+  privacidad sobre los datos de una cuenta borrada. **Si dejas de hacer backups, los últimos
+  se quedan**: la promesa depende de la rutina mensual. Prueba de la rotación, desde `server/`:
+  `bash scripts/lib/rotacion.test.sh` (trabaja en una carpeta temporal, no toca tus backups).
 - Revisión prevista ([0018](../DECISIONS.md)): backups automáticos fuera del portátil cuando la app
   tenga usuarios reales además de David.
 

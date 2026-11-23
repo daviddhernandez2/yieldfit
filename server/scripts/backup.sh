@@ -14,6 +14,9 @@
 #      solo lo demuestra `npm run backup:restore-test`.
 #   4. Opcional (desactivado por decisión, ver 0019): si BACKUP_COPIA_DIR está
 #      definida, copia ahí el backup y comprueba que la copia es idéntica.
+#   5. Rotación (0039): conserva solo los 3 últimos backups completos y borra los más
+#      antiguos (y los que fallaron a medias). Solo se ejecuta si este backup ha pasado
+#      todas sus comprobaciones.
 #
 # Requisitos: mongodb-database-tools (brew) y la URI guardada en el Llavero con el
 # servicio "yieldfit-backup".
@@ -33,6 +36,9 @@ umask 077
 readonly SERVICIO_LLAVERO="yieldfit-backup"
 readonly BASE="yieldfit"
 readonly RAIZ_BACKUPS="$HOME/yieldfit-backups"
+# Cuántos backups completos se conservan (0039). Con uno al mes, unos 3 meses: lo que promete
+# la nota de privacidad. Si se cambia, hay que cambiar también esa nota.
+readonly BACKUPS_A_CONSERVAR=3
 
 error() { echo "ERROR: $*" >&2; exit 1; }
 
@@ -40,6 +46,8 @@ error() { echo "ERROR: $*" >&2; exit 1; }
 source "$(dirname "$0")/lib/credenciales.sh"
 # Lectura de los recuentos de documentos de los logs.
 source "$(dirname "$0")/lib/recuentos.sh"
+# Rotación de backups antiguos (prueba: lib/rotacion.test.sh).
+source "$(dirname "$0")/lib/rotacion.sh"
 
 for cmd in security mongodump shasum perl gzip; do
   command -v "$cmd" >/dev/null || error "no se encuentra '$cmd'. ¿Has instalado mongodb-database-tools? (ver docs/operaciones.md)"
@@ -103,3 +111,9 @@ if [ -n "${BACKUP_COPIA_DIR:-}" ]; then
 
   echo "Segunda copia verificada: $DESTINO"
 fi
+
+# --- Rotación (0039) ---
+# Al final y solo aquí: si algo de lo anterior ha fallado, el script ya ha parado y no se
+# borra ningún backup antiguo. La segunda copia (BACKUP_COPIA_DIR), si existe, no se rota.
+echo
+rotar_backups "$RAIZ_BACKUPS" "$BACKUPS_A_CONSERVAR" "$BASE"

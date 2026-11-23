@@ -1363,3 +1363,38 @@ con `X-Forwarded-For: 1.2.3.4`, `req.ip` es la IP real, y los logs de Render mue
   Cloudflare (límites compartidos otra vez); con uno menos, sería lo que mande el cliente
   (falsificable, y el límite se saltaría cambiando la cabecera). Se vigila en los logs de Render y
   se corrige con `TRUST_PROXY`. La prueba para repetirla está en `docs/auth.md`.
+
+---
+
+## 0039 — Los backups se rotan: se conservan los 3 últimos
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11b · Matiza a: 0018
+
+**Contexto:** `backup.sh` (0018) nunca borraba backups antiguos. Con la beta (11b), la app guarda
+datos de otras personas y permite borrar la cuenta (11b.4): esos datos desaparecían de producción
+al momento, pero seguían para siempre en los backups del portátil. La nota de privacidad (11b.6)
+tenía que decirlo sin plazo.
+
+**Decisión** (de David): al terminar un backup que ha pasado todas sus comprobaciones,
+`backup.sh` conserva los **3 últimos backups completos** (con archivo y huella) y borra los más
+antiguos, y también los que fallaron a medias. Función `rotar_backups` en
+`scripts/lib/rotacion.sh`, con su prueba (`rotacion.test.sh`) sobre carpetas falsas. Con la
+rutina mensual, los datos de una cuenta borrada desaparecen de los backups en unos 3 meses, y la
+nota de privacidad lo dice así.
+
+**Alternativas descartadas:**
+- *Borrar por antigüedad (más de 3 meses):* si un mes no se hace backup, podría dejar el
+  portátil sin ninguna copia. Conservar los N últimos nunca deja menos de N.
+- *Contar también los incompletos para los 3:* una copia rota podría ocupar el sitio de una buena.
+- *Borrar a mano:* depende de acordarse, y la nota de privacidad no podría prometer un plazo.
+
+**Consecuencias:**
+- El plazo de "unos 3 meses" depende de seguir haciendo un backup al mes: si se dejan de hacer,
+  los últimos se quedan.
+- Antes de una migración hay que hacer un backup (0018) y eso también rota: tras varios backups
+  seguidos el mismo día, los anteriores ya no están. Para guardar uno a largo plazo, hay que
+  copiarlo fuera de `~/yieldfit-backups`.
+- La segunda copia opcional (`BACKUP_COPIA_DIR`, desactivada por la 0019) no se rota.
+- Sigue pendiente sacar los backups del portátil (revisión prevista en la 0018; deuda en
+  CLAUDE.md).
+

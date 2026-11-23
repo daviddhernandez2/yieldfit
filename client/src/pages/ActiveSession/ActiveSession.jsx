@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   readActiveSession,
@@ -6,11 +6,11 @@ import {
   clearActiveSession,
   ejerciciosBorradosConSeries,
   serieAnterior,
-  rellenarConAnterior,
   avisoEjerciciosBorrados,
   contar,
 } from "@/utils/activeSession.js";
 import { createSession, getPreviousSets } from "@/api/sessions.js";
+import { sesionReducer } from "@/utils/activeSessionReducer.js";
 import { listExercises } from "@/api/exercises.js";
 import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
@@ -75,7 +75,8 @@ const IconTrash = () => (
 
 // Pantalla principal de la sesión activa.
 // Estructura:
-//  - session: replica del schema de localStorage.
+//  - session: la sesión tal como se guarda en localStorage. Se cambia solo con
+//    dispatch (useReducer); los cambios posibles están en utils/activeSessionReducer.js.
 //  - restTimer: descanso actual (no persiste); recuerda el par ejercicio+serie
 //    y el timestamp exacto en que se marcó completada. Se calcula por
 //    diferencia de tiempos para ser preciso aunque el navegador se pause.
@@ -83,7 +84,9 @@ const IconTrash = () => (
 export default function ActiveSession() {
   const navigate = useNavigate();
 
-  const [session, setSession] = useState(null);
+  // La sesión se cambia con acciones (dispatch) y no con setSession: todos los cambios
+  // posibles están en utils/activeSessionReducer.js, probados sin React (0031).
+  const [session, dispatch] = useReducer(sesionReducer, null);
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [restTimer, setRestTimer] = useState(null);
   const [confirmTerminar, setConfirmTerminar] = useState(false);
@@ -102,7 +105,7 @@ export default function ActiveSession() {
       navigate("/workouts", { replace: true });
       return;
     }
-    setSession(activa);
+    dispatch({ type: "cargar", sesion: activa });
   }, [navigate]);
 
   useEffect(() => {
@@ -128,7 +131,7 @@ export default function ActiveSession() {
     if (ids.length === 0) return;
     getPreviousSets(ids)
       .then((response) => {
-        if (montado) setSession((prev) => ({ ...prev, anteriores: response.data.anteriores }));
+        if (montado) dispatch({ type: "guardarAnteriores", anteriores: response.data.anteriores });
       })
       .catch(() => {
         // Sin "anterior" no se rompe nada: se ignora a propósito.
@@ -145,35 +148,17 @@ export default function ActiveSession() {
   const elapsedSeconds = Math.floor((Date.now() - session.startTime) / 1000);
 
   const updateSet = (exerciseIndex, setIndex, cambios) => {
-    setSession((prev) => ({
-      ...prev,
-      ejercicios: prev.ejercicios.map((ej, i) =>
-        i !== exerciseIndex
-          ? ej
-          : {
-              ...ej,
-              sets: ej.sets.map((set, j) =>
-                j !== setIndex ? set : { ...set, ...cambios },
-              ),
-            },
-      ),
-    }));
+    dispatch({ type: "actualizarSerie", exerciseIndex, setIndex, cambios });
   };
 
   // Toggle de completada.
-  //   - Si marca: rellena los campos vacíos con la vez anterior (atajo de repetir) y
-  //     arranca el timer de descanso.
-  //   - Si desmarca: limpia el timer si era el de esa serie. No borra lo rellenado.
+  //   - El cambio de la sesión (y el atajo de repetir al marcar) lo hace el reducer.
+  //   - Aquí solo queda el timer de descanso, que es estado de la pantalla, no de la
+  //     sesión: si marca, arranca; si desmarca, se limpia si era el de esa serie.
   const handleToggleCompletada = (exerciseIndex, setIndex) => {
-    const set = session.ejercicios[exerciseIndex].sets[setIndex];
-    const nuevaCompletada = !set.completada;
+    const nuevaCompletada = !session.ejercicios[exerciseIndex].sets[setIndex].completada;
 
-    updateSet(exerciseIndex, setIndex, {
-      completada: nuevaCompletada,
-      ...(nuevaCompletada
-        ? rellenarConAnterior(set, serieAnterior(session, exerciseIndex, setIndex))
-        : {}),
-    });
+    dispatch({ type: "alternarCompletada", exerciseIndex, setIndex });
 
     if (nuevaCompletada) {
       setRestTimer({ exerciseIndex, setIndex, completedAt: Date.now() });
@@ -193,37 +178,14 @@ export default function ActiveSession() {
     setRestTimer({ exerciseIndex, setIndex, completedAt: Date.now() });
   };
 
+  // El id se genera aquí y no en el reducer, que tiene que ser puro (mismo resultado para
+  // la misma acción). Es el id local estable que usa React como key de la fila.
   const handleAñadirSerie = (exerciseIndex) => {
-    setSession((prev) => ({
-      ...prev,
-      ejercicios: prev.ejercicios.map((ej, i) =>
-        i !== exerciseIndex
-          ? ej
-          : {
-              ...ej,
-              sets: [
-                ...ej.sets,
-                {
-                  id: crypto.randomUUID(),
-                  peso: "",
-                  reps: "",
-                  completada: false,
-                },
-              ],
-            },
-      ),
-    }));
+    dispatch({ type: "añadirSerie", exerciseIndex, id: crypto.randomUUID() });
   };
 
   const handleQuitarSerie = (exerciseIndex, setIndex) => {
-    setSession((prev) => ({
-      ...prev,
-      ejercicios: prev.ejercicios.map((ej, i) =>
-        i !== exerciseIndex
-          ? ej
-          : { ...ej, sets: ej.sets.filter((_, j) => j !== setIndex) },
-      ),
-    }));
+    dispatch({ type: "quitarSerie", exerciseIndex, setIndex });
 
     if (
       restTimer &&

@@ -20,8 +20,7 @@
   letter-spacing: -0.02em;
 }
 
-/* Botón "Nuevo grupo" del header. Estilo pill outline verde con icono.
-   Deshabilitado en MVP hasta que se implemente el sistema de Charts. */
+/* Botón "Nuevo grupo" del header. Estilo pill outline verde con icono. */
 .newGroupButton {
   display: inline-flex;
   align-items: center;
@@ -58,129 +57,9 @@
   }
 }
 
-.feedback {
-  text-align: center;
-  color: var(--color-text-muted);
-  padding: var(--space-xl);
-}
-
 .feedbackError {
   text-align: center;
   color: var(--color-error);
   padding: var(--space-xl);
 }
 
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-2xl);
-  text-align: center;
-}
-
-.emptyHint {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.groupCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  padding: var(--space-lg);
-  border-radius: var(--radius-md);
-}
-
-.groupHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.groupName {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-}
-
-.groupPercent {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-}
-
-.chart {
-  width: 100%;
-}
-
-.chartEmpty {
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  padding: var(--space-md);
-}
-
-.exerciseList {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.exerciseRow {
-  display: grid;
-  grid-template-columns: 36px 1fr auto;
-  gap: var(--space-md);
-  align-items: center;
-  padding: var(--space-md) 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.exerciseRow:last-child {
-  border-bottom: none;
-}
-
-.badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background-color: rgba(62, 248, 126, 0.12);
-  border-radius: 50%;
-  color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  flex-shrink: 0;
-}
-
-.exerciseName {
-  font-weight: var(--font-weight-medium);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.exercisePercent {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.positive {
-  color: var(--color-accent);
-}
-
-.negative {
-  color: var(--color-error);
-}
-
-.neutral {
-  color: var(--color-text-muted);
-}

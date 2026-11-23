@@ -1,6 +1,7 @@
 import Session from '../models/Session.js';
 import Exercise from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
+import { mejor1RMDeEjercicio } from '../utils/unaRM.js';
 
 // Verifica que el workoutId (si viene) pertenezca al usuario.
 const verificarOwnershipDeWorkout = async (workoutId, userId) => {
@@ -38,13 +39,15 @@ const construirEjerciciosConSnapshots = async (ejerciciosInput, userId) => {
   // a partir del Exercise actual. Los datos de sets (peso, reps...) vienen tal cual.
   return ejerciciosInput.map((ejInput, index) => {
     const exercise = exercisesById.get(String(ejInput.exerciseId));
+    const sets = ejInput.sets || [];
     return {
       exerciseId: ejInput.exerciseId,
       nombreSnapshot: exercise.nombre,
       trackingSnapshot: exercise.tracking,
       descansoSegundos: ejInput.descansoSegundos,
       orden: index,
-      sets: ejInput.sets || [],
+      mejor1RM: mejor1RMDeEjercicio({ trackingSnapshot: exercise.tracking, sets }),
+      sets,
     };
   });
 };

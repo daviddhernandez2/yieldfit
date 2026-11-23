@@ -21,6 +21,7 @@ import Workout from '../models/Workout.js';
 import Session from '../models/Session.js';
 import Chart from '../models/Chart.js';
 import { clonarPresetsAUsuario } from '../utils/presets.js';
+import { mejor1RMDeEjercicio } from '../utils/unaRM.js';
 
 // Credenciales del usuario de prueba. Pueden estar en un repo público: solo
 // existen en la base de desarrollo, que se regenera con este script.
@@ -186,17 +187,19 @@ const main = async () => {
       duracionSegundos: Math.round(entre(50, 80)) * 60,
       ejercicios: rutina.ejercicios.map((e, orden) => {
         const ex = buscar(e.nombre, e.grupo);
+        const sets =
+          ex.tracking === 'tiempo_distancia'
+            ? serieDeCardio(progreso)
+            : seriesDeFuerza(e.pesoInicial, e.series, progreso, semana);
         return {
           exerciseId: ex._id,
-          // Snapshots, igual que hace sessionController al crear una sesión.
+          // Snapshots y mejor1RM, igual que hace sessionController al crear una sesión.
           nombreSnapshot: ex.nombre,
           trackingSnapshot: ex.tracking,
           descansoSegundos: e.series === 1 ? 0 : 120,
           orden,
-          sets:
-            ex.tracking === 'tiempo_distancia'
-              ? serieDeCardio(progreso)
-              : seriesDeFuerza(e.pesoInicial, e.series, progreso, semana),
+          mejor1RM: mejor1RMDeEjercicio({ trackingSnapshot: ex.tracking, sets }),
+          sets,
         };
       }),
     });

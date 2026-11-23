@@ -67,6 +67,16 @@ const sessionExerciseSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    // Mejor 1RM estimado de las series de este ejercicio en esta sesión, calculado UNA
+    // vez al guardar (utils/unaRM.js). El progreso lo lee de aquí sin tocar las series.
+    // null en ejercicios de tiempo/distancia. Las series no se editan nunca (no hay
+    // PUT), así que este valor no se desfasa; si cambiara la fórmula, se recalcula con
+    // scripts/migrar-1rm.js. No es required: las sesiones anteriores al bloque 4 no
+    // lo tenían hasta la migración.
+    mejor1RM: {
+      type: Number,
+      min: 0,
+    },
     sets: {
       type: [setSchema],
       validate: {

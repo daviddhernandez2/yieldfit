@@ -296,7 +296,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
 - [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
 - [x] **11 — Auth robusta**: rate limiting en login y registro (11.1), access token corto +
       refresh token (11.2 y 11.3) e IP real detrás de los proxies de Render (11.4, 0038).
-- [ ] **11b — Beta cerrada**: lo necesario para pasar la app a conocidos. Decisiones de David:
+- [x] **11b — Beta cerrada** (0040–0046): lo necesario para pasar la app a conocidos. Decisiones de David:
       - **11b.1 Rol de admin:** campo `rol` (`usuario` | `admin`) que ninguna ruta de la API acepta;
         se asigna con `npm run admin` (en producción, con el procedimiento de reparaciones).
         `requireAdmin` va tras `requireAuth`, así que el rol se comprueba en cada petición.
@@ -324,6 +324,8 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       - **11b.6 Nota de privacidad:** página pública `/privacidad`, enlazada desde el registro y
         Perfil, **sin email de contacto**. Informativa, no un texto legal. Menciona Resend (cuenta
         en EE. UU., envío desde Irlanda, historial de envíos de 30 días).
+      - **11b.7 Cambios sin guardar:** data router y aviso al salir de rutina, ejercicio, grupo y
+        registro; sin borrador automático. Botones que se apilan si no caben (`GrupoBotones`).
 - [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
       entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
       sincronización híbrida de la sesión activa y revisión de DarkVeil (batería) y

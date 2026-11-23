@@ -56,6 +56,15 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0035 | Límite de intentos en el login y el registro | vigente |
 | 0036 | Mejoras de uso: crear desde el buscador, etiquetas, selector por pasos, arrastrar y cargas | vigente |
 | 0037 | Token de acceso de 15 minutos en memoria y token de renovación en cookie httpOnly | vigente |
+| 0038 | La IP real detrás de Render: `trust proxy` a 3 | vigente |
+| 0039 | Los backups se rotan: se conservan los 3 últimos | vigente |
+| 0040 | Rol de admin asignado por script y página `/developer` | vigente |
+| 0041 | Reportes de fallos desde un botón flotante | vigente |
+| 0042 | Borrar la cuenta con todos sus datos, y el dispositivo al cerrar sesión | vigente |
+| 0043 | Contraseña: cambiarla, restablecerla por script y recuperarla por email con Resend | vigente |
+| 0044 | Nota de privacidad informativa, pública y sin email de contacto | vigente |
+| 0045 | Data router y aviso de cambios sin guardar | vigente |
+| 0046 | Filas de botones que se apilan (`GrupoBotones`) y responsive obligatorio | vigente |
 
 ---
 
@@ -1397,4 +1406,195 @@ nota de privacidad lo dice así.
 - La segunda copia opcional (`BACKUP_COPIA_DIR`, desactivada por la 0019) no se rota.
 - Sigue pendiente sacar los backups del portátil (revisión prevista en la 0018; deuda en
   CLAUDE.md).
+
+---
+
+## 0040 — Rol de admin asignado por script y página `/developer`
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11b (pasos 11b.1 y 11b.3)
+
+**Contexto:** para pasar la app a conocidos (beta cerrada), David necesita ver los reportes de
+fallos y quién usa la app, sin dar ese acceso a nadie más.
+
+**Decisión** (de David):
+- Campo `rol` (`usuario` | `admin`) en `User`, que **ninguna ruta de la API acepta**: se asigna con
+  `npm run admin -- correo` (simulación por defecto; en producción, procedimiento de reparaciones).
+- `requireAdmin` va tras `requireAuth`, que ya lee el usuario de la base en cada petición: quitar
+  el rol tiene efecto al momento. El cliente oculta la página, pero quien decide es el servidor (403).
+- `ultimoAcceso`, guardado al registrarse, entrar y renovar, como mucho una vez por hora.
+- `/api/admin` (reportes y usuarios) es la **única excepción** a "toda consulta filtra por
+  `userId`": devuelve solo nombre, email, registro, último acceso, rol y recuentos, con la lista de
+  campos escrita a mano (nunca nacimiento, peso, altura ni género).
+- Página `/developer` (reportes con filtros y cursor, usuarios, hueco para la documentación),
+  accesible desde Perfil solo para el admin.
+
+**Alternativas descartadas:**
+- *Endpoint para dar el rol:* el único obstáculo para hacerse admin sería un fallo en esa ruta.
+- *Lista de emails admin en una variable de entorno:* el rol no se vería en la base y cambiarlo
+  exigiría redesplegar.
+- *Actualizar el último acceso en `requireAuth`:* una escritura por petición para un dato que
+  basta con una hora de margen.
+
+**Consecuencias:**
+- El panel de usuarios es una lista limitada a 200 (dice el total); con más usuarios habrá que
+  paginarla.
+- La página de documentación queda para más adelante (leída de GitHub, sin copias).
+
+---
+
+## 0041 — Reportes de fallos desde un botón flotante
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11b (paso 11b.2)
+
+**Contexto:** en la beta, los conocidos necesitan una forma fácil de contar fallos, con los datos
+técnicos que hacen falta para reproducirlos.
+
+**Decisión** (de David):
+- Botón con un bichito en todas las pantallas con sesión: en el móvil, **círculo abajo a la
+  derecha por encima de las barras** (opción C; dos alturas, normal y elevada si hay MiniSession o
+  "Reemplazar", definidas en un solo sitio); en escritorio, píldora "Reportar".
+- Hoja con "¿Qué ha fallado?", "¿Qué estabas haciendo?" y, **a la vista**, lo que se envía solo
+  (pantalla, navegador y sistema, tamaño de la ventana). El navegador lo toma el servidor de la
+  cabecera `User-Agent`.
+- `BugReport`, `POST /api/reports`, 5 por hora por usuario; solo texto, nunca capturas.
+- Al borrar una cuenta se borran sus reportes (la privacidad va primero).
+
+**Alternativas descartadas:**
+- *Pestaña lateral a media altura (A/B):* menos reconocible que el círculo.
+- *Servicio externo de reporte de errores:* datos de terceros y otra pieza que mantener.
+- *Captura de pantalla automática:* binarios fuera de lugar en MongoDB y posibles datos de otros.
+
+**Consecuencias:**
+- Si se añade otra barra fija abajo, hay que revisar las alturas del botón y
+  `utils/barrasInferiores.js`.
+- Solo bugs; las ideas pueden llegar más adelante.
+
+---
+
+## 0042 — Borrar la cuenta con todos sus datos, y el dispositivo al cerrar sesión
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11b (paso 11b.4)
+
+**Contexto:** no había forma de borrar una cuenta desde la app; se borraron 4 usuarios a mano y
+quedaron sus datos huérfanos. Además, cerrar sesión dejaba en el dispositivo el entreno a medias y
+las preferencias, a la vista de quien entrara después.
+
+**Decisión** (de David):
+- `DELETE /api/auth/me` **pidiendo la contraseña otra vez** (403 si no es correcta, no 401: un 401
+  haría que el cliente renovara y cerrara la sesión), con límite de 5 fallos cada 15 minutos.
+- En una **transacción** se borran el usuario y todos los documentos con su `userId`
+  (`MODELOS_DEL_USUARIO`); `borrarCuenta.test.js` falla si un modelo con `userId` no está en la lista.
+- En el dispositivo se borran todas las claves `yieldfit_` de localStorage, por prefijo.
+- **Cerrar sesión también borra el dispositivo**, avisando antes si hay un entreno sin terminar.
+  Cuando la sesión caduca sola no se borra nada.
+
+**Alternativas descartadas:**
+- *Borrado "blando" (marcar la cuenta como borrada):* los datos seguirían ahí.
+- *Borrar clave a clave en el dispositivo:* una clave nueva se quedaría sin borrar.
+
+**Consecuencias:**
+- Los datos pueden seguir en los backups como mucho unos 3 meses (0039).
+- Los huérfanos antiguos siguen pendientes en la deuda.
+
+---
+
+## 0043 — Contraseña: cambiarla, restablecerla por script y recuperarla por email con Resend
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11b (pasos 11b.5 y 11b.5b)
+
+**Contexto:** no se podía cambiar la contraseña, y quien la olvidaba no tenía salida. El plan
+inicial era un script ahora y el email "cuando la app saliera de la beta"; David decidió adelantar
+el email a la beta.
+
+**Decisión** (de David):
+- **Cambiarla en Perfil** pidiendo la actual (límite compartido con borrar la cuenta). Cierra las
+  sesiones de los demás dispositivos.
+- **`npm run restablecer -- correo`** como plan B: contraseña temporal aleatoria, mostrada una vez.
+- **"¿Olvidaste tu contraseña?" por email**, enviado con **Resend** desde
+  `no-responder@mail.yieldfit.app` (subdominio, región Irlanda, SPF, DKIM y DMARC comprobados):
+  - enlace de un solo uso, 30 minutos, guardado como huella SHA-256, con el token detrás de `#`;
+  - misma respuesta exista o no la cuenta, enviada **antes** de buscarla;
+  - 3 por hora por email y 5 por IP; al restablecerla se cierran todas las sesiones y se va al login;
+  - aviso "Tu contraseña ha cambiado" al restablecerla y al cambiarla en Perfil.
+- Envío con `fetch` (sin la librería de Resend); sin clave, en local, modo consola.
+
+**Alternativas descartadas:**
+- *Brevo, Postmark o Amazon SES:* Resend es la configuración más sencilla y su plan gratuito
+  (100 al día) sobra para la beta.
+- *Iniciar sesión directamente tras restablecer:* ir al login confirma que la nueva funciona.
+
+**Consecuencias:**
+- La cuenta de Resend está en EE. UU. (lo dice la nota de privacidad).
+- El registro sigue revelando si un email existe (409); ocultarlo exigiría confirmar el email.
+- En producción, el servidor no arranca sin `RESEND_API_KEY`, `EMAIL_REMITENTE` y `APP_URL`.
+
+---
+
+## 0044 — Nota de privacidad informativa, pública y sin email de contacto
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11b (paso 11b.6)
+
+**Contexto:** antes de pasar la app a conocidos, tienen que poder saber qué se guarda de ellos.
+
+**Decisión** (de David): página pública `/privacidad`, enlazada desde el registro y Perfil, en
+lenguaje llano y sin email de contacto: qué se guarda y para qué, quién lo ve (incluido el panel de
+admin y el acceso a la base), dónde (Render en Frankfurt, Atlas en París, Vercel, Resend, backups
+en el portátil) y qué puede hacer el usuario. El texto está solo en la página;
+`docs/privacidad.md` dice cuándo hay que actualizarla.
+
+**Alternativas descartadas:**
+- *Un texto legal completo:* desproporcionado para una beta entre conocidos.
+- *El texto también en `/docs`:* dos versiones que acabarían contradiciéndose.
+
+**Consecuencias:**
+- Si la app se abre al público, hay que revisarla con alguien que sepa de RGPD.
+- Cualquier dato, servicio o cambio de quién ve qué obliga a actualizar la página y su fecha.
+
+---
+
+## 0045 — Data router y aviso de cambios sin guardar
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 11b (paso 11b.7)
+
+**Contexto:** al pulsar volver en un formulario a medias, se perdía todo sin avisar. Con
+`<BrowserRouter>`, React Router no permite frenar una navegación.
+
+**Decisión** (de David):
+- El router pasa a **`createBrowserRouter`** (mismas rutas, en su propio commit sin cambios
+  visibles), que permite `useBlocker`.
+- `useAvisoSalir`: `useBlocker` para la navegación dentro de la app, el atrás del navegador y el
+  gesto de deslizar; `beforeunload` para cerrar o recargar. Solo si `hayCambios` (foto inicial
+  contra estado actual, con pruebas). Formularios de rutina, ejercicio y grupo, y el registro.
+- **Sin borrador automático** por ahora.
+
+**Alternativas descartadas:**
+- *Avisar solo con la flecha de la app:* dejaba fuera el menú, el atrás y el gesto.
+- *Borrador automático:* más código y conflictos al editar; los formularios son cortos.
+
+**Consecuencias:**
+- Cerrar Safari en el iPhone sigue perdiendo los cambios (Safari no muestra ese aviso).
+- En Safari del iPhone, el gesto de deslizar anima la vuelta antes de que aparezca el aviso.
+
+---
+
+## 0046 — Filas de botones que se apilan (`GrupoBotones`) y responsive obligatorio
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 11b
+
+**Contexto:** a 375 y 390 px, el `ConfirmDialog` sacaba de su recuadro botones como "Salir sin
+guardar", y en el registro la fila de peso y altura se salía de la pantalla. Cada página montaba
+su propia fila de botones, y Perfil tenía un apaño por ancho de pantalla.
+
+**Decisión** (de David): arreglarlo en los componentes comunes:
+- **`GrupoBotones`**: si los botones no caben en una línea, se apilan a ancho completo, con la
+  acción principal arriba (`flex-wrap: wrap-reverse`), sin depender de un ancho fijo.
+- `Button` sin `nowrap`; `Input` y `Select` con ancho completo y `min-width: 0`.
+- **Regla:** todo cambio de interfaz se comprueba a 375 y 390 px (y en escritorio), medido en el
+  navegador; los fallos se arreglan en el componente común.
+
+**Alternativas descartadas:**
+- *Media queries por página:* cada formulario nuevo repetiría el problema.
+
+**Consecuencias:**
+- Dos o más botones juntos van siempre en `GrupoBotones`.
 

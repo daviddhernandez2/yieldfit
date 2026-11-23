@@ -5,6 +5,8 @@ import mongoose from 'mongoose';
 // de GET /api/exercises/opciones (DECISIONS.md, 0024). El cliente no tiene copias.
 //   - value: lo que se guarda en la base. No se cambia nunca: hay documentos que lo usan.
 //   - label: lo que se muestra. Se puede cambiar sin migrar nada (p. ej. tildes).
+//   - disponible: false → la app lo muestra como "Próximamente" y no deja elegirlo
+//     (DECISIONS.md, 0030). Sin el campo, está disponible.
 // Un valor nuevo solo exige desplegar el servidor: el cliente lo mostrará solo.
 export const OPCIONES_GRUPO_MUSCULAR = [
   { value: 'Pecho', label: 'Pecho' },
@@ -23,8 +25,15 @@ export const OPCIONES_TIPO = [
   // Máquinas que se cargan con discos (p. ej. Hammer Strength), no con placas. Bloque 2.
   { value: 'Maquinas de discos', label: 'Máquinas de discos' },
   { value: 'Poleas', label: 'Poleas' },
-  { value: 'Cardio', label: 'Cardio' },
+  // Bloqueado hasta el bloque 6b: la sesión activa aún no sabe registrar tiempo y distancia.
+  // Para desbloquearlo, basta con quitar `disponible: false`.
+  { value: 'Cardio', label: 'Cardio', disponible: false },
 ];
+
+// ¿Se puede elegir este tipo al crear un ejercicio o al cambiarle el tipo? Un valor que no
+// está en la lista devuelve true: lo rechazará el enum del schema con su propio mensaje.
+export const tipoDisponible = (tipo) =>
+  OPCIONES_TIPO.find((opcion) => opcion.value === tipo)?.disponible !== false;
 
 const GRUPOS_MUSCULARES = OPCIONES_GRUPO_MUSCULAR.map((o) => o.value);
 const TIPOS = OPCIONES_TIPO.map((o) => o.value);

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Exercise, { OPCIONES_GRUPO_MUSCULAR, OPCIONES_TIPO } from '../models/Exercise.js';
+import Exercise, { OPCIONES_GRUPO_MUSCULAR, OPCIONES_TIPO, tipoDisponible } from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
 import Chart from '../models/Chart.js';
 
@@ -69,11 +69,20 @@ export const getOne = async (req, res, next) => {
   }
 };
 
+// 400 para un tipo marcado como no disponible en OPCIONES_TIPO (hoy, Cardio). La guarda
+// está aquí y no solo en la interfaz para que no se pueda saltar llamando a la API.
+const responderTipoNoDisponible = (res, tipo) =>
+  res.status(400).json({
+    error: 'Validation Error',
+    message: `Los ejercicios de tipo «${tipo}» estarán disponibles próximamente.`,
+  });
+
 // POST /api/exercises
 // Crea un nuevo ejercicio. El tracking se deriva en el middleware pre('save').
 export const create = async (req, res, next) => {
   try {
     const { nombre, grupoMuscular, tipo } = req.body;
+    if (!tipoDisponible(tipo)) return responderTipoNoDisponible(res, tipo);
 
     const exercise = new Exercise({
       userId: req.user._id,
@@ -116,6 +125,11 @@ export const update = async (req, res, next) => {
     }
 
     const { nombre, grupoMuscular, tipo } = req.body;
+    // Solo se rechaza CAMBIAR a un tipo no disponible: un cardio que ya existe se puede
+    // renombrar o pasar a otro tipo sin problema.
+    if (tipo !== undefined && tipo !== exercise.tipo && !tipoDisponible(tipo)) {
+      return responderTipoNoDisponible(res, tipo);
+    }
     if (nombre !== undefined) exercise.nombre = nombre;
     if (grupoMuscular !== undefined) exercise.grupoMuscular = grupoMuscular;
     if (tipo !== undefined) exercise.tipo = tipo;

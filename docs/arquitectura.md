@@ -14,7 +14,7 @@ flowchart LR
         FE["client/<br/>React + Vite<br/>(estáticos)"]
     end
     subgraph Render["Render (Frankfurt)"]
-        API["server/<br/>Express 5 API"]
+        API["server/<br/>Express 5 API<br/>(api.yieldfit.app)"]
     end
     subgraph Atlas["MongoDB Atlas M0"]
         DB[("Base de datos")]
@@ -25,8 +25,13 @@ flowchart LR
     API -- "Mongoose" --> DB
 ```
 
-- El navegador descarga la app de Vercel y después habla **directamente** con la API de Render.
-  Por eso son dos dominios distintos y la API necesita CORS (`CLIENT_ORIGINS`).
+- El navegador descarga la app de Vercel y después habla **directamente** con la API de Render,
+  en `https://api.yieldfit.app` (subdominio propio desde el bloque 11; `yieldfit.onrender.com`
+  sigue respondiendo). Son orígenes distintos, así que la API necesita CORS (`CLIENT_ORIGINS`),
+  pero son el **mismo sitio** (`yieldfit.app`): las cookies de la API llegan con las peticiones
+  del frontend, lo que necesita el token de renovación del bloque 11.
+- **DNS:** el dominio está en Vercel (`ns1.vercel-dns.com`). `api` es un registro CNAME a
+  `yieldfit.onrender.com`; Render emite el certificado HTTPS de `api.yieldfit.app`.
 - **Cold start:** Render duerme el servicio tras un periodo sin tráfico; la primera petición
   tarda decenas de segundos. Se aborda en el bloque 3.
 

@@ -157,3 +157,14 @@ lleva, pero no los recupera.
 - Los scripts no borran backups antiguos: hazlo a mano.
 - Revisión prevista ([0018](../DECISIONS.md)): backups automáticos fuera del portátil cuando la app
   tenga usuarios reales además de David.
+
+## Variables de entorno de Vercel
+
+- `VITE_API_URL` = `https://api.yieldfit.app/api` (Production).
+- **Tiene que ser de tipo normal ("Config"), no "Secret".** Vercel no deja marcar como secreta una
+  variable que empieza por `VITE_`, y tiene sentido: Vite incrusta en el JavaScript publicado
+  todas las variables `VITE_`, así que cualquiera puede leerlas en el navegador. Por eso en el
+  cliente nunca va nada secreto; los secretos (JWT, base de datos) viven solo en Render.
+- Las `VITE_` se leen **al compilar**: después de cambiar una hay que volver a desplegar
+  (Redeploy) para que el cliente la use.
+

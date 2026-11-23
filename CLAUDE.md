@@ -10,7 +10,8 @@ activo, cada sesión una operación, y el progreso se lee como rendimiento de ca
 (% en verde/rojo) a partir del 1RM estimado con la fórmula de Epley.
 
 - Repo (público): https://github.com/daviddhernandez2/yieldfit — rama `main`.
-- Producción: https://yieldfit.app — frontend en Vercel, backend en Render (Frankfurt), MongoDB Atlas M0.
+- Producción: https://yieldfit.app — frontend en Vercel; API en https://api.yieldfit.app (Render,
+  Frankfurt; `yieldfit.onrender.com` sigue respondiendo); MongoDB Atlas M0.
 - Proyecto personal post-curso. El dueño (David) lo desarrolla para aprender y tener un producto sólido.
   **El objetivo principal es que David entienda y pueda explicar todo el código.**
 

@@ -12,6 +12,10 @@ import {
 import { clonarPresetsAUsuario } from '../utils/presets.js';
 import { registrarAcceso } from '../utils/ultimoAcceso.js';
 import { borrarUsuarioYDatos } from '../utils/borrarCuenta.js';
+import { DURACION_RECUPERACION_MS, emitirRecuperacion, gastarRecuperacion } from '../utils/recuperacion.js';
+import { enviarEmail } from '../utils/email.js';
+import { emailContrasenaCambiada, emailRecuperacion } from '../utils/emailsCuenta.js';
+import PasswordReset from '../models/PasswordReset.js';
 
 // ---------------------------------------------------------------------------
 // Cookie del token de renovación (bloque 11, DECISIONS.md 0037)
@@ -291,6 +295,120 @@ export const changePassword = async (req, res, next) => {
     }
 
     await responderConSesion(res, 200, 'Contraseña cambiada', user);
+    avisarContrasenaCambiada(user);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({ error: 'Validation Error', message: messages[0], details: messages });
+    }
+    next(error);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Recuperar la contraseña por email (bloque 11b). Ver docs/auth.md.
+
+const MIN_PASSWORD = 8; // el mismo mínimo que el modelo User
+
+// Aviso "Tu contraseña ha cambiado" (decisión de David), al cambiarla en Perfil y al
+// restablecerla. Se lanza sin esperar: la respuesta al usuario no depende de Resend, y si el
+// envío falla solo se anota (la contraseña ya está cambiada).
+const avisarContrasenaCambiada = (user) => {
+  const { asunto, texto } = emailContrasenaCambiada({
+    nombre: user.nombreCompleto,
+    fecha: new Date(),
+    urlRecuperar: `${process.env.APP_URL}/recuperar`,
+  });
+  enviarEmail({ para: user.email, asunto, texto }).catch((error) =>
+    console.error(`No se pudo enviar el aviso de contraseña cambiada a ${user._id}:`, error.message)
+  );
+};
+
+// Busca la cuenta y, si existe, le envía el enlace. Se ejecuta DESPUÉS de responder.
+const enviarEnlaceRecuperacion = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) return; // Nada que hacer, y el cliente ya tiene su respuesta (la misma).
+  const token = await emitirRecuperacion(user._id);
+  // El token va detrás de "#": esa parte de la URL el navegador no la envía a ningún
+  // servidor (ni a Vercel ni en la cabecera Referer), así que no acaba en ningún log. La
+  // página /restablecer la lee y la manda en el cuerpo de un POST.
+  const enlace = `${process.env.APP_URL}/restablecer#token=${token}`;
+  const { asunto, texto } = emailRecuperacion({
+    nombre: user.nombreCompleto,
+    enlace,
+    minutos: DURACION_RECUPERACION_MS / 60000,
+  });
+  await enviarEmail({ para: user.email, asunto, texto });
+  console.log(`Enlace de recuperación enviado al usuario ${user._id}`);
+};
+
+// POST /api/auth/forgot-password  { email } → 200 siempre con el mismo mensaje
+// La respuesta es la misma exista o no la cuenta, y sale ANTES de buscarla y enviar el
+// email: si esperara a Resend, tardaría más cuando la cuenta existe y, midiendo el tiempo,
+// se sabría. Los límites van en la ruta (por email y por IP).
+export const forgotPassword = async (req, res) => {
+  const email = String(req.body?.email ?? '').toLowerCase().trim();
+  if (!email) {
+    return res.status(400).json({ error: 'Validation Error', message: 'Escribe tu email' });
+  }
+
+  res.status(200).json({
+    message: 'Si hay una cuenta con ese email, te hemos enviado un enlace para restablecer la contraseña.',
+  });
+
+  enviarEnlaceRecuperacion(email).catch((error) =>
+    // Sin el email en el log: solo que falló y por qué.
+    console.error('No se pudo enviar el enlace de recuperación:', error.message)
+  );
+};
+
+// POST /api/auth/reset-password  { token, password } → 200 { message }
+// Pone la contraseña nueva con el enlace del email. En una transacción:
+//   1. gasta el enlace (si no vale, no se toca nada);
+//   2. guarda la contraseña nueva (validación del modelo y hash en pre('save'));
+//   3. cierra TODAS las sesiones (tokens de renovación) y borra sus otros enlaces.
+// Si algo falla, la transacción lo deshace todo, el enlace incluido: se puede reintentar.
+// No inicia sesión: el cliente lleva al login (decisión de David), y así se comprueba que la
+// contraseña nueva funciona.
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body ?? {};
+    // La longitud se comprueba ANTES de gastar el enlace, aunque la transacción lo
+    // devolvería igualmente: así el error es claro y no se abre una transacción para nada.
+    if (typeof password !== 'string' || password.length < MIN_PASSWORD) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: `La contraseña necesita al menos ${MIN_PASSWORD} caracteres`,
+      });
+    }
+
+    const session = await mongoose.startSession();
+    let user = null;
+    try {
+      await session.withTransaction(async () => {
+        user = null; // withTransaction puede repetir esta función: empezar siempre de cero
+        const enlace = await gastarRecuperacion(token, session);
+        if (!enlace) return;
+        user = await User.findById(enlace.userId).session(session);
+        if (!user) return;
+        user.password = password;
+        await user.save({ session });
+        await RefreshToken.deleteMany({ userId: user._id }, { session });
+        await PasswordReset.deleteMany({ userId: user._id, usadoEn: null }, { session });
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    if (!user) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'El enlace no es válido o ha caducado. Pide otro.',
+      });
+    }
+
+    avisarContrasenaCambiada(user);
+    res.status(200).json({ message: 'Contraseña cambiada. Ya puedes iniciar sesión.' });
   } catch (error) {
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map((e) => e.message);

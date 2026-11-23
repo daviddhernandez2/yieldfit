@@ -77,3 +77,41 @@ export const limiteConfirmarContrasena = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
+
+// Pedir un enlace de recuperación (bloque 11b). Dos límites encadenados:
+//   - por EMAIL, 3 por hora: que nadie pueda llenar de emails el buzón de otra persona
+//     pidiendo enlaces con su dirección (y protege el cupo de 100 envíos al día de Resend);
+//   - por IP, 5 por hora: que nadie recorra emails desde una conexión.
+// Cuentan todas las peticiones, exista o no la cuenta: si solo contaran las de cuentas que
+// existen, el 429 revelaría cuáles existen.
+const emailDelCuerpo = (req) => String(req.body?.email ?? '').toLowerCase().trim();
+
+export const limiteRecuperacionEmail = rateLimit({
+  windowMs: UNA_HORA,
+  limit: 3,
+  keyGenerator: (req) => `email|${emailDelCuerpo(req)}`,
+  message: 'Ya has pedido varios enlaces para este email.',
+  handler: responder,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});
+
+export const limiteRecuperacionIp = rateLimit({
+  windowMs: UNA_HORA,
+  limit: 5,
+  message: 'Demasiadas peticiones de recuperación desde esta conexión.',
+  handler: responder,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});
+
+// Poner la contraseña nueva con el enlace: 10 cada 15 minutos por IP. El token no se puede
+// adivinar (256 bits), pero así ni siquiera se puede intentar a gran escala.
+export const limiteRestablecer = rateLimit({
+  windowMs: QUINCE_MINUTOS,
+  limit: 10,
+  message: 'Demasiados intentos.',
+  handler: responder,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});

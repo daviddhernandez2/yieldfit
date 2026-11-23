@@ -5,16 +5,25 @@ import Session from '../models/Session.js';
 import Chart from '../models/Chart.js';
 import BugReport from '../models/BugReport.js';
 import RefreshToken from '../models/RefreshToken.js';
+import PasswordReset from '../models/PasswordReset.js';
 
 // Todo lo que pertenece a un usuario (campo userId). Al borrar la cuenta se borra todo, sin
 // excepciones (bloque 11b): ejercicios, rutinas, sesiones, grupos, reportes de fallos (la
-// privacidad va primero, decisión de David) y tokens de renovación (sus otros dispositivos
-// dejan de poder renovar).
+// privacidad va primero, decisión de David), tokens de renovación (sus otros dispositivos
+// dejan de poder renovar) y enlaces de recuperación de contraseña.
 //
 // SI SE AÑADE UNA COLECCIÓN CON userId, TIENE QUE IR EN ESTA LISTA (lo comprueba
 // borrarCuenta.test.js). Si no, al borrar una cuenta quedarían datos huérfanos, como los de
 // los 4 usuarios borrados a mano (deuda en CLAUDE.md).
-export const MODELOS_DEL_USUARIO = [Exercise, Workout, Session, Chart, BugReport, RefreshToken];
+export const MODELOS_DEL_USUARIO = [
+  Exercise,
+  Workout,
+  Session,
+  Chart,
+  BugReport,
+  RefreshToken,
+  PasswordReset,
+];
 
 // Borra el usuario y todos sus datos dentro de la transacción `session`: o se borra todo
 // o no se borra nada. Primero los datos y el usuario al final: si algo fallara a mitad, la

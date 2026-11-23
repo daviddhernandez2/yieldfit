@@ -1,7 +1,24 @@
 import express from 'express';
-import { register, login, me, refresh, logout, deleteMe, changePassword } from '../controllers/authController.js';
+import {
+  register,
+  login,
+  me,
+  refresh,
+  logout,
+  deleteMe,
+  changePassword,
+  forgotPassword,
+  resetPassword,
+} from '../controllers/authController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
-import { limiteConfirmarContrasena, limiteLogin, limiteRegistro } from '../middlewares/limiteIntentos.js';
+import {
+  limiteConfirmarContrasena,
+  limiteLogin,
+  limiteRecuperacionEmail,
+  limiteRecuperacionIp,
+  limiteRegistro,
+  limiteRestablecer,
+} from '../middlewares/limiteIntentos.js';
 
 const router = express.Router();
 
@@ -16,5 +33,9 @@ router.put('/me/password', requireAuth, limiteConfirmarContrasena, changePasswor
 // Sin requireAuth: la prueba de identidad es la cookie de renovación (bloque 11).
 router.post('/refresh', refresh);
 router.post('/logout', logout);
+// Recuperar la contraseña por email (bloque 11b). Públicas: quien la ha olvidado no tiene
+// sesión. Primero el límite por IP, después el de email.
+router.post('/forgot-password', limiteRecuperacionIp, limiteRecuperacionEmail, forgotPassword);
+router.post('/reset-password', limiteRestablecer, resetPassword);
 
 export default router;

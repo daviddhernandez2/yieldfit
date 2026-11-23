@@ -9,6 +9,7 @@ import {
   rotarRenovacion,
 } from '../utils/refreshToken.js';
 import { clonarPresetsAUsuario } from '../utils/presets.js';
+import { registrarAcceso } from '../utils/ultimoAcceso.js';
 
 // ---------------------------------------------------------------------------
 // Cookie del token de renovación (bloque 11, DECISIONS.md 0037)
@@ -41,8 +42,10 @@ const ponerCookieRenovacion = (res, token) =>
 const quitarCookieRenovacion = (res) => res.clearCookie(COOKIE_RENOVACION, opcionesCookie());
 
 // Login y registro acaban igual: token de acceso en el cuerpo (el cliente lo guarda en
-// memoria) y token de renovación en la cookie, de una familia nueva.
+// memoria) y token de renovación en la cookie, de una familia nueva. Los dos cuentan como
+// acceso (bloque 11b).
 const responderConSesion = async (res, status, message, user) => {
+  await registrarAcceso(user);
   ponerCookieRenovacion(res, await emitirRenovacion(user._id));
   res.status(status).json({ message, token: signToken(user._id), user });
 };
@@ -167,6 +170,7 @@ export const refresh = async (req, res, next) => {
       quitarCookieRenovacion(res);
       return res.status(401).json({ error: 'Unauthorized', message: 'La sesión ha caducado. Vuelve a iniciar sesión.' });
     }
+    await registrarAcceso(user);
     ponerCookieRenovacion(res, rotado.token);
     res.status(200).json({ token: signToken(user._id), user });
   } catch (error) {

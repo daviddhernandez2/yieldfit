@@ -44,6 +44,20 @@ const userSchema = new mongoose.Schema(
         message: 'Género no válido',
       },
     },
+    // Rol (bloque 11b). Ninguna ruta de la API lo acepta: el registro copia solo los campos
+    // que conoce, así que nadie puede hacerse admin enviándolo en la petición. Se asigna
+    // con `npm run admin` (scripts/asignar-admin.js). Los usuarios anteriores no tienen el
+    // campo en la base: Mongoose aplica el valor por defecto al leerlos, sin migración.
+    rol: {
+      type: String,
+      enum: ['usuario', 'admin'],
+      default: 'usuario',
+    },
+    // Último acceso (bloque 11b): al registrarse, iniciar sesión o renovar el token, como
+    // mucho una escritura por hora (utils/ultimoAcceso.js). Lo ve el admin en /developer.
+    ultimoAcceso: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

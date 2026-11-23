@@ -53,3 +53,20 @@ export const requireAuth = async (req, res, next) => {
     next(error);
   }
 };
+
+// Middleware: solo deja pasar a los administradores (bloque 11b).
+// Va SIEMPRE después de requireAuth, que acaba de leer el usuario de la base: el rol se
+// comprueba en cada petición, así que quitarle el rol a alguien tiene efecto al momento,
+// sin esperar a que caduque su token. Que el cliente oculte la página de developer es
+// solo comodidad; quien decide es esto.
+//   401 = no sé quién eres (lo responde requireAuth)
+//   403 = sé quién eres, pero no tienes permiso
+export const requireAdmin = (req, res, next) => {
+  if (req.user?.rol !== 'admin') {
+    return res.status(403).json({
+      error: 'Forbidden',
+      message: 'No tienes permiso para ver esto',
+    });
+  }
+  next();
+};

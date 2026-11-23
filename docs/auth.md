@@ -17,6 +17,7 @@ Dos tokens desde el bloque 11 ([0037](../DECISIONS.md), sustituye a la 0008):
 | Token de renovación | `server/utils/refreshToken.js`, `models/RefreshToken.js` | emitir, rotar (con margen de 30 s) y revocar |
 | Endpoints | `server/controllers/authController.js` | `register`, `login`, `refresh`, `logout`, `me` |
 | Proteger rutas | `server/middlewares/authMiddleware.js` | `requireAuth`: valida el token de acceso y carga `req.user` |
+| Solo admin | `server/middlewares/authMiddleware.js` | `requireAdmin` (tras `requireAuth`): 403 si `req.user.rol` no es `admin` |
 | Token en memoria y renovación | `client/src/api/client.js` | interceptores de axios; `renovarSesion` |
 | Estado de sesión | `client/src/context/AuthContext.jsx` | `status`: `loading` → `authenticated` / `unauthenticated` |
 | Rutas privadas | `client/src/components/PrivateRoute.jsx` | redirige a `/login` si no hay sesión |
@@ -116,6 +117,14 @@ sequenceDiagram
 
 `requireAuth` consulta la base de datos en cada petición. Tiene un coste, pero hace que un
 usuario borrado deje de tener acceso aunque su token no haya caducado.
+
+## Rol de administrador
+
+Desde el bloque 11b, el usuario tiene `rol` (`usuario` o `admin`). Ninguna ruta de la API lo
+acepta: se asigna con `npm run admin` ([operaciones.md](operaciones.md)). Las rutas de admin
+llevan `requireAuth` y después `requireAdmin`; como `requireAuth` lee el usuario de la base en
+cada petición, quitar el rol tiene efecto al momento. El cliente recibe `rol` para mostrar u
+ocultar la página de developer, pero quien decide es el servidor (403).
 
 ## Al abrir la app
 

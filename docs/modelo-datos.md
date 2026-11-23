@@ -34,6 +34,8 @@ erDiagram
         number peso "opcional"
         number altura "opcional"
         string genero "enum, opcional"
+        string rol "usuario | admin, por defecto usuario"
+        date ultimoAcceso "opcional"
     }
     Exercise {
         ObjectId userId FK "indexado"
@@ -89,6 +91,11 @@ Todos los modelos tienen además `createdAt` y `updatedAt` (`timestamps: true`).
 - La contraseña se hashea con bcrypt en `pre('save')`, solo si ha cambiado (`isModified`).
 - `toJSON` borra `password`, así que nunca sale en una respuesta de la API.
 - `comparePassword()` se usa en el login (ver [auth.md](auth.md)).
+- `rol` (`usuario` | `admin`, bloque 11b): ninguna ruta de la API lo acepta; se asigna con
+  `npm run admin` ([operaciones.md](operaciones.md)). Los usuarios anteriores no tienen el campo:
+  Mongoose les aplica `usuario` al leerlos.
+- `ultimoAcceso`: se guarda al registrarse, iniciar sesión y renovar el token, como mucho una vez
+  por hora (`utils/ultimoAcceso.js`), sin tocar `updatedAt`.
 
 ### Exercise
 - **Por usuario:** al registrarse, se clonan 58 presets de `server/data/exercisePresets.js`

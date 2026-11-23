@@ -40,9 +40,17 @@
   padding-right: calc(var(--space-md) * 2 + 16px);
 }
 
+/* Hover: el borde se marca un poco (tema Premium). Un campo con error mantiene su borde rojo. */
+.select:hover:not(:focus):not(.selectError) {
+  border-color: var(--color-border-strong);
+}
+
+/* Foco suave (tema Premium): borde verde translúcido y un anillo de 3 px alrededor. El foco de
+   teclado general (anillo sólido de 2 px) es para botones y enlaces; los campos usan este. */
 .select:focus {
   outline: none;
-  border-color: var(--color-border-accent);
+  border-color: var(--color-field-focus);
+  box-shadow: var(--field-focus-ring);
 }
 
 .selectError {

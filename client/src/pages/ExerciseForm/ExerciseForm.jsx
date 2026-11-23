@@ -11,6 +11,8 @@ import Select from "@/components/Select/Select.jsx";
 import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
+import { useAvisoSalir } from "@/hooks/useAvisoSalir.js";
+import { hayCambios } from "@/utils/cambios.js";
 import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from "@/utils/borradoEjercicio.js";
 import useOpcionesEjercicio, { tipoDisponible } from "@/hooks/useOpcionesEjercicio.js";
 import formulario from "@/styles/paginaFormulario.module.css";
@@ -55,6 +57,11 @@ export default function ExerciseForm() {
   // Grupos y tipos vienen del servidor: sus values son los únicos que acepta la API.
   const { opciones, error: errorOpciones } = useOpcionesEjercicio();
 
+  // Aviso al salir con cambios sin guardar (11b.7). Foto del estado inicial: los valores por
+  // defecto al crear; al editar, null hasta que llega el ejercicio del servidor.
+  const [inicial, setInicial] = useState(() => (editMode ? null : form));
+  const aviso = useAvisoSalir(hayCambios(inicial, form));
+
   // Precarga en modo edición.
   useEffect(() => {
     if (!editMode) return;
@@ -62,11 +69,13 @@ export default function ExerciseForm() {
       try {
         const response = await getExercise(id);
         const ex = response.data.exercise;
-        setForm({
+        const cargado = {
           nombre: ex.nombre,
           grupoMuscular: ex.grupoMuscular,
           tipo: ex.tipo,
-        });
+        };
+        setForm(cargado);
+        setInicial(cargado);
         setTipoOriginal(ex.tipo);
       } catch (err) {
         const message =
@@ -93,6 +102,7 @@ export default function ExerciseForm() {
       } else {
         await createExercise(form);
       }
+      aviso.permitirSalida(); // guardado: salir no pierde nada
       navigate("/exercises");
     } catch (err) {
       const data = err.response?.data;
@@ -108,6 +118,7 @@ export default function ExerciseForm() {
     setSubmitting(true);
     try {
       await deleteExercise(id);
+      aviso.permitirSalida();
       navigate("/exercises");
     } catch (err) {
       const message = err.response?.data?.message || "Error al eliminar.";
@@ -210,6 +221,7 @@ export default function ExerciseForm() {
         </div>
       )}
 
+      <ConfirmDialog {...aviso.dialogo} />
       <ConfirmDialog
         open={confirmDeleteOpen}
         title={tituloBorrarEjercicio(form.nombre)}

@@ -170,6 +170,28 @@ Las rutas privadas van envueltas en `PrivateRoute` + `Layout`. Cualquier otra ru
 permite `useBlocker`, que frena una navegación para preguntar antes. El router se crea una vez,
 fuera del componente `App`.
 
+### Aviso de cambios sin guardar
+
+Los formularios de rutina, ejercicio y grupo (al crear y al editar) y el registro avisan antes
+de salir si hay cambios sin guardar: "Tienes cambios sin guardar. ¿Salir y perderlos?", con
+"Seguir editando" y "Salir sin guardar" (`hooks/useAvisoSalir.js`, bloque 11b).
+
+- **Solo si de verdad hay cambios:** cada formulario guarda una foto de su estado inicial
+  (vacío al crear, lo que llegó del servidor al editar) y `utils/cambios.js` (`hayCambios`, con
+  sus pruebas) la compara con el actual. Escribir algo y borrarlo no es un cambio.
+- **Al guardar o borrar** el formulario llama a `permitirSalida()` antes de navegar.
+
+| Cómo sale el usuario | ¿Avisa? |
+|---|---|
+| Flecha de volver, menú lateral, barra de pestañas | Sí (`useBlocker`) |
+| Botón atrás del navegador | Sí (`useBlocker`) |
+| Deslizar atrás en Safari del iPhone | Sí, pero Safari anima la vuelta antes de que aparezca el aviso |
+| Cerrar la pestaña o recargar (escritorio) | Sí, con el aviso **del navegador** (`beforeunload`; texto genérico) |
+| Cerrar Safari en el iPhone | No: Safari no muestra ese aviso. Solo lo cubriría un borrador automático (descartado por ahora) |
+
+Desde el registro, el enlace a la nota de privacidad se abre en otra pestaña, para no salir del
+formulario.
+
 ## Arranque en frío de Render
 
 Con el plan gratuito, Render apaga el servidor tras ~15 minutos sin uso; la siguiente petición

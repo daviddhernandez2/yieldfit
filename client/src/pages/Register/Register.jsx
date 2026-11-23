@@ -5,6 +5,9 @@ import Button from '@/components/Button/Button.jsx';
 import ServerWakingUp from '@/components/ServerWakingUp/ServerWakingUp.jsx';
 import Input from '@/components/Input/Input.jsx';
 import RadioGroup from '@/components/RadioGroup/RadioGroup.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import { useAvisoSalir } from '@/hooks/useAvisoSalir.js';
+import { hayCambios } from '@/utils/cambios.js';
 import styles from '@/pages/Register/Register.module.css';
 
 // Opciones del campo género. Los valores coinciden con el enum del modelo User
@@ -15,6 +18,17 @@ const GENERO_OPTIONS = [
   { value: 'otro', label: 'Otro' },
 ];
 
+const FORMULARIO_VACIO = {
+  email: '',
+  password: '',
+  passwordConfirm: '',
+  nombreCompleto: '',
+  fechaNacimiento: '',
+  peso: '',
+  altura: '',
+  genero: '',
+};
+
 // Pantalla de registro. Formulario único con todos los campos del modelo User.
 // Tras un registro exitoso el backend devuelve un token, así que el usuario
 // queda automáticamente autenticado y se le redirige al dashboard.
@@ -22,16 +36,9 @@ export default function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    passwordConfirm: '',
-    nombreCompleto: '',
-    fechaNacimiento: '',
-    peso: '',
-    altura: '',
-    genero: '',
-  });
+  const [formData, setFormData] = useState(FORMULARIO_VACIO);
+  // Aviso al salir con cambios sin guardar (11b.7): es un formulario largo.
+  const aviso = useAvisoSalir(hayCambios(FORMULARIO_VACIO, formData));
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -75,6 +82,7 @@ export default function Register() {
       if (formData.genero) payload.genero = formData.genero;
 
       await register(payload);
+      aviso.permitirSalida(); // cuenta creada: salir no pierde nada
       navigate('/dashboard');
     } catch (error) {
       // El backend devuelve mensajes específicos en 'details' (ValidationError)
@@ -195,7 +203,8 @@ export default function Register() {
           {/* Antes de dar sus datos, que pueda leer qué se guarda (bloque 11b). */}
           <p className={styles.privacidad}>
             Qué datos se guardan y para qué:{' '}
-            <Link to="/privacidad" className={styles.link}>
+            {/* En otra pestaña: así no se sale del registro ni se pierde lo escrito. */}
+            <Link to="/privacidad" target="_blank" rel="noopener noreferrer" className={styles.link}>
               Privacidad
             </Link>
           </p>
@@ -219,6 +228,7 @@ export default function Register() {
           </Link>
         </p>
       </div>
+      <ConfirmDialog {...aviso.dialogo} />
     </div>
   );
 }

@@ -6,6 +6,8 @@ import Input from "@/components/Input/Input.jsx";
 import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
+import { useAvisoSalir } from "@/hooks/useAvisoSalir.js";
+import { hayCambios } from "@/utils/cambios.js";
 import ExercisePicker from "@/components/ExercisePicker/ExercisePicker.jsx";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import { contar } from "@/utils/activeSession.js";
@@ -35,14 +37,24 @@ export default function GroupForm() {
   const [confirmBorrar, setConfirmBorrar] = useState(false);
   const { opciones, error: errorOpciones } = useOpcionesEjercicio();
 
+  // Aviso al salir con cambios sin guardar (11b.7). Foto del estado inicial: vacío al crear;
+  // al editar, null hasta que llega el grupo del servidor.
+  const [inicial, setInicial] = useState(editando ? null : { nombre: "", seleccionados: new Set() });
+  const aviso = useAvisoSalir(hayCambios(inicial, { nombre, seleccionados }));
+
   useEffect(() => {
     const cargar = async () => {
       try {
         const [catRes, grupoRes] = await Promise.all([listExercises(), editando ? getChart(id) : null]);
         setCatalogo(catRes.data.exercises);
         if (grupoRes) {
-          setNombre(grupoRes.data.chart.nombre);
-          setSeleccionados(new Set(grupoRes.data.chart.exerciseIds.map(String)));
+          const cargado = {
+            nombre: grupoRes.data.chart.nombre,
+            seleccionados: new Set(grupoRes.data.chart.exerciseIds.map(String)),
+          };
+          setNombre(cargado.nombre);
+          setSeleccionados(cargado.seleccionados);
+          setInicial(cargado);
         }
       } catch {
         // Un grupo que no existe (o de otro usuario) devuelve 404: de vuelta al Dashboard.
@@ -70,6 +82,7 @@ export default function GroupForm() {
       const datos = { nombre: nombre.trim(), exerciseIds: [...seleccionados] };
       if (editando) await updateChart(id, datos);
       else await createChart(datos);
+      aviso.permitirSalida(); // guardado: salir no pierde nada
       navigate("/dashboard");
     } catch (err) {
       const data = err.response?.data;
@@ -82,6 +95,7 @@ export default function GroupForm() {
     setGuardando(true);
     try {
       await deleteChart(id);
+      aviso.permitirSalida();
       navigate("/dashboard");
     } catch (err) {
       setErrorMessage(err.response?.data?.message || "Error al borrar el grupo.");
@@ -155,6 +169,7 @@ export default function GroupForm() {
         </div>
       )}
 
+      <ConfirmDialog {...aviso.dialogo} />
       <ConfirmDialog
         open={confirmBorrar}
         title={`¿Eliminar «${nombre}»?`}

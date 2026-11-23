@@ -17,6 +17,8 @@ import ListaOrdenable, { Asa } from '@/components/ListaOrdenable/ListaOrdenable.
 import { moverElemento } from '@/utils/orden.js';
 import { minutosYSegundos, duracionHablada } from '@/utils/tiempo.js';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import { useAvisoSalir } from '@/hooks/useAvisoSalir.js';
+import { hayCambios } from '@/utils/cambios.js';
 import useOpcionesEjercicio, { tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
 import formulario from '@/styles/paginaFormulario.module.css';
@@ -61,6 +63,11 @@ export default function WorkoutForm() {
   // Grupos musculares para los chips de filtro, tal como los define el servidor.
   const { opciones, error: errorOpciones } = useOpcionesEjercicio();
 
+  // Aviso al salir con cambios sin guardar (11b.7). Foto del estado inicial: vacío al crear;
+  // al editar, null hasta que llega la rutina del servidor (sin foto no hay nada que perder).
+  const [inicial, setInicial] = useState(isEditMode ? null : { nombre: '', ejercicios: [] });
+  const aviso = useAvisoSalir(hayCambios(inicial, { nombre, ejercicios }));
+
   useEffect(() => {
     const cargar = async () => {
       try {
@@ -74,6 +81,7 @@ export default function WorkoutForm() {
           const wo = woRes.data.workout;
           setNombre(wo.nombre);
           setEjercicios(wo.ejercicios);
+          setInicial({ nombre: wo.nombre, ejercicios: wo.ejercicios });
         }
       } catch {
         if (isEditMode) navigate('/workouts', { replace: true });
@@ -140,6 +148,7 @@ export default function WorkoutForm() {
       } else {
         await createWorkout(payload);
       }
+      aviso.permitirSalida(); // guardado: salir no pierde nada
       navigate('/workouts');
     } catch (err) {
       const data = err.response?.data;
@@ -154,6 +163,7 @@ export default function WorkoutForm() {
     setDeleting(true);
     try {
       await deleteWorkout(id);
+      aviso.permitirSalida();
       navigate('/workouts');
     } catch (err) {
       const message = err.response?.data?.message || 'Error al eliminar la rutina.';
@@ -326,6 +336,7 @@ export default function WorkoutForm() {
         </div>
       )}
 
+      <ConfirmDialog {...aviso.dialogo} />
       <ConfirmDialog
         open={confirmOpen}
         title="¿Eliminar esta rutina?"

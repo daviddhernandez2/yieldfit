@@ -229,7 +229,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       producción) y un backup completo de producción justo antes de migrar.
       **Requisito:** el endpoint de progreso acepta un rango (desde/hasta) desde el principio,
       para que el selector de rango del bloque 9 no obligue a rehacerlo.
-- [ ] **5 — Serie anterior**: mostrar en cada serie de la sesión activa lo hecho en la sesión anterior.
+- [x] **5 — Serie anterior**: mostrar en cada serie de la sesión activa lo hecho en la sesión anterior.
 - [ ] **6 — Reemplazar ejercicio en sesión activa**: cambiar un ejercicio por otro sin salir de la
       sesión. Valorar antes pasar el estado de `ActiveSession.jsx` a `useReducer`.
 - [ ] **7 — Exportar CSV**: historial exportable, generado en el backend.

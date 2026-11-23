@@ -47,6 +47,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0026 | Progreso en el servidor: 1RM precalculado, % tipo bolsa e índice base 100 | vigente |
 | 0027 | Historial paginado por cursor | vigente |
 | 0028 | Sin middleware de compresión: Render ya comprime | vigente |
+| 0029 | Serie anterior: última sesión con el ejercicio, guardada en la sesión activa | vigente |
 
 ---
 
@@ -924,4 +925,46 @@ producción, con Brotli, que comprime algo más que gzip.
   si no, añadir `compression` (una línea en `app.js`).
 - Las mediciones en local (sin compresión) muestran los tamaños sin comprimir; los de producción
   son menores.
+
+---
+
+## 0029 — Serie anterior: última sesión con el ejercicio, guardada en la sesión activa
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 5
+
+**Contexto:** durante el entreno no se veía qué se hizo la vez anterior en cada serie, que es lo
+que se necesita para decidir el peso.
+
+**Decisión** (de David):
+- **"La vez anterior" = la última sesión guardada que incluye ese ejercicio, en cualquier
+  rutina.** Sirve aunque el mismo ejercicio esté en varias rutinas.
+- `GET /api/sessions/previous-sets?exerciseIds=…` devuelve sus series, con una consulta por
+  ejercicio sobre un **índice nuevo `{ userId, ejercicios.exerciseId, fecha }`**. Sin él, un
+  ejercicio que no se ha hecho nunca recorría todo el historial (1.402 sesiones examinadas en
+  el seed de 10 años); con él, 0.
+- La sesión activa lo pide **una vez** y lo guarda **dentro de sí misma** (localStorage): sigue
+  disponible al recargar o sin cobertura. Si la petición falla, el entreno sigue sin "anterior"
+  y se reintenta al volver a abrir la sesión.
+- Se muestra como **texto de ayuda** en los campos vacíos, emparejando series por posición, en
+  el color de texto secundario y en cursiva para que no se confunda con un valor escrito.
+- **Atajo de repetir:** al marcar una serie como completada, cada campo vacío se rellena con el
+  valor de la vez anterior; lo escrito no se toca.
+
+**Alternativas descartadas:**
+- *La última vez que se hizo la misma rutina:* no sirve si el ejercicio está en varias rutinas.
+- *Una columna "Anterior" (como Strong o Hevy):* no cabe en el ancho de un iPhone con las
+  columnas actuales de la serie.
+- *Una petición por ejercicio o por serie:* hasta 10 peticiones al empezar, con la cobertura del
+  gimnasio.
+- *Sin índice nuevo:* la consulta de un ejercicio poco frecuente crecería con el historial (0015).
+
+**Consecuencias:**
+- Un índice más en `sessions` (multikey: una entrada por ejercicio de cada sesión). Ocupa poco
+  y cada sesión guardada lo actualiza.
+- Marcar una serie vacía por error la guarda con los valores anteriores (antes la guardaba
+  vacía, que tampoco servía).
+- Un ejercicio que se añada o reemplace a mitad de sesión no tendrá "anterior" hasta que se pida
+  para él (bloque 6).
+- Los ejercicios de cardio solo muestran peso y reps: depende de la deuda del cardio en la sesión
+  activa.
 

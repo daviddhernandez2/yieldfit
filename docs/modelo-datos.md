@@ -140,6 +140,10 @@ Entrenamiento realizado.
 - **Índice `{ userId: 1, fecha: -1 }`:** lo usan las dos consultas que crecen con el historial:
   la lista paginada (`GET /api/sessions`, de la más reciente a la más antigua) y el progreso de
   un rango (`GET /api/progress`).
+- **Índice `{ userId: 1, 'ejercicios.exerciseId': 1, fecha: -1 }`** ([0029](../DECISIONS.md)):
+  la serie anterior (`GET /api/sessions/previous-sets`) busca la última sesión con cada
+  ejercicio. Es multikey: una entrada por ejercicio de cada sesión. Sin él, un ejercicio que no
+  se ha hecho nunca recorría todo el historial.
 
 #### Cómo se calcula el progreso
 
@@ -209,6 +213,6 @@ crecen sin límite:
 
 | Colección | Crecimiento | Estado |
 |---|---|---|
-| Session | una por entrenamiento, indefinidamente | indexada; lista paginada por cursor y progreso por rango, sin leer las series (bloque 4) |
+| Session | una por entrenamiento, indefinidamente | indexada; lista paginada por cursor, progreso por rango sin leer las series (bloque 4) y serie anterior por índice (bloque 5) |
 | Exercise | ~58 + los que cree el usuario | acotada |
 | Workout, Chart | pocas por usuario | acotadas |

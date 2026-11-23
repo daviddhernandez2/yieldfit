@@ -91,7 +91,7 @@ flowchart TB
 | `/api/auth` | `authRoutes.js` | pública, salvo `GET /me` |
 | `/api/exercises` | `exerciseRoutes.js` | `requireAuth` a nivel router |
 | `/api/workouts` | `workoutRoutes.js` | `requireAuth` a nivel router |
-| `/api/sessions` | `sessionRoutes.js` | `requireAuth` a nivel router; lista paginada por cursor ([0027](../DECISIONS.md)) |
+| `/api/sessions` | `sessionRoutes.js` | `requireAuth` a nivel router; lista paginada por cursor ([0027](../DECISIONS.md)); `previous-sets` para la serie anterior ([0029](../DECISIONS.md)) |
 | `/api/progress` | `progressRoutes.js` | `requireAuth` a nivel router; solo lectura ([0026](../DECISIONS.md)) |
 | `/api/health` | en `app.js` | pública; despertador de la portada ([0025](../DECISIONS.md)) |
 | `/api/charts` | `chartRoutes.js` | `requireAuth` a nivel router (sin uso en el cliente todavía) |

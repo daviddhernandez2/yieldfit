@@ -27,6 +27,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 2 — Máquina de discos | [bloques/2-maquina-de-discos.md](bloques/2-maquina-de-discos.md) |
 | 3 — Loader de arranque | [bloques/3-loader-arranque.md](bloques/3-loader-arranque.md) |
 | 4 — Historial escalable | [bloques/4-historial-escalable.md](bloques/4-historial-escalable.md) |
+| 5 — Serie anterior | [bloques/5-serie-anterior.md](bloques/5-serie-anterior.md) |
 
 ## Cómo mantener esta documentación
 

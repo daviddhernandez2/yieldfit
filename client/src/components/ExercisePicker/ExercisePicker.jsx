@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import Chip from '@/components/Chip/Chip.jsx';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
+import CrearEjercicio from '@/components/ExercisePicker/CrearEjercicio.jsx';
 import { etiquetaDe, tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import styles from '@/components/ExercisePicker/ExercisePicker.module.css';
 
@@ -23,6 +24,8 @@ const IconCheck = () => (
 //   - onElegir(exerciseId): al pulsar un ejercicio.
 //   - listaCompleta: sin altura máxima en la lista (en una página propia, como la de
 //     reemplazar, hace scroll la página entera y no una caja dentro).
+//   - onCreado(ejercicio): si se pasa, cuando lo buscado no existe aparece "+ Crear «…»" y
+//     se puede crear ahí mismo (CrearEjercicio). Quien usa el buscador lo añade a su lista.
 //
 // Un ejercicio de un tipo bloqueado (cardio, 0030) sale con "Próximamente" y no se puede
 // pulsar, salvo que ya esté seleccionado: así se puede quitar de una rutina que ya lo tenía.
@@ -33,9 +36,24 @@ export default function ExercisePicker({
   excluidos = new Set(),
   onElegir,
   listaCompleta = false,
+  onCreado,
 }) {
   const [busqueda, setBusqueda] = useState('');
   const [grupo, setGrupo] = useState(null);
+  const [creando, setCreando] = useState(false);
+
+  // "+ Crear" solo si se ha escrito algo y ningún ejercicio se llama exactamente así
+  // (sin distinguir mayúsculas ni espacios de los extremos). Mira todo el catálogo, también
+  // los excluidos: si ya existe, no se ofrece crear un duplicado.
+  const textoBuscado = busqueda.trim();
+  const existeExacto = ejercicios.some((ex) => ex.nombre.trim().toLowerCase() === textoBuscado.toLowerCase());
+  const puedeCrear = Boolean(onCreado) && textoBuscado.length >= 2 && !existeExacto;
+
+  const handleCreado = (ejercicio) => {
+    setCreando(false);
+    setBusqueda('');
+    onCreado(ejercicio);
+  };
 
   const visibles = useMemo(() => {
     const texto = busqueda.toLowerCase();
@@ -76,7 +94,7 @@ export default function ExercisePicker({
       </div>
 
       <div className={`${styles.catalogo} ${listaCompleta ? styles.catalogoCompleto : ''} glassCard`}>
-        {visibles.length === 0 && <p className={styles.vacio}>No hay ejercicios con esos filtros.</p>}
+        {visibles.length === 0 && !puedeCrear && <p className={styles.vacio}>No hay ejercicios con esos filtros.</p>}
         {visibles.map((ex) => {
           const isSelected = seleccionados.has(ex._id);
           const disponible = tipoDisponible(opciones, ex.tipo);
@@ -100,7 +118,24 @@ export default function ExercisePicker({
             </button>
           );
         })}
+
+        {/* Lo buscado no existe: crearlo aquí mismo, sin salir de la pantalla. */}
+        {puedeCrear && !creando && (
+          <button type="button" className={`${styles.catalogoItem} ${styles.crearFila}`} onClick={() => setCreando(true)}>
+            <span className={styles.catalogoItemName}>+ Crear «{textoBuscado}»</span>
+          </button>
+        )}
       </div>
+
+      {creando && (
+        <CrearEjercicio
+          nombreInicial={textoBuscado}
+          grupoInicial={grupo}
+          opciones={opciones}
+          onCreado={handleCreado}
+          onCancelar={() => setCreando(false)}
+        />
+      )}
     </div>
   );
 }

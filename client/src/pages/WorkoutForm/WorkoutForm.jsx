@@ -264,6 +264,11 @@ export default function WorkoutForm() {
             opciones={opciones}
             seleccionados={exerciseIdsAñadidos}
             onElegir={handleToggleExercise}
+            // Creado desde el buscador: entra en el catálogo y se añade a la rutina.
+            onCreado={(ex) => {
+              setCatalogo((prev) => [...prev, ex]);
+              handleToggleExercise(ex._id);
+            }}
           />
         </section>
 

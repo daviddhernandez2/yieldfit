@@ -144,6 +144,11 @@ export default function ReplaceExercise() {
           excluidos={new Set(sesion.ejercicios.map((ej) => ej.exerciseId))}
           seleccionados={elegidoId ? new Set([elegidoId]) : new Set()}
           onElegir={handleElegir}
+          // Creado desde el buscador: queda elegido; falta pulsar "Reemplazar por «…»".
+          onCreado={(ex) => {
+            setCatalogo((prev) => [...prev, ex]);
+            setElegidoId(ex._id);
+          }}
           listaCompleta
         />
       )}

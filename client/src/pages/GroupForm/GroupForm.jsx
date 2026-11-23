@@ -126,6 +126,11 @@ export default function GroupForm() {
             opciones={opciones}
             seleccionados={seleccionados}
             onElegir={alternar}
+            // Creado desde el buscador: entra en el catálogo y queda marcado en el grupo.
+            onCreado={(ex) => {
+              setCatalogo((prev) => [...prev, ex]);
+              alternar(ex._id);
+            }}
           />
         </section>
 

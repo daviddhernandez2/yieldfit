@@ -14,12 +14,19 @@ import diagnosticoRoutes from './routes/diagnosticoRoutes.js'; // TEMPORAL (bloq
 
 const app = express();
 
-// Render pone un proxy delante de la app: sin esto, req.ip sería la IP del proxy para todos
-// los usuarios y el límite de intentos (bloque 11) los trataría como uno solo. El número
-// es cuántos proxies de confianza hay delante; TRUST_PROXY permite ajustarlo sin tocar
-// código si Render cambiara. Se comprueba en los logs de Render: morgan escribe req.ip
-// (remote-addr) en cada petición, y tiene que ser la IP real de quien entra.
-app.set('trust proxy', Number(process.env.TRUST_PROXY ?? 1));
+// Detrás de Render hay una cadena de proxies, y cada uno añade a X-Forwarded-For la IP que ve:
+//   cliente → Cloudflare → red interna de Render → proxy local (::1) → Express
+// Express cuenta desde el final de esa lista tantos saltos como proxies de confianza le
+// digamos, y la IP siguiente es req.ip. Con 3 sale la del usuario; con 1 (lo que había)
+// salía la IP interna de Render, igual para todos, y el límite de intentos (bloque 11)
+// trataba a todo el mundo como uno solo. Comprobado con un endpoint temporal (DECISIONS 0038).
+// Lo que mande el cliente en X-Forwarded-For queda al principio de la lista, por delante
+// de su IP real, así que no puede falsificar req.ip mientras el número sea el correcto.
+// Si Render cambia la cadena, la cuenta deja de cuadrar: con un salto más, req.ip sería una
+// IP de Cloudflare (límites compartidos otra vez); con uno menos, sería lo que mande el
+// cliente (falsificable). Se vigila en los logs de Render, donde morgan escribe req.ip
+// (remote-addr), y se corrige con TRUST_PROXY sin tocar código.
+app.set('trust proxy', Number(process.env.TRUST_PROXY ?? 3));
 
 // Helmet añade cabeceras HTTP de seguridad por defecto (X-Content-Type-Options,
 // X-Frame-Options, Strict-Transport-Security, etc.) sin necesidad de configurarlas

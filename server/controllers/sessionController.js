@@ -114,6 +114,65 @@ export const list = async (req, res, next) => {
   }
 };
 
+const MAX_DIAS_CALENDARIO = 366;
+
+// ¿Es una zona horaria IANA válida ("Europe/Madrid")? Intl lanza un error si no.
+const zonaValida = (zona) => {
+  try {
+    new Intl.DateTimeFormat('es-ES', { timeZone: zona });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// GET /api/sessions/days?desde=…&hasta=…&zona=Europe/Madrid
+// Días entrenados en un rango, para el calendario (bloque 8, DECISIONS.md 0033). Solo
+// devuelve el día y el id y nombre de cada sesión, nunca las series:
+//   { dias: [{ dia: '2026-11-03', sesiones: [{ _id, nombre }] }] }
+// `desde` entra en el rango y `hasta` no (como un mes: del día 1 al día 1 del siguiente).
+//
+// Zona horaria: las fechas se guardan en UTC. Una sesión a las 00:30 en Madrid es el día
+// anterior en UTC, así que se agrupa por el día en la zona del usuario (la envía el
+// cliente; sin ella, UTC). El rango está limitado a un año: la respuesta no crece con el
+// historial (0015).
+export const days = async (req, res, next) => {
+  try {
+    const desde = new Date(req.query.desde);
+    const hasta = new Date(req.query.hasta);
+    const zona = req.query.zona ?? 'UTC';
+    const dias = (hasta - desde) / (24 * 60 * 60 * 1000);
+    if (Number.isNaN(dias) || dias <= 0 || dias > MAX_DIAS_CALENDARIO) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: `desde y hasta tienen que ser fechas válidas, con hasta posterior y como mucho ${MAX_DIAS_CALENDARIO} días después`,
+      });
+    }
+    if (!zonaValida(zona)) {
+      return res.status(400).json({ error: 'Validation Error', message: 'zona horaria no válida' });
+    }
+
+    // Usa el índice { userId, fecha }. $dateToString convierte cada fecha al día en la zona
+    // del usuario, y $group junta las sesiones de un mismo día.
+    const resultado = await Session.aggregate([
+      { $match: { userId: req.user._id, fecha: { $gte: desde, $lt: hasta } } },
+      { $sort: { fecha: 1 } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$fecha', timezone: zona } },
+          sesiones: { $push: { _id: '$_id', nombre: '$nombre' } },
+        },
+      },
+      { $sort: { _id: 1 } },
+      { $project: { _id: 0, dia: '$_id', sesiones: 1 } },
+    ]);
+
+    res.status(200).json({ dias: resultado });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const MAX_EJERCICIOS_ANTERIORES = 30;
 
 // GET /api/sessions/previous-sets?exerciseIds=a,b,c

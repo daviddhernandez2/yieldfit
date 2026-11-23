@@ -192,6 +192,14 @@ export default function Register() {
             </div>
           )}
 
+          {/* Antes de dar sus datos, que pueda leer qué se guarda (bloque 11b). */}
+          <p className={styles.privacidad}>
+            Qué datos se guardan y para qué:{' '}
+            <Link to="/privacidad" className={styles.link}>
+              Privacidad
+            </Link>
+          </p>
+
           <Button
             type="submit"
             variant="primary"

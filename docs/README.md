@@ -13,6 +13,7 @@ renderiza los diagramas mermaid de forma nativa (ver [0016](../DECISIONS.md)).
 | [Modelo de datos](modelo-datos.md) | Colecciones, qué va embebido y qué referenciado, snapshots, índices |
 | [Autenticación](auth.md) | Registro, login, tokens de acceso y de renovación, límite de intentos e IP real |
 | [Operaciones](operaciones.md) | Backups de producción, prueba de restauración y reparaciones puntuales |
+| [Privacidad](privacidad.md) | Dónde está la nota de privacidad de la app y cuándo hay que actualizarla |
 | [Decisiones](../DECISIONS.md) | Registro de decisiones técnicas y de producto (fuente única, no se duplica aquí) |
 
 ## Bloques del roadmap

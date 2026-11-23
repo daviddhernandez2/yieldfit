@@ -252,3 +252,15 @@
   color: var(--color-text-muted);
   line-height: 1.5;
 }
+
+/* Enlace discreto a la nota de privacidad, al final de la página (bloque 11b). */
+.privacidadLink {
+  align-self: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.privacidadLink:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}

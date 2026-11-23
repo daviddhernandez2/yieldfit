@@ -1,0 +1,116 @@
+/* Nota de privacidad (bloque 11b). Página de lectura: una columna estrecha (unos 70
+   caracteres por línea) y texto con aire, como un artículo. */
+.page {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: var(--space-xl) var(--space-md);
+  background-color: var(--color-bg);
+}
+
+.nota {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.volver {
+  align-self: flex-start;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.volver:hover {
+  color: var(--color-text);
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.actualizada {
+  margin-top: calc(-1 * var(--space-md));
+  font-size: var(--font-size-sm);
+}
+
+.intro {
+  color: var(--color-text);
+}
+
+.nota section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.nota h2 {
+  margin-top: var(--space-md);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.nota strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Resumen en tres puntos, destacado con el verde suave de la app. */
+.resumen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-lg);
+  background-color: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-medium);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  list-style: none;
+}
+
+.resumen li::before {
+  content: '✓ ';
+  color: var(--color-accent);
+}
+
+/* Qué se guarda: término en blanco y su explicación debajo. */
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.datos dt {
+  margin-top: var(--space-sm);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-left: var(--space-lg);
+}
+
+.pie {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.enlace {
+  color: var(--color-accent);
+}

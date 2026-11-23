@@ -73,3 +73,9 @@
 .link:hover {
   text-decoration: underline;
 }
+/* Enlace a la nota de privacidad, encima del botón de crear la cuenta (bloque 11b). */
+.privacidad {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}

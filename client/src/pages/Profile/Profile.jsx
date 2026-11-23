@@ -140,6 +140,11 @@ export default function Profile() {
       {/* Al final de la página, separado de todo lo demás (bloque 11b). */}
       <EliminarCuenta />
 
+      {/* Nota de privacidad (bloque 11b): qué se guarda, dónde y quién lo ve. */}
+      <Link to="/privacidad" className={styles.privacidadLink}>
+        Privacidad
+      </Link>
+
       <ConfirmDialog
         open={avisoEntreno}
         title="Entreno sin terminar"

@@ -15,6 +15,7 @@ const Login = lazy(() => import('@/pages/Login/Login.jsx'));
 const Register = lazy(() => import('@/pages/Register/Register.jsx'));
 const Recuperar = lazy(() => import('@/pages/Recuperar/Recuperar.jsx'));
 const Restablecer = lazy(() => import('@/pages/Restablecer/Restablecer.jsx'));
+const Privacidad = lazy(() => import('@/pages/Privacidad/Privacidad.jsx'));
 const Dashboard = lazy(() => import('@/pages/Dashboard/Dashboard.jsx'));
 const Exercises = lazy(() => import('@/pages/Exercises/Exercises.jsx'));
 const ExerciseForm = lazy(() => import('@/pages/ExerciseForm/ExerciseForm.jsx'));
@@ -72,6 +73,8 @@ function App() {
             {/* Recuperar la contraseña por email (bloque 11b): públicas, sin sesión. */}
             <Route path="/recuperar" element={<Recuperar />} />
             <Route path="/restablecer" element={<Restablecer />} />
+            {/* Nota de privacidad (bloque 11b): pública, se lee antes de registrarse. */}
+            <Route path="/privacidad" element={<Privacidad />} />
 
             {/* Rutas privadas */}
             <Route

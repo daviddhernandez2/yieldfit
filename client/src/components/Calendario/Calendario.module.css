@@ -1,69 +1,89 @@
-/* Calendario de días entrenados, arriba del Historial. Plegable: cerrado solo ocupa la
-   cabecera (mes y número de sesiones). */
+/* Calendario de días entrenados, arriba del Historial. Mismas medidas que las tarjetas
+   del Dashboard (relleno y separación --space-lg, título en negrita). Solo colores del
+   design system (variables.css). La tarjeta mide siempre lo mismo: las dos vistas están
+   superpuestas y el mes tiene siempre 6 filas. */
 .calendario {
+  /* Medidas propias del calendario, en un solo sitio. */
+  --celda-mes: 44px; /* tamaño máximo de un día en la vista de mes */
+  --casilla: 11px; /* casilla del mapa anual: 53 semanas caben en la tarjeta de escritorio */
+  --hueco-casilla: 3px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
   border-radius: var(--radius-md);
-  overflow: hidden;
 }
 
+/* ---------- Cabecera: título a la izquierda, Mes / Año a la derecha ---------- */
+
 .cabecera {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-md);
-  width: 100%;
-  padding: var(--space-md);
-  background: transparent;
-  border: none;
-  color: var(--color-text);
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
 }
 
 .titulo {
-  font-weight: var(--font-weight-medium);
-  /* toLocaleDateString lo da en minúscula ("noviembre de 2026"). */
-  text-transform: capitalize;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
 }
 
 .resumen {
+  margin: var(--space-xs) 0 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-.chevron {
+.selector {
   display: flex;
-  color: var(--color-text-muted);
-  transition: var(--transition-base);
-}
-
-.chevronAbierto {
-  transform: rotate(180deg);
-}
-
-.cuerpo {
-  display: flex;
-  flex-direction: column;
+  flex-shrink: 0;
   gap: var(--space-sm);
-  padding: 0 var(--space-md) var(--space-md);
 }
 
+/* ---------- Navegación: ‹ periodo › ---------- */
+
+/* En la vista de mes, la navegación tiene el mismo ancho que la rejilla (anchoMes): las
+   flechas quedan justo en sus bordes. En la de año ocupa toda la tarjeta, como el mapa. */
 .navegacion {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: var(--space-md);
+  width: 100%;
+  margin: 0 auto;
 }
 
+.anchoMes {
+  max-width: calc(7 * var(--celda-mes) + 6 * var(--space-sm));
+}
+
+.periodo {
+  font-weight: var(--font-weight-medium);
+  /* toLocaleDateString lo da en minúscula ("noviembre de 2026"). */
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+/* Mismo estilo que el botón de volver de las páginas de edición. */
 .flecha {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   background: transparent;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   color: var(--color-text);
   cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.flecha:hover:not(:disabled) {
+  border-color: var(--color-text-muted);
 }
 
 .flecha:disabled {
@@ -72,19 +92,51 @@
   cursor: not-allowed;
 }
 
-/* 7 columnas iguales. Las celdas son cuadradas (aspect-ratio) y se adaptan al ancho:
-   en un iPhone de 375 px cada una mide unos 40 px, suficiente para tocarla. */
-.rejilla {
+/* ---------- Las dos vistas, superpuestas ---------- */
+
+/* Las dos vistas ocupan la misma celda de una rejilla de 1×1: la altura es la de la más
+   alta (la de mes, con sus 6 filas) y no cambia al pasar de una a otra. */
+.vistas {
+  position: relative;
+  display: grid;
+}
+
+.vista {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.oculta {
+  visibility: hidden;
+}
+
+/* El mapa anual es más bajo que el mes: se centra en vertical en ese espacio. */
+.vistaAnio {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+/* ---------- Vista de mes ---------- */
+
+/* Celdas cuadradas con la misma separación en las dos direcciones. En el móvil la rejilla
+   llena el ancho; en escritorio crece hasta --celda-mes y se centra. */
+.rejillaMes {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--space-xs);
+  gap: var(--space-sm);
+  width: 100%;
+  margin: 0 auto;
 }
 
 .diaSemana {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-  padding-bottom: var(--space-xs);
+  font-weight: var(--font-weight-medium);
 }
 
 .dia {
@@ -92,37 +144,187 @@
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  padding: 0;
   background: transparent;
+  border: none;
   color: var(--color-text-muted);
   font-family: inherit;
   font-size: var(--font-size-sm);
   font-variant-numeric: tabular-nums;
 }
 
-/* Día entrenado: verde de la marca, lleno, con texto oscuro para el contraste. */
-.diaEntrenado {
+/* Hueco antes del día 1 o después del último: mismo tamaño que un día. */
+.huecoMes {
+  aspect-ratio: 1;
+}
+
+/* El círculo es un 80 % de la celda, centrado: todos los círculos quedan a la misma
+   distancia entre sí. */
+.circulo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  height: 80%;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  transition: var(--transition-base);
+}
+
+/* ---------- Vista de año (mapa tipo GitHub) ---------- */
+
+/* Si no cabe (móvil), se desplaza en horizontal dentro de su caja; la página no. */
+.mapaAnual {
+  overflow-x: auto;
+  padding-bottom: var(--space-xs);
+}
+
+.meses {
+  display: grid;
+  grid-template-columns: repeat(var(--columnas), var(--casilla));
+  column-gap: var(--hueco-casilla);
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.semanas {
+  display: flex;
+  gap: var(--hueco-casilla);
+  width: max-content;
+}
+
+.semana {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hueco-casilla);
+}
+
+.cuadro,
+.huecoCuadro {
+  display: block;
+  width: var(--casilla);
+  height: var(--casilla);
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+}
+
+/* Día sin sesiones: casilla apagada, para que se vea la forma del año. */
+.cuadro {
+  background-color: var(--color-border);
+}
+
+.huecoCuadro {
+  background: transparent;
+}
+
+.leyenda {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--hueco-casilla);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.leyenda > span:first-child {
+  margin-right: var(--space-xs);
+}
+
+.leyenda > span:last-child {
+  margin-left: var(--space-xs);
+}
+
+/* ---------- Intensidad: solo verdes del design system ---------- */
+
+/* Año: casillas macizas. Una sesión, verde medio; dos o más, el acento. */
+.cuadro.nivel1 {
+  background-color: var(--color-accent-medium);
+}
+
+.cuadro.nivel2 {
   background-color: var(--color-accent);
-  color: var(--color-accent-text);
+}
+
+/* Mes: círculos de cristal (como las glassCard): fondo verde translúcido con desenfoque y
+   un brillo arriba. Una sesión: fondo suave y borde medio, número en blanco. Dos o más:
+   fondo medio, borde y número en el verde de acento (como un chip seleccionado). */
+.nivel1 .circulo,
+.nivel2 .circulo {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* Mismo brillo superior que .glassCard en variables.css. */
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
   font-weight: var(--font-weight-bold);
+}
+
+.nivel1 .circulo {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent-medium);
+  color: var(--color-text);
+}
+
+.nivel2 .circulo {
+  background-color: var(--color-accent-medium);
+  border-color: var(--color-border-accent);
+  color: var(--color-accent);
+}
+
+.nivel1,
+.nivel2 {
   cursor: pointer;
 }
 
-.diaEntrenado:hover {
-  background-color: var(--color-accent-hover);
+.dia.nivel1:hover .circulo,
+.dia.nivel2:hover .circulo {
+  border-color: var(--color-accent-hover);
 }
 
-/* Hoy: borde, para situarse aunque no se haya entrenado. */
-.diaHoy {
+/* Hoy: anillo, para situarse aunque no se haya entrenado. */
+.diaHoy .circulo {
   border-color: var(--color-text);
   color: var(--color-text);
 }
 
-/* Día con varias sesiones cuya lista está abierta debajo. */
-.diaAbierto {
-  outline: 2px solid var(--color-text);
-  outline-offset: 1px;
+.cuadro.diaHoy {
+  outline: 1px solid var(--color-text);
+  outline-offset: -1px;
+}
+
+.diaAbierto .circulo,
+.cuadro.diaAbierto {
+  box-shadow: 0 0 0 2px var(--color-text);
+}
+
+/* ---------- Lista de un día con varias sesiones (encima del calendario) ---------- */
+
+.capaDia {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+}
+
+.capaDiaCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.cerrar {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
 }
 
 .listaDia {
@@ -131,7 +333,6 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--color-border);
 }
 
 .sesionDia {
@@ -139,15 +340,20 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: var(--space-sm) 0;
+  padding: var(--space-md) 0;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
   font-family: inherit;
   font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   text-align: left;
   cursor: pointer;
+}
+
+.listaDia li:last-child .sesionDia {
+  border-bottom: none;
 }
 
 .error {

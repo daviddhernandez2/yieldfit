@@ -123,7 +123,7 @@ export default function History() {
         )}
       </header>
 
-      {/* Días entrenados del mes (bloque 8): plegado, arriba de la lista. */}
+      {/* Días entrenados (bloque 8): vista de mes o de año, arriba de la lista. */}
       {!loading && !error && sessions.length > 0 && <Calendario />}
 
       {loading && <p className={styles.feedback}>Cargando...</p>}

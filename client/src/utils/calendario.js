@@ -46,3 +46,39 @@ export const moverMes = ({ anio, mes }, paso) => {
   const fecha = new Date(anio, mes + paso, 1);
   return { anio: fecha.getFullYear(), mes: fecha.getMonth() };
 };
+
+// ---------------------------------------------------------------------------
+// Vista anual (como el mapa de contribuciones de GitHub)
+
+// Rango de un año natural: del 1 de enero (00:00 local) al 1 de enero siguiente, que no
+// entra. Cabe en el límite de 366 días del servidor. Las dos vistas usan este rango: la
+// mensual lee sus días del año ya pedido.
+export const rangoDelAnio = (anio) => ({
+  desde: new Date(anio, 0, 1).toISOString(),
+  hasta: new Date(anio + 1, 0, 1).toISOString(),
+});
+
+// El año en columnas de semana (cada una de lunes a domingo, de arriba abajo). Los huecos
+// antes del 1 de enero y después del 31 de diciembre son null.
+export const rejillaDelAnio = (anio) => {
+  const huecosAntes = (new Date(anio, 0, 1).getDay() + 6) % 7;
+  const celdas = Array(huecosAntes).fill(null);
+  for (let fecha = new Date(anio, 0, 1); fecha.getFullYear() === anio; fecha.setDate(fecha.getDate() + 1)) {
+    celdas.push({ dia: claveDia(fecha), numero: fecha.getDate(), mes: fecha.getMonth() });
+  }
+  while (celdas.length % 7 !== 0) celdas.push(null);
+
+  const semanas = [];
+  for (let i = 0; i < celdas.length; i += 7) semanas.push(celdas.slice(i, i + 7));
+  return semanas;
+};
+
+// En qué columna empieza cada mes, para poner su nombre encima: [{ mes: 0, columna: 0 }, …].
+export const inicioDeMeses = (semanas) =>
+  semanas.flatMap((semana, columna) =>
+    semana.filter((celda) => celda?.numero === 1).map((celda) => ({ mes: celda.mes, columna })),
+  );
+
+// Intensidad del color de un día según cuántas sesiones tiene: 0 (ninguna), 1 (una) o 2
+// (dos o más). Con ~3 sesiones por semana, más niveles no aportarían nada.
+export const nivelDeDia = (sesiones) => Math.min(sesiones, 2);

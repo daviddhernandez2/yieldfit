@@ -12,6 +12,10 @@
    --color-accent: #3EF87E;
    --color-accent-hover: #2dd968;
    --color-accent-text: #000000;
+   /* Verde translúcido, para fondos (cristal, seleccionado). Mismo verde que el acento.
+      soft = fondo de un elemento seleccionado (chips); medium = claramente visible. */
+   --color-accent-soft: rgba(62, 248, 126, 0.08);
+   --color-accent-medium: rgba(62, 248, 126, 0.25);
 
    /* Color de error / pérdida */
    --color-error: #FF3000;

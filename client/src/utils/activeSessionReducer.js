@@ -18,6 +18,11 @@
 
 import { serieAnterior, rellenarConAnterior } from './activeSession.js';
 
+// Cuántas series tendrá el ejercicio que reemplaza a este: las mismas, y al menos 1 (si
+// se hubieran quitado todas, el nuevo no tendría ninguna que hacer). La pantalla la usa
+// para generar un id por serie antes de llamar al reducer.
+export const seriesAlReemplazar = (ejercicio) => Math.max(1, ejercicio.sets.length);
+
 // Devuelve la sesión con un ejercicio cambiado. El resto de ejercicios son los mismos
 // objetos (no se copian): solo cambia lo que tiene que cambiar.
 const cambiarEjercicio = (sesion, exerciseIndex, cambio) => ({
@@ -75,6 +80,28 @@ export const sesionReducer = (sesion, accion) => {
     // Lo que devuelve GET /api/sessions/previous-sets (bloque 5).
     case 'guardarAnteriores':
       return { ...sesion, anteriores: accion.anteriores };
+
+    // La vez anterior de un ejercicio que entra a mitad de sesión (al reemplazar). Se suma a
+    // la que ya había. Si la sesión aún no tiene `anteriores` (la carga inicial falló), no
+    // se crea: así la sesión sigue "sin anteriores" y la próxima vez que se abra los pide
+    // todos, incluido este.
+    case 'añadirAnteriores':
+      if (!sesion.anteriores) return sesion;
+      return { ...sesion, anteriores: { ...sesion.anteriores, ...accion.anteriores } };
+
+    // Reemplazar un ejercicio por otro (bloque 6, 0031): el nuevo ocupa el mismo sitio, con
+    // el mismo número de series (al menos 1) y el mismo descanso, y los campos vacíos. Lo
+    // hecho del ejercicio anterior se pierde (la pantalla lo confirma antes).
+    // { exerciseIndex, exerciseId, exerciseNombre, ids: [un id por serie] }
+    case 'reemplazarEjercicio':
+      return cambiarEjercicio(sesion, accion.exerciseIndex, (ej) => ({
+        exerciseId: accion.exerciseId,
+        exerciseNombre: accion.exerciseNombre,
+        // Solo se puede elegir un ejercicio disponible (el catálogo no deja otros).
+        bloqueado: false,
+        descansoSegundos: ej.descansoSegundos,
+        sets: accion.ids.map((id) => ({ id, peso: '', reps: '', completada: false })),
+      }));
 
     default:
       // Una acción desconocida es un error de programación: mejor verlo que ignorarlo.

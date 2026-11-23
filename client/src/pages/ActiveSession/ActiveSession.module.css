@@ -291,8 +291,15 @@
   transition: width 1s linear;
 }
 
-.addSetButton {
+/* "+ Añadir serie" y "Reemplazar ejercicio", uno al lado del otro bajo las series. */
+.accionesEjercicio {
+  display: flex;
+  gap: var(--space-sm);
   margin-top: var(--space-sm);
+}
+
+.accionEjercicio {
+  flex: 1;
   padding: var(--space-sm);
   background: transparent;
   border: 1px dashed rgba(255, 255, 255, 0.15);
@@ -304,7 +311,7 @@
   transition: var(--transition-base);
 }
 
-.addSetButton:hover {
+.accionEjercicio:hover {
   color: var(--color-accent);
   border-color: var(--color-border-accent);
 }

@@ -10,7 +10,8 @@ import {
   contar,
 } from "@/utils/activeSession.js";
 import { createSession, getPreviousSets } from "@/api/sessions.js";
-import { sesionReducer } from "@/utils/activeSessionReducer.js";
+import { sesionReducer, seriesAlReemplazar } from "@/utils/activeSessionReducer.js";
+import ReemplazarEjercicio from "@/pages/ActiveSession/ReemplazarEjercicio.jsx";
 import { listExercises } from "@/api/exercises.js";
 import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
@@ -96,6 +97,10 @@ export default function ActiveSession() {
   // Ejercicios con series hechas que ya no existen: se calculan al pulsar
   // "Terminar sesión" y no se envían al guardar.
   const [borrados, setBorrados] = useState([]);
+  // Reemplazar un ejercicio (bloque 6): índice del ejercicio cuya ventana está abierta, y
+  // el reemplazo pendiente de confirmar cuando el ejercicio tenía series hechas.
+  const [reemplazandoIndex, setReemplazandoIndex] = useState(null);
+  const [reemplazoPendiente, setReemplazoPendiente] = useState(null);
 
   const [, setTick] = useState(0);
 
@@ -194,6 +199,46 @@ export default function ActiveSession() {
     ) {
       setRestTimer(null);
     }
+  };
+
+  // Hace el reemplazo: la sesión cambia en el reducer; aquí, lo que es de la pantalla
+  // (el temporizador) y pedir la vez anterior del ejercicio nuevo (pendiente del bloque 5).
+  const reemplazar = (exerciseIndex, nuevo) => {
+    const ids = Array.from({ length: seriesAlReemplazar(session.ejercicios[exerciseIndex]) }, () =>
+      crypto.randomUUID(),
+    );
+    dispatch({
+      type: "reemplazarEjercicio",
+      exerciseIndex,
+      exerciseId: nuevo._id,
+      exerciseNombre: nuevo.nombre,
+      ids,
+    });
+    // El temporizador señala la serie por posición: si era de este ejercicio, ya no vale.
+    if (restTimer?.exerciseIndex === exerciseIndex) setRestTimer(null);
+    getPreviousSets([nuevo._id])
+      .then((res) => dispatch({ type: "añadirAnteriores", anteriores: res.data.anteriores }))
+      .catch(() => {
+        // Sin "anterior" para el nuevo no se rompe nada.
+      });
+  };
+
+  // Al elegir en la ventana: si el ejercicio tenía series hechas, se pregunta antes
+  // (se perderán); si no, se reemplaza directamente.
+  const handleElegirReemplazo = (nuevo) => {
+    const exerciseIndex = reemplazandoIndex;
+    setReemplazandoIndex(null);
+    const hechas = session.ejercicios[exerciseIndex].sets.filter((s) => s.completada).length;
+    if (hechas > 0) {
+      setReemplazoPendiente({ exerciseIndex, nuevo, hechas });
+      return;
+    }
+    reemplazar(exerciseIndex, nuevo);
+  };
+
+  const handleConfirmReemplazo = () => {
+    reemplazar(reemplazoPendiente.exerciseIndex, reemplazoPendiente.nuevo);
+    setReemplazoPendiente(null);
   };
 
   const handleToggleExpand = (index) => {
@@ -399,13 +444,22 @@ export default function ActiveSession() {
                     );
                   })}
 
-                  <button
-                    type="button"
-                    className={styles.addSetButton}
-                    onClick={() => handleAñadirSerie(exerciseIndex)}
-                  >
-                    + Añadir serie
-                  </button>
+                  <div className={styles.accionesEjercicio}>
+                    <button
+                      type="button"
+                      className={styles.accionEjercicio}
+                      onClick={() => handleAñadirSerie(exerciseIndex)}
+                    >
+                      + Añadir serie
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.accionEjercicio}
+                      onClick={() => setReemplazandoIndex(exerciseIndex)}
+                    >
+                      Reemplazar ejercicio
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -452,6 +506,35 @@ export default function ActiveSession() {
         confirmVariant="primary"
         onConfirm={handleConfirmTerminar}
         onCancel={() => setConfirmTerminar(false)}
+      />
+
+      {reemplazandoIndex !== null && (
+        <ReemplazarEjercicio
+          ejercicioActual={session.ejercicios[reemplazandoIndex]}
+          idsEnSesion={new Set(session.ejercicios.map((ej) => ej.exerciseId))}
+          onElegir={handleElegirReemplazo}
+          onCerrar={() => setReemplazandoIndex(null)}
+        />
+      )}
+
+      {/* Solo aparece si el ejercicio reemplazado tenía series hechas: se van a perder. */}
+      <ConfirmDialog
+        open={reemplazoPendiente !== null}
+        title={
+          reemplazoPendiente
+            ? `¿Reemplazar «${session.ejercicios[reemplazoPendiente.exerciseIndex].exerciseNombre}»?`
+            : ""
+        }
+        message={
+          reemplazoPendiente
+            ? `Tienes ${contar(reemplazoPendiente.hechas, "serie hecha", "series hechas")} de «${session.ejercicios[reemplazoPendiente.exerciseIndex].exerciseNombre}». Si lo reemplazas por «${reemplazoPendiente.nuevo.nombre}», se perderán.`
+            : ""
+        }
+        confirmLabel="Reemplazar"
+        cancelLabel="Cancelar"
+        confirmVariant="danger"
+        onConfirm={handleConfirmReemplazo}
+        onCancel={() => setReemplazoPendiente(null)}
       />
 
       {/* Diálogo de descarte. Verbo intencionadamente distinto al de

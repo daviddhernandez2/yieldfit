@@ -2,7 +2,7 @@
 //   node src/utils/activeSessionReducer.test.js
 // Repetirlas siempre que se cambie el reducer.
 
-import { sesionReducer } from './activeSessionReducer.js';
+import { sesionReducer, seriesAlReemplazar } from './activeSessionReducer.js';
 
 let fallos = 0;
 const ok = (desc, real, esperado) => {
@@ -95,6 +95,23 @@ ok('quitarSerie quita esa y deja las demás', s.ejercicios[0].sets.map((x) => x.
 
 s = sesionReducer(desdeLocalStorage(SESION_ANTIGUA), { type: 'guardarAnteriores', anteriores: { press: { sets: [] } } });
 ok('guardarAnteriores', s.anteriores, { press: { sets: [] } });
+
+// --- Reemplazar (bloque 6) ---
+const conHecha = sesionReducer(base, { type: 'alternarCompletada', exerciseIndex: 0, setIndex: 0 });
+s = sesionReducer(conHecha, { type: 'reemplazarEjercicio', exerciseIndex: 0, exerciseId: 'remo', exerciseNombre: 'Remo con barra', ids: ['r1', 'r2'] });
+ok('reemplazar: el nuevo ocupa el mismo sitio, con las mismas series vacías y el mismo descanso', s.ejercicios[0], {
+  exerciseId: 'remo', exerciseNombre: 'Remo con barra', bloqueado: false, descansoSegundos: 120,
+  sets: [{ id: 'r1', peso: '', reps: '', completada: false }, { id: 'r2', peso: '', reps: '', completada: false }],
+});
+ok('reemplazar: lo hecho del anterior se pierde', s.ejercicios[0].sets.some((x) => x.completada), false);
+ok('reemplazar: los demás ejercicios no cambian (mismo objeto)', s.ejercicios[1] === conHecha.ejercicios[1], true);
+ok('reemplazar: misma forma que en localStorage', claves(JSON.parse(JSON.stringify(s)).ejercicios[0]), claves(SESION_ACTUAL.ejercicios[0]));
+ok('seriesAlReemplazar: las mismas, y al menos 1', [seriesAlReemplazar({ sets: [1, 2, 3] }), seriesAlReemplazar({ sets: [] })], [3, 1]);
+
+s = sesionReducer(base, { type: 'añadirAnteriores', anteriores: { remo: { sets: [{ peso: 60, reps: 10 }] } } });
+ok('añadirAnteriores: suma el nuevo y conserva los que había', Object.keys(s.anteriores).sort(), ['peso-muerto', 'remo']);
+s = sesionReducer(desdeLocalStorage(SESION_ANTIGUA), { type: 'añadirAnteriores', anteriores: { remo: { sets: [] } } });
+ok('añadirAnteriores sin "anteriores" previos: no los crea (se pedirán todos al reabrir)', 'anteriores' in s, false);
 
 let error = '';
 try { sesionReducer(base, { type: 'inventada' }); } catch (e) { error = e.message; }

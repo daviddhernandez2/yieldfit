@@ -1,0 +1,45 @@
+/* Mismo patrón que WorkoutActionsModal: fondo que tapa la pantalla y panel central. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+}
+
+/* Más ancho que el de acciones: dentro va un catálogo con buscador. Alto máximo para que
+   en el móvil el botón Cancelar siempre quede a la vista; el catálogo hace scroll dentro. */
+.panel {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100svh - var(--space-2xl));
+  overflow-y: auto;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.subtitle {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+}

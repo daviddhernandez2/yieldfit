@@ -30,24 +30,79 @@
   border-radius: var(--radius-pill);
 }
 
-/* Punto verde que late: indica que la app sigue trabajando, no que se ha colgado. */
-.punto {
+/* Ticker: la línea se dibuja (stroke-dashoffset), el punto la recorre (offset-path) y al
+   final aparece el área verde suave. Un ciclo de 2,4 s que se repite. */
+.ticker {
   flex-shrink: 0;
-  width: var(--space-sm);
-  height: var(--space-sm);
-  border-radius: var(--radius-pill);
-  background-color: var(--color-accent);
-  animation: latido 1.2s ease-in-out infinite;
+  width: 72px;
+  height: 24px;
+  overflow: visible;
 }
 
-@keyframes latido {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+.flotante .ticker {
+  width: 56px;
+  height: 20px;
 }
 
-/* Quien pide menos movimiento en su sistema ve el punto quieto. */
+.linea {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: dibujar 2.4s cubic-bezier(0.45, 0.05, 0.35, 1) infinite;
+}
+
+.area {
+  fill: var(--color-accent-soft);
+  opacity: 0;
+  animation: rellenar 2.4s ease-in-out infinite;
+}
+
+.punta {
+  fill: var(--color-accent);
+  offset-path: path('M2 36 L22 30 L38 33 L56 22 L72 26 L92 14 L110 18 L128 8 L146 4');
+  animation: recorrer 2.4s cubic-bezier(0.45, 0.05, 0.35, 1) infinite;
+}
+
+@keyframes dibujar {
+  0% { stroke-dashoffset: 200; }
+  70%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes rellenar {
+  0%, 55% { opacity: 0; }
+  75%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes recorrer {
+  0% { offset-distance: 0%; opacity: 1; }
+  70% { offset-distance: 100%; opacity: 1; }
+  92% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* Quien pide menos movimiento en su sistema ve el ticker quieto en su estado final: la
+   línea completa con su área, que se sigue entendiendo como "cotización". */
 @media (prefers-reduced-motion: reduce) {
-  .punto {
+  .linea,
+  .area,
+  .punta {
     animation: none;
+  }
+
+  .linea {
+    stroke-dashoffset: 0;
+  }
+
+  .area {
+    opacity: 1;
+  }
+
+  .punta {
+    offset-distance: 100%;
   }
 }

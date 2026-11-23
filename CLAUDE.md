@@ -185,7 +185,8 @@ Aplicar en cada cambio y avisar cuando algo existente no los cumpla:
 No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
-- JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
+- JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token (el límite de intentos ya
+  está, 11.1).
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
 - **Datos huérfanos de usuarios inexistentes:** en producción hay ejercicios de 11 usuarios
   distintos pero solo 7 usuarios (diagnóstico de cardio, 2026-11-23). Parece que se borraron 4
@@ -279,8 +280,8 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       - desplegable para ocultar la lista de ejercicios y dejar solo el gráfico; cada grupo
         recuerda si está plegado.
 - [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
-- [ ] **11 — Auth robusta**: rate limiting en login y registro (prioritario), access token
-      corto + refresh token.
+- [ ] **11 — Auth robusta**: rate limiting en login y registro (prioritario, **hecho en el 11.1**),
+      access token corto + refresh token (11.2 y 11.3, después del bloque 9b).
 - [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
       entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
       sincronización híbrida de la sesión activa y revisión de DarkVeil (batería) y

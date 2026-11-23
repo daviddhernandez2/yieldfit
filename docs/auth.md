@@ -139,7 +139,23 @@ es que un token robado sigue siendo válido hasta que caduca.
 - Token en `localStorage`: legible por JavaScript si hubiera un XSS.
 - Sin refresh token ni revocación. Auth robusta en el bloque 11; almacenamiento seguro nativo en
   iPhone en el bloque 12.
-- Sin rate limiting en `/login`.
-- El mismo mensaje de error no impide del todo saber si un email existe: cuando no existe, la
-  respuesta llega antes porque se salta bcrypt, que es lento a propósito. Es una enumeración por
-  tiempo de respuesta; conviene tenerla en cuenta en el bloque 11.
+- El límite de intentos es por IP y email: un ataque repartido entre muchas IP no se frena así.
+  Los contadores están en memoria y se ponen a cero si Render reinicia el servidor.
+
+## Límite de intentos
+
+Desde el bloque 11 ([0035](../DECISIONS.md)), `middlewares/limiteIntentos.js`:
+
+| Ruta | Límite | Qué cuenta |
+|---|---|---|
+| `POST /api/auth/login` | 5 cada 15 min por IP + email | solo los fallos (un acierto no suma) |
+| `POST /api/auth/register` | 5 por hora por IP | cada registro |
+
+Al pasarse, el servidor responde **429** con "Demasiados intentos… Vuelve a intentarlo en N
+minutos", que el formulario muestra tal cual. Para que la IP sea la real detrás del proxy de
+Render, Express tiene `trust proxy` a 1 (variable `TRUST_PROXY`); se comprueba en los logs de
+Render, donde morgan escribe la IP de cada petición.
+
+**Mismo tiempo exista o no el email:** si el email no existe, el login compara la contraseña
+contra un hash falso con el mismo coste. Antes respondía antes (se saltaba bcrypt) y, midiendo
+el tiempo, se podía saber qué emails están registrados.

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import { signToken } from '../utils/jwt.js';
 import { clonarPresetsAUsuario } from '../utils/presets.js';
@@ -70,6 +71,12 @@ export const register = async (req, res, next) => {
   }
 };
 
+// Hash de una contraseña que nadie tiene, con el mismo coste que los de verdad (10). Se
+// compara contra él cuando el email no existe, para que esa respuesta tarde lo mismo que
+// la de una contraseña incorrecta (bloque 11). Antes, un email inexistente respondía antes
+// porque se saltaba bcrypt, y midiendo el tiempo se podía saber qué emails están registrados.
+const HASH_FALSO = bcrypt.hashSync('contraseña-que-ningún-usuario-tiene', 10);
+
 // POST /api/auth/login
 // Verifica credenciales y devuelve un nuevo token JWT.
 export const login = async (req, res, next) => {
@@ -89,6 +96,7 @@ export const login = async (req, res, next) => {
     // "contraseña incorrecta" para evitar enumeración de usuarios. Un atacante
     // no debería poder descubrir qué emails están registrados probando logins.
     if (!user) {
+      await bcrypt.compare(password, HASH_FALSO); // mismo tiempo que si existiera
       return res.status(401).json({
         error: 'Unauthorized',
         message: 'Credenciales incorrectas',

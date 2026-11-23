@@ -13,6 +13,13 @@ import progressRoutes from './routes/progressRoutes.js';
 
 const app = express();
 
+// Render pone un proxy delante de la app: sin esto, req.ip sería la IP del proxy para todos
+// los usuarios y el límite de intentos (bloque 11) los trataría como uno solo. El número
+// es cuántos proxies de confianza hay delante; TRUST_PROXY permite ajustarlo sin tocar
+// código si Render cambiara. Se comprueba en los logs de Render: morgan escribe req.ip
+// (remote-addr) en cada petición, y tiene que ser la IP real de quien entra.
+app.set('trust proxy', Number(process.env.TRUST_PROXY ?? 1));
+
 // Helmet añade cabeceras HTTP de seguridad por defecto (X-Content-Type-Options,
 // X-Frame-Options, Strict-Transport-Security, etc.) sin necesidad de configurarlas
 // una a una manualmente.

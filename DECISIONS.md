@@ -53,6 +53,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0032 | Reemplazar un ejercicio en la sesión activa | vigente |
 | 0033 | Calendario de días entrenados: mes y año, desde un endpoint de solo fechas | vigente |
 | 0034 | Grupos de progreso con rango, plegado y orden en el dispositivo | vigente |
+| 0035 | Límite de intentos en el login y el registro | vigente |
 
 ---
 
@@ -1175,4 +1176,39 @@ Fecha: 2026-11-23 · Estado: vigente · Bloque: 9
 - Con rangos cortos (1S) a menudo no hay % (ningún ejercicio con dos puntos); la tarjeta lo dice.
 - Los estilos comunes de las páginas de formulario (rutinas y grupos) pasan a
   `styles/paginaFormulario.module.css`, como se hizo con `ExercisePicker`.
+
+---
+
+## 0035 — Límite de intentos en el login y el registro
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11 (paso 11.1, adelantado al resto del bloque)
+
+**Contexto:** el login no tenía ningún límite: cualquiera podía probar contraseñas contra una
+cuenta sin parar. Tampoco el registro, que además clona 58 ejercicios por cuenta. Y el login de un
+email inexistente respondía antes que el de una contraseña incorrecta (se saltaba bcrypt), así que
+midiendo el tiempo se podía saber qué emails están registrados.
+
+**Decisión** (de David, valores propuestos):
+- **`express-rate-limit`** (dependencia nueva, la estándar en Express, sin dependencias propias),
+  en `middlewares/limiteIntentos.js`:
+  - login: **5 fallos cada 15 minutos por IP + email**; los aciertos no cuentan;
+  - registro: **5 por hora por IP**;
+  - respuesta 429 con el formato de error de la API y los minutos que faltan.
+- **`trust proxy` a 1** (`TRUST_PROXY`), para que `req.ip` sea la IP real detrás del proxy de
+  Render y no la del proxy para todos.
+- **Tiempo constante:** si el email no existe, se compara contra un hash falso del mismo coste.
+
+**Alternativas descartadas:**
+- *Bloqueo por cuenta (contador en el usuario):* frena ataques desde muchas IP, pero cualquiera
+  podría bloquear la cuenta de otro fallando a propósito.
+- *Contadores en Redis:* necesario con varias instancias; con una sola, otro servicio que pagar y
+  mantener.
+- *CAPTCHA:* fricción para el usuario y un servicio externo; no hace falta con este volumen.
+
+**Consecuencias:**
+- Los contadores viven en memoria: un reinicio de Render los pone a cero.
+- Un ataque repartido entre muchas IP no se frena con este límite.
+- Si Render cambiara su número de proxies, `req.ip` sería incorrecta y el límite trataría a
+  todos como una sola IP (el registro quedaría en 5 por hora para todo el mundo). Se vigila en
+  los logs de Render y se corrige con `TRUST_PROXY`.
 

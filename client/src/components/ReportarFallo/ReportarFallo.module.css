@@ -1,0 +1,242 @@
+/* ---------------------------------------------------------------------------
+   Botón flotante (bloque 11b, paso 11b.2)
+   --------------------------------------------------------------------------- */
+
+.boton {
+  /* ALTURA DEL BOTÓN EN EL MÓVIL: el único sitio donde se decide.
+     Va por encima de toda la pila fija de abajo (opción C). De abajo arriba:
+       - TabBar:              bottom 16px, ~67px de alto       → llega a ~83px
+       - MiniSession:         bottom 97px, ~55px + zona segura → llega a ~152px
+       - «Reemplazar» (sticky en ReplaceExercise): bottom 96px, ~62px → ~158px
+       - Aviso de servidor dormido: bottom 96px, centrado: no llega a la esquina
+     172px deja unos 14px de aire sobre la más alta. La zona segura del iPhone (barra de
+     inicio) se suma porque MiniSession también crece con ella.
+     Si algún día se añade otra barra abajo, se cambia SOLO este valor. */
+  --bug-bottom-movil: calc(172px + env(safe-area-inset-bottom));
+
+  position: fixed;
+  right: var(--space-md);
+  bottom: var(--bug-bottom-movil);
+  /* Por encima del contenido y al nivel de la TabBar (100); por debajo del aviso de
+     servidor (110) y de los diálogos (1000). No se solapa con ninguno. */
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  /* 44px: el mínimo cómodo para el dedo (guía de Apple). */
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background-color: var(--color-bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+/* :active para el dedo en el móvil, donde no hay :hover. */
+.boton:hover,
+.boton:active,
+.boton:focus-visible {
+  color: var(--color-accent);
+  border-color: var(--color-accent-medium);
+}
+
+.boton svg {
+  flex-shrink: 0;
+}
+
+/* El texto "Reportar" solo se ve en escritorio. En el móvil, el nombre accesible lo da
+   aria-label ("Reportar un fallo"). */
+.texto {
+  display: none;
+}
+
+/* Escritorio: píldora en la esquina inferior derecha, que ahí está libre (sin TabBar;
+   MiniSession y el aviso de servidor van centrados). */
+@media (min-width: 768px) {
+  .boton {
+    right: var(--space-lg);
+    bottom: var(--space-lg);
+    width: auto;
+    height: 40px;
+    padding: 0 var(--space-md) 0 var(--space-sm);
+  }
+
+  .texto {
+    display: inline;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hoja del formulario: sube desde abajo en el móvil, panel centrado en escritorio
+   --------------------------------------------------------------------------- */
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  /* Como ConfirmDialog: por encima de todo. */
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background-color: var(--color-overlay);
+  animation: aparecer 150ms ease;
+}
+
+.hoja {
+  width: 100%;
+  /* Con el teclado abierto queda poco sitio: la hoja hace scroll por dentro. */
+  max-height: 90svh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-md);
+  /* Que el botón Enviar no quede bajo la barra de inicio del iPhone. */
+  padding-bottom: max(var(--space-lg), env(safe-area-inset-bottom));
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  animation: subir 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 768px) {
+  .fondo {
+    align-items: center;
+    padding: var(--space-xl);
+  }
+
+  .hoja {
+    max-width: 480px;
+    padding: var(--space-xl);
+    border-bottom: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    animation-name: aparecer;
+  }
+}
+
+@keyframes aparecer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes subir {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fondo,
+  .hoja {
+    animation: none;
+  }
+}
+
+.titulo {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.etiqueta {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.opcional {
+  font-weight: var(--font-weight-regular);
+}
+
+/* Mismo aspecto que Input. font-size base (16px): con menos, Safari en el iPhone hace
+   zoom al enfocar el campo. */
+.areaTexto {
+  width: 100%;
+  padding: var(--space-md);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  line-height: 1.4;
+  resize: vertical;
+  transition: var(--transition-base);
+}
+
+.areaTexto:focus {
+  outline: none;
+  border-color: var(--color-border-accent);
+}
+
+/* Lo que se envía solo, a la vista y discreto. */
+.datos {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.datosTitulo {
+  margin-bottom: var(--space-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.datosLista {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-md);
+  row-gap: var(--space-xs);
+}
+
+.datosLista dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* El User-Agent es largo: más pequeño, pero entero (es lo que se envía). */
+.navegador {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
+.gracias {
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.acciones {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.acciones > button {
+  flex: 1;
+}

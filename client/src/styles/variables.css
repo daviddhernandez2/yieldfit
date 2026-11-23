@@ -20,6 +20,12 @@
    /* Color de error / pérdida */
    --color-error: #FF3000;
 
+   /* Fondos de capas flotantes (bloque 11b). Cristal oscuro: botones y barras que flotan
+      sobre el contenido (con backdrop-filter). Overlay: lo que oscurece la pantalla detrás
+      de un diálogo o una hoja. TabBar y ConfirmDialog aún tienen estos valores sueltos. */
+   --color-bg-glass: rgba(15, 15, 15, 0.75);
+   --color-overlay: rgba(0, 0, 0, 0.7);
+
    /* Bordes */
    --color-border: #1f1f1f;
    --color-border-accent: #3EF87E;

@@ -12,8 +12,9 @@ export const login = (credentials) => {
   return apiClient.post('/auth/login', credentials);
 };
 
-// GET /api/auth/me
-// Devuelve los datos del usuario autenticado. Requiere token válido.
-export const getMe = () => {
-  return apiClient.get('/auth/me');
+// POST /api/auth/logout
+// Cierra la sesión de este dispositivo en el servidor: invalida el token de renovación y
+// borra su cookie (bloque 11). sinRenovar: si falla con 401, no hay nada que renovar.
+export const logout = () => {
+  return apiClient.post('/auth/logout', null, { sinRenovar: true });
 };

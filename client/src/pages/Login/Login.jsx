@@ -7,8 +7,9 @@ import Input from '@/components/Input/Input.jsx';
 import styles from '@/pages/Login/Login.module.css';
 
 // Pantalla de login. Formulario con email + password.
-// Usa la función login() del AuthContext, que se encarga de guardar el token
-// en localStorage y actualizar el estado global. Tras éxito, navega al dashboard.
+// Usa la función login() del AuthContext, que guarda el token de acceso en memoria (la
+// cookie de renovación la gestiona el navegador) y actualiza el estado global. Tras
+// éxito, navega al dashboard.
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();

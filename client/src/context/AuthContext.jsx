@@ -1,30 +1,25 @@
 import { createContext, useReducer, useEffect } from 'react';
-import { getMe, login as loginApi, register as registerApi } from '@/api/auth.js';
-import { alCaducarSesion } from '@/api/client.js';
+import { login as loginApi, register as registerApi, logout as logoutApi } from '@/api/auth.js';
+import { alCaducarSesion, ponerTokenAcceso, renovarSesion } from '@/api/client.js';
+import { marcarSesion } from '@/utils/indicadorSesion.js';
 
-// Estado inicial del contexto.
-// status indica en qué fase está la autenticación; el frontend lo usa para
-// decidir qué mostrar (un loader durante "loading", la app durante "authenticated").
+// Estado de la sesión. `status` dice en qué fase está la autenticación; la app lo usa para
+// decidir qué mostrar (un loader en "loading", la app en "authenticated").
+// El token de acceso NO está aquí: vive en memoria dentro de api/client.js (bloque 11), que
+// es quien lo pone en cada petición.
 const initialState = {
   user: null,
-  token: localStorage.getItem('yieldfit_token'),
   status: 'loading', // 'loading' | 'authenticated' | 'unauthenticated'
 };
 
-// Reducer: una única función que define todas las transiciones de estado posibles.
-// Cada caso del switch documenta una acción válida.
+// Reducer: todas las transiciones de estado posibles.
 function authReducer(state, action) {
   switch (action.type) {
     case 'AUTH_SUCCESS':
-      return {
-        user: action.payload.user,
-        token: action.payload.token,
-        status: 'authenticated',
-      };
+      return { user: action.payload.user, status: 'authenticated' };
     case 'AUTH_FAIL':
-      return { user: null, token: null, status: 'unauthenticated' };
     case 'LOGOUT':
-      return { user: null, token: null, status: 'unauthenticated' };
+      return { user: null, status: 'unauthenticated' };
     default:
       return state;
   }
@@ -33,74 +28,84 @@ function authReducer(state, action) {
 // El contexto en sí. Lo exportamos para que el hook useAuth lo consuma.
 export const AuthContext = createContext(null);
 
-// Provider: el componente que envuelve la app y expone el contexto.
-// Tres responsabilidades:
-//  1. Al montar, comprobar si hay token y validarlo contra /me.
-//  2. Exponer funciones login/register/logout al resto de la app.
-//  3. Mantener el token en localStorage sincronizado con el estado.
+// Provider: el componente que envuelve la app y expone el contexto (DECISIONS.md 0037).
+//  1. Al abrir la app, pide un token de acceso con la cookie de renovación: si la sesión
+//     sigue viva (30 días), se entra sin escribir la contraseña.
+//  2. Expone login, register y logout.
+//  3. Mantiene el indicador "hay sesión" que usa la intro (utils/indicadorSesion.js).
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Al cargar la app, comprobamos si el token guardado sigue siendo válido.
-  // Si lo es, recuperamos el usuario actualizado del backend.
-  // Si no, limpiamos y el usuario tendrá que volver a loguearse.
+  const entrar = (token, user) => {
+    ponerTokenAcceso(token);
+    marcarSesion(true);
+    dispatch({ type: 'AUTH_SUCCESS', payload: { user } });
+  };
+
+  const salir = () => {
+    ponerTokenAcceso(null);
+    marcarSesion(false);
+    dispatch({ type: 'LOGOUT' });
+  };
+
   useEffect(() => {
-    const verificarSesion = async () => {
-      const token = localStorage.getItem('yieldfit_token');
-      if (!token) {
+    // Limpieza única: hasta el bloque 11 el token de 7 días se guardaba en localStorage.
+    // Ya no sirve (el servidor cambió de secreto al desplegar) y no debe quedarse ahí.
+    try {
+      localStorage.removeItem('yieldfit_token');
+    } catch {
+      // Sin localStorage no había nada que limpiar.
+    }
+
+    // ¿Sigue viva la sesión? La cookie de renovación lo dice. Si no hay cookie, ha caducado
+    // o el servidor no responde, se trata como "sin sesión" y se va al login.
+    renovarSesion()
+      .then(({ token, user }) => entrar(token, user))
+      .catch(() => {
+        marcarSesion(false);
         dispatch({ type: 'AUTH_FAIL' });
-        return;
-      }
-      try {
-        const response = await getMe();
-        dispatch({
-          type: 'AUTH_SUCCESS',
-          payload: { user: response.data.user, token },
-        });
-      } catch {
-        // Si el token está caducado o es inválido, /me devuelve 401
-        // y el interceptor de axios ya habrá limpiado el storage.
-        dispatch({ type: 'AUTH_FAIL' });
-      }
-    };
-    verificarSesion();
+      });
   }, []);
 
-  // Si cualquier petición recibe un 401 con token, api/client.js lo anuncia y aquí
-  // se cierra la sesión. PrivateRoute ve 'unauthenticated' y redirige a /login sin
-  // recargar la página. El return da de baja la suscripción al desmontar.
-  useEffect(() => alCaducarSesion(() => dispatch({ type: 'LOGOUT' })), []);
+  // Si una petición acaba en sesión caducada (la renovación falló), api/client.js lo
+  // anuncia y aquí se cierra la sesión. PrivateRoute redirige a /login sin recargar.
+  useEffect(
+    () =>
+      alCaducarSesion(() => {
+        marcarSesion(false);
+        dispatch({ type: 'LOGOUT' });
+      }),
+    []
+  );
 
-  // Función login: llama a la API, guarda el token y actualiza el estado.
+  // Login y registro: el servidor devuelve el token de acceso en el cuerpo (se guarda en
+  // memoria) y el de renovación en una cookie httpOnly (la gestiona el navegador).
   const login = async (credentials) => {
     const response = await loginApi(credentials);
-    const { token, user } = response.data;
-    localStorage.setItem('yieldfit_token', token);
-    dispatch({ type: 'AUTH_SUCCESS', payload: { user, token } });
-    return user;
+    entrar(response.data.token, response.data.user);
+    return response.data.user;
   };
 
-  // Función register: misma lógica que login porque el backend ya devuelve
-  // un token en el registro (el usuario queda logueado automáticamente).
   const register = async (userData) => {
     const response = await registerApi(userData);
-    const { token, user } = response.data;
-    localStorage.setItem('yieldfit_token', token);
-    dispatch({ type: 'AUTH_SUCCESS', payload: { user, token } });
-    return user;
+    entrar(response.data.token, response.data.user);
+    return response.data.user;
   };
 
-  // Función logout: limpia el storage y actualiza el estado a no autenticado.
-  // No hay endpoint en el backend porque JWT es stateless: solo el cliente
-  // necesita actuar para cerrar sesión.
-  const logout = () => {
-    localStorage.removeItem('yieldfit_token');
-    dispatch({ type: 'LOGOUT' });
+  // Cerrar sesión: el servidor invalida el token de renovación de este dispositivo. Si esa
+  // petición falla (sin conexión), se sale igualmente en el cliente: el token de acceso
+  // desaparece de la memoria y la cookie caducará sola.
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } catch {
+      // Se ignora a propósito: salir no puede depender de la red.
+    }
+    salir();
   };
 
   const value = {
     user: state.user,
-    token: state.token,
     status: state.status,
     login,
     register,

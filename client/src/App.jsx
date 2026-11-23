@@ -4,6 +4,7 @@ import { AuthProvider } from '@/context/AuthContext.jsx';
 import PrivateRoute from '@/components/PrivateRoute.jsx';
 import Layout from '@/components/Layout/Layout.jsx';
 import Intro from '@/components/Intro/Intro.jsx';
+import { haySesionGuardada } from '@/utils/indicadorSesion.js';
 
 // Todas las páginas se cargan de forma perezosa (code-splitting por ruta).
 // Cada una se descarga en un chunk separado la primera vez que se visita
@@ -34,13 +35,11 @@ const RouteFallback = () => (
 
 function App() {
   // Intro cinemática:
-  //   - Si el usuario NO tiene sesión activa (no hay token en localStorage),
-  //     el intro aparece en cada refresco de la app.
-  //   - Si el usuario está logueado, no aparece: agilizamos el uso diario
-  //     para quien ya conoce la marca y usa la app con normalidad.
-  const [mostrarIntro, setMostrarIntro] = useState(() => {
-    return !localStorage.getItem('yieldfit_token');
-  });
+  //   - Si este dispositivo NO tiene una sesión abierta, la intro aparece en cada refresco.
+  //   - Si la tiene, no aparece: agilizamos el uso diario a quien ya conoce la marca.
+  // Se decide con un indicador sin datos (utils/indicadorSesion.js): desde el bloque 11 el
+  // token vive en memoria y al abrir la app todavía no se sabe si la sesión sigue viva.
+  const [mostrarIntro, setMostrarIntro] = useState(() => !haySesionGuardada());
 
   const finalizarIntro = () => {
     setMostrarIntro(false);

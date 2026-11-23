@@ -150,6 +150,8 @@ flowchart TB
 |---|---|---|
 | `/` | Welcome | no |
 | `/login`, `/register` | Login, Register | no |
+| `/recuperar`, `/restablecer` | Recuperar, Restablecer (contraseña por email) | no |
+| `/privacidad` | Privacidad | no |
 | `/dashboard` | Dashboard | sí |
 | `/exercises`, `/exercises/new`, `/exercises/:id/edit` | Exercises, ExerciseForm | sí |
 | `/workouts`, `/workouts/new`, `/workouts/:id/edit` | Workouts, WorkoutForm | sí |
@@ -157,8 +159,16 @@ flowchart TB
 | `/history`, `/history/:id` | History, SessionDetail | sí |
 | `/groups/new`, `/groups/:id/edit` | GroupForm | sí |
 | `/profile` | Profile | sí |
+| `/developer` | Developer (solo admin) | sí |
 
 Las rutas privadas van envueltas en `PrivateRoute` + `Layout`. Cualquier otra ruta redirige a `/`.
+
+**Router de datos** (desde el bloque 11b): las rutas se declaran con `createBrowserRouter` y
+`createRoutesFromElements` y se montan con `<RouterProvider>`, en lugar de `<BrowserRouter>` y
+`<Routes>`. Las rutas son las mismas; el `<Suspense>` de la carga perezosa está en una ruta raíz
+(`RaizRutas`) que pinta cada página en su `<Outlet />`. El motivo: solo este tipo de router
+permite `useBlocker`, que frena una navegación para preguntar antes. El router se crea una vez,
+fuera del componente `App`.
 
 ## Arranque en frío de Render
 

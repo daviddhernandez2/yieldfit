@@ -1,5 +1,12 @@
 import { useState, Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Navigate,
+  Outlet,
+  Route,
+  RouterProvider,
+} from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext.jsx';
 import PrivateRoute from '@/components/PrivateRoute.jsx';
 import Layout from '@/components/Layout/Layout.jsx';
@@ -37,6 +44,187 @@ const RouteFallback = () => (
   </div>
 );
 
+// Raíz de todas las rutas: la carga perezosa de cada página se espera aquí. Antes era el
+// <Suspense> que envolvía <Routes>; con el data router, las rutas hijas se pintan en <Outlet />.
+const RaizRutas = () => (
+  <Suspense fallback={<RouteFallback />}>
+    <Outlet />
+  </Suspense>
+);
+
+// Router "de datos" (createBrowserRouter) en lugar de <BrowserRouter> (bloque 11b, paso 11b.7).
+// Las rutas son las mismas, escritas igual (createRoutesFromElements). El motivo del cambio:
+// solo este tipo de router permite useBlocker, que frena una navegación para preguntar antes
+// (formularios con cambios sin guardar, hooks/useAvisoSalir.js), incluido el botón atrás del
+// navegador y el gesto de deslizar del iPhone.
+// Se crea una vez, fuera del componente: si se creara dentro, cada render de App (p. ej. al
+// terminar la intro) montaría un router nuevo y se perdería la navegación.
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route element={<RaizRutas />}>
+      {/* Rutas públicas */}
+      <Route path="/" element={<Welcome />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      {/* Recuperar la contraseña por email (bloque 11b): públicas, sin sesión. */}
+      <Route path="/recuperar" element={<Recuperar />} />
+      <Route path="/restablecer" element={<Restablecer />} />
+      {/* Nota de privacidad (bloque 11b): pública, se lee antes de registrarse. */}
+      <Route path="/privacidad" element={<Privacidad />} />
+
+      {/* Rutas privadas */}
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Dashboard />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/exercises"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Exercises />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/exercises/new"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <ExerciseForm />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/exercises/:id/edit"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <ExerciseForm />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/workouts"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Workouts />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/workouts/new"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <WorkoutForm />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/workouts/:id/edit"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <WorkoutForm />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/sessions/active"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <ActiveSession />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      {['/groups/new', '/groups/:id/edit'].map((ruta) => (
+        <Route
+          key={ruta}
+          path={ruta}
+          element={
+            <PrivateRoute>
+              <Layout>
+                <GroupForm />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+      ))}
+      <Route
+        path="/sessions/active/replace/:index"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <ReplaceExercise />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <History />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/history/:id"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <SessionDetail />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Profile />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      {/* Solo admin (bloque 11b): la página redirige si no lo eres, y el servidor
+          responde 403 a cada petición. */}
+      <Route
+        path="/developer"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Developer />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+
+      {/* Cualquier URL desconocida vuelve a Welcome. */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Route>
+  )
+);
+
 function App() {
   // Intro cinemática:
   //   - Si este dispositivo NO tiene una sesión abierta, la intro aparece en cada refresco.
@@ -63,171 +251,7 @@ function App() {
   return (
     <AuthProvider>
       {mostrarIntro && <Intro onFinish={finalizarIntro} />}
-      <BrowserRouter>
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
-            {/* Rutas públicas */}
-            <Route path="/" element={<Welcome />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            {/* Recuperar la contraseña por email (bloque 11b): públicas, sin sesión. */}
-            <Route path="/recuperar" element={<Recuperar />} />
-            <Route path="/restablecer" element={<Restablecer />} />
-            {/* Nota de privacidad (bloque 11b): pública, se lee antes de registrarse. */}
-            <Route path="/privacidad" element={<Privacidad />} />
-
-            {/* Rutas privadas */}
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/exercises"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Exercises />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/exercises/new"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <ExerciseForm />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/exercises/:id/edit"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <ExerciseForm />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/workouts"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Workouts />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/workouts/new"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <WorkoutForm />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/workouts/:id/edit"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <WorkoutForm />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/sessions/active"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <ActiveSession />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            {['/groups/new', '/groups/:id/edit'].map((ruta) => (
-              <Route
-                key={ruta}
-                path={ruta}
-                element={
-                  <PrivateRoute>
-                    <Layout>
-                      <GroupForm />
-                    </Layout>
-                  </PrivateRoute>
-                }
-              />
-            ))}
-            <Route
-              path="/sessions/active/replace/:index"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <ReplaceExercise />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/history"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <History />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/history/:id"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <SessionDetail />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Profile />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            {/* Solo admin (bloque 11b): la página redirige si no lo eres, y el servidor
-                responde 403 a cada petición. */}
-            <Route
-              path="/developer"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Developer />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-
-            {/* Cualquier URL desconocida vuelve a Welcome. */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </AuthProvider>
   );
 }

@@ -230,6 +230,20 @@ sequenceDiagram
 - **En el dispositivo** se borran todas las claves `yieldfit_` de localStorage
   (`utils/datosLocales.js`): sesión activa, preferencias y orden de los grupos.
 
+## Cambiar la contraseña
+
+Desde el bloque 11b, Perfil → "Cambiar contraseña" (`PUT /api/auth/me/password` con
+`{ actual, nueva }`):
+
+- Pide la **contraseña actual** (403 si no es correcta, por lo mismo que al borrar la cuenta) y
+  comparte con el borrado el límite de 5 fallos cada 15 minutos.
+- La nueva pasa por la validación del modelo (mínimo 8 caracteres) y por `pre('save')`, que la
+  hashea; tiene que ser distinta de la actual.
+- En la misma transacción se borran **todos los tokens de renovación** del usuario: se cierran las
+  sesiones de sus otros dispositivos (si alguien le había robado la sesión, queda fuera). Este
+  dispositivo recibe una sesión nueva en la respuesta. Los tokens de acceso de los otros valen
+  hasta 15 minutos más.
+
 ## Limitaciones conocidas
 
 - Un token de acceso robado vale hasta 15 minutos: no se puede revocar uno a uno (no se
@@ -251,7 +265,7 @@ Desde el bloque 11 ([0035](../DECISIONS.md)), `middlewares/limiteIntentos.js`:
 | `POST /api/auth/login` | 5 cada 15 min por IP + email | solo los fallos (un acierto no suma) |
 | `POST /api/auth/register` | 5 por hora por IP | cada registro |
 | `POST /api/reports` | 5 por hora por usuario (bloque 11b) | los reportes guardados (un 400 no suma) |
-| `DELETE /api/auth/me` | 5 cada 15 min por usuario (bloque 11b) | solo las contraseñas incorrectas |
+| `DELETE /api/auth/me` y `PUT /api/auth/me/password` | 5 cada 15 min por usuario, **compartido** entre las dos (bloque 11b) | solo las contraseñas incorrectas |
 
 Al pasarse, el servidor responde **429** con "Demasiados intentos… Vuelve a intentarlo en N
 minutos", que el formulario muestra tal cual.

@@ -1,7 +1,7 @@
 import express from 'express';
-import { register, login, me, refresh, logout, deleteMe } from '../controllers/authController.js';
+import { register, login, me, refresh, logout, deleteMe, changePassword } from '../controllers/authController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
-import { limiteBorrarCuenta, limiteLogin, limiteRegistro } from '../middlewares/limiteIntentos.js';
+import { limiteConfirmarContrasena, limiteLogin, limiteRegistro } from '../middlewares/limiteIntentos.js';
 
 const router = express.Router();
 
@@ -9,8 +9,10 @@ const router = express.Router();
 router.post('/register', limiteRegistro, register);
 router.post('/login', limiteLogin, login);
 router.get('/me', requireAuth, me);
-// Borrar la cuenta (bloque 11b): el límite va tras requireAuth porque cuenta por usuario.
-router.delete('/me', requireAuth, limiteBorrarCuenta, deleteMe);
+// Borrar la cuenta y cambiar la contraseña (bloque 11b): piden la contraseña actual. El
+// límite va tras requireAuth porque cuenta por usuario, y es el mismo para las dos.
+router.delete('/me', requireAuth, limiteConfirmarContrasena, deleteMe);
+router.put('/me/password', requireAuth, limiteConfirmarContrasena, changePassword);
 // Sin requireAuth: la prueba de identidad es la cookie de renovación (bloque 11).
 router.post('/refresh', refresh);
 router.post('/logout', logout);

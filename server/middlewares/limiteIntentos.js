@@ -62,10 +62,12 @@ export const limiteReportes = rateLimit({
   legacyHeaders: false,
 });
 
-// Borrar la cuenta (bloque 11b): pide la contraseña otra vez. Sin límite, quien encontrara
-// una sesión abierta podría probar contraseñas aquí sin parar. 5 fallos cada 15 minutos
-// por usuario, como el login; un acierto no cuenta (y además la cuenta deja de existir).
-export const limiteBorrarCuenta = rateLimit({
+// Rutas que vuelven a pedir la contraseña con la sesión ya abierta (bloque 11b): borrar la
+// cuenta y cambiar la contraseña. Sin límite, quien encontrara una sesión abierta podría
+// probar contraseñas aquí sin parar. 5 fallos cada 15 minutos por usuario, como el login; un
+// acierto no cuenta. El contador es COMPARTIDO entre las dos rutas: las dos adivinan la misma
+// contraseña, así que no deben sumar 5 + 5 intentos.
+export const limiteConfirmarContrasena = rateLimit({
   windowMs: QUINCE_MINUTOS,
   limit: 5,
   skipSuccessfulRequests: true,

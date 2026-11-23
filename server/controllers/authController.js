@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import User from '../models/User.js';
+import RefreshToken from '../models/RefreshToken.js';
 import { signToken } from '../utils/jwt.js';
 import {
   DURACION_RENOVACION_MS,
@@ -239,6 +240,62 @@ export const deleteMe = async (req, res, next) => {
     quitarCookieRenovacion(res);
     res.status(204).send();
   } catch (error) {
+    next(error);
+  }
+};
+
+// PUT /api/auth/me/password  { actual, nueva }
+// Cambia la contraseña del usuario autenticado (bloque 11b). Pide la actual, como borrar la
+// cuenta, y comparte su límite de intentos. También sirve para sustituir la contraseña
+// temporal que da `npm run restablecer`.
+//
+// Al cambiarla se cierran las sesiones de TODOS los demás dispositivos (se borran sus tokens
+// de renovación): si alguien te había robado la sesión, cambiar la contraseña lo echa. Este
+// dispositivo sigue dentro con una sesión nueva. Los tokens de acceso de los otros siguen
+// valiendo hasta 15 minutos (limitación conocida, docs/auth.md).
+export const changePassword = async (req, res, next) => {
+  try {
+    const { actual, nueva } = req.body ?? {};
+    if (!actual || !nueva) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'Escribe la contraseña actual y la nueva',
+      });
+    }
+
+    // 403 y no 401, por lo mismo que en deleteMe: un 401 cerraría la sesión.
+    const user = req.user;
+    if (!(await user.comparePassword(actual))) {
+      return res.status(403).json({ error: 'Forbidden', message: 'La contraseña actual no es correcta' });
+    }
+    if (actual === nueva) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'La contraseña nueva tiene que ser distinta de la actual',
+      });
+    }
+
+    // Contraseña nueva y cierre de las otras sesiones, juntos: si fallara lo segundo, no
+    // quedaría una contraseña cambiada con las sesiones viejas abiertas.
+    // save() y no updateOne: así pasa por la validación del modelo (mínimo 8 caracteres) y
+    // por pre('save'), que la hashea.
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        user.password = nueva;
+        await user.save({ session });
+        await RefreshToken.deleteMany({ userId: user._id }, { session });
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    await responderConSesion(res, 200, 'Contraseña cambiada', user);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({ error: 'Validation Error', message: messages[0], details: messages });
+    }
     next(error);
   }
 };

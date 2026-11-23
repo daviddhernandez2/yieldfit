@@ -108,7 +108,8 @@ flowchart LR
 ```
 
   `value` es lo que se guarda y no se cambia nunca; `label` es solo presentación (por eso
-  `Maquinas` se muestra como "Máquinas").
+  `Maquinas` se muestra como "Máquinas"). Una opción con `disponible: false` (hoy, Cardio) se
+  muestra como "Próximamente" y no se puede elegir ([0030](../DECISIONS.md)).
 - `tracking` no lo elige el usuario: lo calcula `pre('save')` ([0006](../DECISIONS.md)).
 
 ```mermaid

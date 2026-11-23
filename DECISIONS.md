@@ -48,6 +48,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0027 | Historial paginado por cursor | vigente |
 | 0028 | Sin middleware de compresión: Render ya comprime | vigente |
 | 0029 | Serie anterior: última sesión con el ejercicio, guardada en la sesión activa | vigente |
+| 0030 | Cardio bloqueado con "Próximamente" desde las opciones del servidor | vigente |
 
 ---
 
@@ -967,4 +968,48 @@ que se necesita para decidir el peso.
   para él (bloque 6).
 - Los ejercicios de cardio solo muestran peso y reps: depende de la deuda del cardio en la sesión
   activa.
+
+---
+
+## 0030 — Cardio bloqueado con "Próximamente" desde las opciones del servidor
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 5b
+
+**Contexto:** la sesión activa solo tiene campos de peso y reps: los ejercicios de cardio
+(tracking `tiempo_distancia`) se guardaban con peso y reps a 0. En vez de dejarlo solo como
+deuda, David decidió bloquearlo en la app hasta implementarlo de verdad. El diagnóstico de
+producción (`npm run diagnostico:cardio`) dio 66 ejercicios de cardio (los predefinidos de cada
+usuario), 0 rutinas con cardio y 0 sesiones: el bloqueo no afecta a datos existentes.
+
+**Decisión** (de David, tal como se propuso):
+- **Un solo interruptor en el servidor:** la opción Cardio de `OPCIONES_TIPO` lleva
+  `disponible: false`. El cliente lo recibe en `GET /api/exercises/opciones` (0024) y no tiene
+  ninguna lista propia de lo bloqueado. Desbloquear = quitar ese campo.
+- **Se bloquea el tipo Cardio**, no el tracking: es lo que el usuario elige y ya viaja en las
+  opciones. En la práctica es lo mismo (0 ejercicios de tipo Cardio en otro grupo).
+- **Guarda en el servidor:** crear un ejercicio con un tipo no disponible, o cambiarle el tipo
+  a uno, da 400. Editar un cardio existente sin cambiar el tipo sigue permitido.
+- **En la app**, etiqueta "Próximamente" (componente `Proximamente`): select con "Cardio
+  (próximamente)" deshabilitado; etiqueta en la lista de ejercicios y en rutinas; en el catálogo
+  de la rutina no se puede añadir; en la sesión activa la fila sale bloqueada, sin series, y no
+  se guarda. El Historial no cambia.
+- **La sesión activa guarda `bloqueado`** al empezar, en vez de consultarlo al pintar: las
+  opciones se piden en cada carga de la app, y sin cobertura no se sabría qué bloquear.
+- **Los presets de cardio se siguen clonando** a usuarios nuevos: se ven como "Próximamente" y
+  estarán listos al desbloquear.
+
+**Alternativas descartadas:**
+- *Dejarlo solo como deuda:* la app permitía registrar cardio y lo guardaba con ceros.
+- *Lista de bloqueados en el cliente:* dos sitios que tocar al desbloquear (0024).
+- *No clonar los presets de cardio:* los usuarios que se registren mientras tanto no los tendrían
+  nunca.
+- *Guarda también en rutinas desde el servidor:* más lógica que tocar al desbloquear; la interfaz
+  ya lo impide y una rutina con cardio no hace daño.
+
+**Consecuencias:**
+- El cardio no tiene bloque asignado en el roadmap; el análisis de cómo implementarlo está en la
+  deuda de `CLAUDE.md`.
+- Al desbloquear, las sesiones activas que estén en curso en ese momento siguen con la fila
+  bloqueada (se decidió al empezar). Es un caso de minutos.
+- Un ejercicio de tipo Cardio en otro grupo (que se mediría por 1RM) también queda bloqueado.
 

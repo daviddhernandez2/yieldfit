@@ -195,8 +195,9 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - **Cardio en la sesión activa:** solo tiene campos de peso y reps, así que hoy no se puede
   registrar tiempo y distancia desde la app (los ejercicios `tiempo_distancia` se guardan con
   peso y reps a 0). El seed sí crea sesiones de cardio porque escribe directamente en la base.
-  Mientras tanto, el cardio está bloqueado en la app con "Próximamente". Propuesta para
-  implementarlo, como **bloque 6b** (no renumerar: DECISIONS y el código citan los números):
+  Mientras tanto, el cardio está bloqueado en la app con "Próximamente" (bloque 5b, 0030).
+  **Sin bloque asignado en el roadmap.** Análisis para cuando se implemente (si se le da
+  número, uno con letra como "6b": no renumerar, DECISIONS y el código citan los números):
   - **Dónde:** después del 6, que refactoriza `ActiveSession.jsx` (quizá a `useReducer`), y antes
     del 7, para que el CSV nazca con tiempo y distancia reales. El 8 y el 9 no dependen de él.
   - **Alcance:** la sesión activa conoce el tracking de cada ejercicio; filas de cardio con
@@ -243,6 +244,9 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       **Requisito:** el endpoint de progreso acepta un rango (desde/hasta) desde el principio,
       para que el selector de rango del bloque 9 no obligue a rehacerlo.
 - [x] **5 — Serie anterior**: mostrar en cada serie de la sesión activa lo hecho en la sesión anterior.
+- [x] **5b — Cardio bloqueado**: el tipo Cardio se marca como no disponible en las opciones del
+      servidor y la app lo muestra como "Próximamente" en todos los sitios donde se elige o se
+      registra. Desbloquearlo es quitar `disponible: false` en `OPCIONES_TIPO`.
 - [ ] **6 — Reemplazar ejercicio en sesión activa**: cambiar un ejercicio por otro sin salir de la
       sesión. Valorar antes pasar el estado de `ActiveSession.jsx` a `useReducer`.
 - [ ] **7 — Exportar CSV**: historial exportable, generado en el backend.

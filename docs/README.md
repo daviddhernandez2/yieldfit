@@ -32,6 +32,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 6 — Reemplazar ejercicio | [bloques/6-reemplazar-ejercicio.md](bloques/6-reemplazar-ejercicio.md) |
 | 8 — Calendario | [bloques/8-calendario.md](bloques/8-calendario.md) |
 | 9 — Grupos de progreso | [bloques/9-grupos-progreso.md](bloques/9-grupos-progreso.md) |
+| 9b — Mejoras de uso | [bloques/9b-mejoras-uso.md](bloques/9b-mejoras-uso.md) |
 
 ## Cómo mantener esta documentación
 

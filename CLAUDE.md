@@ -55,9 +55,9 @@ activo, cada sesión una operación, y el progreso se lee como rendimiento de ca
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | React 19, Vite 8, react-router-dom 7, axios, Recharts, CSS Modules, Geist (fontsource) |
+| Frontend | React 19, Vite 8, react-router-dom 7, axios, Recharts, CSS Modules, Geist (fontsource), dnd-kit (arrastrar) |
 | Efectos | three.js + @react-three/fiber + postprocessing (Dither, solo Welcome); ogl (DarkVeil, fondo global en `Layout`) |
-| Backend | Node 20, Express 5 (ESM), Mongoose 9, bcrypt, jsonwebtoken, helmet, cors, morgan |
+| Backend | Node 20, Express 5 (ESM), Mongoose 9, bcrypt, jsonwebtoken, helmet, cors, morgan, express-rate-limit |
 | Lint | oxlint (cliente) |
 | Tests | No hay todavía |
 
@@ -279,6 +279,10 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
         el primer punto del rango elegido, como en las apps de bolsa;
       - desplegable para ocultar la lista de ejercicios y dejar solo el gráfico; cada grupo
         recuerda si está plegado.
+- [x] **9b — Mejoras de uso**: crear un ejercicio desde el buscador, grupo y tipo bajo el nombre
+      ("Pecho · Máquinas"), descanso y series con selector por pasos (1:30), arrastrar para
+      reordenar (rutina, sesión activa y grupos del Dashboard) y animaciones de carga
+      (esqueletos y ticker de servidor dormido).
 - [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
 - [ ] **11 — Auth robusta**: rate limiting en login y registro (prioritario, **hecho en el 11.1**),
       access token corto + refresh token (11.2 y 11.3, después del bloque 9b).

@@ -54,6 +54,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0033 | Calendario de días entrenados: mes y año, desde un endpoint de solo fechas | vigente |
 | 0034 | Grupos de progreso con rango, plegado y orden en el dispositivo | vigente |
 | 0035 | Límite de intentos en el login y el registro | vigente |
+| 0036 | Mejoras de uso: crear desde el buscador, etiquetas, selector por pasos, arrastrar y cargas | vigente |
 
 ---
 
@@ -1211,4 +1212,52 @@ midiendo el tiempo se podía saber qué emails están registrados.
 - Si Render cambiara su número de proxies, `req.ip` sería incorrecta y el límite trataría a
   todos como una sola IP (el registro quedaría en 5 por hora para todo el mundo). Se vigila en
   los logs de Render y se corrige con `TRUST_PROXY`.
+
+---
+
+## 0036 — Mejoras de uso: crear desde el buscador, etiquetas, selector por pasos, arrastrar y cargas
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 9b
+
+**Contexto:** tras los bloques de funciones, un repaso de cómo se usa la app en el gimnasio:
+crear un ejercicio obligaba a salir de la rutina; dos ejercicios con el mismo nombre ("Press en
+máquina" de pecho y de hombros) no se distinguían; el descanso se escribía en segundos; no había
+forma de cambiar el orden de los ejercicios; y las esperas se veían como un "Cargando...".
+
+**Decisión** (de David, punto por punto):
+1. **Crear desde el buscador:** si lo buscado no existe (por nombre exacto), "+ Crear «…»" abre
+   un mini formulario dentro de `ExercisePicker` (nombre ya escrito, grupo y tipo). El ejercicio
+   creado se añade a la rutina, se marca en el grupo o queda elegido al reemplazar.
+2. **"Pecho · Máquinas" bajo el nombre**, en gris (componente `NombreEjercicio`): buscador,
+   rutina, sesión activa y Ejercicios. No en Historial ni Dashboard: las sesiones guardadas solo
+   conservan el nombre. La sesión activa guarda grupo y tipo al empezar (campos opcionales en
+   localStorage: las sesiones anteriores siguen funcionando).
+3. **Selector por pasos** (`SelectorPasos`): descanso "− 1:30 +" en saltos de 15 s (se guardan
+   segundos) y series "− 3 +", con los límites del modelo.
+4. **Arrastrar para reordenar** con **dnd-kit** (`ListaOrdenable`): ejercicios de la rutina, de
+   la sesión activa y grupos del Dashboard (sustituye a las flechas). Solo desde un asa ⋮⋮, para
+   que en el iPhone el scroll siga funcionando; también con teclado y con avisos en español
+   para lectores de pantalla. En la sesión activa, el temporizador y el ejercicio abierto siguen
+   al ejercicio movido.
+5. **Cargas:** esqueletos (`Esqueleto`, `ZonaCarga`) con brillo suave en Dashboard, Historial,
+   Ejercicios y Rutinas; y un **ticker** (línea de cotización que se dibuja) en lugar del punto
+   del servidor dormido. Los dos respetan "reducir movimiento" y usan tokens de `variables.css`.
+
+**Alternativas descartadas:**
+- *Crear el ejercicio en su página y volver:* se perdía lo hecho en la rutina.
+- *Etiquetas como píldoras:* compiten con el nombre en filas estrechas.
+- *Campo "mm:ss" o desplegable de valores fijos para el descanso:* fácil equivocarse al escribir
+  en el móvil, o poco flexible.
+- *Arrastre nativo de HTML5:* no funciona con el dedo en el iPhone. *react-beautiful-dnd:*
+  abandonada. *SortableJS:* mueve el DOM por su cuenta y choca con React. *A mano:* cientos de
+  líneas (scroll, accesibilidad, animación).
+- *Indicador de velas o de "apertura de mercado":* el ticker es la gráfica del Dashboard en
+  miniatura y se entiende mejor; el texto dice claramente qué pasa.
+
+**Consecuencias:**
+- Una dependencia más en el cliente (dnd-kit, ~15 KB comprimida).
+- Las formas de la sesión activa en localStorage ganan dos campos opcionales y una acción más en
+  el reducer (`moverEjercicio`), con sus pruebas.
+- Formularios, detalle de sesión y la carga inicial de la app siguen con "Cargando...": no
+  estaban en el alcance.
 

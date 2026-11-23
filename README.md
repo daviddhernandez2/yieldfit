@@ -29,9 +29,9 @@ La propuesta de Yield Fit es trasladar esa lógica visual al dominio del entrena
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | React 19, Vite 8, React Router 7, Axios, Recharts, CSS Modules |
+| Frontend | React 19, Vite 8, React Router 7, Axios, Recharts, CSS Modules, dnd-kit |
 | Efectos WebGL | three.js + @react-three/fiber + postprocessing (fondo de la bienvenida); ogl (fondo de la app) |
-| Backend | Node.js 20, Express 5, Mongoose 9, bcrypt, JWT, helmet, cors, morgan |
+| Backend | Node.js 20, Express 5, Mongoose 9, bcrypt, JWT, helmet, cors, morgan, express-rate-limit |
 | Base de datos | MongoDB Atlas |
 | Despliegue | Vercel (frontend), Render en Frankfurt (backend), MongoDB Atlas M0 |
 

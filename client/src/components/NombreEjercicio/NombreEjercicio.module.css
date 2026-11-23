@@ -1,0 +1,24 @@
+/* Nombre arriba y "Grupo · Tipo" debajo en gris. min-width: 0 para que, dentro de una
+   fila de grid o flex, el nombre largo se corte con puntos en vez de ensanchar la fila. */
+.nombreEjercicio {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+
+.nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detalle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

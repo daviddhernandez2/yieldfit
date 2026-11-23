@@ -14,7 +14,8 @@
 //
 // La forma de la sesión es EXACTAMENTE la que ya se guarda en localStorage (ver
 // buildActiveSessionFromWorkout en activeSession.js): una sesión a medias de antes de este
-// cambio sigue funcionando después del deploy. El reducer no añade ni quita campos.
+// cambio sigue funcionando después del deploy. El reducer no añade ni quita campos, salvo
+// grupoMuscular y tipo al reemplazar un ejercicio (opcionales, bloque 9b).
 
 import { serieAnterior, rellenarConAnterior } from './activeSession.js';
 
@@ -92,11 +93,13 @@ export const sesionReducer = (sesion, accion) => {
     // Reemplazar un ejercicio por otro (bloque 6, 0031): el nuevo ocupa el mismo sitio, con
     // el mismo número de series (al menos 1) y el mismo descanso, y los campos vacíos. Lo
     // hecho del ejercicio anterior se pierde (la pantalla lo confirma antes).
-    // { exerciseIndex, exerciseId, exerciseNombre, ids: [un id por serie] }
+    // { exerciseIndex, exerciseId, exerciseNombre, grupoMuscular?, tipo?, ids: [uno por serie] }
     case 'reemplazarEjercicio':
       return cambiarEjercicio(sesion, accion.exerciseIndex, (ej) => ({
         exerciseId: accion.exerciseId,
         exerciseNombre: accion.exerciseNombre,
+        // Grupo y tipo para "Pecho · Máquinas" (bloque 9b), si la acción los trae.
+        ...(accion.grupoMuscular && { grupoMuscular: accion.grupoMuscular, tipo: accion.tipo }),
         // Solo se puede elegir un ejercicio disponible (el catálogo no deja otros).
         bloqueado: false,
         descansoSegundos: ej.descansoSegundos,

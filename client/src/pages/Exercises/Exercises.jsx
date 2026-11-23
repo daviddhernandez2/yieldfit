@@ -6,6 +6,7 @@ import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from '@/utils/borradoEjercicio.js';
 import useOpcionesEjercicio, { etiquetaDe, tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
+import NombreEjercicio from '@/components/NombreEjercicio/NombreEjercicio.jsx';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import styles from '@/pages/Exercises/Exercises.module.css';
 
@@ -184,7 +185,13 @@ export default function Exercises() {
                 className={styles.rowMain}
                 onClick={() => navigate(`/exercises/${ex._id}/edit`)}
               >
-                <span className={styles.rowName}>{ex.nombre}</span>
+                <NombreEjercicio
+                  className={styles.rowName}
+                  nombre={ex.nombre}
+                  grupoMuscular={ex.grupoMuscular}
+                  opciones={opciones}
+                  mostrarTipo={false}
+                />
                 <span className={styles.rowType}>
                   {etiquetaDe(opciones.tipos, ex.tipo)}
                   {/* Se puede abrir y borrar como siempre; solo avisa de que aún no se registra. */}

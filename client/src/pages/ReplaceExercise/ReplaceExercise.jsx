@@ -78,6 +78,8 @@ export default function ReplaceExercise() {
       exerciseIndex,
       exerciseId: nuevo._id,
       exerciseNombre: nuevo.nombre,
+      grupoMuscular: nuevo.grupoMuscular,
+      tipo: nuevo.tipo,
       ids: Array.from({ length: seriesAlReemplazar(ejercicio) }, () => crypto.randomUUID()),
     });
     // Se guarda ya: si la petición de abajo tarda o falla, el reemplazo está hecho.

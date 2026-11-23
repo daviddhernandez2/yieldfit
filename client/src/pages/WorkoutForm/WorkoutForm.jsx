@@ -11,6 +11,7 @@ import Input from '@/components/Input/Input.jsx';
 import Button from '@/components/Button/Button.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ExercisePicker from '@/components/ExercisePicker/ExercisePicker.jsx';
+import NombreEjercicio from '@/components/NombreEjercicio/NombreEjercicio.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import useOpcionesEjercicio, { tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
@@ -208,9 +209,13 @@ export default function WorkoutForm() {
                 return (
                   <div key={ej.exerciseId} className={`${styles.addedItem} glassCard`}>
                     <div className={styles.addedItemHeader}>
-                      <span className={styles.addedItemName}>
-                        {exercise?.nombre || 'Ejercicio'}
-                      </span>
+                      <NombreEjercicio
+                        className={styles.addedItemName}
+                        nombre={exercise?.nombre || 'Ejercicio'}
+                        grupoMuscular={exercise?.grupoMuscular}
+                        tipo={exercise?.tipo}
+                        opciones={opciones}
+                      />
                       {/* Un cardio que ya estaba en la rutina se queda (y se guarda), pero
                           en la sesión activa saldrá bloqueado. */}
                       {exercise && !tipoDisponible(opciones, exercise.tipo) && <Proximamente />}

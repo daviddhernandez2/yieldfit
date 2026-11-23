@@ -33,6 +33,8 @@ const SESION_ACTUAL = {
     {
       exerciseId: 'peso-muerto',
       exerciseNombre: 'Peso muerto',
+      grupoMuscular: 'Espalda',
+      tipo: 'Pesas libres',
       bloqueado: false,
       descansoSegundos: 120,
       sets: [
@@ -98,13 +100,15 @@ ok('guardarAnteriores', s.anteriores, { press: { sets: [] } });
 
 // --- Reemplazar (bloque 6) ---
 const conHecha = sesionReducer(base, { type: 'alternarCompletada', exerciseIndex: 0, setIndex: 0 });
-s = sesionReducer(conHecha, { type: 'reemplazarEjercicio', exerciseIndex: 0, exerciseId: 'remo', exerciseNombre: 'Remo con barra', ids: ['r1', 'r2'] });
+s = sesionReducer(conHecha, { type: 'reemplazarEjercicio', exerciseIndex: 0, exerciseId: 'remo', exerciseNombre: 'Remo con barra', grupoMuscular: 'Espalda', tipo: 'Pesas libres', ids: ['r1', 'r2'] });
 ok('reemplazar: el nuevo ocupa el mismo sitio, con las mismas series vacías y el mismo descanso', s.ejercicios[0], {
-  exerciseId: 'remo', exerciseNombre: 'Remo con barra', bloqueado: false, descansoSegundos: 120,
+  exerciseId: 'remo', exerciseNombre: 'Remo con barra', grupoMuscular: 'Espalda', tipo: 'Pesas libres', bloqueado: false, descansoSegundos: 120,
   sets: [{ id: 'r1', peso: '', reps: '', completada: false }, { id: 'r2', peso: '', reps: '', completada: false }],
 });
 ok('reemplazar: lo hecho del anterior se pierde', s.ejercicios[0].sets.some((x) => x.completada), false);
 ok('reemplazar: los demás ejercicios no cambian (mismo objeto)', s.ejercicios[1] === conHecha.ejercicios[1], true);
+const sinDetalle = sesionReducer(conHecha, { type: 'reemplazarEjercicio', exerciseIndex: 0, exerciseId: 'remo', exerciseNombre: 'Remo', ids: ['r1'] });
+ok('reemplazar sin grupo ni tipo (versión anterior de la pantalla): no añade esos campos', ['grupoMuscular' in sinDetalle.ejercicios[0], 'tipo' in sinDetalle.ejercicios[0]], [false, false]);
 ok('reemplazar: misma forma que en localStorage', claves(JSON.parse(JSON.stringify(s)).ejercicios[0]), claves(SESION_ACTUAL.ejercicios[0]));
 ok('seriesAlReemplazar: las mismas, y al menos 1', [seriesAlReemplazar({ sets: [1, 2, 3] }), seriesAlReemplazar({ sets: [] })], [3, 1]);
 

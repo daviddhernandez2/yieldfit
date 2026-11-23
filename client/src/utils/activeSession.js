@@ -45,6 +45,8 @@ export const clearActiveSession = () => {
 // (objeto con nombre) o sin popular (solo el ObjectId), soportamos los dos
 // casos. Adicionalmente se acepta un mapa opcional exerciseNombreById para
 // resolver el nombre por ID cuando la rutina viene sin popular.
+// detalleById (bloque 9b): Map(id → { grupoMuscular, tipo }), para mostrar "Pecho ·
+// Máquinas" bajo el nombre en la sesión. Opcional: sin él, esos campos no se guardan.
 // bloqueados: Set con los exerciseId que no se pueden registrar todavía (cardio,
 // DECISIONS.md 0030). Se decide al empezar, con las opciones del servidor, y se guarda en
 // la sesión: así la sesión sabe qué filas bloquear aunque se recargue sin cobertura.
@@ -52,6 +54,7 @@ export const buildActiveSessionFromWorkout = (
   workout,
   exerciseNombreById = null,
   bloqueados = new Set(),
+  detalleById = new Map(),
 ) => {
   return {
     startTime: Date.now(),
@@ -79,9 +82,14 @@ export const buildActiveSessionFromWorkout = (
       // series: no se puede marcar nada, no cuenta en el resumen y no se envía al guardar.
       const bloqueado = bloqueados.has(exerciseIdStr);
 
+      const detalle = detalleById.get(exerciseIdStr);
+
       return {
         exerciseId: exerciseIdStr,
         exerciseNombre,
+        // Campos opcionales (bloque 9b): una sesión empezada antes no los tiene y se ve igual,
+        // solo sin la línea de grupo y tipo.
+        ...(detalle && { grupoMuscular: detalle.grupoMuscular, tipo: detalle.tipo }),
         bloqueado,
         descansoSegundos: ej.descansoSegundos,
         // Cada set recibe un id local estable (no confundir con el _id de Mongo,

@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import Chip from '@/components/Chip/Chip.jsx';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
 import CrearEjercicio from '@/components/ExercisePicker/CrearEjercicio.jsx';
-import { etiquetaDe, tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
+import NombreEjercicio from '@/components/NombreEjercicio/NombreEjercicio.jsx';
+import { tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import styles from '@/components/ExercisePicker/ExercisePicker.module.css';
 
 const IconCheck = () => (
@@ -106,10 +107,15 @@ export default function ExercisePicker({
               disabled={!disponible && !isSelected}
               className={`${styles.catalogoItem} ${isSelected ? styles.catalogoItemSelected : ''}`}
             >
-              <span className={styles.catalogoItemName}>{ex.nombre}</span>
-              <span className={styles.catalogoItemMeta}>
-                {disponible ? etiquetaDe(opciones.gruposMusculares, ex.grupoMuscular) : <Proximamente />}
-              </span>
+              {/* Grupo y tipo bajo el nombre: distingue "Press en máquina" de pecho y de hombros. */}
+              <NombreEjercicio
+                className={styles.catalogoItemName}
+                nombre={ex.nombre}
+                grupoMuscular={ex.grupoMuscular}
+                tipo={ex.tipo}
+                opciones={opciones}
+              />
+              <span className={styles.catalogoItemMeta}>{!disponible && <Proximamente />}</span>
               {isSelected && (
                 <span className={styles.catalogoItemCheck}>
                   <IconCheck />

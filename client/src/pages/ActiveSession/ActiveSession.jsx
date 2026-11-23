@@ -16,6 +16,8 @@ import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
 import Proximamente from "@/components/Proximamente/Proximamente.jsx";
+import NombreEjercicio from "@/components/NombreEjercicio/NombreEjercicio.jsx";
+import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import styles from "@/pages/ActiveSession/ActiveSession.module.css";
 
 // Formatea segundos como MM:SS. Sigue creciendo pasada la hora (65:30).
@@ -87,6 +89,9 @@ export default function ActiveSession() {
   // La sesión se cambia con acciones (dispatch) y no con setSession: todos los cambios
   // posibles están en utils/activeSessionReducer.js, probados sin React (0031).
   const [session, dispatch] = useReducer(sesionReducer, null);
+  // Solo para los textos de grupo y tipo bajo cada nombre ("Máquinas" con tilde). Si no
+  // llegan (sin cobertura), NombreEjercicio muestra el valor guardado.
+  const { opciones } = useOpcionesEjercicio();
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [restTimer, setRestTimer] = useState(null);
   const [confirmTerminar, setConfirmTerminar] = useState(false);
@@ -327,7 +332,7 @@ export default function ActiveSession() {
                 className={`${styles.exerciseCard} ${styles.exerciseCardBloqueado} glassCard`}
               >
                 <div className={styles.exerciseHeader}>
-                  <span className={styles.exerciseName}>{ej.exerciseNombre}</span>
+                  <NombreEjercicio className={styles.exerciseName} nombre={ej.exerciseNombre} grupoMuscular={ej.grupoMuscular} tipo={ej.tipo} opciones={opciones} />
                   <Proximamente />
                 </div>
               </div>
@@ -344,7 +349,7 @@ export default function ActiveSession() {
                 className={styles.exerciseHeader}
                 onClick={() => handleToggleExpand(exerciseIndex)}
               >
-                <span className={styles.exerciseName}>{ej.exerciseNombre}</span>
+                <NombreEjercicio className={styles.exerciseName} nombre={ej.exerciseNombre} grupoMuscular={ej.grupoMuscular} tipo={ej.tipo} opciones={opciones} />
                 <span className={styles.exerciseMeta}>
                   {setsCompletados}/{ej.sets.length}
                 </span>

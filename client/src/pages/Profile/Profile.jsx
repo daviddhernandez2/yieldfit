@@ -5,6 +5,7 @@ import { useActiveSession } from '@/hooks/useActiveSession.js';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import EliminarCuenta from '@/pages/Profile/EliminarCuenta.jsx';
+import CambiarContrasena from '@/pages/Profile/CambiarContrasena.jsx';
 import styles from '@/pages/Profile/Profile.module.css';
 
 const formatFecha = (fecha) => {
@@ -123,6 +124,9 @@ export default function Profile() {
           <DeleteButton onClick={pedirCerrarSesion}>Cerrar sesión</DeleteButton>
         </div>
       </section>
+
+      {/* Cambiar la contraseña (bloque 11b). */}
+      <CambiarContrasena />
 
       {/* Acceso a /developer (bloque 11b), solo para el admin. Ocultarlo es comodidad: quien
           decide es el servidor (403). */}

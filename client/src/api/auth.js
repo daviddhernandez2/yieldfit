@@ -26,3 +26,11 @@ export const logout = () => {
 export const deleteAccount = (password) => {
   return apiClient.delete('/auth/me', { data: { password } });
 };
+
+// PUT /api/auth/me/password  { actual, nueva } → { message, token, user }
+// Cambia la contraseña (bloque 11b). Cierra las sesiones de los demás dispositivos y devuelve
+// una sesión nueva para este (token de acceso en el cuerpo y cookie nueva). 403 si la actual
+// no es correcta.
+export const changePassword = (actual, nueva) => {
+  return apiClient.put('/auth/me/password', { actual, nueva });
+};

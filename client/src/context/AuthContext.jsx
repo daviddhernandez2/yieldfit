@@ -4,6 +4,7 @@ import {
   register as registerApi,
   logout as logoutApi,
   deleteAccount,
+  changePassword,
 } from '@/api/auth.js';
 import { alCaducarSesion, ponerTokenAcceso, renovarSesion } from '@/api/client.js';
 import { marcarSesion } from '@/utils/indicadorSesion.js';
@@ -125,6 +126,13 @@ export function AuthProvider({ children }) {
     salir();
   };
 
+  // Cambiar la contraseña (bloque 11b). El servidor cierra las sesiones de los demás
+  // dispositivos y devuelve una nueva para este: se guarda como al iniciar sesión.
+  const cambiarContrasena = async (actual, nueva) => {
+    const response = await changePassword(actual, nueva);
+    entrar(response.data.token, response.data.user);
+  };
+
   const value = {
     user: state.user,
     status: state.status,
@@ -132,6 +140,7 @@ export function AuthProvider({ children }) {
     register,
     logout,
     eliminarCuenta,
+    cambiarContrasena,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

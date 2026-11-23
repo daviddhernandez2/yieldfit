@@ -189,24 +189,66 @@
   font-weight: var(--font-weight-medium);
 }
 
-.eliminarFormulario {
+/* --- Paneles con formulario: eliminar la cuenta y cambiar la contraseña (bloque 11b) --- */
+
+.panelFormulario {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
-.eliminarAcciones {
+.panelAcciones {
   display: flex;
   gap: var(--space-md);
 }
 
-.eliminarAcciones > button {
+.panelAcciones > button {
   flex: 1;
 }
 
 /* En pantallas estrechas, "Eliminar definitivamente" no cabe al lado de Cancelar. */
 @media (max-width: 420px) {
-  .eliminarAcciones {
+  .panelAcciones {
     flex-direction: column-reverse;
   }
+}
+
+.panelError {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
+/* --- Cambiar la contraseña (bloque 11b) --- */
+
+.contrasenaSeccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+}
+
+.contrasenaCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+/* Botón de texto discreto, como el "⋯" de los datos personales pero con palabra. */
+.contrasenaBoton {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.contrasenaOk {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
 }

@@ -61,7 +61,7 @@ export default function EliminarCuenta() {
         <strong> No se puede deshacer.</strong>
       </p>
 
-      <form className={styles.eliminarFormulario} onSubmit={confirmar} noValidate>
+      <form className={styles.panelFormulario} onSubmit={confirmar} noValidate>
         <Input
           id="eliminar-password"
           type="password"
@@ -72,7 +72,7 @@ export default function EliminarCuenta() {
           error={error}
           autoFocus
         />
-        <div className={styles.eliminarAcciones}>
+        <div className={styles.panelAcciones}>
           <Button type="button" variant="outline" onClick={cancelar} disabled={borrando}>
             Cancelar
           </Button>

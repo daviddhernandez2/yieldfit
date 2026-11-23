@@ -244,6 +244,11 @@ Desde el bloque 11b, Perfil → "Cambiar contraseña" (`PUT /api/auth/me/passwor
   dispositivo recibe una sesión nueva en la respuesta. Los tokens de acceso de los otros valen
   hasta 15 minutos más.
 
+**Si alguien la olvida** (beta, sin envío de email): `npm run restablecer -- correo` le pone una
+contraseña temporal y cierra todas sus sesiones ([operaciones.md](operaciones.md)). Se la das por
+un canal seguro y la cambia en Perfil al entrar. El envío por email llegará cuando la app salga de
+la beta.
+
 ## Limitaciones conocidas
 
 - Un token de acceso robado vale hasta 15 minutos: no se puede revocar uno a uno (no se

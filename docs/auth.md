@@ -186,6 +186,12 @@ sesión) y hay que volver a entrar.
 la cookie; el cliente olvida el token de acceso. Si la petición falla (sin conexión), se sale
 igualmente en el cliente. Los demás dispositivos del usuario siguen dentro.
 
+Desde el bloque 11b, cerrar sesión **borra también lo guardado en el dispositivo** (todas las claves
+`yieldfit_`, `utils/datosLocales.js`): quien entre después en ese mismo móvil no ve el entreno a
+medias ni las preferencias del anterior. Si hay un entreno sin terminar, Perfil avisa antes de
+cerrar la sesión. Cuando la sesión caduca sola no se borra nada: al volver a entrar, el entreno
+sigue donde estaba.
+
 ## Borrar la cuenta
 
 Desde el bloque 11b, Perfil → "Eliminar mi cuenta" (`pages/Profile/EliminarCuenta.jsx`) borra el

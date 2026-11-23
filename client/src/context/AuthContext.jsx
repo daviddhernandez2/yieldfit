@@ -101,12 +101,18 @@ export function AuthProvider({ children }) {
   // Cerrar sesión: el servidor invalida el token de renovación de este dispositivo. Si esa
   // petición falla (sin conexión), se sale igualmente en el cliente: el token de acceso
   // desaparece de la memoria y la cookie caducará sola.
+  // Además se borra lo guardado en el dispositivo (bloque 11b): si otra persona entra después
+  // en este mismo móvil, no verá el entreno a medias ni las preferencias del anterior. Por
+  // eso Perfil avisa antes si hay un entreno sin terminar.
+  // Cuando la sesión caduca sola (alCaducarSesion) NO se borra nada: al volver a entrar, el
+  // entreno sigue donde estaba.
   const logout = async () => {
     try {
       await logoutApi();
     } catch {
       // Se ignora a propósito: salir no puede depender de la red.
     }
+    borrarDatosLocales();
     salir();
   };
 

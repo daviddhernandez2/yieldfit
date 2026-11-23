@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth.js';
+import { useActiveSession } from '@/hooks/useActiveSession.js';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import EliminarCuenta from '@/pages/Profile/EliminarCuenta.jsx';
 import styles from '@/pages/Profile/Profile.module.css';
@@ -45,6 +48,15 @@ const IconMore = () => (
 // todavía no existe (no está en el roadmap de CLAUDE.md).
 export default function Profile() {
   const { user, logout } = useAuth();
+  const sesionActiva = useActiveSession();
+  const [avisoEntreno, setAvisoEntreno] = useState(false);
+
+  // Cerrar sesión borra lo guardado en el dispositivo, incluido el entreno a medias
+  // (AuthContext): si lo hay, se pregunta antes.
+  const pedirCerrarSesion = () => {
+    if (sesionActiva) setAvisoEntreno(true);
+    else logout();
+  };
 
   if (!user) return null;
 
@@ -108,7 +120,7 @@ export default function Profile() {
         {/* Botón "Cerrar sesión" dentro del card, discreto y alineado a la
             derecha con el estilo DeleteButton estándar. */}
         <div className={styles.logoutWrapper}>
-          <DeleteButton onClick={logout}>Cerrar sesión</DeleteButton>
+          <DeleteButton onClick={pedirCerrarSesion}>Cerrar sesión</DeleteButton>
         </div>
       </section>
 
@@ -123,6 +135,19 @@ export default function Profile() {
 
       {/* Al final de la página, separado de todo lo demás (bloque 11b). */}
       <EliminarCuenta />
+
+      <ConfirmDialog
+        open={avisoEntreno}
+        title="Entreno sin terminar"
+        message="Tienes un entreno sin terminar. Si cierras sesión se perderá. ¿Cerrar sesión igualmente?"
+        confirmLabel="Cerrar sesión"
+        confirmVariant="danger"
+        onConfirm={() => {
+          setAvisoEntreno(false);
+          logout();
+        }}
+        onCancel={() => setAvisoEntreno(false)}
+      />
     </div>
   );
 }

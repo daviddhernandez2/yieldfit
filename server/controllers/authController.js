@@ -2,7 +2,50 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import { signToken } from '../utils/jwt.js';
+import {
+  DURACION_RENOVACION_MS,
+  emitirRenovacion,
+  revocarRenovacion,
+  rotarRenovacion,
+} from '../utils/refreshToken.js';
 import { clonarPresetsAUsuario } from '../utils/presets.js';
+
+// ---------------------------------------------------------------------------
+// Cookie del token de renovación (bloque 11, DECISIONS.md 0037)
+//   - httpOnly: JavaScript no puede leerla; un XSS no puede robarla.
+//   - secure (en producción): solo viaja por HTTPS.
+//   - sameSite 'lax': no viaja en peticiones POST desde otros sitios (protege de CSRF).
+//     yieldfit.app y api.yieldfit.app son el mismo sitio, así que sí viaja desde la app.
+//   - path '/api/auth': solo se envía a /refresh y /logout, no en cada petición a la API.
+const COOKIE_RENOVACION = 'yieldfit_renovacion';
+const opcionesCookie = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  path: '/api/auth',
+});
+
+// La cabecera Cookie llega como texto ("a=1; b=2"). Se lee a mano en vez de añadir
+// cookie-parser: solo hace falta una cookie en dos rutas.
+const leerCookie = (req, nombre) => {
+  const par = (req.headers.cookie ?? '')
+    .split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${nombre}=`));
+  return par ? decodeURIComponent(par.slice(nombre.length + 1)) : null;
+};
+
+const ponerCookieRenovacion = (res, token) =>
+  res.cookie(COOKIE_RENOVACION, token, { ...opcionesCookie(), maxAge: DURACION_RENOVACION_MS });
+
+const quitarCookieRenovacion = (res) => res.clearCookie(COOKIE_RENOVACION, opcionesCookie());
+
+// Login y registro acaban igual: token de acceso en el cuerpo (el cliente lo guarda en
+// memoria) y token de renovación en la cookie, de una familia nueva.
+const responderConSesion = async (res, status, message, user) => {
+  ponerCookieRenovacion(res, await emitirRenovacion(user._id));
+  res.status(status).json({ message, token: signToken(user._id), user });
+};
 
 // POST /api/auth/register
 // Crea un nuevo usuario, le clona los ejercicios preset y devuelve token JWT.
@@ -47,15 +90,9 @@ export const register = async (req, res, next) => {
       await session.endSession();
     }
 
-    // El token se emite también en el registro para que el cliente quede logueado
-    // automáticamente sin necesidad de una segunda petición a /login.
-    const token = signToken(user._id);
-
-    res.status(201).json({
-      message: 'Usuario registrado correctamente',
-      token,
-      user,
-    });
+    // La sesión se abre también en el registro, para que el cliente quede dentro sin
+    // necesidad de una segunda petición a /login.
+    await responderConSesion(res, 201, 'Usuario registrado correctamente', user);
   } catch (error) {
     // Errores de validación de Mongoose: devolvemos los mensajes de cada campo
     // que ha fallado para que el frontend pueda mostrarlos junto a su input.
@@ -111,13 +148,41 @@ export const login = async (req, res, next) => {
       });
     }
 
-    const token = signToken(user._id);
+    await responderConSesion(res, 200, 'Login correcto', user);
+  } catch (error) {
+    next(error);
+  }
+};
 
-    res.status(200).json({
-      message: 'Login correcto',
-      token,
-      user,
-    });
+// POST /api/auth/refresh
+// Con la cookie de renovación, devuelve un token de acceso nuevo y cambia la cookie por la
+// siguiente de su familia (cada token de renovación sirve una vez). El cliente lo llama al
+// abrir la app (el token de acceso no sobrevive a una recarga: vive en memoria) y cuando una
+// petición recibe 401 porque el de acceso ha caducado.
+export const refresh = async (req, res, next) => {
+  try {
+    const rotado = await rotarRenovacion(leerCookie(req, COOKIE_RENOVACION));
+    const user = rotado && (await User.findById(rotado.userId));
+    if (!user) {
+      quitarCookieRenovacion(res);
+      return res.status(401).json({ error: 'Unauthorized', message: 'La sesión ha caducado. Vuelve a iniciar sesión.' });
+    }
+    ponerCookieRenovacion(res, rotado.token);
+    res.status(200).json({ token: signToken(user._id), user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/auth/logout
+// Cierra la sesión de ESTE dispositivo: invalida su token de renovación (y su familia) y
+// borra la cookie. El token de acceso que tenga el cliente caduca solo en 15 minutos como
+// mucho; el cliente lo olvida al momento.
+export const logout = async (req, res, next) => {
+  try {
+    await revocarRenovacion(leerCookie(req, COOKIE_RENOVACION));
+    quitarCookieRenovacion(res);
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

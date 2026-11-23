@@ -9,6 +9,7 @@ import './models/Exercise.js';
 import './models/Chart.js';
 import './models/Workout.js';
 import './models/Session.js';
+import './models/RefreshToken.js';
 
 const PORT = process.env.PORT || 3000;
 

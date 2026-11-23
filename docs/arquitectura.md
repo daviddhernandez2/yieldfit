@@ -100,6 +100,7 @@ flowchart TB
 | `/api/progress` | `progressRoutes.js` | `requireAuth` a nivel router; solo lectura ([0026](../DECISIONS.md)) |
 | `/api/health` | en `app.js` | pública; despertador de la portada ([0025](../DECISIONS.md)) |
 | `/api/charts` | `chartRoutes.js` | `requireAuth` a nivel router; grupos de progreso ([0034](../DECISIONS.md)) |
+| `/api/reports` | `reportRoutes.js` | `requireAuth` a nivel router; reportes de fallos, 5 por hora por usuario (bloque 11b) |
 
 **Errores:** los controladores pasan los errores inesperados con `next(error)` a `errorHandler`.
 En producción, un 500 responde siempre con un mensaje genérico, porque el cliente muestra

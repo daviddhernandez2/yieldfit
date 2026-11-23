@@ -201,6 +201,7 @@ Desde el bloque 11 ([0035](../DECISIONS.md)), `middlewares/limiteIntentos.js`:
 |---|---|---|
 | `POST /api/auth/login` | 5 cada 15 min por IP + email | solo los fallos (un acierto no suma) |
 | `POST /api/auth/register` | 5 por hora por IP | cada registro |
+| `POST /api/reports` | 5 por hora por usuario (bloque 11b) | los reportes guardados (un 400 no suma) |
 
 Al pasarse, el servidor responde **429** con "Demasiados intentos… Vuelve a intentarlo en N
 minutos", que el formulario muestra tal cual.

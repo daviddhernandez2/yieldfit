@@ -16,6 +16,7 @@ erDiagram
     User ||--o{ Workout : "tiene (userId)"
     User ||--o{ Session : "tiene (userId)"
     User ||--o{ Chart : "tiene (userId)"
+    User ||--o{ BugReport : "envía (userId)"
 
     Workout ||--|{ WorkoutExercise_embebido : "ejercicios[]"
     Session ||--|{ SessionExercise_embebido : "ejercicios[]"
@@ -80,6 +81,15 @@ erDiagram
     Chart {
         ObjectId userId FK "indexado"
         string nombre
+    }
+    BugReport {
+        ObjectId userId FK "índice con createdAt"
+        string descripcion "obligatorio, ≤2000"
+        string contexto "opcional, ≤1000"
+        string ruta
+        string navegador "User-Agent de la petición"
+        object pantalla "ancho, alto"
+        string estado "pendiente | resuelto"
     }
 ```
 
@@ -176,6 +186,12 @@ Se crea y edita en `/groups/new` y `/groups/:id/edit`. Su progreso lo calcula
 `GET /api/progress?grupo=<id>` con **exactamente el mismo cálculo que "Todos"**, solo con sus
 ejercicios: la lista la lee el servidor del propio grupo. Al borrar un ejercicio se quita de
 los grupos (0020); un grupo puede quedarse vacío y la tarjeta lo avisa.
+
+### BugReport
+Reporte de un fallo enviado con el botón de la app (bloque 11b): `POST /api/reports`, 5 por hora
+por usuario. El cliente manda `descripcion`, `contexto`, `ruta` y `pantalla`; el navegador lo toma
+el servidor de la cabecera `User-Agent`, y `estado` (`pendiente` por defecto) solo lo cambia el
+admin. Solo texto: nunca capturas de pantalla. Se borran con la cuenta del usuario (11b.4).
 
 ## Borrar un ejercicio: el historial se conserva
 

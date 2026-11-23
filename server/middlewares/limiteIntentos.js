@@ -47,3 +47,17 @@ export const limiteRegistro = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
+
+// Reportes de fallos (bloque 11b): 5 por hora y por USUARIO, no por IP (va después de
+// requireAuth). Suficiente para contar varios fallos seguidos; frena a quien quiera llenar
+// la bandeja. Los envíos rechazados por datos no válidos (400) no cuentan.
+export const limiteReportes = rateLimit({
+  windowMs: UNA_HORA,
+  limit: 5,
+  skipFailedRequests: true,
+  keyGenerator: (req) => String(req.user._id),
+  message: 'Has enviado muchos reportes seguidos.',
+  handler: responder,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});

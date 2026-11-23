@@ -1322,3 +1322,44 @@ navegador de la víctima haga esas peticiones con sus credenciales desde otra we
 - En local, `DURACION_ACCESO_PRUEBA` acorta el token de acceso para probar la renovación; se
   ignora en producción.
 
+---
+
+## 0038 — La IP real detrás de Render: `trust proxy` a 3
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 11 · Corrige: 0035 (solo el valor de `trust proxy`)
+
+**Contexto:** con el login y la cookie ya en producción (0037), los logs de Render mostraban como
+IP de cada petición una IP interna de Render (`10.x`), igual para todos. Con `trust proxy` a 1
+(0035), el límite de intentos trataba a todos los usuarios como una sola IP: en la práctica, el
+del login quedaba por email y el del registro, 5 por hora **para todo el mundo**.
+
+**Cómo se averiguó** (sin suponer): un endpoint temporal, solo de lectura y sobre la propia
+petición, devolvía las cabeceras de IP y qué daría `req.ip` con cada valor de `trust proxy`. Se
+desplegó, se probó y se quitó en cuanto el arreglo quedó comprobado. Resultado:
+- Entre el usuario y Express hay **tres proxies**: Cloudflare, la red interna de Render y un
+  proxy local en la misma máquina (la conexión llega de `::1`). Cada uno añade al final de
+  `X-Forwarded-For` la IP que ve.
+- Las IP de Cloudflare y de Render cambian entre peticiones; el **número de saltos**, no.
+- Un `X-Forwarded-For` falso enviado por el cliente queda **al principio** de la lista, por
+  delante de su IP real.
+
+**Decisión** (de David): **`trust proxy` a 3**, como valor por defecto en el código
+(`TRUST_PROXY` sigue permitiendo cambiarlo sin desplegar). Express cuenta tres saltos desde el
+final y se queda con el siguiente, la IP del usuario; lo que el cliente escriba queda por delante
+y se ignora. El limitador y morgan usan `req.ip`, así que no cambian. Comprobado en producción:
+con `X-Forwarded-For: 1.2.3.4`, `req.ip` es la IP real, y los logs de Render muestran la IP real.
+
+**Alternativas descartadas:**
+- *Leer `CF-Connecting-IP`* (la pone Cloudflare con la IP del usuario): no depende del número de
+  saltos, pero obliga a cambiar la clave del limitador y el formato de morgan, y no se comprobó
+  que Cloudflare sustituya un valor falso enviado por el cliente. Ese Cloudflare es de Render, no
+  nuestro: no controlamos su configuración.
+- *Confiar en rangos de IP* (privados y los de Cloudflare): habría que mantener a mano la lista de
+  rangos de Cloudflare.
+
+**Consecuencias:**
+- Los límites de la 0035 funcionan por fin por IP real.
+- **Depende de que Render mantenga tres proxies.** Con uno más, `req.ip` sería una IP de
+  Cloudflare (límites compartidos otra vez); con uno menos, sería lo que mande el cliente
+  (falsificable, y el límite se saltaría cambiando la cabecera). Se vigila en los logs de Render y
+  se corrige con `TRUST_PROXY`. La prueba para repetirla está en `docs/auth.md`.

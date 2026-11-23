@@ -179,6 +179,8 @@ igualmente en el cliente. Los demás dispositivos del usuario siguen dentro.
   almacenamiento seguro del sistema.
 - El límite de intentos es por IP y email: un ataque repartido entre muchas IP no se frena así.
   Los contadores están en memoria y se ponen a cero si Render reinicia el servidor.
+- La IP depende de cuántos proxies tiene Render delante (3 hoy); ver
+  [La IP real detrás de Render](#la-ip-real-detrás-de-render).
 
 ## Límite de intentos
 
@@ -190,9 +192,33 @@ Desde el bloque 11 ([0035](../DECISIONS.md)), `middlewares/limiteIntentos.js`:
 | `POST /api/auth/register` | 5 por hora por IP | cada registro |
 
 Al pasarse, el servidor responde **429** con "Demasiados intentos… Vuelve a intentarlo en N
-minutos", que el formulario muestra tal cual. Para que la IP sea la real detrás del proxy de
-Render, Express tiene `trust proxy` a 1 (variable `TRUST_PROXY`); se comprueba en los logs de
-Render, donde morgan escribe la IP de cada petición.
+minutos", que el formulario muestra tal cual.
+
+### La IP real detrás de Render
+
+El límite depende de `req.ip`. Entre el usuario y Express hay **tres proxies**, y cada uno añade
+al final de la cabecera `X-Forwarded-For` la IP que ve ([0038](../DECISIONS.md)):
+
+```mermaid
+flowchart LR
+    U["Usuario"] --> CF["Cloudflare"] --> R["Red interna<br/>de Render"] --> L["Proxy local<br/>(::1)"] --> E["Express"]
+```
+
+Lo que llega a Express es `X-Forwarded-For: [lo que mande el cliente…], usuario, Cloudflare, Render`,
+y la conexión viene del proxy local. Con **`trust proxy` a 3** (`TRUST_PROXY`, por defecto 3),
+Express cuenta tres saltos desde el final y se queda con el siguiente: la IP del usuario. Lo que
+un cliente escriba en `X-Forwarded-For` queda por delante y se ignora.
+
+**Si Render cambia la cadena,** la cuenta deja de cuadrar: con un proxy más, `req.ip` sería una IP
+de Cloudflare (límites compartidos por todos); con uno menos, sería lo que mande el cliente. Se
+comprueba en los logs de Render (morgan escribe `req.ip` en cada petición: tiene que ser la IP
+real) y con esta prueba, que debe devolver la IP real y no `1.2.3.4` en los logs:
+
+```bash
+curl -s -H "X-Forwarded-For: 1.2.3.4" https://api.yieldfit.app/api/health
+```
+
+Se corrige cambiando `TRUST_PROXY` en Render, sin tocar código.
 
 **Mismo tiempo exista o no el email:** si el email no existe, el login compara la contraseña
 contra un hash falso con el mismo coste. Antes respondía antes (se saltaba bcrypt) y, midiendo

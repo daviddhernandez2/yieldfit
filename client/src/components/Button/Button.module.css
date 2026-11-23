@@ -1,13 +1,12 @@
+/* Botón (bloque 9c, design system del artefacto: components/Button/README.md). */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-md) var(--space-xl);
+  gap: var(--space-sm);
   border-radius: var(--radius-pill);
-  font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   transition: var(--transition-base);
-  min-height: 48px;
   /* Sin nowrap: si un botón no cabe ni a ancho completo, el texto baja de línea en vez de
      salirse. En filas de botones, quien decide si se apilan es GrupoBotones. */
   max-width: 100%;
@@ -19,17 +18,42 @@
   cursor: not-allowed;
 }
 
-/* Variante primaria: fondo verde sólido */
+/* --- Tamaños --- */
+
+/* sm: acciones dentro de tarjetas o filas. */
+.sm {
+  min-height: 36px;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+/* md (por defecto): formularios. 48 px, el mínimo táctil de la app. */
+.md {
+  min-height: 48px;
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-base);
+}
+
+/* lg: el CTA de una pantalla (uno por pantalla). */
+.lg {
+  min-height: 52px;
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-lg);
+}
+
+/* --- Variantes --- */
+
+/* Primaria: relleno color-action (blanco roto), texto oscuro. */
 .primary {
-  background-color: var(--color-accent);
-  color: var(--color-accent-text);
+  background-color: var(--color-action);
+  color: var(--color-on-action);
 }
 
 .primary:hover:not(:disabled) {
-  background-color: var(--color-accent-hover);
+  background-color: var(--color-action-hover);
 }
 
-/* Variante outline: borde verde sin relleno */
+/* Outline: borde verde sin relleno. */
 .outline {
   background-color: transparent;
   border: 1.5px solid var(--color-border-accent);
@@ -37,20 +61,31 @@
 }
 
 .outline:hover:not(:disabled) {
-  background-color: rgba(62, 248, 126, 0.08);
+  background-color: var(--color-accent-soft);
+}
+
+/* Ghost: sin fondo ni borde. Acciones terciarias. */
+.ghost {
+  background-color: transparent;
+  color: var(--color-text);
+}
+
+.ghost:hover:not(:disabled) {
+  background-color: var(--color-hover);
+}
+
+/* Danger: rojo tonal con borde, nunca sólido. Se ve, pero no domina la pantalla. */
+.danger {
+  background-color: var(--color-danger-fill);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-on-danger);
+}
+
+.danger:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
 }
 
 /* Modificador opcional: ocupar todo el ancho disponible */
 .fullWidth {
   width: 100%;
-}
-
-/* Variante danger: fondo rojo sólido. Para acciones destructivas como borrar. */
-.danger {
-  background-color: var(--color-error);
-  color: var(--color-text);
-}
-
-.danger:hover:not(:disabled) {
-  background-color: #cc2600;
 }

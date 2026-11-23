@@ -1,11 +1,20 @@
 import styles from '@/components/Button/Button.module.css';
 
-// Botón reutilizable con dos variantes visuales:
-// - "primary": fondo verde sólido, texto oscuro. Para CTAs principales.
-// - "outline": borde verde, fondo transparente, texto verde. Para acciones secundarias.
+// Botón de acción en píldora (design system del artefacto, README de Button; bloque 9c).
+//
+// Variantes:
+//   - "primary" (por defecto): relleno color-action (blanco roto) con texto oscuro. Una sola
+//     acción principal por vista; el verde queda para datos y estados.
+//   - "outline": borde verde, sin relleno. Acciones secundarias y "Cancelar".
+//   - "danger": rojo TONAL (fondo y borde translúcidos, texto rojo), nunca sólido. Para
+//     confirmar borrados (p. ej. en ConfirmDialog con confirmVariant="danger").
+//   - "ghost": sin fondo ni borde; hover suave. Acciones terciarias en barras y tarjetas.
+// Tamaños: "sm" 36 px (dentro de tarjetas o filas), "md" 48 px (por defecto, formularios),
+// "lg" 52 px (el CTA de una pantalla).
 // Acepta cualquier prop estándar de <button> a través de ...rest (onClick, disabled, type...).
 export default function Button({
   variant = 'primary',
+  size = 'md',
   children,
   fullWidth = false,
   ...rest
@@ -13,6 +22,7 @@ export default function Button({
   const className = [
     styles.button,
     styles[variant],
+    styles[size],
     fullWidth ? styles.fullWidth : '',
   ]
     .filter(Boolean)

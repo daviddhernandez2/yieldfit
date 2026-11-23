@@ -9,7 +9,11 @@ import styles from '@/components/Sidebar/Sidebar.module.css';
 export default function Sidebar() {
   return (
     <aside className={styles.sidebar}>
-      <Logo width={130} className={styles.logo} />
+      {/* El contenedor lleva el margen: Logo fija padding: 0 en línea y una clase sobre
+          el propio botón no podría cambiarlo. */}
+      <div className={styles.logo}>
+        <Logo width={130} />
+      </div>
 
       <nav className={styles.nav}>
         {NAV_ITEMS.map(({ path, label, Icon }) => (

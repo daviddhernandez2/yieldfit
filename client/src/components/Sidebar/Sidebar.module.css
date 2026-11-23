@@ -1,4 +1,8 @@
-/* Oculto por defecto (móvil). En desktop se muestra como columna izquierda. */
+/* Sidebar de escritorio: logo arriba y, debajo, la navegación en una tarjeta de cristal.
+   Antes este archivo tenía casi todas las reglas escritas dos veces con valores distintos
+   (ganaba la segunda); ahora cada regla está una vez, con los valores que se veían. */
+
+/* Oculto por defecto (móvil). En escritorio se muestra como columna izquierda. */
 .sidebar {
   display: none;
 }
@@ -21,81 +25,18 @@
   }
 }
 
-/* El componente Logo ya controla su propio tamaño con la prop width.
-   Aquí solo lo alineamos a la izquierda. */
+/* El logo empieza justo donde empiezan los iconos del menú: el relleno de la tarjeta de
+   navegación (--space-md) + el de cada opción (--space-md) + el borde de la tarjeta (1 px).
+   Si cambia alguno de esos tres valores, hay que cambiarlo también aquí. */
 .logo {
+  /* flex: evita el hueco de línea de texto que deja un inline-block dentro de un div. */
+  display: flex;
   align-self: flex-start;
-  padding-left: var(--space-md);
   margin-top: var(--space-xl);
-}
-/* Card wrapper de la navegación. Envuelve los items con fondo elevado y
-   borde, replicando el patrón visual del mockup: la navegación es una
-   "tarjeta" independiente, no items sueltos sobre el fondo. */
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  padding: var(--space-md);
-  border-radius: var(--radius-lg);
-  /* Mismo glass que el resto de cards para coherencia visual. */
-  background: rgba(20, 20, 20, 0.55);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
-    0 20px 60px -20px rgba(0, 0, 0, 0.5);
-}
-.item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-  color: var(--color-text-muted);
-  font-weight: var(--font-weight-medium);
-  text-decoration: none;
-  transition: var(--transition-base);
+  padding-left: calc(var(--space-md) * 2 + 1px);
 }
 
-.item:hover {
-  color: var(--color-text);
-}
-
-/* Item activo: fondo verde translúcido + texto e icono en verde.
-   currentColor en el SVG hace que el icono cambie de color con el texto. */
-.active {
-  color: var(--color-accent);
-  background-color: rgba(62, 248, 126, 0.08);
-}
-
-.active:hover {
-  color: var(--color-accent);
-}/* Oculto por defecto (móvil). En desktop se muestra como columna izquierda. */
-.sidebar {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    width: 260px;
-    flex-shrink: 0;
-    padding: var(--space-lg);
-    gap: var(--space-2xl);
-  }
-}
-
-/* El componente Logo ya controla su propio tamaño con la prop width.
-   Aquí solo lo alineamos a la izquierda. */
-.logo {
-  align-self: flex-start;
-}
-
-/* Card wrapper de la navegación. Envuelve los items con fondo elevado y
-   borde, replicando el patrón visual del mockup: la navegación es una
-   "tarjeta" independiente, no items sueltos sobre el fondo. */
+/* Tarjeta de la navegación, con el mismo cristal que las glassCard de la app. */
 .nav {
   display: flex;
   flex-direction: column;
@@ -127,11 +68,11 @@
   color: var(--color-text);
 }
 
-/* Item activo: fondo verde translúcido + texto e icono en verde.
+/* Opción activa: fondo verde translúcido + texto e icono en verde.
    currentColor en el SVG hace que el icono cambie de color con el texto. */
 .active {
   color: var(--color-accent);
-  background-color: rgba(62, 248, 126, 0.08);
+  background-color: var(--color-accent-soft);
 }
 
 .active:hover {

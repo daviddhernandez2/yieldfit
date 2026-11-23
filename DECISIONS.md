@@ -46,6 +46,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0025 | Aviso de arranque en frío y 401 sin recarga | vigente |
 | 0026 | Progreso en el servidor: 1RM precalculado, % tipo bolsa e índice base 100 | vigente |
 | 0027 | Historial paginado por cursor | vigente |
+| 0028 | Sin middleware de compresión: Render ya comprime | vigente |
 
 ---
 
@@ -897,4 +898,30 @@ en el servidor (0026), solo lo usa el Historial, que no necesita más que las pr
   despliegue del bloque 4 hay un par de minutos así (aceptado por David).
 - El orden desempata por `_id` cuando dos sesiones tienen la misma fecha; el índice
   `{ userId, fecha }` no lo incluye, pero los empates son raros y se resuelven en memoria.
+
+---
+
+## 0028 — Sin middleware de compresión: Render ya comprime
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: entre el 4 y el 5
+
+**Contexto:** tras el bloque 4 se valoró añadir el middleware `compression` de Express. Medido en
+local, reducía la página del historial de 40,7 KB a 3,4 KB y el progreso total de 73,4 KB a
+11,5 KB. Antes de subirlo se comprobó la producción: las respuestas de la API ya llegan con
+`content-encoding: br`.
+
+**Decisión** (de David): **no añadir `compression`.** Render ya comprime las respuestas en
+producción, con Brotli, que comprime algo más que gzip.
+
+**Alternativas descartadas:**
+- *Añadirlo igualmente:* una dependencia más que en producción no cambia nada (el proxy de Render
+  ve la respuesta ya comprimida y no la toca).
+- *Añadirlo solo para desarrollo:* en local el servidor y el navegador están en la misma máquina;
+  el tamaño de las respuestas no importa.
+
+**Consecuencias:**
+- La compresión depende de Render. Si se cambia de proveedor, hay que comprobar si comprime y,
+  si no, añadir `compression` (una línea en `app.js`).
+- Las mediciones en local (sin compresión) muestran los tamaños sin comprimir; los de producción
+  son menores.
 

@@ -15,7 +15,7 @@ Dos tokens desde el bloque 11 ([0037](../DECISIONS.md), sustituye a la 0008):
 |---|---|---|
 | Token de acceso | `server/utils/jwt.js` | `signToken(userId)` (15 min), `verifyToken(token)` con `JWT_SECRET` |
 | Token de renovación | `server/utils/refreshToken.js`, `models/RefreshToken.js` | emitir, rotar (con margen de 30 s) y revocar |
-| Endpoints | `server/controllers/authController.js` | `register`, `login`, `refresh`, `logout`, `me`, `deleteMe` |
+| Endpoints | `server/controllers/authController.js` | `register`, `login`, `refresh`, `logout`, `me`, `deleteMe`, `changePassword`, `forgotPassword`, `resetPassword` |
 | Proteger rutas | `server/middlewares/authMiddleware.js` | `requireAuth`: valida el token de acceso y carga `req.user` |
 | Solo admin | `server/middlewares/authMiddleware.js` | `requireAdmin` (tras `requireAuth`): 403 si `req.user.rol` no es `admin` |
 | Token en memoria y renovación | `client/src/api/client.js` | interceptores de axios; `renovarSesion` |
@@ -244,10 +244,61 @@ Desde el bloque 11b, Perfil → "Cambiar contraseña" (`PUT /api/auth/me/passwor
   dispositivo recibe una sesión nueva en la respuesta. Los tokens de acceso de los otros valen
   hasta 15 minutos más.
 
-**Si alguien la olvida** (beta, sin envío de email): `npm run restablecer -- correo` le pone una
-contraseña temporal y cierra todas sus sesiones ([operaciones.md](operaciones.md)). Se la das por
-un canal seguro y la cambia en Perfil al entrar. El envío por email llegará cuando la app salga de
-la beta.
+Al cambiarla se envía el email "Tu contraseña ha cambiado" (ver abajo).
+
+## Recuperar la contraseña por email
+
+Desde el bloque 11b, "¿Olvidaste tu contraseña?" en el login. El email lo envía **Resend** desde
+`no-responder@mail.yieldfit.app` (configuración en [operaciones.md](operaciones.md#envío-de-emails-resend)).
+
+```mermaid
+sequenceDiagram
+    participant R as /recuperar
+    participant API as API
+    participant DB as MongoDB
+    participant RS as Resend
+    participant E as /restablecer
+
+    R->>API: POST /auth/forgot-password { email }
+    API-->>R: 200, siempre el mismo mensaje
+    Note over API: después de responder
+    alt la cuenta existe
+        API->>DB: borra sus enlaces sin usar y guarda la huella del nuevo (30 min)
+        API->>RS: email con yieldfit.app/restablecer#token=…
+    end
+    E->>API: POST /auth/reset-password { token, password }
+    rect rgba(62, 248, 126, 0.12)
+    Note over API,DB: transacción
+    API->>DB: gasta el enlace (si no vale → 400, no se toca nada)
+    API->>DB: contraseña nueva (validación + hash)
+    API->>DB: borra TODOS sus tokens de renovación y enlaces
+    end
+    API->>RS: email "Tu contraseña ha cambiado"
+    API-->>E: 200 → al login con "Contraseña cambiada"
+```
+
+- **El enlace:** token aleatorio de 256 bits; en la base solo su huella SHA-256
+  (`PasswordReset`, con índice TTL). **Caduca en 30 minutos**, **sirve una vez** (se gasta de
+  forma atómica) y pedir otro anula el anterior.
+- **El token va detrás de `#`:** el navegador no envía esa parte de la URL a ningún servidor, así
+  que no queda en los logs de Vercel ni en la cabecera `Referer`. `/restablecer` lo lee, lo quita
+  de la barra de direcciones y lo manda en el cuerpo del POST.
+- **Misma respuesta exista o no la cuenta**, y se responde **antes** de buscarla y enviar el
+  email: si se esperara a Resend, la respuesta tardaría más cuando existe. Ojo: el registro sí
+  revela si un email existe (409 "Ya existe una cuenta con ese email"); ocultarlo exigiría
+  confirmar el email por correo.
+- **Límites:** pedir el enlace, 3 por hora por email (que nadie llene el buzón de otro, y protege
+  el cupo de 100 envíos al día de Resend) y 5 por hora por IP; ponerla con el enlace, 10 cada 15
+  minutos por IP.
+- **Al restablecerla se cierran todas las sesiones**, y no se inicia sesión: se va al login.
+- **Aviso "Tu contraseña ha cambiado"** al restablecerla y al cambiarla en Perfil: si no fuiste
+  tú, te enteras. Se envía sin esperar; si falla, solo se anota en el log.
+- **En local sin `RESEND_API_KEY` no se envía nada:** el email, con su enlace, sale en la consola
+  del servidor. En producción, sin clave el servidor no arranca.
+
+**Plan B:** si el email no llega, `npm run restablecer -- correo` pone una contraseña temporal y
+cierra todas sus sesiones ([operaciones.md](operaciones.md)). Se la das por un canal seguro y la
+cambia en Perfil al entrar.
 
 ## Limitaciones conocidas
 
@@ -271,6 +322,8 @@ Desde el bloque 11 ([0035](../DECISIONS.md)), `middlewares/limiteIntentos.js`:
 | `POST /api/auth/register` | 5 por hora por IP | cada registro |
 | `POST /api/reports` | 5 por hora por usuario (bloque 11b) | los reportes guardados (un 400 no suma) |
 | `DELETE /api/auth/me` y `PUT /api/auth/me/password` | 5 cada 15 min por usuario, **compartido** entre las dos (bloque 11b) | solo las contraseñas incorrectas |
+| `POST /api/auth/forgot-password` | 3 por hora por email y 5 por hora por IP (bloque 11b) | todas, exista o no la cuenta |
+| `POST /api/auth/reset-password` | 10 cada 15 min por IP (bloque 11b) | todas |
 
 Al pasarse, el servidor responde **429** con "Demasiados intentos… Vuelve a intentarlo en N
 minutos", que el formulario muestra tal cual.

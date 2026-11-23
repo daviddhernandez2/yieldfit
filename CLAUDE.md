@@ -307,10 +307,16 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
         leída de GitHub, sin copias).
       - **11b.4 Borrar la cuenta:** `DELETE /api/auth/me` pidiendo la contraseña; en una
         transacción, el usuario y todos sus datos, tokens **y sus reportes**.
-      - **11b.5 Contraseña:** "Cambiar contraseña" en Perfil y script de restablecimiento. El envío
-        por email, cuando la app salga de la beta. **Sin códigos de invitación.**
+      - **11b.5 Contraseña:** "Cambiar contraseña" en Perfil y script de restablecimiento (plan B).
+        **Sin códigos de invitación.**
+      - **11b.5b Recuperar por email** (cambio de plan de David: ya en la beta, no después):
+        Resend desde `no-responder@mail.yieldfit.app` (región Irlanda); enlace de un solo uso, 30
+        minutos, guardado como huella; misma respuesta exista o no el email; límites por email y
+        por IP; al restablecer se cierran todas las sesiones y se va al login; aviso "Tu
+        contraseña ha cambiado" al restablecerla y al cambiarla en Perfil.
       - **11b.6 Nota de privacidad:** página pública `/privacidad`, enlazada desde el registro y
-        Perfil, **sin email de contacto**. Informativa, no un texto legal.
+        Perfil, **sin email de contacto**. Informativa, no un texto legal. Menciona Resend (cuenta
+        en EE. UU., envío desde Irlanda, historial de envíos de 30 días).
 - [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
       entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
       sincronización híbrida de la sesión activa y revisión de DarkVeil (batería) y

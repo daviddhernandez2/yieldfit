@@ -170,3 +170,39 @@ lleva, pero no los recupera.
 - Las `VITE_` se leen **al compilar**: después de cambiar una hay que volver a desplegar
   (Redeploy) para que el cliente la use.
 
+## Envío de emails (Resend)
+
+Desde el bloque 11b la API envía dos emails: el enlace para recuperar la contraseña y el aviso
+"Tu contraseña ha cambiado" (ver [auth.md](auth.md#recuperar-la-contraseña-por-email)). Plan
+gratuito de Resend: 100 emails al día y 3.000 al mes.
+
+**Configuración (una sola vez):**
+1. Cuenta en resend.com, plan Free.
+2. **Domains → Add Domain:** `mail.yieldfit.app`, región **Ireland (eu-west-1)**. Un subdominio,
+   como recomienda Resend: la reputación de envío no afecta a `yieldfit.app`. La región no se
+   puede cambiar sin borrar el dominio.
+3. **Registros DNS en Vercel** (Domains → yieldfit.app → DNS Records): los que muestra Resend
+   (SPF: MX y TXT; DKIM: TXT), copiados tal cual; en Vercel, el nombre sin `.yieldfit.app`.
+4. **DMARC:** TXT con nombre `_dmarc` y valor `v=DMARC1; p=none;`. Cuando los envíos pasen bien
+   las comprobaciones, se puede endurecer (`p=quarantine`).
+5. **Verify** en Resend (minutos; como mucho 72 horas).
+6. **Sin seguimiento** de clics ni de aperturas en el dominio: el de clics reescribiría el enlace
+   y el token pasaría por Resend.
+7. **API key** con permiso *Sending access* y solo el dominio `mail.yieldfit.app`.
+
+**Variables en Render** (ninguna en el repo):
+
+| Variable | Valor |
+|---|---|
+| `RESEND_API_KEY` | la clave del paso 7 |
+| `EMAIL_REMITENTE` | `Yield Fit <no-responder@mail.yieldfit.app>` |
+| `APP_URL` | `https://yieldfit.app` (base de los enlaces) |
+
+Sin cualquiera de las tres, el servidor **no arranca** en producción: hay que ponerlas **antes**
+de desplegar el código que las usa.
+
+**Comprobar que no llega a spam:** pide un enlace para tu email; en Gmail → ⋮ → "Mostrar
+original" deben salir `SPF: PASS`, `DKIM: PASS` y `DMARC: PASS`.
+
+**En local:** sin `RESEND_API_KEY` en `server/.env`, los emails se escriben en la consola del
+servidor (modo consola); `APP_URL=http://localhost:5173` sí es obligatoria.

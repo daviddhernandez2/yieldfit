@@ -17,6 +17,7 @@ erDiagram
     User ||--o{ Session : "tiene (userId)"
     User ||--o{ Chart : "tiene (userId)"
     User ||--o{ BugReport : "envía (userId)"
+    User ||--o{ PasswordReset : "pide (userId)"
 
     Workout ||--|{ WorkoutExercise_embebido : "ejercicios[]"
     Session ||--|{ SessionExercise_embebido : "ejercicios[]"
@@ -197,6 +198,11 @@ admin. Solo texto: nunca capturas de pantalla. Se borran con la cuenta del usuar
 Índices `{ userId, createdAt }`, `{ estado, createdAt }` y `{ createdAt }`: la bandeja de
 `/developer` ordena del más reciente al más antiguo y filtra por usuario, por estado o por fechas,
 paginada por cursor como el Historial.
+
+### PasswordReset
+Enlace para recuperar la contraseña por email (bloque 11b): `userId`, `hash` (SHA-256 del token;
+el token en claro solo va en el email), `usadoEn` y `expiresAt` (30 minutos, con índice TTL que
+borra los caducados). Como mucho uno sin usar por usuario. Ver [auth.md](auth.md#recuperar-la-contraseña-por-email).
 
 ## Borrar un ejercicio: el historial se conserva
 

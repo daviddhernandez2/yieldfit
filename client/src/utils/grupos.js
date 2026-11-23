@@ -45,13 +45,14 @@ export const desdeDeRango = (valor, ahora = new Date()) => {
 // al servidor. Cualquier fallo de localStorage (modo privado, lleno) se ignora: se usan
 // los valores por defecto.
 const clave = (grupoId) => `yieldfit_grupo_${grupoId ?? 'todos'}`;
-const POR_DEFECTO = { rango: RANGO_POR_DEFECTO, plegado: false };
+// plegado: lista de ejercicios oculta. tarjetaPlegada: la tarjeta entera, solo nombre y %.
+const POR_DEFECTO = { rango: RANGO_POR_DEFECTO, plegado: false, tarjetaPlegada: false };
 
 export const leerPreferencias = (grupoId) => {
   try {
     const guardadas = JSON.parse(localStorage.getItem(clave(grupoId)) ?? '{}');
     const rango = RANGOS.some((r) => r.valor === guardadas.rango) ? guardadas.rango : POR_DEFECTO.rango;
-    return { rango, plegado: guardadas.plegado === true };
+    return { rango, plegado: guardadas.plegado === true, tarjetaPlegada: guardadas.tarjetaPlegada === true };
   } catch {
     return { ...POR_DEFECTO };
   }
@@ -64,3 +65,47 @@ export const guardarPreferencias = (grupoId, preferencias) => {
     // Sin localStorage, la preferencia dura hasta recargar. No pasa nada.
   }
 };
+
+// ---------------------------------------------------------------------------
+// Orden de las tarjetas del Dashboard (también en este dispositivo). "Todos" usa el id
+// 'todos'. Se guarda la lista de ids en el orden elegido.
+
+export const ID_TODOS = 'todos';
+const CLAVE_ORDEN = 'yieldfit_orden_grupos';
+
+// Aplica el orden guardado a los grupos que existen hoy: primero los que estaban en el
+// orden guardado (en ese orden), después los nuevos (en orden de creación). Los ids
+// guardados de grupos que ya no existen se ignoran.
+export const ordenarGrupos = (ids, ordenGuardado) => {
+  const enOrden = ordenGuardado.filter((id) => ids.includes(id));
+  const nuevos = ids.filter((id) => !enOrden.includes(id));
+  return [...enOrden, ...nuevos];
+};
+
+// Sube (paso -1) o baja (paso 1) un id en el orden. En los extremos no hace nada.
+export const moverEnOrden = (orden, id, paso) => {
+  const desde = orden.indexOf(id);
+  const hasta = desde + paso;
+  if (desde < 0 || hasta < 0 || hasta >= orden.length) return orden;
+  const nuevo = [...orden];
+  [nuevo[desde], nuevo[hasta]] = [nuevo[hasta], nuevo[desde]];
+  return nuevo;
+};
+
+export const leerOrden = () => {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_ORDEN) ?? '[]');
+    return Array.isArray(guardado) ? guardado.filter((id) => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+
+export const guardarOrden = (orden) => {
+  try {
+    localStorage.setItem(CLAVE_ORDEN, JSON.stringify(orden));
+  } catch {
+    // Sin localStorage, el orden dura hasta recargar.
+  }
+};
+

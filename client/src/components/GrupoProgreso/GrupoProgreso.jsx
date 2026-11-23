@@ -123,15 +123,27 @@ export default function GrupoProgreso({ grupoId = null, nombre, numEjercicios })
             </button>
           )}
         </div>
-        {progreso?.porcentaje != null && (
-          <div className={`${styles.groupPercent} ${claseSigno(progreso.porcentaje)}`}>
-            <IconTrend value={progreso.porcentaje} />
-            <span>{formatPorcentaje(progreso.porcentaje)}</span>
-          </div>
-        )}
+        <div className={styles.derecha}>
+          {progreso?.porcentaje != null && (
+            <div className={`${styles.groupPercent} ${claseSigno(progreso.porcentaje)}`}>
+              <IconTrend value={progreso.porcentaje} />
+              <span>{formatPorcentaje(progreso.porcentaje)}</span>
+            </div>
+          )}
+          {/* Plegar la tarjeta entera: quedan solo el nombre y el %. */}
+          <button
+            type="button"
+            className={styles.plegarTarjeta}
+            onClick={() => cambiar({ tarjetaPlegada: !preferencias.tarjetaPlegada })}
+            aria-expanded={!preferencias.tarjetaPlegada}
+            aria-label={`${preferencias.tarjetaPlegada ? "Desplegar" : "Plegar"} ${nombre}`}
+          >
+            <IconChevron abierto={!preferencias.tarjetaPlegada} />
+          </button>
+        </div>
       </div>
 
-      {vacio ? (
+      {preferencias.tarjetaPlegada ? null : vacio ? (
         <p className={styles.mensaje}>
           Este grupo no tiene ejercicios:{" "}
           <button type="button" className={styles.enlace} onClick={() => navigate(`/groups/${grupoId}/edit`)}>

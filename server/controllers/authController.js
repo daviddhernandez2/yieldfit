@@ -10,6 +10,7 @@ import {
 } from '../utils/refreshToken.js';
 import { clonarPresetsAUsuario } from '../utils/presets.js';
 import { registrarAcceso } from '../utils/ultimoAcceso.js';
+import { borrarUsuarioYDatos } from '../utils/borrarCuenta.js';
 
 // ---------------------------------------------------------------------------
 // Cookie del token de renovación (bloque 11, DECISIONS.md 0037)
@@ -199,6 +200,44 @@ export const logout = async (req, res, next) => {
 export const me = async (req, res, next) => {
   try {
     res.status(200).json({ user: req.user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE /api/auth/me  { password }
+// Borra la cuenta del usuario autenticado y TODOS sus datos (bloque 11b). Requiere
+// requireAuth y vuelve a pedir la contraseña: quien encuentre la sesión abierta en un
+// dispositivo ajeno no puede borrar la cuenta. Tiene su propio límite de intentos.
+export const deleteMe = async (req, res, next) => {
+  try {
+    const { password } = req.body ?? {};
+    if (!password) {
+      return res.status(400).json({ error: 'Validation Error', message: 'Escribe tu contraseña' });
+    }
+
+    // 403 y no 401: un 401 con token hace que el cliente renueve la sesión y repita la
+    // petición, y al volver a fallar cerraría la sesión. Aquí la sesión es válida: lo que
+    // falla es la confirmación.
+    const isMatch = await req.user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(403).json({ error: 'Forbidden', message: 'La contraseña no es correcta' });
+    }
+
+    const session = await mongoose.startSession();
+    let borrados;
+    try {
+      await session.withTransaction(async () => {
+        borrados = await borrarUsuarioYDatos(req.user._id, session);
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    // Solo números y el id, nada personal: sirve para comprobar en los logs que se borró todo.
+    console.log(`Cuenta ${req.user._id} borrada:`, JSON.stringify(borrados));
+    quitarCookieRenovacion(res);
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

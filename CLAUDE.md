@@ -191,7 +191,8 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
   distintos pero solo 7 usuarios (diagnóstico de cardio, 2026-11-23). Parece que se borraron 4
   usuarios a mano sin borrar sus datos: ejercicios y quizá rutinas, sesiones o grupos. Pendiente:
   un diagnóstico de solo lectura que los cuente y una limpieza con el procedimiento de
-  reparaciones (`docs/operaciones.md`). No existe forma de borrar un usuario desde la app.
+  reparaciones (`docs/operaciones.md`). Desde el 11b.4 la app borra la cuenta con todos sus datos,
+  así que no deberían aparecer huérfanos nuevos.
 - **Cardio en la sesión activa:** solo tiene campos de peso y reps, así que hoy no se puede
   registrar tiempo y distancia desde la app (los ejercicios `tiempo_distancia` se guardan con
   peso y reps a 0). El seed sí crea sesiones de cardio porque escribe directamente en la base.

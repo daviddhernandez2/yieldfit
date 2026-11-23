@@ -61,3 +61,17 @@ export const limiteReportes = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
+
+// Borrar la cuenta (bloque 11b): pide la contraseña otra vez. Sin límite, quien encontrara
+// una sesión abierta podría probar contraseñas aquí sin parar. 5 fallos cada 15 minutos
+// por usuario, como el login; un acierto no cuenta (y además la cuenta deja de existir).
+export const limiteBorrarCuenta = rateLimit({
+  windowMs: QUINCE_MINUTOS,
+  limit: 5,
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) => String(req.user._id),
+  message: 'Demasiados intentos con una contraseña incorrecta.',
+  handler: responder,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});

@@ -15,7 +15,7 @@ Dos tokens desde el bloque 11 ([0037](../DECISIONS.md), sustituye a la 0008):
 |---|---|---|
 | Token de acceso | `server/utils/jwt.js` | `signToken(userId)` (15 min), `verifyToken(token)` con `JWT_SECRET` |
 | Token de renovación | `server/utils/refreshToken.js`, `models/RefreshToken.js` | emitir, rotar (con margen de 30 s) y revocar |
-| Endpoints | `server/controllers/authController.js` | `register`, `login`, `refresh`, `logout`, `me` |
+| Endpoints | `server/controllers/authController.js` | `register`, `login`, `refresh`, `logout`, `me`, `deleteMe` |
 | Proteger rutas | `server/middlewares/authMiddleware.js` | `requireAuth`: valida el token de acceso y carga `req.user` |
 | Solo admin | `server/middlewares/authMiddleware.js` | `requireAdmin` (tras `requireAuth`): 403 si `req.user.rol` no es `admin` |
 | Token en memoria y renovación | `client/src/api/client.js` | interceptores de axios; `renovarSesion` |
@@ -186,6 +186,44 @@ sesión) y hay que volver a entrar.
 la cookie; el cliente olvida el token de acceso. Si la petición falla (sin conexión), se sale
 igualmente en el cliente. Los demás dispositivos del usuario siguen dentro.
 
+## Borrar la cuenta
+
+Desde el bloque 11b, Perfil → "Eliminar mi cuenta" (`pages/Profile/EliminarCuenta.jsx`) borra el
+usuario y **todos** sus datos: ejercicios, rutinas, sesiones, grupos, reportes de fallos y tokens
+de renovación (así sus otros dispositivos tampoco pueden renovar la sesión).
+
+```mermaid
+sequenceDiagram
+    participant P as EliminarCuenta.jsx
+    participant CTX as AuthContext
+    participant API as DELETE /api/auth/me
+    participant DB as MongoDB
+
+    P->>CTX: eliminarCuenta(contraseña)
+    CTX->>API: { password } (con requireAuth)
+    alt contraseña incorrecta
+        API-->>P: 403 (5 fallos en 15 min → 429)
+    else correcta
+        rect rgba(62, 248, 126, 0.12)
+        Note over API,DB: transacción (utils/borrarCuenta.js)
+        API->>DB: deleteMany en las 6 colecciones con userId
+        API->>DB: User.deleteOne
+        end
+        API-->>CTX: 204 + borra la cookie
+        CTX->>CTX: borra lo guardado en el dispositivo (yieldfit_*)<br/>status = unauthenticated → /login
+    end
+```
+
+- **Vuelve a pedir la contraseña**, aunque la sesión sea válida: quien encuentre la app abierta
+  en un móvil ajeno no puede borrar la cuenta. Tiene su propio límite: 5 fallos cada 15 minutos.
+- **403 y no 401** si la contraseña no es correcta: un 401 haría que el cliente renovara la
+  sesión, repitiera la petición y, al volver a fallar, la cerrara.
+- **Transacción:** o se borra todo o no se borra nada. La lista de colecciones está en
+  `MODELOS_DEL_USUARIO`; `server/utils/borrarCuenta.test.js` falla si un modelo con `userId` no
+  está en ella.
+- **En el dispositivo** se borran todas las claves `yieldfit_` de localStorage
+  (`utils/datosLocales.js`): sesión activa, preferencias y orden de los grupos.
+
 ## Limitaciones conocidas
 
 - Un token de acceso robado vale hasta 15 minutos: no se puede revocar uno a uno (no se
@@ -207,6 +245,7 @@ Desde el bloque 11 ([0035](../DECISIONS.md)), `middlewares/limiteIntentos.js`:
 | `POST /api/auth/login` | 5 cada 15 min por IP + email | solo los fallos (un acierto no suma) |
 | `POST /api/auth/register` | 5 por hora por IP | cada registro |
 | `POST /api/reports` | 5 por hora por usuario (bloque 11b) | los reportes guardados (un 400 no suma) |
+| `DELETE /api/auth/me` | 5 cada 15 min por usuario (bloque 11b) | solo las contraseñas incorrectas |
 
 Al pasarse, el servidor responde **429** con "Demasiados intentos… Vuelve a intentarlo en N
 minutos", que el formulario muestra tal cual.

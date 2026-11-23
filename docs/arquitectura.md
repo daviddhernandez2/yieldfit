@@ -93,7 +93,7 @@ flowchart TB
 
 | Prefijo | Router | Protección |
 |---|---|---|
-| `/api/auth` | `authRoutes.js` | pública, salvo `GET /me` |
+| `/api/auth` | `authRoutes.js` | pública, salvo `GET /me` y `DELETE /me` (borrar la cuenta, bloque 11b) |
 | `/api/exercises` | `exerciseRoutes.js` | `requireAuth` a nivel router |
 | `/api/workouts` | `workoutRoutes.js` | `requireAuth` a nivel router |
 | `/api/sessions` | `sessionRoutes.js` | `requireAuth` a nivel router; lista paginada por cursor ([0027](../DECISIONS.md)); `previous-sets` para la serie anterior ([0029](../DECISIONS.md)); `days` para el calendario ([0033](../DECISIONS.md)) |

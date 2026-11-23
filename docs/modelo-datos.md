@@ -106,6 +106,8 @@ Todos los modelos tienen además `createdAt` y `updatedAt` (`timestamps: true`).
   Mongoose les aplica `usuario` al leerlos.
 - `ultimoAcceso`: se guarda al registrarse, iniciar sesión y renovar el token, como mucho una vez
   por hora (`utils/ultimoAcceso.js`), sin tocar `updatedAt`.
+- **Borrar la cuenta** (bloque 11b, [auth.md](auth.md#borrar-la-cuenta)) borra en una transacción
+  el usuario y todos los documentos con su `userId` en las demás colecciones.
 
 ### Exercise
 - **Por usuario:** al registrarse, se clonan 58 presets de `server/data/exercisePresets.js`

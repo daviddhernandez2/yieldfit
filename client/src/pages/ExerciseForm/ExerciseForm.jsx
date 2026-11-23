@@ -13,6 +13,7 @@ import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
 import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from "@/utils/borradoEjercicio.js";
 import useOpcionesEjercicio, { tipoDisponible } from "@/hooks/useOpcionesEjercicio.js";
+import formulario from "@/styles/paginaFormulario.module.css";
 import styles from "@/pages/ExerciseForm/ExerciseForm.module.css";
 
 const IconChevronLeft = () => (
@@ -132,16 +133,16 @@ export default function ExerciseForm() {
       {/* Header: botón atrás + título. Mismo patrón que SessionDetail y
           otras vistas de detalle: la navegación queda pegada al inicio
           de la línea de lectura. */}
-      <header className={styles.header}>
+      <header className={formulario.header}>
         <button
           type="button"
           onClick={() => navigate("/exercises")}
-          className={styles.backButton}
+          className={formulario.backButton}
           aria-label="Volver al listado de ejercicios"
         >
           <IconChevronLeft />
         </button>
-        <h1 className={styles.title}>
+        <h1 className={formulario.title}>
           {editMode ? "Editar ejercicio" : "Nuevo ejercicio"}
         </h1>
       </header>
@@ -178,14 +179,14 @@ export default function ExerciseForm() {
         />
 
         {errorMessage && (
-          <div className={styles.errorBanner} role="alert">
+          <div className={formulario.errorBanner} role="alert">
             {errorMessage}
           </div>
         )}
 
         {/* Botón principal centrado y con ancho contenido, coherente con
             el resto de la app. Sin fullWidth para no dominar la pantalla. */}
-        <div className={styles.submitWrapper}>
+        <div className={formulario.submitWrapper}>
           <Button variant="primary" type="submit" disabled={submitting}>
             {submitting
               ? "Guardando..."
@@ -199,7 +200,7 @@ export default function ExerciseForm() {
       {/* Zona de eliminación (solo en modo edición). DeleteButton estándar
           discreto, alineado a la derecha. Estandarizado con SessionDetail. */}
       {editMode && (
-        <div className={styles.deleteWrapper}>
+        <div className={formulario.deleteWrapper}>
           <DeleteButton
             onClick={() => setConfirmDeleteOpen(true)}
             disabled={submitting}

@@ -8,6 +8,7 @@ import Button from "@/components/Button/Button.jsx";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import { readActiveSession, writeActiveSession, contar } from "@/utils/activeSession.js";
 import { sesionReducer, seriesAlReemplazar } from "@/utils/activeSessionReducer.js";
+import formulario from "@/styles/paginaFormulario.module.css";
 import styles from "@/pages/ReplaceExercise/ReplaceExercise.module.css";
 
 const IconChevronLeft = () => (
@@ -115,17 +116,17 @@ export default function ReplaceExercise() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
+      <header className={formulario.header}>
         <button
           type="button"
           onClick={volverASesion}
-          className={styles.backButton}
+          className={formulario.backButton}
           aria-label="Volver a la sesión"
         >
           <IconChevronLeft />
         </button>
         <div>
-          <h1 className={styles.title}>Reemplazar ejercicio</h1>
+          <h1 className={formulario.title}>Reemplazar ejercicio</h1>
           <p className={styles.subtitle}>
             «{ejercicio.exerciseNombre}» · solo para esta sesión: la rutina no cambia.
           </p>
@@ -134,7 +135,7 @@ export default function ReplaceExercise() {
 
       {fallo && <p className={styles.error}>{fallo}</p>}
       {!fallo && (guardando || !catalogo || !opciones) && (
-        <p className={styles.feedback}>{guardando ? "Reemplazando..." : "Cargando..."}</p>
+        <p className={formulario.feedback}>{guardando ? "Reemplazando..." : "Cargando..."}</p>
       )}
       {!fallo && !guardando && catalogo && opciones && (
         <ExercisePicker

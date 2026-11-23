@@ -1,3 +1,6 @@
+/* Los estilos comunes de las páginas de formulario (cabecera con botón de volver, título, mensaje de carga)
+   están en styles/paginaFormulario.module.css. Aquí, solo lo propio de esta página. */
+
 /* Página completa, con el mismo esquema que ExerciseForm: cabecera con botón atrás. */
 .page {
   display: flex;
@@ -8,49 +11,10 @@
   width: 100%;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-.backButton {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: var(--transition-base);
-}
-
-.backButton:hover {
-  border-color: var(--color-text-muted);
-  background-color: rgba(255, 255, 255, 0.04);
-}
-
-.title {
-  margin: 0;
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: -0.02em;
-}
-
 .subtitle {
   margin: var(--space-xs) 0 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-}
-
-.feedback {
-  text-align: center;
-  color: var(--color-text-muted);
-  padding: var(--space-md);
 }
 
 .error {
@@ -76,4 +40,3 @@
     bottom: var(--space-lg);
   }
 }
-

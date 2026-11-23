@@ -1,7 +1,9 @@
 /* Estilos comunes de las páginas de formulario con cabecera "‹ Título", secciones y
-   botones de guardar y borrar: WorkoutForm (rutinas) y GroupForm (grupos). Antes estaban
-   copiados en los dos; cambiar el diseño de estas páginas se hace aquí, una sola vez.
-   Cada página importa este módulo además del suyo propio. */
+   botones de guardar y borrar: WorkoutForm (rutinas), GroupForm (grupos), ExerciseForm
+   (ejercicios) y ReplaceExercise (reemplazar en la sesión activa). Antes estaban copiados
+   en cada una; cambiar el diseño de estas páginas se hace aquí, una sola vez.
+   Cada página importa este módulo además del suyo propio, y en el suyo deja solo lo que
+   tiene distinto (p. ej. ExerciseForm y ReplaceExercise son más estrechas: 600 px). */
 
 .page {
   display: flex;

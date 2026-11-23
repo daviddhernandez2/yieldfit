@@ -1,3 +1,6 @@
+/* Los estilos comunes de las páginas de formulario (cabecera con botón de volver, título, aviso de error, botones de guardar y borrar)
+   están en styles/paginaFormulario.module.css. Aquí, solo lo propio de esta página. */
+
 .page {
   display: flex;
   flex-direction: column;
@@ -7,74 +10,10 @@
   width: 100%;
 }
 
-/* Header: botón atrás delante del título, mismo patrón que SessionDetail. */
-.header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-/* Botón atrás sin fondo, coherente con SessionDetail. */
-.backButton {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: var(--transition-base);
-  flex-shrink: 0;
-}
-
-.backButton:hover {
-  border-color: var(--color-text-muted);
-  background-color: rgba(255, 255, 255, 0.04);
-}
-
-.title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: -0.02em;
-}
-
 .form {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-}
-
-.errorBanner {
-  padding: var(--space-md);
-  background-color: rgba(255, 48, 0, 0.1);
-  border: 1px solid rgba(255, 48, 0, 0.3);
-  border-radius: var(--radius-md);
-  color: var(--color-error);
-  font-size: var(--font-size-sm);
-}
-
-/* Botón "Guardar cambios" centrado, con ancho contenido. */
-.submitWrapper {
-  display: flex;
-  justify-content: center;
-  padding-top: var(--space-sm);
-}
-
-.submitWrapper button {
-  min-width: 200px;
-  max-width: 280px;
-}
-
-/* Zona de eliminación al final de la página. Alineada a la derecha
-   como acción destructiva discreta. */
-.deleteWrapper {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: var(--space-md);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .feedback {
@@ -92,4 +31,3 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
-

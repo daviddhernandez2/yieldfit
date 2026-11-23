@@ -21,6 +21,8 @@ const IconCheck = () => (
 //   - seleccionados: Set de ids que se marcan con un check (los ya añadidos a la rutina).
 //   - excluidos: Set de ids que no se muestran (p. ej. los que ya están en la sesión).
 //   - onElegir(exerciseId): al pulsar un ejercicio.
+//   - listaCompleta: sin altura máxima en la lista (en una página propia, como la de
+//     reemplazar, hace scroll la página entera y no una caja dentro).
 //
 // Un ejercicio de un tipo bloqueado (cardio, 0030) sale con "Próximamente" y no se puede
 // pulsar, salvo que ya esté seleccionado: así se puede quitar de una rutina que ya lo tenía.
@@ -30,6 +32,7 @@ export default function ExercisePicker({
   seleccionados = new Set(),
   excluidos = new Set(),
   onElegir,
+  listaCompleta = false,
 }) {
   const [busqueda, setBusqueda] = useState('');
   const [grupo, setGrupo] = useState(null);
@@ -72,7 +75,7 @@ export default function ExercisePicker({
         </div>
       </div>
 
-      <div className={`${styles.catalogo} glassCard`}>
+      <div className={`${styles.catalogo} ${listaCompleta ? styles.catalogoCompleto : ''} glassCard`}>
         {visibles.length === 0 && <p className={styles.vacio}>No hay ejercicios con esos filtros.</p>}
         {visibles.map((ex) => {
           const isSelected = seleccionados.has(ex._id);

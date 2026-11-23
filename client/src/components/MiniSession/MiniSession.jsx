@@ -37,7 +37,8 @@ export default function MiniSession() {
   }, [session]);
 
   if (!session) return null;
-  if (location.pathname === '/sessions/active') return null;
+  // En la sesión activa y en sus páginas (reemplazar ejercicio) la barra sobra.
+  if (location.pathname.startsWith('/sessions/active')) return null;
 
   const elapsed = Math.floor((Date.now() - session.startTime) / 1000);
 

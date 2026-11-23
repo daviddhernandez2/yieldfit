@@ -52,6 +52,10 @@
   overflow-y: auto;
 }
 
+.catalogoCompleto {
+  max-height: none;
+}
+
 .catalogoItem {
   display: grid;
   grid-template-columns: 1fr auto auto;

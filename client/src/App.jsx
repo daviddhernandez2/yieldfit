@@ -18,6 +18,7 @@ const ExerciseForm = lazy(() => import('@/pages/ExerciseForm/ExerciseForm.jsx'))
 const Workouts = lazy(() => import('@/pages/Workouts/Workouts.jsx'));
 const WorkoutForm = lazy(() => import('@/pages/WorkoutForm/WorkoutForm.jsx'));
 const ActiveSession = lazy(() => import('@/pages/ActiveSession/ActiveSession.jsx'));
+const ReplaceExercise = lazy(() => import('@/pages/ReplaceExercise/ReplaceExercise.jsx'));
 const History = lazy(() => import('@/pages/History/History.jsx'));
 const SessionDetail = lazy(() => import('@/pages/SessionDetail/SessionDetail.jsx'));
 const Profile = lazy(() => import('@/pages/Profile/Profile.jsx'));
@@ -139,6 +140,16 @@ function App() {
                 <PrivateRoute>
                   <Layout>
                     <ActiveSession />
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/sessions/active/replace/:index"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <ReplaceExercise />
                   </Layout>
                 </PrivateRoute>
               }

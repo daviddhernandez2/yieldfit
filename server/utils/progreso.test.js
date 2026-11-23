@@ -2,7 +2,7 @@
 //   node utils/progreso.test.js
 // Repetirlas siempre que se cambie el cálculo del progreso.
 
-import { calcularProgreso } from './progreso.js';
+import { calcularProgreso, reducirSerie } from './progreso.js';
 const S = 'sentadilla', C = 'curl', B = 'borrado', K = 'cardio';
 const nombres = new Map([[S, 'Sentadilla'], [C, 'Curl'], [K, 'Bici']]);
 const ses = (dia, ...ejs) => ({ fecha: new Date(2026, 0, dia), ejercicios: ejs.map(([exerciseId, mejor1RM]) => ({ exerciseId, mejor1RM })) });
@@ -34,6 +34,15 @@ r = calcularProgreso([ses(1, [S, 100], [S, 105]), ses(2, [S, 110])], nombres);
 ok('ejercicio repetido en una sesión: cuenta el mejor', r.porcentaje, 4.76);
 r = calcularProgreso([], nombres);
 ok('sin sesiones', r, { sesiones: 0, porcentaje: null, ejercicios: [], serie: [] });
+
+// Reducción de la línea (bloque 9)
+const larga = Array.from({ length: 1400 }, (_, i) => ({ fecha: i, indice: 100 + i / 10 }));
+const corta = reducirSerie(larga);
+ok('serie de 1.400 puntos se reduce a 150 como mucho', corta.length <= 150 && corta.length > 140, true);
+ok('conserva el primer y el último punto', [corta[0], corta.at(-1)], [larga[0], larga.at(-1)]);
+ok('los puntos siguen en orden', corta.every((p, i) => i === 0 || p.fecha > corta[i - 1].fecha), true);
+const pequena = larga.slice(0, 40);
+ok('una serie de 150 o menos no se toca (mismo objeto)', reducirSerie(pequena) === pequena, true);
 
 console.log(fallos === 0 ? '\nTODO CORRECTO' : `\n${fallos} FALLOS`);
 

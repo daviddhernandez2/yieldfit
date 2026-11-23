@@ -89,3 +89,21 @@ export const calcularProgreso = (sesiones, nombres) => {
 
   return { sesiones: sesiones.length, porcentaje, ejercicios, serie };
 };
+
+// Reduce la línea del gráfico a como mucho `maximo` puntos (bloque 9, DECISIONS.md 0034).
+// Con el rango "Total" de 10 años hay ~1.400 puntos (uno por sesión): más de los que se
+// distinguen en una pantalla y más trabajo para el navegador. Se parte la serie en
+// `maximo` tramos seguidos y se queda el ÚLTIMO punto de cada tramo, más el primero de
+// todos. Así la línea empieza en 100 y acaba exactamente donde acaba la serie completa
+// (último punto − 100 = % del grupo). El % se calcula antes, con todos los puntos.
+export const reducirSerie = (serie, maximo = 150) => {
+  if (serie.length <= maximo) return serie;
+  const reducida = [serie[0]];
+  for (let tramo = 1; tramo < maximo; tramo++) {
+    // Índice del último punto de este tramo (el último tramo acaba en el último punto).
+    const indice = Math.round((tramo * (serie.length - 1)) / (maximo - 1));
+    if (reducida.at(-1) !== serie[indice]) reducida.push(serie[indice]);
+  }
+  return reducida;
+};
+

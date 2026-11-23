@@ -22,7 +22,8 @@ const verificarOwnershipDeEjercicios = async (exerciseIds, userId) => {
 // descendente (las más recientes arriba, como suele esperar el usuario).
 export const list = async (req, res, next) => {
   try {
-    const charts = await Chart.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    // En orden de creación: en el Dashboard, cada grupo nuevo aparece debajo de los anteriores.
+    const charts = await Chart.find({ userId: req.user._id }).sort({ createdAt: 1 });
     res.status(200).json({ charts });
   } catch (error) {
     next(error);

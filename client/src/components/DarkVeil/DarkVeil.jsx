@@ -12,9 +12,12 @@
  * - Sin DarkVeil.css: sus reglas no se aplicaban (el contenedor y su estilo están en
  *   Layout.module.css; el canvas toma su tamaño del renderer de ogl).
  * - Imports con el alias @.
+ * - Lo oscuro es el negro del tema (uniform uFondo, leído del token --color-bg) en vez de
+ *   negro puro (bloque 9c).
  */
 import { useRef, useEffect } from 'react';
 import { Renderer, Program, Mesh, Triangle, Vec2 } from 'ogl';
+import { leerColorToken } from '@/utils/colorToken.js';
 const vertex = `
 attribute vec2 position;
 void main(){gl_Position=vec4(position,0.0,1.0);}
@@ -30,6 +33,7 @@ uniform float uNoise;
 uniform float uScan;
 uniform float uScanFreq;
 uniform float uWarp;
+uniform vec3 uFondo;
 #define iTime uTime
 #define iResolution uResolution
 vec4 buf[8];
@@ -80,8 +84,11 @@ void main(){
     // preserva las variaciones de intensidad del patrón CPPN pero elimina
     // el color, quedando en blanco/gris coherente con la marca.
     float lum=dot(col.rgb,vec3(0.2126,0.7152,0.0722));
-    col.rgb=vec3(lum);
-    gl_FragColor=vec4(clamp(col.rgb,0.0,1.0),1.0);
+    // Del negro del tema (uFondo) al blanco, en vez de del negro puro al blanco: las zonas
+    // oscuras quedan del mismo color que el fondo de la app (bloque 9c).
+    lum=clamp(lum,0.0,1.0);
+    col.rgb=uFondo+vec3(lum)*(1.0-uFondo);
+    gl_FragColor=vec4(col.rgb,1.0);
 }
 `;
 export default function DarkVeil({
@@ -113,7 +120,8 @@ export default function DarkVeil({
         uNoise: { value: noiseIntensity },
         uScan: { value: scanlineIntensity },
         uScanFreq: { value: scanlineFrequency },
-        uWarp: { value: warpAmount }
+        uWarp: { value: warpAmount },
+        uFondo: { value: leerColorToken('--color-bg') }
       }
     });
     const mesh = new Mesh(gl, { geometry, program });

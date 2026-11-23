@@ -1,37 +1,89 @@
 /* Variables globales del design system de Yield Fit.
-   Cambiar un valor aquí se propaga a toda la app. */
+   Cambiar un valor aquí se propaga a toda la app.
+
+   FUENTE DE VERDAD: el design system del artefacto (CLAUDE.md, DECISIONS 0047), tema Premium.
+   Los valores de aquí se copian a mano de su `project/tokens.json`: si el artefacto cambia, se
+   actualizan aquí. Un solo tema, sin conmutador. */
 
 :root {
-   /* Colores base */
-   --color-bg: #000000;
-   --color-bg-elevated: #0a0a0a;
-   --color-text: #ffffff;
-   --color-text-muted: #888888;
+   /* --- Superficies por niveles (tema Premium) ---
+      Nunca negro ni blanco puros. De abajo arriba: página, tarjetas y campos, diálogos y
+      menús, hover y pulsado. */
+   --surface-0: #08090a;
+   --surface-1: #0f1012;
+   --surface-2: #16181b;
+   --surface-3: #1d2024;
 
-   /* Color de acento principal (verde tipo trading subiendo) */
+   /* Colores base. bg y bg-elevated son los niveles 0 y 1 con su nombre de siempre. */
+   --color-bg: var(--surface-0);
+   --color-bg-elevated: var(--surface-1);
+   --color-text: #ededed;
+   --color-text-muted: #8b9098;
+
+   /* Verde de marca ("trading subiendo"). En Premium es para datos y estados: cifras de
+      ganancia, lo seleccionado, lo activo y el foco. El botón principal usa color-action. */
    --color-accent: #3EF87E;
    --color-accent-hover: #2dd968;
-   --color-accent-text: #000000;
-   /* Verde translúcido, para fondos (cristal, seleccionado). Mismo verde que el acento.
-      soft = fondo de un elemento seleccionado (chips); medium = claramente visible. */
+   --color-accent-text: #04140a;
+   /* Verde translúcido para fondos de estado: soft = seleccionado (chips); medium = claramente
+      visible (calendario, casillas). */
    --color-accent-soft: rgba(62, 248, 126, 0.08);
-   --color-accent-medium: rgba(62, 248, 126, 0.25);
+   --color-accent-medium: rgba(62, 248, 126, 0.22);
 
-   /* Color de error / pérdida */
-   --color-error: #FF3000;
+   /* Escala tonal del verde (400 = color-accent). Para fondos tonales y gráficas de varias
+      intensidades; como texto sobre fondo oscuro, solo de 200 a 400. */
+   --green-50: #ecfff3;
+   --green-100: #c9fddc;
+   --green-200: #96fbbb;
+   --green-300: #66f99b;
+   --green-400: #3ef87e;
+   --green-500: #22dc63;
+   --green-600: #16b04e;
+   --green-700: #12853d;
+   --green-800: #0f5c2d;
+   --green-900: #0a3a1d;
 
-   /* Fondos de capas flotantes (bloque 11b). Cristal oscuro: botones y barras que flotan
-      sobre el contenido (con backdrop-filter). Overlay: lo que oscurece la pantalla detrás
-      de un diálogo o una hoja. TabBar y ConfirmDialog aún tienen estos valores sueltos. */
-   --color-bg-glass: rgba(15, 15, 15, 0.75);
-   --color-overlay: rgba(0, 0, 0, 0.7);
+   /* Acción principal: el relleno del botón primario. Blanco roto con texto casi negro. */
+   --color-action: #ededed;
+   --color-action-hover: #ffffff;
+   --color-on-action: #08090a;
 
-   /* Bordes */
-   --color-border: #1f1f1f;
-   --color-border-accent: #3EF87E;
+   /* Rojo apagado: error, pérdida y peligro. Una señal, nunca un fondo sólido: los botones
+      destructivos son tonales (fill + border, texto on-danger). */
+   --color-error: #dc6b67;
+   --color-danger-fill: rgba(220, 107, 103, 0.08);
+   --color-danger-hover: rgba(220, 107, 103, 0.14);
+   --color-danger-border: rgba(220, 107, 103, 0.24);
+   --color-on-danger: var(--color-error);
 
-    /* Tipografía */
+   /* Capas flotantes. Cristal: barras y botones que flotan sobre el contenido (con
+      backdrop-filter). Overlay: lo que oscurece la pantalla detrás de un diálogo o una hoja. */
+   --color-bg-glass: rgba(15, 16, 18, 0.72);
+   --color-overlay: rgba(4, 5, 6, 0.72);
+
+   /* Bordes translúcidos: funcionan sobre cualquier nivel de superficie. */
+   --color-border: rgba(255, 255, 255, 0.08);
+   --color-border-strong: rgba(255, 255, 255, 0.14);
+   --color-border-accent: var(--color-accent);
+   /* Fondo de hover de botones ghost y filas. */
+   --color-hover: rgba(255, 255, 255, 0.05);
+   /* Campo en foco: borde verde suave y anillo (field-focus-ring, abajo). El foco de teclado
+      general sigue siendo el anillo sólido de 2 px en color-accent. */
+   --color-field-focus: rgba(62, 248, 126, 0.55);
+
+   /* Gráficas. Ganancia y pérdida siempre con flecha o signo, no solo color. */
+   --chart-gain: #3ef87e;
+   --chart-loss: #dc6b67;
+   --chart-neutral: #8b9098;
+   --chart-grid: rgba(255, 255, 255, 0.04);
+   --chart-series-1: #3ef87e;
+   --chart-series-2: #6cb6ff;
+   --chart-series-3: #f2b45a;
+   --chart-series-4: #b9a2ff;
+
+   /* Tipografía. --font-mono: cifras y datos técnicos (variaciones, series × reps). */
    --font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+   --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
    --font-size-sm: 0.875rem;
    --font-size-base: 1rem;
    --font-size-lg: 1.125rem;
@@ -49,13 +101,27 @@
    --space-xl: 2rem;
    --space-2xl: 3rem;
 
-   /* Radios de borde */
+   /* Radios de borde. Concéntricos: el radio interior es el exterior menos el padding. */
+   --radius-xs: 4px;
    --radius-sm: 8px;
    --radius-md: 12px;
    --radius-lg: 24px;
    --radius-pill: 999px;
 
-   /* Transiciones por defecto */
+   /* Profundidad: brillo interior de 1 px arriba + sombra amplia y suave.
+      1 = tarjetas y métricas; 2 = menús, popovers y TabBar; 3 = diálogos y hojas. */
+   --elevation-1: inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+   --elevation-2: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 8px 24px -8px rgba(0, 0, 0, 0.6);
+   --elevation-3: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 24px 64px -16px rgba(0, 0, 0, 0.7);
+   /* Anillo suave alrededor de un campo en foco (junto a color-field-focus). */
+   --field-focus-ring: 0 0 0 3px rgba(62, 248, 126, 0.18);
+
+   /* Movimiento. Se animan propiedades concretas, nunca `all`, con ease-standard:
+      duration-fast en hover y pulsado; duration-overlay cuando entra un diálogo.
+      transition-base se mantiene para lo que aún no se ha pasado a propiedades concretas. */
+   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+   --duration-fast: 150ms;
+   --duration-overlay: 280ms;
    --transition-base: all 0.15s ease;
 }
 
@@ -68,16 +134,14 @@
 *:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
-/* Glass Morphism */
+/* Tarjeta de cristal (tema Premium): fondo translúcido del nivel 2 y sombra de elevación 2. */
 .glassCard {
-  background: rgba(30, 30, 30, 0.35);
+  background: rgba(22, 24, 27, 0.55);
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-    0 20px 60px -20px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--elevation-2);
 }

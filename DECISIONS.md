@@ -51,6 +51,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0030 | Cardio bloqueado con "Próximamente" desde las opciones del servidor | vigente |
 | 0031 | Sesión activa con `useReducer` | vigente |
 | 0032 | Reemplazar un ejercicio en la sesión activa | vigente |
+| 0033 | Calendario de días entrenados: mes y año, desde un endpoint de solo fechas | vigente |
 
 ---
 
@@ -1086,4 +1087,50 @@ salir de la sesión o dejarlo vacío.
   de reemplazar (igual que al salir de la sesión a cualquier otra pantalla).
 - Si la carga inicial de la serie anterior había fallado, el ejercicio nuevo tampoco la recibe
   hasta que se reabra la sesión, que entonces las pide todas.
+
+---
+
+## 0033 — Calendario de días entrenados: mes y año, desde un endpoint de solo fechas
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 8
+
+**Contexto:** no había forma de ver de un vistazo qué días se había entrenado. El historial
+viene paginado y con series (0027): no sirve para pintar un calendario.
+
+**Decisión** (de David):
+- **`GET /api/sessions/days?desde&hasta&zona`** devuelve solo los días entrenados, cada uno
+  con el id y el nombre de sus sesiones (sin series). Agrupa con `$dateToString` en la **zona
+  horaria del usuario** (la envía el cliente): una sesión a las 00:30 en Madrid cuenta en ese
+  día, no en el anterior UTC. Rango de un año como máximo: la respuesta no crece con el
+  historial. Usa el índice `{ userId, fecha }` sin abrir ninguna sesión.
+- **Calendario arriba del Historial, siempre desplegado**, con dos vistas:
+  - **Mes:** rejilla de lunes a domingo, celdas de 44 px como máximo.
+  - **Año:** mapa tipo GitHub, una columna por semana; en el móvil se desplaza en horizontal y
+    empieza mostrando lo más reciente.
+  - Las dos leen el mismo dato: los días de un año natural, pedidos una vez por año.
+- **La tarjeta no cambia de tamaño:** las dos vistas están superpuestas en el mismo espacio
+  (la inactiva, oculta) y el mes tiene siempre 6 filas. La lista de un día con varias sesiones
+  aparece encima del calendario, no debajo.
+- **Diseño alineado con la app:** cabecera como las tarjetas del Dashboard ("Días entrenados" y
+  el número de sesiones a la izquierda, chips Mes / Año a la derecha), navegación ‹ periodo ›
+  con las flechas en los bordes de la rejilla, celdas cuadradas con la misma separación en las
+  dos direcciones.
+- **Solo verdes del design system.** Se añaden a `variables.css` dos tokens de verde
+  translúcido, `--color-accent-soft` (8 %) y `--color-accent-medium` (25 %), opacidades que ya
+  se usaban sueltas en la app. Mes: círculos de cristal (una sesión, fondo suave; dos o
+  más, fondo medio con borde y número en el acento). Año: casillas en verde medio o acento.
+- **Tocar un día entrenado:** con una sesión abre su detalle; con varias, las lista debajo.
+- Cabecera con "N sesiones" del mes o del año que se ve. Sin rachas.
+- Rejillas calculadas con funciones puras (`utils/calendario.js`), sin librerías, con pruebas
+  (`node src/utils/calendario.test.js`).
+
+**Alternativas descartadas:**
+- *Una librería de calendario:* dependencia nueva para unas rejillas de pocas líneas.
+- *Calcularlo con la lista de sesiones:* paginada y con series; para un calendario bastan fechas.
+- *Una página propia o el Dashboard:* el calendario es una forma de recorrer el historial.
+- *Plegado por defecto:* primera versión; David lo prefirió siempre visible.
+
+**Consecuencias:**
+- Un año con ~150 sesiones son unos pocos KB; con más años solo se pide el que se mira.
+- La racha de semanas seguidas queda para más adelante: necesitaría rangos de más de un año.
 

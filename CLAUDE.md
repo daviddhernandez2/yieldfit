@@ -205,6 +205,9 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
     y atajo de repetir también para cardio; Historial y detalle muestran tiempo y distancia;
     quitar el bloqueo (una línea en `OPCIONES_TIPO`). Las sesiones de cardio guardadas con
     peso y reps a 0 no se pueden recuperar.
+- **Verdes translúcidos sueltos:** la app usa `rgba(62, 248, 126, α)` con 11 opacidades
+  distintas en varios CSS. Desde el bloque 8 existen `--color-accent-soft` (0.08) y
+  `--color-accent-medium` (0.25) en `variables.css`: sustituir los sueltos por tokens.
 - `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; las props no reaccionan tras
   montar y `prevColor` no se usa). Bloque 12.
 
@@ -266,7 +269,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       - Cliente: descarga con axios (el token va en cabecera, un `<a href>` no lo envía).
         **Para el bloque 12:** en Capacitor esa descarga no funciona igual; habrá que usar el
         menú de compartir.
-- [ ] **8 — Calendario de días entrenados**: endpoint que devuelva solo fechas por rango
+- [x] **8 — Calendario de días entrenados**: endpoint que devuelva solo fechas por rango
       (sin traer sesiones completas).
 - [ ] **9 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;
       misma lógica de cálculo que el grupo "Todos", aplicada a los ejercicios seleccionados.

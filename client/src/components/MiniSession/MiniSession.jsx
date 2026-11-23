@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useActiveSession } from '@/hooks/useActiveSession.js';
+import { hayMiniSession } from '@/utils/barrasInferiores.js';
 import styles from '@/components/MiniSession/MiniSession.module.css';
 
 // Formatea segundos como MM:SS o HH:MM:SS según duración.
@@ -36,9 +37,8 @@ export default function MiniSession() {
     return () => clearInterval(interval);
   }, [session]);
 
-  if (!session) return null;
-  // En la sesión activa y en sus páginas (reemplazar ejercicio) la barra sobra.
-  if (location.pathname.startsWith('/sessions/active')) return null;
+  // Sin sesión activa, o dentro de ella, la barra sobra (utils/barrasInferiores.js).
+  if (!hayMiniSession(session, location.pathname)) return null;
 
   const elapsed = Math.floor((Date.now() - session.startTime) / 1000);
 

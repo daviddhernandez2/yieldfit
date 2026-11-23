@@ -3,16 +3,19 @@
    --------------------------------------------------------------------------- */
 
 .boton {
-  /* ALTURA DEL BOTÓN EN EL MÓVIL: el único sitio donde se decide.
-     Va por encima de toda la pila fija de abajo (opción C). De abajo arriba:
-       - TabBar:              bottom 16px, ~67px de alto       → llega a ~83px
-       - MiniSession:         bottom 97px, ~55px + zona segura → llega a ~152px
-       - «Reemplazar» (sticky en ReplaceExercise): bottom 96px, ~62px → ~158px
+  /* ALTURAS DEL BOTÓN EN EL MÓVIL: el único sitio donde se deciden.
+     Pila fija de abajo, de abajo arriba:
+       - TabBar:              bottom 16px, ~67px de alto       → llega a ~83px (siempre)
+       - MiniSession:         bottom 97px, ~55px + zona segura → llega a ~152px (a veces)
+       - «Reemplazar» (sticky en ReplaceExercise): bottom 96px, ~62px → ~158px (a veces)
        - Aviso de servidor dormido: bottom 96px, centrado: no llega a la esquina
-     172px deja unos 14px de aire sobre la más alta. La zona segura del iPhone (barra de
-     inicio) se suma porque MiniSession también crece con ella.
-     Si algún día se añade otra barra abajo, se cambia SOLO este valor. */
-  --bug-bottom-movil: calc(172px + env(safe-area-inset-bottom));
+     Normal: 96px, unos 12px por encima de la TabBar.
+     Elevado (.elevado): 172px, unos 14px por encima de la más alta. Cuándo se eleva lo
+     decide utils/barrasInferiores.js, la misma regla que usa MiniSession.
+     La zona segura del iPhone (barra de inicio) se suma porque MiniSession crece con ella.
+     Si algún día se añade otra barra abajo, se cambian estos valores y esa regla. */
+  --bug-bottom-movil: 96px;
+  --bug-bottom-movil-elevado: calc(172px + env(safe-area-inset-bottom));
 
   position: fixed;
   right: var(--space-md);
@@ -39,6 +42,11 @@
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: var(--transition-base);
+}
+
+/* Con MiniSession o «Reemplazar» abajo, el botón sube por encima de ellos. */
+.elevado {
+  bottom: var(--bug-bottom-movil-elevado);
 }
 
 /* :active para el dedo en el móvil, donde no hay :hover. */

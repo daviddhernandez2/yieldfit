@@ -58,3 +58,22 @@
   color: var(--color-error);
   font-size: var(--font-size-sm);
 }
+
+/* Botón de confirmar pegado abajo al hacer scroll. En el móvil, por encima de la TabBar
+   flotante (Layout reserva 80 px para ella); en escritorio no hay TabBar. */
+.confirmar {
+  position: sticky;
+  bottom: calc(var(--space-md) + 80px);
+  z-index: 2;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-elevated);
+}
+
+@media (min-width: 768px) {
+  .confirmar {
+    bottom: var(--space-lg);
+  }
+}
+

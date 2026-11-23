@@ -4,6 +4,7 @@ import { listExercises } from "@/api/exercises.js";
 import { getPreviousSets } from "@/api/sessions.js";
 import ExercisePicker from "@/components/ExercisePicker/ExercisePicker.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
+import Button from "@/components/Button/Button.jsx";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import { readActiveSession, writeActiveSession, contar } from "@/utils/activeSession.js";
 import { sesionReducer, seriesAlReemplazar } from "@/utils/activeSessionReducer.js";
@@ -37,6 +38,9 @@ export default function ReplaceExercise() {
   const { opciones, error: errorOpciones } = useOpcionesEjercicio();
   const [catalogo, setCatalogo] = useState(null);
   const [error, setError] = useState("");
+  // Ejercicio elegido en la lista. Elegir no reemplaza: hace falta pulsar el botón de abajo,
+  // para que un toque por error al hacer scroll no cambie nada.
+  const [elegidoId, setElegidoId] = useState(null);
   // Reemplazo pendiente de confirmar (el ejercicio tenía series hechas).
   const [pendiente, setPendiente] = useState(null);
   const [guardando, setGuardando] = useState(false);
@@ -94,11 +98,17 @@ export default function ReplaceExercise() {
     volverASesion();
   };
 
-  // Si había series hechas, se pregunta antes (se perderán); si no, directo.
+  // Tocar un ejercicio lo marca; tocar el marcado lo desmarca.
   const handleElegir = (id) => {
-    const nuevo = catalogo.find((ex) => ex._id === id);
-    if (hechas > 0) setPendiente(nuevo);
-    else reemplazar(nuevo);
+    setElegidoId((actual) => (actual === id ? null : id));
+  };
+
+  const elegido = catalogo?.find((ex) => ex._id === elegidoId) ?? null;
+
+  // Botón de abajo: si había series hechas, se pregunta antes (se perderán); si no, directo.
+  const handleConfirmar = () => {
+    if (hechas > 0) setPendiente(elegido);
+    else reemplazar(elegido);
   };
 
   const fallo = error || errorOpciones;
@@ -131,9 +141,20 @@ export default function ReplaceExercise() {
           ejercicios={catalogo}
           opciones={opciones}
           excluidos={new Set(sesion.ejercicios.map((ej) => ej.exerciseId))}
+          seleccionados={elegidoId ? new Set([elegidoId]) : new Set()}
           onElegir={handleElegir}
           listaCompleta
         />
+      )}
+
+      {/* Franja pegada abajo (encima de la TabBar en el móvil): el botón se ve aunque el
+          ejercicio elegido esté al final de la lista. */}
+      {!fallo && !guardando && catalogo && opciones && (
+        <div className={styles.confirmar}>
+          <Button variant="primary" fullWidth disabled={!elegido} onClick={handleConfirmar}>
+            {elegido ? `Reemplazar por «${elegido.nombre}»` : "Elige un ejercicio"}
+          </Button>
+        </div>
       )}
 
       <ConfirmDialog

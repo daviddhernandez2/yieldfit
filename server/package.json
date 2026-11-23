@@ -12,6 +12,7 @@
     "backup": "bash scripts/backup.sh",
     "backup:restore-test": "bash scripts/restore-test.sh",
     "diagnostico:borrados": "node scripts/diagnostico-borrados.js",
+    "diagnostico:cardio": "node scripts/diagnostico-cardio.js",
     "reparar:borrados": "node scripts/reparar-borrados.js",
     "migrar:1rm": "node scripts/migrar-1rm.js"
   },

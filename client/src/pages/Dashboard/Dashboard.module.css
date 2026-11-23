@@ -90,24 +90,22 @@
   border-color: var(--color-text-muted);
 }
 
-/* Modo ordenar: una fila por grupo con subir y bajar. */
+/* Modo ordenar: una fila por grupo, con el asa ⋮⋮ para arrastrar. */
 .listaOrden {
-  list-style: none;
-  margin: 0;
-  padding: var(--space-sm) var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
 }
 
 .filaOrden {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-md) 0;
+  padding: var(--space-sm) 0;
   border-bottom: 1px solid var(--color-border);
 }
 
-.filaOrden:last-child {
+/* El último de la lista (cada fila va dentro de un envoltorio de ListaOrdenable). */
+.listaOrden > :last-child .filaOrden {
   border-bottom: none;
 }
 
@@ -116,23 +114,4 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.botonOrden {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.botonOrden:disabled {
-  color: var(--color-text-muted);
-  opacity: 0.4;
-  cursor: not-allowed;
 }

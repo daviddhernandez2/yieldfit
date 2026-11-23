@@ -1,7 +1,7 @@
 // Pruebas de utils/grupos.js. Desde /client: node src/utils/grupos.test.js
 process.env.TZ = 'Europe/Madrid';
 
-const { desdeDeRango, leerPreferencias, guardarPreferencias, RANGOS, ordenarGrupos, moverEnOrden, leerOrden, guardarOrden } = await import('./grupos.js');
+const { desdeDeRango, leerPreferencias, guardarPreferencias, RANGOS, ordenarGrupos, leerOrden, guardarOrden } = await import('./grupos.js');
 
 let fallos = 0;
 const ok = (desc, real, esperado) => {
@@ -37,10 +37,6 @@ ok('sin orden guardado: el de creación', ordenarGrupos(['todos', 'a', 'b'], [])
 ok('respeta el orden guardado', ordenarGrupos(['todos', 'a', 'b'], ['b', 'todos', 'a']), ['b', 'todos', 'a']);
 ok('grupo nuevo: al final', ordenarGrupos(['todos', 'a', 'b', 'c'], ['b', 'todos', 'a']), ['b', 'todos', 'a', 'c']);
 ok('grupo borrado: se ignora', ordenarGrupos(['todos', 'a'], ['b', 'todos', 'a']), ['todos', 'a']);
-ok('subir', moverEnOrden(['todos', 'a', 'b'], 'b', -1), ['todos', 'b', 'a']);
-ok('bajar', moverEnOrden(['todos', 'a', 'b'], 'todos', 1), ['a', 'todos', 'b']);
-ok('subir el primero: no cambia', moverEnOrden(['todos', 'a'], 'todos', -1), ['todos', 'a']);
-ok('bajar el último: no cambia', moverEnOrden(['todos', 'a'], 'a', 1), ['todos', 'a']);
 guardarOrden(['b', 'todos']);
 ok('guarda y lee el orden', leerOrden(), ['b', 'todos']);
 almacen.yieldfit_orden_grupos = '{"no":"es una lista"}';

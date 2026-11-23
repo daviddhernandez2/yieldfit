@@ -117,6 +117,12 @@ ok('añadirAnteriores: suma el nuevo y conserva los que había', Object.keys(s.a
 s = sesionReducer(desdeLocalStorage(SESION_ANTIGUA), { type: 'añadirAnteriores', anteriores: { remo: { sets: [] } } });
 ok('añadirAnteriores sin "anteriores" previos: no los crea (se pedirán todos al reabrir)', 'anteriores' in s, false);
 
+// --- Mover ejercicios (bloque 9b) ---
+s = sesionReducer(base, { type: 'moverEjercicio', desde: 0, hasta: 1 });
+ok('mover: cambia el orden de los ejercicios', s.ejercicios.map((e) => e.exerciseId), ['cinta', 'peso-muerto']);
+ok('mover: los ejercicios son los mismos objetos (no se copian)', s.ejercicios[1] === base.ejercicios[0], true);
+ok('mover: misma forma que en localStorage', claves(JSON.parse(JSON.stringify(s))), claves(SESION_ACTUAL));
+
 let error = '';
 try { sesionReducer(base, { type: 'inventada' }); } catch (e) { error = e.message; }
 ok('acción desconocida: error explícito', error, 'Acción desconocida en sesionReducer: inventada');

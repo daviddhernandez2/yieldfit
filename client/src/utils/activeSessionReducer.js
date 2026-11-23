@@ -18,6 +18,7 @@
 // grupoMuscular y tipo al reemplazar un ejercicio (opcionales, bloque 9b).
 
 import { serieAnterior, rellenarConAnterior } from './activeSession.js';
+import { moverElemento } from './orden.js';
 
 // Cuántas series tendrá el ejercicio que reemplaza a este: las mismas, y al menos 1 (si
 // se hubieran quitado todas, el nuevo no tendría ninguna que hacer). La pantalla la usa
@@ -105,6 +106,10 @@ export const sesionReducer = (sesion, accion) => {
         descansoSegundos: ej.descansoSegundos,
         sets: accion.ids.map((id) => ({ id, peso: '', reps: '', completada: false })),
       }));
+
+    // Cambiar el orden de los ejercicios arrastrando (bloque 9b): { desde, hasta }.
+    case 'moverEjercicio':
+      return { ...sesion, ejercicios: moverElemento(sesion.ejercicios, accion.desde, accion.hasta) };
 
     default:
       // Una acción desconocida es un error de programación: mejor verlo que ignorarlo.

@@ -13,6 +13,8 @@ import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ExercisePicker from '@/components/ExercisePicker/ExercisePicker.jsx';
 import NombreEjercicio from '@/components/NombreEjercicio/NombreEjercicio.jsx';
 import SelectorPasos from '@/components/SelectorPasos/SelectorPasos.jsx';
+import ListaOrdenable, { Asa } from '@/components/ListaOrdenable/ListaOrdenable.jsx';
+import { moverElemento } from '@/utils/orden.js';
 import { minutosYSegundos, duracionHablada } from '@/utils/tiempo.js';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import useOpcionesEjercicio, { tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
@@ -205,12 +207,21 @@ export default function WorkoutForm() {
             <h2 className={formulario.sectionTitle}>
               Ejercicios añadidos ({ejercicios.length})
             </h2>
-            <div className={styles.addedList}>
-              {ejercicios.map((ej) => {
+            {/* El orden de la lista es el de la rutina: se cambia arrastrando desde el asa
+                ⋮⋮ (bloque 9b). El servidor reasigna `orden` según la posición al guardar. */}
+            <ListaOrdenable
+              ids={ejercicios.map((ej) => ej.exerciseId)}
+              nombreDe={(id) => catalogoById.get(id)?.nombre ?? 'Ejercicio'}
+              onMover={(desde, hasta) => setEjercicios((prev) => moverElemento(prev, desde, hasta))}
+              className={styles.addedList}
+            >
+              {(id, asa) => {
+                const ej = ejercicios.find((e) => e.exerciseId === id);
                 const exercise = catalogoById.get(ej.exerciseId);
                 return (
-                  <div key={ej.exerciseId} className={`${styles.addedItem} glassCard`}>
+                  <div className={`${styles.addedItem} glassCard`}>
                     <div className={styles.addedItemHeader}>
+                      <Asa {...asa} />
                       <NombreEjercicio
                         className={styles.addedItemName}
                         nombre={exercise?.nombre || 'Ejercicio'}
@@ -260,8 +271,8 @@ export default function WorkoutForm() {
                     </div>
                   </div>
                 );
-              })}
-            </div>
+              }}
+            </ListaOrdenable>
           </section>
         )}
 

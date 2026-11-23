@@ -82,16 +82,6 @@ export const ordenarGrupos = (ids, ordenGuardado) => {
   return [...enOrden, ...nuevos];
 };
 
-// Sube (paso -1) o baja (paso 1) un id en el orden. En los extremos no hace nada.
-export const moverEnOrden = (orden, id, paso) => {
-  const desde = orden.indexOf(id);
-  const hasta = desde + paso;
-  if (desde < 0 || hasta < 0 || hasta >= orden.length) return orden;
-  const nuevo = [...orden];
-  [nuevo[desde], nuevo[hasta]] = [nuevo[hasta], nuevo[desde]];
-  return nuevo;
-};
-
 export const leerOrden = () => {
   try {
     const guardado = JSON.parse(localStorage.getItem(CLAVE_ORDEN) ?? '[]');

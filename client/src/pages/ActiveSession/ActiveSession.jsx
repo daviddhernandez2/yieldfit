@@ -17,6 +17,8 @@ import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
 import Proximamente from "@/components/Proximamente/Proximamente.jsx";
 import NombreEjercicio from "@/components/NombreEjercicio/NombreEjercicio.jsx";
+import ListaOrdenable, { Asa } from "@/components/ListaOrdenable/ListaOrdenable.jsx";
+import { indiceTrasMover } from "@/utils/orden.js";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import styles from "@/pages/ActiveSession/ActiveSession.module.css";
 
@@ -201,6 +203,14 @@ export default function ActiveSession() {
     }
   };
 
+  // Arrastrar un ejercicio (bloque 9b): el reducer cambia el orden; el temporizador y el
+  // ejercicio abierto señalan por posición, así que se recolocan para seguir al mismo.
+  const handleMoverEjercicio = (desde, hasta) => {
+    dispatch({ type: "moverEjercicio", desde, hasta });
+    setRestTimer((t) => t && { ...t, exerciseIndex: indiceTrasMover(t.exerciseIndex, desde, hasta) });
+    setExpandedIndex((i) => indiceTrasMover(i, desde, hasta));
+  };
+
   const handleToggleExpand = (index) => {
     setExpandedIndex((actual) => (actual === index ? actual : index));
   };
@@ -318,8 +328,16 @@ export default function ActiveSession() {
         <div className={styles.chrono}>{formatTiempo(elapsedSeconds)}</div>
       </header>
 
-      <div className={styles.exercisesList}>
-        {session.ejercicios.map((ej, exerciseIndex) => {
+      {/* Los ejercicios se reordenan arrastrando desde el asa ⋮⋮ (bloque 9b). */}
+      <ListaOrdenable
+        ids={session.ejercicios.map((ej) => ej.exerciseId)}
+        nombreDe={(id) => session.ejercicios.find((ej) => ej.exerciseId === id)?.exerciseNombre ?? ""}
+        onMover={handleMoverEjercicio}
+        className={styles.exercisesList}
+      >
+        {(id, asa) => {
+          const exerciseIndex = session.ejercicios.findIndex((e) => e.exerciseId === id);
+          const ej = session.ejercicios[exerciseIndex];
           const isExpanded = expandedIndex === exerciseIndex;
           const setsCompletados = ej.sets.filter((s) => s.completada).length;
 
@@ -331,9 +349,12 @@ export default function ActiveSession() {
                 key={ej.exerciseId}
                 className={`${styles.exerciseCard} ${styles.exerciseCardBloqueado} glassCard`}
               >
-                <div className={styles.exerciseHeader}>
-                  <NombreEjercicio className={styles.exerciseName} nombre={ej.exerciseNombre} grupoMuscular={ej.grupoMuscular} tipo={ej.tipo} opciones={opciones} />
-                  <Proximamente />
+                <div className={styles.cabeceraFila}>
+                  <Asa {...asa} />
+                  <div className={styles.exerciseHeader}>
+                    <NombreEjercicio className={styles.exerciseName} nombre={ej.exerciseNombre} grupoMuscular={ej.grupoMuscular} tipo={ej.tipo} opciones={opciones} />
+                    <Proximamente />
+                  </div>
                 </div>
               </div>
             );
@@ -344,21 +365,25 @@ export default function ActiveSession() {
               key={ej.exerciseId}
               className={`${styles.exerciseCard} glassCard ${setsCompletados === ej.sets.length && ej.sets.length > 0 ? styles.exerciseCardCompleted : ""}`}
             >
-              <button
-                type="button"
-                className={styles.exerciseHeader}
-                onClick={() => handleToggleExpand(exerciseIndex)}
-              >
-                <NombreEjercicio className={styles.exerciseName} nombre={ej.exerciseNombre} grupoMuscular={ej.grupoMuscular} tipo={ej.tipo} opciones={opciones} />
-                <span className={styles.exerciseMeta}>
-                  {setsCompletados}/{ej.sets.length}
-                </span>
-                <span
-                  className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ""}`}
+              {/* El asa va fuera del botón de abrir/cerrar: no se pueden anidar botones. */}
+              <div className={styles.cabeceraFila}>
+                <Asa {...asa} />
+                <button
+                  type="button"
+                  className={styles.exerciseHeader}
+                  onClick={() => handleToggleExpand(exerciseIndex)}
                 >
-                  <IconChevronDown />
-                </span>
-              </button>
+                  <NombreEjercicio className={styles.exerciseName} nombre={ej.exerciseNombre} grupoMuscular={ej.grupoMuscular} tipo={ej.tipo} opciones={opciones} />
+                  <span className={styles.exerciseMeta}>
+                    {setsCompletados}/{ej.sets.length}
+                  </span>
+                  <span
+                    className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ""}`}
+                  >
+                    <IconChevronDown />
+                  </span>
+                </button>
+              </div>
 
               {isExpanded && (
                 <div className={styles.exerciseBody}>
@@ -426,8 +451,8 @@ export default function ActiveSession() {
               )}
             </div>
           );
-        })}
-      </div>
+        }}
+      </ListaOrdenable>
 
       {errorMessage && (
         <div className={styles.errorBanner} role="alert">

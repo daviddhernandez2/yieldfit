@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listCharts } from '@/api/charts.js';
 import GrupoProgreso from '@/components/GrupoProgreso/GrupoProgreso.jsx';
-import { ID_TODOS, guardarOrden, leerOrden, moverEnOrden, ordenarGrupos } from '@/utils/grupos.js';
+import { ID_TODOS, guardarOrden, leerOrden, ordenarGrupos } from '@/utils/grupos.js';
+import { moverElemento } from '@/utils/orden.js';
+import ListaOrdenable, { Asa } from '@/components/ListaOrdenable/ListaOrdenable.jsx';
 import styles from '@/pages/Dashboard/Dashboard.module.css';
 
 // Icono + para el botón "Nuevo grupo" del header.
@@ -13,15 +15,9 @@ const IconPlus = () => (
   </svg>
 );
 
-const IconFlecha = ({ arriba }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polyline points={arriba ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
-  </svg>
-);
-
 // Pantalla principal del progreso (bloque 9, DECISIONS.md 0034).
 // "Todos" (todos los ejercicios; no se edita ni se borra) y los grupos del usuario, en el
-// orden que él elija ("Ordenar"). El orden se guarda en este dispositivo (utils/grupos.js).
+// orden que él elija ("Ordenar", arrastrando). El orden se guarda en este dispositivo (utils/grupos.js).
 // Cada tarjeta (GrupoProgreso) pide su propio progreso con su rango, así que aquí solo se
 // cargan los grupos.
 export default function Dashboard() {
@@ -42,8 +38,8 @@ export default function Dashboard() {
   const orden = ordenarGrupos([ID_TODOS, ...(grupos ?? []).map((g) => g._id)], ordenGuardado);
   const nombreDe = (id) => (id === ID_TODOS ? 'Todos' : porId.get(id).nombre);
 
-  const mover = (id, paso) => {
-    const nuevo = moverEnOrden(orden, id, paso);
+  const mover = (desde, hasta) => {
+    const nuevo = moverElemento(orden, desde, hasta);
     setOrdenGuardado(nuevo);
     guardarOrden(nuevo);
   };
@@ -70,20 +66,16 @@ export default function Dashboard() {
       {error && <p className={styles.feedbackError}>{error}</p>}
 
       {ordenando ? (
-        // Modo ordenar: lista compacta con subir y bajar. Las tarjetas no se cargan.
-        <ol className={`${styles.listaOrden} glassCard`}>
-          {orden.map((id, i) => (
-            <li key={id} className={styles.filaOrden}>
+        // Modo ordenar: lista compacta que se reordena arrastrando desde el asa ⋮⋮ (bloque
+        // 9b; antes eran flechas). Las tarjetas no se cargan mientras tanto.
+        <ListaOrdenable ids={orden} nombreDe={nombreDe} onMover={mover} className={`${styles.listaOrden} glassCard`}>
+          {(id, asa) => (
+            <div className={styles.filaOrden}>
+              <Asa {...asa} />
               <span className={styles.nombreOrden}>{nombreDe(id)}</span>
-              <button type="button" className={styles.botonOrden} onClick={() => mover(id, -1)} disabled={i === 0} aria-label={`Subir ${nombreDe(id)}`}>
-                <IconFlecha arriba />
-              </button>
-              <button type="button" className={styles.botonOrden} onClick={() => mover(id, 1)} disabled={i === orden.length - 1} aria-label={`Bajar ${nombreDe(id)}`}>
-                <IconFlecha />
-              </button>
-            </li>
-          ))}
-        </ol>
+            </div>
+          )}
+        </ListaOrdenable>
       ) : (
         orden.map((id) =>
           id === ID_TODOS ? (

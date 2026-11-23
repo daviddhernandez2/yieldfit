@@ -357,3 +357,16 @@
   color: var(--color-text-muted);
 }
 
+/* Fila de cabecera de cada ejercicio: el asa ⋮⋮ para arrastrar (bloque 9b) y, a su lado,
+   el botón de abrir/cerrar, que ocupa el resto. */
+.cabeceraFila {
+  display: flex;
+  align-items: center;
+  padding-left: var(--space-xs);
+}
+
+.cabeceraFila > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+

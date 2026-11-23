@@ -179,6 +179,15 @@
   border-color: var(--color-border-accent);
 }
 
+/* Texto de ayuda de la vez anterior (o "—"): en el color de texto secundario y en cursiva,
+   para que no se confunda con un valor escrito, que va en blanco y normal.
+   opacity: 1 porque Firefox atenúa los placeholders por su cuenta. */
+.setInput::placeholder {
+  color: var(--color-text-muted);
+  font-style: italic;
+  opacity: 1;
+}
+
 /* Pill del descanso: siempre visible si el ejercicio tiene descanso.
    Discreto en gris cuando es solo informativo, verde brillante cuando
    es la serie activa contando atrás. tabular-nums evita saltos visuales

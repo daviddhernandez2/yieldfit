@@ -113,3 +113,29 @@ export const avisoEjerciciosBorrados = (borrados) =>
 // Se pasan las dos formas porque en español no siempre basta con añadir una "s"
 // (p. ej. "1 sesión" / "2 sesiones").
 export const contar = (n, singular, plural) => `${n} ${n === 1 ? singular : plural}`;
+
+// ---------------------------------------------------------------------------
+// Serie anterior (bloque 5, DECISIONS.md 0029)
+// La sesión activa guarda en `anteriores` lo que devuelve GET /api/sessions/previous-sets:
+// { <exerciseId>: { fecha, sets } }. Se guarda dentro de la sesión (localStorage) para que
+// siga disponible si se recarga o se pierde la cobertura en mitad del entreno.
+
+// Peso y reps de la vez anterior para una serie, emparejando por posición (la 2.ª serie
+// con la 2.ª). null si ese ejercicio no se ha hecho nunca o la vez anterior tuvo menos series.
+export const serieAnterior = (session, exerciseIndex, setIndex) => {
+  const ej = session.ejercicios[exerciseIndex];
+  const anterior = session.anteriores?.[ej.exerciseId]?.sets?.[setIndex];
+  if (!anterior) return null;
+  return { peso: anterior.peso ?? null, reps: anterior.reps ?? null };
+};
+
+// Atajo de repetir: al marcar como completada una serie, cada campo que esté VACÍO se
+// rellena con el valor de la vez anterior. Lo que el usuario haya escrito no se toca.
+// Devuelve solo los cambios (para mezclarlos con { completada: true }).
+export const rellenarConAnterior = (set, anterior) => {
+  if (!anterior) return {};
+  const cambios = {};
+  if (set.peso === "" && anterior.peso != null) cambios.peso = String(anterior.peso);
+  if (set.reps === "" && anterior.reps != null) cambios.reps = String(anterior.reps);
+  return cambios;
+};

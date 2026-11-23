@@ -5,10 +5,12 @@ import {
   writeActiveSession,
   clearActiveSession,
   ejerciciosBorradosConSeries,
+  serieAnterior,
+  rellenarConAnterior,
   avisoEjerciciosBorrados,
   contar,
 } from "@/utils/activeSession.js";
-import { createSession } from "@/api/sessions.js";
+import { createSession, getPreviousSets } from "@/api/sessions.js";
 import { listExercises } from "@/api/exercises.js";
 import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
@@ -112,6 +114,28 @@ export default function ActiveSession() {
     if (session) writeActiveSession(session);
   }, [session]);
 
+  // Serie anterior: se pide UNA vez por sesión activa y se guarda dentro de ella (y por
+  // tanto en localStorage). Si falla (p. ej. sin cobertura), el entreno sigue igual, sin
+  // "anterior", y se reintenta la próxima vez que se abra la sesión. También cubre las
+  // sesiones empezadas antes de que existiera la función: no tienen `anteriores`.
+  const faltanAnteriores = Boolean(session) && !session.anteriores;
+  useEffect(() => {
+    if (!faltanAnteriores) return;
+    let montado = true;
+    getPreviousSets(session.ejercicios.map((ej) => ej.exerciseId))
+      .then((response) => {
+        if (montado) setSession((prev) => ({ ...prev, anteriores: response.data.anteriores }));
+      })
+      .catch(() => {
+        // Sin "anterior" no se rompe nada: se ignora a propósito.
+      });
+    return () => {
+      montado = false;
+    };
+    // Solo depende de si faltan: `session` cambia con cada tecla y no debe repetir la petición.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [faltanAnteriores]);
+
   if (!session) return null;
 
   const elapsedSeconds = Math.floor((Date.now() - session.startTime) / 1000);
@@ -133,13 +157,19 @@ export default function ActiveSession() {
   };
 
   // Toggle de completada.
-  //   - Si marca: arranca timer de descanso.
-  //   - Si desmarca: limpia el timer si era el de esa serie.
+  //   - Si marca: rellena los campos vacíos con la vez anterior (atajo de repetir) y
+  //     arranca el timer de descanso.
+  //   - Si desmarca: limpia el timer si era el de esa serie. No borra lo rellenado.
   const handleToggleCompletada = (exerciseIndex, setIndex) => {
     const set = session.ejercicios[exerciseIndex].sets[setIndex];
     const nuevaCompletada = !set.completada;
 
-    updateSet(exerciseIndex, setIndex, { completada: nuevaCompletada });
+    updateSet(exerciseIndex, setIndex, {
+      completada: nuevaCompletada,
+      ...(nuevaCompletada
+        ? rellenarConAnterior(set, serieAnterior(session, exerciseIndex, setIndex))
+        : {}),
+    });
 
     if (nuevaCompletada) {
       setRestTimer({ exerciseIndex, setIndex, completedAt: Date.now() });
@@ -365,6 +395,7 @@ export default function ActiveSession() {
                         key={set.id}
                         setIndex={setIndex}
                         set={set}
+                        anterior={serieAnterior(session, exerciseIndex, setIndex)}
                         descansoSegundos={ej.descansoSegundos}
                         timerActivo={timerActivoEnEsta ? restTimer : null}
                         onChangePeso={(v) =>
@@ -468,6 +499,7 @@ export default function ActiveSession() {
 function SetRow({
   setIndex,
   set,
+  anterior,
   descansoSegundos,
   timerActivo,
   onChangePeso,
@@ -518,7 +550,14 @@ function SetRow({
         className={styles.setInput}
         value={set.peso}
         onChange={(e) => onChangePeso(e.target.value)}
-        placeholder="—"
+        // Vacío, muestra en gris lo de la vez anterior (setInput::placeholder usa el
+        // color de texto secundario, para no confundirlo con un valor escrito).
+        placeholder={anterior?.peso != null ? String(anterior.peso) : "—"}
+        aria-label={
+          anterior?.peso != null
+            ? `Peso de la serie ${setIndex + 1}. La vez anterior: ${anterior.peso} kg`
+            : `Peso de la serie ${setIndex + 1}`
+        }
       />
       <input
         type="number"
@@ -527,7 +566,12 @@ function SetRow({
         className={styles.setInput}
         value={set.reps}
         onChange={(e) => onChangeReps(e.target.value)}
-        placeholder="—"
+        placeholder={anterior?.reps != null ? String(anterior.reps) : "—"}
+        aria-label={
+          anterior?.reps != null
+            ? `Repeticiones de la serie ${setIndex + 1}. La vez anterior: ${anterior.reps}`
+            : `Repeticiones de la serie ${setIndex + 1}`
+        }
       />
       {/* Pill de descanso: siempre visible si hay descanso configurado.
           - En serie completada + timer activo: cuenta atrás en verde brillante.

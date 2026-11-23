@@ -23,3 +23,13 @@ export const getSession = (id) => {
 export const deleteSession = (id) => {
   return apiClient.delete(`/sessions/${id}`);
 };
+
+// GET /api/sessions/previous-sets?exerciseIds=a,b,c
+// Para cada ejercicio, las series de la última sesión guardada que lo incluye (en
+// cualquier rutina). Devuelve { anteriores: { <exerciseId>: { fecha, sets } } }; los
+// ejercicios que no se han hecho nunca no aparecen.
+export const getPreviousSets = (exerciseIds) => {
+  return apiClient.get('/sessions/previous-sets', {
+    params: { exerciseIds: [...new Set(exerciseIds)].join(',') },
+  });
+};

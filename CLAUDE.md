@@ -284,6 +284,28 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
 - [ ] **10 — Icono de ejercicio**: imagen por ejercicio con almacenamiento externo.
 - [x] **11 — Auth robusta**: rate limiting en login y registro (11.1), access token corto +
       refresh token (11.2 y 11.3) e IP real detrás de los proxies de Render (11.4, 0038).
+- [ ] **11b — Beta cerrada**: lo necesario para pasar la app a conocidos. Decisiones de David:
+      - **11b.1 Rol de admin:** campo `rol` (`usuario` | `admin`) que ninguna ruta de la API acepta;
+        se asigna con `npm run admin` (en producción, con el procedimiento de reparaciones).
+        `requireAdmin` va tras `requireAuth`, así que el rol se comprueba en cada petición.
+        Campo `ultimoAcceso`, actualizado al entrar y al renovar, como mucho una vez por hora.
+      - **11b.2 Reportar bugs:** modelo `BugReport`, `POST /api/reports` (5 por hora por usuario).
+        Botón en todas las pantallas privadas: en el móvil, **círculo abajo a la derecha por encima
+        de todas las barras** (opción C; su altura se define en un solo sitio, documentado); en
+        escritorio, píldora "Reportar" abajo a la derecha. Hoja con "¿Qué ha fallado?" (obligatorio),
+        "¿Qué estabas haciendo?" (opcional) y, a la vista, lo que se envía solo (ruta, navegador y
+        sistema, tamaño de pantalla). Solo bugs; las ideas, más adelante.
+      - **11b.3 Página `/developer`** (solo admin): reportes con filtros (estado, usuario, fechas),
+        estado pendiente/resuelto y paginación por cursor; usuarios con nombre, email, registro,
+        último acceso y recuentos (sesiones, ejercicios, rutinas), **sin** nacimiento, peso ni
+        altura (el endpoint no los lee); hueco "Próximamente" para la documentación (en el futuro,
+        leída de GitHub, sin copias).
+      - **11b.4 Borrar la cuenta:** `DELETE /api/auth/me` pidiendo la contraseña; en una
+        transacción, el usuario y todos sus datos, tokens **y sus reportes**.
+      - **11b.5 Contraseña:** "Cambiar contraseña" en Perfil y script de restablecimiento. El envío
+        por email, cuando la app salga de la beta. **Sin códigos de invitación.**
+      - **11b.6 Nota de privacidad:** página pública `/privacidad`, enlazada desde el registro y
+        Perfil, **sin email de contacto**. Informativa, no un texto legal.
 - [ ] **12 — App iPhone**: Capacitor, notificaciones locales (fin de descanso; aviso de
       entrenamiento activo sin actividad), almacenamiento seguro nativo del token,
       sincronización híbrida de la sesión activa y revisión de DarkVeil (batería) y

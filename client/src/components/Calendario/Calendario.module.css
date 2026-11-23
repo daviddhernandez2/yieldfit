@@ -1,0 +1,157 @@
+/* Calendario de días entrenados, arriba del Historial. Plegable: cerrado solo ocupa la
+   cabecera (mes y número de sesiones). */
+.calendario {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cabecera {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-md);
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.titulo {
+  font-weight: var(--font-weight-medium);
+  /* toLocaleDateString lo da en minúscula ("noviembre de 2026"). */
+  text-transform: capitalize;
+}
+
+.resumen {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.chevron {
+  display: flex;
+  color: var(--color-text-muted);
+  transition: var(--transition-base);
+}
+
+.chevronAbierto {
+  transform: rotate(180deg);
+}
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 0 var(--space-md) var(--space-md);
+}
+
+.navegacion {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flecha {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.flecha:disabled {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 7 columnas iguales. Las celdas son cuadradas (aspect-ratio) y se adaptan al ancho:
+   en un iPhone de 375 px cada una mide unos 40 px, suficiente para tocarla. */
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.diaSemana {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding-bottom: var(--space-xs);
+}
+
+.dia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Día entrenado: verde de la marca, lleno, con texto oscuro para el contraste. */
+.diaEntrenado {
+  background-color: var(--color-accent);
+  color: var(--color-accent-text);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.diaEntrenado:hover {
+  background-color: var(--color-accent-hover);
+}
+
+/* Hoy: borde, para situarse aunque no se haya entrenado. */
+.diaHoy {
+  border-color: var(--color-text);
+  color: var(--color-text);
+}
+
+/* Día con varias sesiones cuya lista está abierta debajo. */
+.diaAbierto {
+  outline: 2px solid var(--color-text);
+  outline-offset: 1px;
+}
+
+.listaDia {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-border);
+}
+
+.sesionDia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-sm) 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+}

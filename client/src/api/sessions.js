@@ -33,3 +33,13 @@ export const getPreviousSets = (exerciseIds) => {
     params: { exerciseIds: [...new Set(exerciseIds)].join(',') },
   });
 };
+
+// GET /api/sessions/days?desde=…&hasta=…&zona=…
+// Días entrenados en un rango (como mucho un año), para el calendario. Devuelve
+// { dias: [{ dia: '2026-11-03', sesiones: [{ _id, nombre }] }] }. La zona es la del
+// dispositivo, para que una sesión a las 00:30 cuente en el día que se vio.
+export const getTrainedDays = ({ desde, hasta }) => {
+  const zona = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return apiClient.get('/sessions/days', { params: { desde, hasta, zona } });
+};
+

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listSessions } from '@/api/sessions.js';
 import Button from '@/components/Button/Button.jsx';
+import Calendario from '@/components/Calendario/Calendario.jsx';
 import styles from '@/pages/History/History.module.css';
 
 // Formatea segundos como "1h 24 min" o "24 min" según duración.
@@ -121,6 +122,9 @@ export default function History() {
           </button>
         )}
       </header>
+
+      {/* Días entrenados del mes (bloque 8): plegado, arriba de la lista. */}
+      {!loading && !error && sessions.length > 0 && <Calendario />}
 
       {loading && <p className={styles.feedback}>Cargando...</p>}
 

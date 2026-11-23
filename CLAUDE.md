@@ -187,6 +187,10 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
+- **Cardio en la sesión activa:** solo tiene campos de peso y reps, así que hoy no se puede
+  registrar tiempo y distancia desde la app (los ejercicios `tiempo_distancia` se guardan con
+  peso y reps a 0). El seed sí crea sesiones de cardio porque escribe directamente en la base.
+  Pendiente de ubicar en el roadmap como bloque propio (se propone al cerrar el bloque 5).
 - `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; las props no reaccionan tras
   montar y `prevColor` no se usa). Bloque 12.
 

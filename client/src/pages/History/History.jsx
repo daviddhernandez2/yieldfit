@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listSessions } from '@/api/sessions.js';
+import Button from '@/components/Button/Button.jsx';
 import styles from '@/pages/History/History.module.css';
 
 // Formatea segundos como "1h 24 min" o "24 min" según duración.
@@ -55,20 +56,27 @@ const IconChevronRight = () => (
 );
 
 // Pantalla de historial de sesiones.
-// Lista las sesiones completadas del usuario ordenadas por fecha descendente.
+// Lista las sesiones completadas del usuario ordenadas por fecha descendente, de 20
+// en 20: el botón "Cargar más" pide las siguientes (paginación por cursor, 0027).
 // El borrado se hace desde el detalle de cada sesión, no desde esta lista.
 export default function History() {
   const navigate = useNavigate();
 
   const [sessions, setSessions] = useState([]);
+  // Cursor de la página siguiente; null cuando ya están todas.
+  const [siguienteCursor, setSiguienteCursor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const [error, setError] = useState('');
+  // Error al cargar más, separado de `error`: no debe ocultar las sesiones ya cargadas.
+  const [errorMas, setErrorMas] = useState('');
 
   useEffect(() => {
     const cargar = async () => {
       try {
         const response = await listSessions();
         setSessions(response.data.sessions);
+        setSiguienteCursor(response.data.siguienteCursor);
       } catch (err) {
         const message = err.response?.data?.message || 'Error al cargar el historial.';
         setError(message);
@@ -78,6 +86,21 @@ export default function History() {
     };
     cargar();
   }, []);
+
+  const cargarMas = async () => {
+    setErrorMas('');
+    setCargandoMas(true);
+    try {
+      const response = await listSessions({ cursor: siguienteCursor });
+      // Se añaden al final: son más antiguas que las que ya se ven.
+      setSessions((actuales) => [...actuales, ...response.data.sessions]);
+      setSiguienteCursor(response.data.siguienteCursor);
+    } catch (err) {
+      setErrorMas(err.response?.data?.message || 'No se han podido cargar más sesiones.');
+    } finally {
+      setCargandoMas(false);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -138,6 +161,16 @@ export default function History() {
               </span>
             </button>
           ))}
+        </div>
+      )}
+
+      {errorMas && <p className={styles.feedbackError}>{errorMas}</p>}
+
+      {!loading && !error && siguienteCursor && (
+        <div className={styles.cargarMas}>
+          <Button variant="outline" onClick={cargarMas} disabled={cargandoMas}>
+            {cargandoMas ? 'Cargando...' : 'Cargar más'}
+          </Button>
         </div>
       )}
     </div>

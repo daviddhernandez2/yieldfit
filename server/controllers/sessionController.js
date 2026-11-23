@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Session from '../models/Session.js';
 import Exercise from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
@@ -52,14 +53,62 @@ const construirEjerciciosConSnapshots = async (ejerciciosInput, userId) => {
   });
 };
 
-// GET /api/sessions
-// Devuelve las sesiones del usuario, ordenadas por fecha descendente.
-// Sin paginar: devuelve TODAS las sesiones, y el cliente calcula el progreso sobre
-// la lista completa. Crece con el historial; se pagina en el bloque 4 (CLAUDE.md).
+const LIMITE_POR_DEFECTO = 20;
+const LIMITE_MAXIMO = 50;
+
+// El cursor señala la última sesión ya enviada: "<fecha ISO>_<id>". Devuelve
+// { fecha, id }, o null si no tiene ese formato.
+const leerCursor = (cursor) => {
+  const separador = cursor.lastIndexOf('_');
+  const fecha = new Date(cursor.slice(0, separador));
+  const id = cursor.slice(separador + 1);
+  if (separador < 1 || Number.isNaN(fecha.getTime()) || !mongoose.isValidObjectId(id)) return null;
+  return { fecha, id: new mongoose.Types.ObjectId(id) };
+};
+
+// GET /api/sessions?cursor=…&limite=…
+// Sesiones del usuario de la más reciente a la más antigua, de `limite` en `limite`
+// (20 por defecto, 50 como máximo). Devuelve { sessions, siguienteCursor }: para la
+// página siguiente se repite la petición con ese cursor; null significa que no hay más.
+//
+// Paginación por cursor y no por número de página (DECISIONS.md, 0027): si se guarda
+// una sesión mientras el usuario está en el Historial, con páginas se repetiría una
+// sesión al pasar de página; con el cursor ("las anteriores a esta") no. Y usa el
+// índice { userId, fecha } directamente, sin saltarse documentos.
 export const list = async (req, res, next) => {
   try {
-    const sessions = await Session.find({ userId: req.user._id }).sort({ fecha: -1 });
-    res.status(200).json({ sessions });
+    const limite = req.query.limite === undefined ? LIMITE_POR_DEFECTO : Number(req.query.limite);
+    if (!Number.isInteger(limite) || limite < 1 || limite > LIMITE_MAXIMO) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: `limite tiene que ser un número entero entre 1 y ${LIMITE_MAXIMO}`,
+      });
+    }
+
+    const filtro = { userId: req.user._id };
+    if (req.query.cursor !== undefined) {
+      const cursor = leerCursor(String(req.query.cursor));
+      if (!cursor) {
+        return res.status(400).json({ error: 'Validation Error', message: 'cursor no válido' });
+      }
+      // "Anteriores a la última enviada". Dos sesiones pueden tener la misma fecha: en
+      // ese caso desempata el _id, que también entra en el orden.
+      filtro.$or = [
+        { fecha: { $lt: cursor.fecha } },
+        { fecha: cursor.fecha, _id: { $lt: cursor.id } },
+      ];
+    }
+
+    // Se pide una de más para saber si hay otra página sin hacer un count aparte.
+    const encontradas = await Session.find(filtro)
+      .sort({ fecha: -1, _id: -1 })
+      .limit(limite + 1);
+    const sessions = encontradas.slice(0, limite);
+    const ultima = sessions.at(-1);
+    const siguienteCursor =
+      encontradas.length > limite ? `${ultima.fecha.toISOString()}_${ultima._id}` : null;
+
+    res.status(200).json({ sessions, siguienteCursor });
   } catch (error) {
     next(error);
   }

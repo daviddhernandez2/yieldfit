@@ -154,3 +154,10 @@
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
+
+/* Botón "Cargar más" centrado bajo la lista. */
+.cargarMas {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-lg);
+}

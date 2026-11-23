@@ -6,10 +6,12 @@ export const createSession = (data) => {
   return apiClient.post('/sessions', data);
 };
 
-// GET /api/sessions
-// Devuelve las sesiones del usuario, más recientes primero.
-export const listSessions = () => {
-  return apiClient.get('/sessions');
+// GET /api/sessions?cursor=…&limite=…
+// Sesiones del usuario, más recientes primero, de 20 en 20. Devuelve
+// { sessions, siguienteCursor }: para la página siguiente se pasa ese cursor; null
+// significa que no hay más.
+export const listSessions = ({ cursor, limite } = {}) => {
+  return apiClient.get('/sessions', { params: { cursor, limite } });
 };
 
 // GET /api/sessions/:id

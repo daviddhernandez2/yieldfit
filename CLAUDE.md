@@ -121,8 +121,8 @@ Import alias en cliente: `@` → `client/src`.
   `trackingSnapshot`) para que el historial sea inmutable, y `mejor1RM` calculado al guardar.
   Índice `{ userId: 1, fecha: -1 }`. El progreso lo calcula `GET /api/progress` (0026) y el
   historial se pagina por cursor (0027).
-- **Chart**: grupo de ejercicios del usuario (`nombre`, `exerciseIds`). CRUD en backend hecho;
-  **sin uso en el frontend todavía** (no existe `api/charts.js`).
+- **Chart**: grupo de progreso del usuario (`nombre`, `exerciseIds`); en la app se llama "grupo".
+  Su progreso lo calcula `GET /api/progress?grupo=<id>` con el mismo cálculo que "Todos" (0034).
 
 Todas las queries filtran por `userId: req.user._id`; los controladores verifican
 ownership de los ids referenciados. Mantener siempre ese patrón.
@@ -271,7 +271,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
         menú de compartir.
 - [x] **8 — Calendario de días entrenados**: endpoint que devuelva solo fechas por rango
       (sin traer sesiones completas).
-- [ ] **9 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;
+- [x] **9 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;
       misma lógica de cálculo que el grupo "Todos", aplicada a los ejercicios seleccionados.
       Además, en cada grupo (incluido "Todos"):
       - selector de rango: 1 semana, 1 mes, 1 año, 5 años, 10 años y total. El % se mide desde

@@ -52,6 +52,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0031 | Sesión activa con `useReducer` | vigente |
 | 0032 | Reemplazar un ejercicio en la sesión activa | vigente |
 | 0033 | Calendario de días entrenados: mes y año, desde un endpoint de solo fechas | vigente |
+| 0034 | Grupos de progreso con rango, plegado y orden en el dispositivo | vigente |
 
 ---
 
@@ -1133,4 +1134,45 @@ viene paginado y con series (0027): no sirve para pintar un calendario.
 **Consecuencias:**
 - Un año con ~150 sesiones son unos pocos KB; con más años solo se pide el que se mira.
 - La racha de semanas seguidas queda para más adelante: necesitaría rangos de más de un año.
+
+---
+
+## 0034 — Grupos de progreso con rango, plegado y orden en el dispositivo
+
+Fecha: 2026-11-23 · Estado: vigente · Bloque: 9
+
+**Contexto:** el Dashboard solo mostraba "Todos", siempre con todo el historial. El modelo
+`Chart` (grupo de ejercicios) y su CRUD existían en el servidor desde el principio, sin uso.
+
+**Decisión** (de David):
+- **Mismo cálculo para todos:** `GET /api/progress?grupo=<id>` aplica el cálculo de "Todos"
+  (0026) solo a los ejercicios del grupo, que el servidor lee del propio grupo (no viajan desde
+  el cliente). Un grupo ajeno da 404.
+- **Línea reducida a ~150 puntos** en el servidor (último punto de cada tramo, más el primero),
+  calculando el % con todos. La línea acaba donde la completa: último punto − 100 = %.
+- **Crear y editar grupos en una página** (`/groups/new`, `/groups/:id/edit`), con
+  `ExercisePicker`; borrar solo borra el grupo.
+- **Dashboard:** una tarjeta por grupo (componente `GrupoProgreso`, también para "Todos"), con
+  **selector de rango** 1S · 1M · 1A · 5A · 10A · Total (por defecto Total), **desplegable de
+  la lista de ejercicios**, **plegado de la tarjeta entera** (quedan nombre y %) y **orden
+  elegido por el usuario** (modo "Ordenar", con subir y bajar; "Todos" también se mueve).
+- **Rango, plegados y orden se guardan en el dispositivo** (localStorage), no en el servidor:
+  no tocan el modelo y "Todos" no es un `Chart`.
+- **Grupo vacío:** la tarjeta dice "Este grupo no tiene ejercicios: edítalo"; no se borra.
+- Los grupos se listan en orden de creación (el servidor ordenaba al revés y nadie lo usaba).
+
+**Alternativas descartadas:**
+- *Enviar la lista de ejercicios desde el cliente:* podría desincronizarse del grupo guardado.
+- *Guardar rango, plegado y orden en el servidor:* sincronizaría dispositivos, pero exige
+  preferencias de usuario además de campos en `Chart`. Se puede revisar en el bloque 12.
+- *Arrastrar y soltar para ordenar:* necesita una librería y es más difícil con el dedo y el
+  teclado; subir y bajar basta para unos pocos grupos.
+- *Ventana para crear grupos:* en el iPhone no caben (lección del bloque 6).
+
+**Consecuencias:**
+- Cada tarjeta hace su propia petición: con 3 o 4 grupos, 3 o 4 peticiones pequeñas.
+- En otro dispositivo, los grupos aparecen con el rango, el plegado y el orden por defecto.
+- Con rangos cortos (1S) a menudo no hay % (ningún ejercicio con dos puntos); la tarjeta lo dice.
+- Los estilos comunes de las páginas de formulario (rutinas y grupos) pasan a
+  `styles/paginaFormulario.module.css`, como se hizo con `ExercisePicker`.
 

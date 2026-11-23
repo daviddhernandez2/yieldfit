@@ -31,6 +31,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 5b — Cardio bloqueado | [bloques/5b-cardio-bloqueado.md](bloques/5b-cardio-bloqueado.md) |
 | 6 — Reemplazar ejercicio | [bloques/6-reemplazar-ejercicio.md](bloques/6-reemplazar-ejercicio.md) |
 | 8 — Calendario | [bloques/8-calendario.md](bloques/8-calendario.md) |
+| 9 — Grupos de progreso | [bloques/9-grupos-progreso.md](bloques/9-grupos-progreso.md) |
 
 ## Cómo mantener esta documentación
 

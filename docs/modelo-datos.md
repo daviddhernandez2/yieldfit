@@ -164,8 +164,11 @@ Ejemplo: sentadilla 150 → 165 (+10 %, índice 110) y curl 20 → 21 (+5 %, ín
 sube un 7,5 % y la línea acaba en 107,5.
 
 ### Chart
-Grupo de ejercicios para el progreso (`nombre`, `exerciseIds[]`). CRUD hecho en el backend,
-**sin uso en el cliente todavía** (bloque 9).
+Grupo de progreso (`nombre`, `exerciseIds[]`); en la app se llama "grupo" ([0034](../DECISIONS.md)).
+Se crea y edita en `/groups/new` y `/groups/:id/edit`. Su progreso lo calcula
+`GET /api/progress?grupo=<id>` con **exactamente el mismo cálculo que "Todos"**, solo con sus
+ejercicios: la lista la lee el servidor del propio grupo. Al borrar un ejercicio se quita de
+los grupos (0020); un grupo puede quedarse vacío y la tarjeta lo avisa.
 
 ## Borrar un ejercicio: el historial se conserva
 

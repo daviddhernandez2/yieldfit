@@ -94,7 +94,7 @@ flowchart TB
 | `/api/sessions` | `sessionRoutes.js` | `requireAuth` a nivel router; lista paginada por cursor ([0027](../DECISIONS.md)); `previous-sets` para la serie anterior ([0029](../DECISIONS.md)); `days` para el calendario ([0033](../DECISIONS.md)) |
 | `/api/progress` | `progressRoutes.js` | `requireAuth` a nivel router; solo lectura ([0026](../DECISIONS.md)) |
 | `/api/health` | en `app.js` | pública; despertador de la portada ([0025](../DECISIONS.md)) |
-| `/api/charts` | `chartRoutes.js` | `requireAuth` a nivel router (sin uso en el cliente todavía) |
+| `/api/charts` | `chartRoutes.js` | `requireAuth` a nivel router; grupos de progreso ([0034](../DECISIONS.md)) |
 
 **Errores:** los controladores pasan los errores inesperados con `next(error)` a `errorHandler`.
 En producción, un 500 responde siempre con un mensaje genérico, porque el cliente muestra
@@ -148,6 +148,7 @@ flowchart TB
 | `/workouts`, `/workouts/new`, `/workouts/:id/edit` | Workouts, WorkoutForm | sí |
 | `/sessions/active`, `/sessions/active/replace/:index` | ActiveSession, ReplaceExercise | sí |
 | `/history`, `/history/:id` | History, SessionDetail | sí |
+| `/groups/new`, `/groups/:id/edit` | GroupForm | sí |
 | `/profile` | Profile | sí |
 
 Las rutas privadas van envueltas en `PrivateRoute` + `Layout`. Cualquier otra ruta redirige a `/`.

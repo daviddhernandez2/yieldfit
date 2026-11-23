@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { listSessions } from '@/api/sessions.js';
 import Button from '@/components/Button/Button.jsx';
 import Calendario from '@/components/Calendario/Calendario.jsx';
+import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import styles from '@/pages/History/History.module.css';
 
 // Formatea segundos como "1h 24 min" o "24 min" según duración.
@@ -126,7 +127,20 @@ export default function History() {
       {/* Días entrenados (bloque 8): vista de mes o de año, arriba de la lista. */}
       {!loading && !error && sessions.length > 0 && <Calendario />}
 
-      {loading && <p className={styles.feedback}>Cargando...</p>}
+      {/* Mientras llegan las sesiones: cuatro tarjetas con la forma de las de verdad. */}
+      {loading && (
+        <ZonaCarga etiqueta="Cargando el historial" className={styles.list}>
+          {[40, 34, 46, 38].map((ancho) => (
+            <div key={ancho} className={`${styles.card} glassCard`}>
+              <div className={styles.cardText}>
+                <Esqueleto ancho={`${ancho}%`} alto="1rem" />
+                <Esqueleto ancho="60%" alto="0.75rem" />
+              </div>
+              <Esqueleto ancho="64px" />
+            </div>
+          ))}
+        </ZonaCarga>
+      )}
 
       {error && <p className={styles.feedbackError}>{error}</p>}
 

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { getProgress } from "@/api/progress.js";
 import Chip from "@/components/Chip/Chip.jsx";
+import Esqueleto, { ZonaCarga } from "@/components/Esqueleto/Esqueleto.jsx";
 import { RANGOS, desdeDeRango, guardarPreferencias, leerPreferencias } from "@/utils/grupos.js";
 import styles from "@/components/GrupoProgreso/GrupoProgreso.module.css";
 
@@ -161,7 +162,19 @@ export default function GrupoProgreso({ grupoId = null, nombre, numEjercicios })
           </div>
 
           {error && <p className={styles.error}>{error}</p>}
-          {!error && !progreso && <p className={styles.mensaje}>Cargando...</p>}
+          {/* Mientras llega el progreso: la silueta del gráfico y de dos ejercicios. */}
+          {!error && !progreso && (
+            <ZonaCarga etiqueta={`Cargando el progreso de ${nombre}`} className={styles.esqueleto}>
+              <Esqueleto forma="bloque" alto="220px" />
+              {[55, 40].map((ancho) => (
+                <div key={ancho} className={styles.exerciseRow}>
+                  <Esqueleto forma="circulo" ancho="36px" />
+                  <Esqueleto ancho={`${ancho}%`} />
+                  <Esqueleto ancho="56px" />
+                </div>
+              ))}
+            </ZonaCarga>
+          )}
 
           {progreso && progreso.porcentaje === null && (
             <p className={styles.mensaje}>

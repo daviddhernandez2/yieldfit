@@ -213,3 +213,10 @@
   font-size: var(--font-size-sm);
 }
 
+/* Esqueleto de carga: gráfico + dos filas, con la misma separación que el contenido. */
+.esqueleto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+

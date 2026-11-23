@@ -4,6 +4,7 @@ import { listWorkouts } from '@/api/workouts.js';
 import { useStartSession } from '@/hooks/useStartSession.js';
 import WorkoutActionsModal from '@/components/WorkoutActionsModal/WorkoutActionsModal.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import styles from '@/pages/Workouts/Workouts.module.css';
 
 // Genera un badge de 2 letras a partir del nombre de la rutina.
@@ -82,7 +83,18 @@ export default function Workouts() {
         </button>
       </header>
 
-      {loading && <p className={styles.feedback}>Cargando...</p>}
+      {/* Mientras llegan las rutinas: tres tarjetas con insignia y nombre. */}
+      {loading && (
+        <ZonaCarga etiqueta="Cargando tus rutinas" className={styles.list}>
+          {[45, 35, 52].map((ancho) => (
+            <div key={ancho} className={`${styles.card} glassCard`}>
+              <Esqueleto forma="circulo" ancho="36px" />
+              <Esqueleto ancho={`${ancho}%`} alto="1rem" />
+              <span />
+            </div>
+          ))}
+        </ZonaCarga>
+      )}
 
       {(error || startError) && (
         <p className={styles.feedbackError}>{error || startError}</p>

@@ -1,0 +1,53 @@
+/* Hueso de esqueleto: forma gris (--color-border) con un brillo que la cruza despacio.
+   El brillo es un degradado más ancho que el hueso que se desplaza de derecha a izquierda. */
+.hueso {
+  display: block;
+  flex-shrink: 0;
+  background-color: var(--color-border);
+  background-image: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.06) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: brillo 1.6s ease-in-out infinite;
+}
+
+@keyframes brillo {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+.linea {
+  border-radius: var(--radius-sm);
+}
+
+.bloque {
+  border-radius: var(--radius-md);
+}
+
+.circulo {
+  border-radius: 50%;
+}
+
+.pildora {
+  border-radius: var(--radius-pill);
+}
+
+/* Quien pide menos movimiento en su sistema ve la silueta quieta. */
+@media (prefers-reduced-motion: reduce) {
+  .hueso {
+    animation: none;
+  }
+}
+
+/* Texto solo para lectores de pantalla: no se ve, pero se anuncia. */
+.soloLector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -6,6 +6,7 @@ import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from '@/utils/borradoEjercicio.js';
 import useOpcionesEjercicio, { etiquetaDe, tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
+import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import styles from '@/pages/Exercises/Exercises.module.css';
 
 // "Todos" no es un grupo muscular: es la ausencia de filtro. El resto de chips son
@@ -139,7 +140,20 @@ export default function Exercises() {
         </div>
       </div>
 
-      {(loading || (!opciones && !errorOpciones)) && <p className={styles.feedback}>Cargando...</p>}
+      {/* Mientras llegan los ejercicios: la tabla con seis filas (nombre y tipo). */}
+      {(loading || (!opciones && !errorOpciones)) && (
+        <ZonaCarga etiqueta="Cargando tus ejercicios" className={`${styles.list} glassCard`}>
+          {[48, 36, 55, 42, 30, 50].map((ancho) => (
+            <div key={ancho} className={styles.row}>
+              <div className={styles.rowMain}>
+                <Esqueleto ancho={`${ancho}%`} alto="1rem" />
+                <Esqueleto ancho="72px" />
+              </div>
+              <span />
+            </div>
+          ))}
+        </ZonaCarga>
+      )}
 
       {error && <p className={styles.feedbackError}>{error}</p>}
 

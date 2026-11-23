@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { notFoundHandler, errorHandler } from './middlewares/errorHandlers.js';
 import { crearRetrasoPrueba } from './middlewares/retrasoPrueba.js';
+import { comprobarConfigEmail } from './utils/email.js';
 import authRoutes from './routes/authRoutes.js';
 import exerciseRoutes from './routes/exerciseRoutes.js';
 import chartRoutes from './routes/chartRoutes.js';
@@ -55,6 +56,9 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 if (!process.env.CLIENT_ORIGINS) {
   throw new Error('CLIENT_ORIGINS no está definida en las variables de entorno');
 }
+
+// Variables del envío de emails (bloque 11b): ver utils/email.js.
+comprobarConfigEmail();
 
 const clientOrigins = process.env.CLIENT_ORIGINS
   .split(',')

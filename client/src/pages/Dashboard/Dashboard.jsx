@@ -8,14 +8,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { listSessions } from '@/api/sessions.js';
-import { listExercises } from '@/api/exercises.js';
-import {
-  calcularProgresoTodos,
-  mediaGrupo,
-  serieAgregadaTodos,
-  quitarEjerciciosBorrados,
-} from '@/utils/performance.js';
+import { getProgress } from '@/api/progress.js';
 import styles from '@/pages/Dashboard/Dashboard.module.css';
 
 // Formatea un número decimal como porcentaje con signo: 3.14 → "+3,1%".
@@ -30,6 +23,28 @@ const claseSigno = (n) => {
   if (n > 0) return styles.positive;
   if (n < 0) return styles.negative;
   return styles.neutral;
+};
+
+// Formato de las fechas del eje X según lo que abarca el gráfico. Con más de un año,
+// "11 oct" se repite cada año y no se sabe de cuál es: se muestra mes y año ("abr 2017").
+// Con un año o menos, día y mes ("11 oct"). El tooltip siempre lleva la fecha completa.
+const UN_ANIO_MS = 365 * 24 * 60 * 60 * 1000;
+const FORMATO_CORTO = { day: 'numeric', month: 'short' };
+const FORMATO_LARGO = { month: 'short', year: 'numeric' };
+const FORMATO_COMPLETO = { day: 'numeric', month: 'short', year: 'numeric' };
+
+const formatoEjeX = (serie) => {
+  if (serie.length < 2) return FORMATO_CORTO;
+  const abarca = new Date(serie.at(-1).fecha) - new Date(serie[0].fecha);
+  return abarca > UN_ANIO_MS ? FORMATO_LARGO : FORMATO_CORTO;
+};
+
+// Iniciales de 2 letras para el badge: "Press banca con barra" → "PB"; "Sentadilla" → "SE".
+const generarIniciales = (nombre) => {
+  if (!nombre) return '?';
+  const palabras = nombre.trim().split(/\s+/);
+  if (palabras.length === 1) return palabras[0].slice(0, 2).toUpperCase();
+  return (palabras[0][0] + palabras[1][0]).toUpperCase();
 };
 
 // Icono flecha arriba/abajo/plana según el signo.
@@ -64,26 +79,21 @@ const IconPlus = () => (
 );
 
 // Pantalla principal del progreso.
-// En MVP muestra un único grupo por defecto llamado "Todos" que agrupa
-// todos los ejercicios con al menos 2 sesiones registradas.
-// El sistema de Charts personalizados se implementará en pulido.
+// Muestra un único grupo, "Todos", con los ejercicios que tienen al menos 2 sesiones
+// en el rango. Los grupos personalizados (modelo Chart) llegan en el bloque 9.
 export default function Dashboard() {
-  const [sesiones, setSesiones] = useState([]);
-  // Ids de los ejercicios que existen hoy: los borrados no cuentan en el progreso.
-  const [idsExistentes, setIdsExistentes] = useState(new Set());
+  // El progreso llega calculado del servidor (GET /api/progress): el cliente ya no
+  // descarga las sesiones ni recalcula nada (DECISIONS.md, 0026). Sin rango = todo
+  // el historial; el selector de rango llega en el bloque 9.
+  const [progreso, setProgreso] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const cargar = async () => {
       try {
-        // Las dos peticiones en paralelo: una no depende de la otra.
-        const [sesionesRes, ejerciciosRes] = await Promise.all([
-          listSessions(),
-          listExercises(),
-        ]);
-        setSesiones(sesionesRes.data.sessions);
-        setIdsExistentes(new Set(ejerciciosRes.data.exercises.map((ex) => ex._id)));
+        const response = await getProgress();
+        setProgreso(response.data.progreso);
       } catch (err) {
         const message = err.response?.data?.message || 'Error al cargar el progreso.';
         setError(message);
@@ -94,27 +104,20 @@ export default function Dashboard() {
     cargar();
   }, []);
 
-  // Sesiones sin los ejercicios borrados: es lo único que se usa para el progreso.
-  // `sesiones` (completas) sigue sirviendo para saber si el usuario ha entrenado.
-  const sesionesParaProgreso = useMemo(
-    () => quitarEjerciciosBorrados(sesiones, idsExistentes),
-    [sesiones, idsExistentes]
-  );
-
-  const progresoPorEjercicio = useMemo(
-    () => calcularProgresoTodos(sesionesParaProgreso),
-    [sesionesParaProgreso]
-  );
-
-  const mediaTotal = useMemo(
-    () => mediaGrupo(progresoPorEjercicio),
-    [progresoPorEjercicio]
-  );
-
-  const serieGrafica = useMemo(
-    () => serieAgregadaTodos(sesionesParaProgreso),
-    [sesionesParaProgreso]
-  );
+  // Datos para la gráfica: el índice base 100 de cada sesión, con la etiqueta del eje
+  // (formato según el rango, ver formatoEjeX) y la fecha completa para el tooltip.
+  const serieGrafica = useMemo(() => {
+    const serie = progreso?.serie ?? [];
+    const formato = formatoEjeX(serie);
+    return serie.map((punto) => {
+      const fecha = new Date(punto.fecha);
+      return {
+        indice: punto.indice,
+        etiqueta: fecha.toLocaleDateString('es-ES', formato),
+        fechaCompleta: fecha.toLocaleDateString('es-ES', FORMATO_COMPLETO),
+      };
+    });
+  }, [progreso]);
 
   if (loading) {
     return <p className={styles.feedback}>Cargando...</p>;
@@ -143,7 +146,7 @@ export default function Dashboard() {
         </button>
       </header>
 
-      {sesiones.length === 0 ? (
+      {progreso.sesiones === 0 ? (
         <div className={styles.emptyState}>
           <p>Aún no has terminado ninguna sesión.</p>
           <p className={styles.emptyHint}>
@@ -154,10 +157,10 @@ export default function Dashboard() {
         <section className={`${styles.groupCard} glassCard`}>
           <div className={styles.groupHeader}>
             <h2 className={styles.groupName}>Todos</h2>
-            {mediaTotal !== null && (
-              <div className={`${styles.groupPercent} ${claseSigno(mediaTotal)}`}>
-                <IconTrend value={mediaTotal} />
-                <span>{formatPorcentaje(mediaTotal)}</span>
+            {progreso.porcentaje !== null && (
+              <div className={`${styles.groupPercent} ${claseSigno(progreso.porcentaje)}`}>
+                <IconTrend value={progreso.porcentaje} />
+                <span>{formatPorcentaje(progreso.porcentaje)}</span>
               </div>
             )}
           </div>
@@ -186,8 +189,9 @@ export default function Dashboard() {
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
-                    domain={['dataMin - 5', 'dataMax + 5']}
-                    tickFormatter={(v) => `${Math.round(v)}kg`}
+                    domain={['dataMin - 2', 'dataMax + 2']}
+                    // El índice empieza en 100: 112 significa +12 % desde el inicio.
+                    tickFormatter={(v) => formatPorcentaje(v - 100)}
                   />
                   <Tooltip
                     contentStyle={{
@@ -196,12 +200,14 @@ export default function Dashboard() {
                       borderRadius: '8px',
                       color: '#ffffff',
                     }}
-                    formatter={(value) => [`${Math.round(value)} kg`, '1RM medio']}
+                    formatter={(value) => [formatPorcentaje(value - 100), 'Progreso']}
+                    // La etiqueta del eje puede no llevar el día; el tooltip, siempre completa.
+                    labelFormatter={(etiqueta, payload) => payload?.[0]?.payload.fechaCompleta ?? etiqueta}
                     labelStyle={{ color: '#888888' }}
                   />
                   <Area
                     type="monotone"
-                    dataKey="media1RM"
+                    dataKey="indice"
                     stroke="#3EF87E"
                     strokeWidth={2.5}
                     fill="url(#areaGradient)"
@@ -217,11 +223,11 @@ export default function Dashboard() {
             </p>
           )}
 
-          {progresoPorEjercicio.length > 0 ? (
+          {progreso.ejercicios.length > 0 ? (
             <div className={styles.exerciseList}>
-              {progresoPorEjercicio.map((ej) => (
+              {progreso.ejercicios.map((ej) => (
                 <div key={ej.exerciseId} className={styles.exerciseRow}>
-                  <span className={styles.badge}>{ej.iniciales}</span>
+                  <span className={styles.badge}>{generarIniciales(ej.nombre)}</span>
                   <span className={styles.exerciseName}>{ej.nombre}</span>
                   <div className={`${styles.exercisePercent} ${claseSigno(ej.porcentaje)}`}>
                     <IconTrend value={ej.porcentaje} />

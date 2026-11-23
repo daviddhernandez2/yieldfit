@@ -9,6 +9,7 @@ import exerciseRoutes from './routes/exerciseRoutes.js';
 import chartRoutes from './routes/chartRoutes.js';
 import workoutRoutes from './routes/workoutRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
+import progressRoutes from './routes/progressRoutes.js';
 
 const app = express();
 
@@ -71,6 +72,7 @@ app.use('/api/exercises', exerciseRoutes);
 app.use('/api/charts', chartRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/progress', progressRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

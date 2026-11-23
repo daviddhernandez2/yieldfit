@@ -20,8 +20,9 @@ export default function Select({ label, error, id, options, placeholder, ...rest
             {placeholder}
           </option>
         )}
+        {/* disabled: la opción se ve pero no se puede elegir (p. ej. "Cardio (próximamente)"). */}
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value} disabled={opt.disabled}>
             {opt.label}
           </option>
         ))}

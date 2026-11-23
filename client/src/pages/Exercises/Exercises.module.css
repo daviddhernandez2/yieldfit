@@ -160,6 +160,11 @@
 }
 
 .rowType {
+  /* inline-flex para que el tipo y la etiqueta "Próximamente" queden en línea, separados. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   white-space: nowrap;

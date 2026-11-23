@@ -12,7 +12,8 @@ import Button from '@/components/Button/Button.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import Chip from '@/components/Chip/Chip.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
-import useOpcionesEjercicio, { etiquetaDe } from '@/hooks/useOpcionesEjercicio.js';
+import useOpcionesEjercicio, { etiquetaDe, tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
+import Proximamente from '@/components/Proximamente/Proximamente.jsx';
 import styles from '@/pages/WorkoutForm/WorkoutForm.module.css';
 
 const DEFAULT_NUM_SERIES = 3;
@@ -229,6 +230,9 @@ export default function WorkoutForm() {
                       <span className={styles.addedItemName}>
                         {exercise?.nombre || 'Ejercicio'}
                       </span>
+                      {/* Un cardio que ya estaba en la rutina se queda (y se guarda), pero
+                          en la sesión activa saldrá bloqueado. */}
+                      {exercise && !tipoDisponible(opciones, exercise.tipo) && <Proximamente />}
                       <button
                         type="button"
                         onClick={() => handleQuitarEjercicio(ej.exerciseId)}
@@ -299,16 +303,24 @@ export default function WorkoutForm() {
             )}
             {catalogoFiltrado.map((ex) => {
               const isSelected = exerciseIdsAñadidos.has(ex._id);
+              // Un ejercicio bloqueado (cardio) no se puede añadir. Si ya estaba en la
+              // rutina, sí se puede quitar: por eso solo se deshabilita si no está.
+              const bloqueado = !tipoDisponible(opciones, ex.tipo) && !isSelected;
               return (
                 <button
                   key={ex._id}
                   type="button"
                   onClick={() => handleToggleExercise(ex._id)}
+                  disabled={bloqueado}
                   className={`${styles.catalogoItem} ${isSelected ? styles.catalogoItemSelected : ''}`}
                 >
                   <span className={styles.catalogoItemName}>{ex.nombre}</span>
                   <span className={styles.catalogoItemMeta}>
-                    {etiquetaDe(opciones.gruposMusculares, ex.grupoMuscular)}
+                    {tipoDisponible(opciones, ex.tipo) ? (
+                      etiquetaDe(opciones.gruposMusculares, ex.grupoMuscular)
+                    ) : (
+                      <Proximamente />
+                    )}
                   </span>
                   {isSelected && (
                     <span className={styles.catalogoItemCheck}>

@@ -4,7 +4,8 @@ import { listExercises, deleteExercise } from '@/api/exercises.js';
 import Chip from '@/components/Chip/Chip.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from '@/utils/borradoEjercicio.js';
-import useOpcionesEjercicio, { etiquetaDe } from '@/hooks/useOpcionesEjercicio.js';
+import useOpcionesEjercicio, { etiquetaDe, tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
+import Proximamente from '@/components/Proximamente/Proximamente.jsx';
 import styles from '@/pages/Exercises/Exercises.module.css';
 
 // "Todos" no es un grupo muscular: es la ausencia de filtro. El resto de chips son
@@ -170,7 +171,11 @@ export default function Exercises() {
                 onClick={() => navigate(`/exercises/${ex._id}/edit`)}
               >
                 <span className={styles.rowName}>{ex.nombre}</span>
-                <span className={styles.rowType}>{etiquetaDe(opciones.tipos, ex.tipo)}</span>
+                <span className={styles.rowType}>
+                  {etiquetaDe(opciones.tipos, ex.tipo)}
+                  {/* Se puede abrir y borrar como siempre; solo avisa de que aún no se registra. */}
+                  {!tipoDisponible(opciones, ex.tipo) && <Proximamente />}
+                </span>
               </button>
               {/* Papelera separada como acción destructiva individual. */}
               <button

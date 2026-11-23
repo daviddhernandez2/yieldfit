@@ -81,6 +81,8 @@
 }
 
 .addedItemName {
+  /* Ocupa el espacio libre: así la etiqueta "Próximamente", si la hay, queda pegada a la X. */
+  flex: 1;
   font-weight: var(--font-weight-medium);
 }
 
@@ -242,3 +244,14 @@
   padding-top: var(--space-md);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
+
+/* Ejercicio bloqueado (cardio) en el catálogo: se ve, pero no se puede añadir. */
+.catalogoItem:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+}
+
+.catalogoItem:disabled:hover {
+  background-color: transparent;
+}
+

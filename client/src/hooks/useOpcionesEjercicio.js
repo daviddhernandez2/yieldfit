@@ -16,7 +16,9 @@ import { getOpcionesEjercicio } from '@/api/exercises.js';
 // está abierta. Si falla, se olvida, para que la próxima pantalla lo reintente.
 let peticion = null;
 
-const cargarOpciones = () => {
+// Exportada para quien necesita las opciones fuera de un componente (p. ej. al empezar
+// una sesión en useStartSession); comparte la misma petición que el hook.
+export const cargarOpciones = () => {
   if (!peticion) {
     peticion = getOpcionesEjercicio()
       .then((response) => response.data.opciones)
@@ -57,3 +59,10 @@ export default function useOpcionesEjercicio() {
 // debería pasar), se muestra tal cual en vez de dejar el hueco vacío.
 export const etiquetaDe = (lista, value) =>
   lista.find((opcion) => opcion.value === value)?.label ?? value;
+
+// ¿Se puede usar un tipo de ejercicio? Lo decide el servidor con `disponible: false` en
+// sus opciones (hoy, Cardio: DECISIONS.md, 0030). Desbloquearlo es quitar ese campo en el
+// servidor; el cliente no tiene ninguna lista propia de lo bloqueado.
+export const tipoDisponible = (opciones, tipo) =>
+  opciones.tipos.find((opcion) => opcion.value === tipo)?.disponible !== false;
+

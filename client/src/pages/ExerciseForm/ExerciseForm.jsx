@@ -12,7 +12,7 @@ import Button from "@/components/Button/Button.jsx";
 import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
 import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from "@/utils/borradoEjercicio.js";
-import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
+import useOpcionesEjercicio, { tipoDisponible } from "@/hooks/useOpcionesEjercicio.js";
 import styles from "@/pages/ExerciseForm/ExerciseForm.module.css";
 
 const IconChevronLeft = () => (
@@ -48,6 +48,9 @@ export default function ExerciseForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  // Tipo con el que se cargó el ejercicio al editar: si es uno bloqueado (cardio), se
+  // avisa. Al crear no hay tipo original.
+  const [tipoOriginal, setTipoOriginal] = useState(null);
   // Grupos y tipos vienen del servidor: sus values son los únicos que acepta la API.
   const { opciones, error: errorOpciones } = useOpcionesEjercicio();
 
@@ -63,6 +66,7 @@ export default function ExerciseForm() {
           grupoMuscular: ex.grupoMuscular,
           tipo: ex.tipo,
         });
+        setTipoOriginal(ex.tipo);
       } catch (err) {
         const message =
           err.response?.data?.message || "Error al cargar el ejercicio.";
@@ -116,6 +120,13 @@ export default function ExerciseForm() {
   if (errorOpciones) return <p className={styles.feedback}>{errorOpciones}</p>;
   if (loading || !opciones) return <p className={styles.feedback}>Cargando...</p>;
 
+  // Los tipos no disponibles se ven en el select pero no se pueden elegir. En un <select>
+  // nativo no se puede dar estilo a una opción, así que la etiqueta va en el texto.
+  const opcionesTipo = opciones.tipos.map((t) =>
+    t.disponible === false ? { ...t, label: `${t.label} (próximamente)`, disabled: true } : t,
+  );
+  const editandoBloqueado = tipoOriginal !== null && !tipoDisponible(opciones, tipoOriginal);
+
   return (
     <div className={styles.page}>
       {/* Header: botón atrás + título. Mismo patrón que SessionDetail y
@@ -152,11 +163,18 @@ export default function ExerciseForm() {
           options={opciones.gruposMusculares}
         />
 
+        {editandoBloqueado && (
+          <p className={styles.aviso} role="note">
+            Los ejercicios de cardio estarán disponibles próximamente: todavía no se pueden
+            registrar en una sesión. Puedes renombrarlo o cambiarle el tipo.
+          </p>
+        )}
+
         <Select
           label="Tipo"
           value={form.tipo}
           onChange={handleChange("tipo")}
-          options={opciones.tipos}
+          options={opcionesTipo}
         />
 
         {errorMessage && (

@@ -187,10 +187,23 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).
+- **Datos huérfanos de usuarios inexistentes:** en producción hay ejercicios de 11 usuarios
+  distintos pero solo 7 usuarios (diagnóstico de cardio, 2026-11-23). Parece que se borraron 4
+  usuarios a mano sin borrar sus datos: ejercicios y quizá rutinas, sesiones o grupos. Pendiente:
+  un diagnóstico de solo lectura que los cuente y una limpieza con el procedimiento de
+  reparaciones (`docs/operaciones.md`). No existe forma de borrar un usuario desde la app.
 - **Cardio en la sesión activa:** solo tiene campos de peso y reps, así que hoy no se puede
   registrar tiempo y distancia desde la app (los ejercicios `tiempo_distancia` se guardan con
   peso y reps a 0). El seed sí crea sesiones de cardio porque escribe directamente en la base.
-  Pendiente de ubicar en el roadmap como bloque propio (se propone al cerrar el bloque 5).
+  Mientras tanto, el cardio está bloqueado en la app con "Próximamente". Propuesta para
+  implementarlo, como **bloque 6b** (no renumerar: DECISIONS y el código citan los números):
+  - **Dónde:** después del 6, que refactoriza `ActiveSession.jsx` (quizá a `useReducer`), y antes
+    del 7, para que el CSV nazca con tiempo y distancia reales. El 8 y el 9 no dependen de él.
+  - **Alcance:** la sesión activa conoce el tracking de cada ejercicio; filas de cardio con
+    tiempo (mm:ss) y distancia (km); enviar `tiempoSegundos` y `distanciaMetros`; serie anterior
+    y atajo de repetir también para cardio; Historial y detalle muestran tiempo y distancia;
+    quitar el bloqueo (una línea en `OPCIONES_TIPO`). Las sesiones de cardio guardadas con
+    peso y reps a 0 no se pueden recuperar.
 - `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; las props no reaccionan tras
   montar y `prevColor` no se usa). Bloque 12.
 

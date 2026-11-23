@@ -24,6 +24,7 @@ const GroupForm = lazy(() => import('@/pages/GroupForm/GroupForm.jsx'));
 const History = lazy(() => import('@/pages/History/History.jsx'));
 const SessionDetail = lazy(() => import('@/pages/SessionDetail/SessionDetail.jsx'));
 const Profile = lazy(() => import('@/pages/Profile/Profile.jsx'));
+const Developer = lazy(() => import('@/pages/Developer/Developer.jsx'));
 
 // Fallback minimalista mientras se descarga el chunk de la página.
 // Se muestra solo durante fracciones de segundo en conexiones normales.
@@ -193,6 +194,18 @@ function App() {
                 <PrivateRoute>
                   <Layout>
                     <Profile />
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            {/* Solo admin (bloque 11b): la página redirige si no lo eres, y el servidor
+                responde 403 a cada petición. */}
+            <Route
+              path="/developer"
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <Developer />
                   </Layout>
                 </PrivateRoute>
               }

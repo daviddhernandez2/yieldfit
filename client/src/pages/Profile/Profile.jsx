@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth.js';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import styles from '@/pages/Profile/Profile.module.css';
@@ -109,6 +110,15 @@ export default function Profile() {
           <DeleteButton onClick={logout}>Cerrar sesión</DeleteButton>
         </div>
       </section>
+
+      {/* Acceso a /developer (bloque 11b), solo para el admin. Ocultarlo es comodidad: quien
+          decide es el servidor (403). */}
+      {user.rol === 'admin' && (
+        <Link to="/developer" className={`${styles.developerLink} glassCard`}>
+          <span>Developer</span>
+          <span className={styles.developerHint}>Reportes y usuarios</span>
+        </Link>
+      )}
     </div>
   );
 }

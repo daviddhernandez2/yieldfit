@@ -1,0 +1,251 @@
+/* Página /developer (bloque 11b). Mismo esqueleto que Historial: columna centrada. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+/* Fila de chips: secciones de la página y estados de los reportes. Scroll horizontal si
+   no caben, en lugar de partir la fila. */
+.secciones,
+.chips {
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* --- Filtros de los reportes --- */
+
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Móvil: un campo por fila. Escritorio: usuario ancho y las dos fechas al lado. */
+.camposFiltro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.camposFiltro > :first-child {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+  .camposFiltro {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  .camposFiltro > :first-child {
+    grid-column: auto;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.etiqueta {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+/* Select y fechas con el aspecto de Input. font-size base: con menos, Safari en el iPhone
+   hace zoom al enfocar. */
+.control {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  color-scheme: dark;
+}
+
+.control:focus {
+  outline: none;
+  border-color: var(--color-border-accent);
+}
+
+.limpiar {
+  align-self: flex-start;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.limpiar:hover {
+  color: var(--color-text);
+}
+
+/* --- Tarjetas (reportes y usuarios) --- */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+}
+
+.tarjetaCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.meta {
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.nombre {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Insignia de estado. Pendiente en gris; resuelto en verde (el verde de la app ya
+   significa "bien"). También sirve para "Admin" en la lista de usuarios. */
+.estado {
+  flex-shrink: 0;
+  padding: 2px var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.resuelto {
+  border-color: var(--color-accent-medium);
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* El texto del usuario, tal cual lo escribió (saltos de línea incluidos). */
+.descripcion {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.contexto {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.datosTecnicos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-md);
+  row-gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.datosTecnicos dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.navegador {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.tarjetaAcciones {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.contadores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.contadores strong {
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Estados de la página --- */
+
+.resumen,
+.vacioTexto {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
+.cargarMas {
+  display: flex;
+  justify-content: center;
+}
+
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}

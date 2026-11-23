@@ -115,8 +115,9 @@ cd client && npm run dev     # App en http://localhost:5173
 | `npm run backup:restore-test` | Prueba que el último backup se puede restaurar |
 | `npm run diagnostico:borrados` | Diagnóstico de solo lectura de datos huérfanos (`-- --desarrollo` para `yieldfit-dev`) |
 | `npm run reparar:borrados` | Reparación puntual de producción; solo simula sin `-- --aplicar` |
+| `npm run migrar:1rm` | Rellena `mejor1RM` en sesiones antiguas (bloque 4); solo simula sin `-- --aplicar` |
 
-Los tres de producción necesitan credenciales en el Llavero de macOS y un procedimiento concreto:
+Los de producción necesitan credenciales en el Llavero de macOS y un procedimiento concreto:
 síguelo en [docs/operaciones.md](docs/operaciones.md).
 
 **Cliente** (`client/`):
@@ -141,7 +142,7 @@ yieldfit/
 │       ├── pages/          # Una carpeta por vista, cargadas con lazy()
 │       ├── context/        # AuthContext
 │       ├── hooks/          # Hooks propios (sesión activa, arranque de sesión…)
-│       ├── utils/          # Lógica sin UI: cálculo de progreso, sesión activa
+│       ├── utils/          # Lógica sin UI: sesión activa, aviso de arranque en frío
 │       └── styles/         # Tokens de diseño (variables.css)
 ├── server/                 # Backend Node + Express
 │   ├── index.js            # Punto de entrada: conecta a MongoDB y arranca Express
@@ -152,7 +153,7 @@ yieldfit/
 │   ├── routes/             # Un router por recurso
 │   ├── middlewares/        # Autenticación, 404 y errores
 │   ├── data/               # Ejercicios predefinidos
-│   ├── utils/              # JWT y clonado de presets
+│   ├── utils/              # JWT, presets, 1RM (Epley) y cálculo del progreso
 │   └── scripts/            # Seed, backups, diagnóstico y reparación
 ├── docs/                   # Documentación técnica
 ├── DECISIONS.md            # Registro de decisiones

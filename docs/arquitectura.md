@@ -91,7 +91,9 @@ flowchart TB
 | `/api/auth` | `authRoutes.js` | pública, salvo `GET /me` |
 | `/api/exercises` | `exerciseRoutes.js` | `requireAuth` a nivel router |
 | `/api/workouts` | `workoutRoutes.js` | `requireAuth` a nivel router |
-| `/api/sessions` | `sessionRoutes.js` | `requireAuth` a nivel router |
+| `/api/sessions` | `sessionRoutes.js` | `requireAuth` a nivel router; lista paginada por cursor ([0027](../DECISIONS.md)) |
+| `/api/progress` | `progressRoutes.js` | `requireAuth` a nivel router; solo lectura ([0026](../DECISIONS.md)) |
+| `/api/health` | en `app.js` | pública; despertador de la portada ([0025](../DECISIONS.md)) |
 | `/api/charts` | `chartRoutes.js` | `requireAuth` a nivel router (sin uso en el cliente todavía) |
 
 **Errores:** los controladores pasan los errores inesperados con `next(error)` a `errorHandler`.
@@ -112,8 +114,8 @@ flowchart TB
     CO["components/<br/>UI reutilizable + Layout, PrivateRoute"]
     H["hooks/<br/>useAuth · useActiveSession · useStartSession"]
     CTX["context/AuthContext"]
-    U["utils/<br/>performance.js (1RM, progreso)<br/>activeSession.js (localStorage)"]
-    API["api/<br/>auth · exercises · workouts · sessions"]
+    U["utils/<br/>activeSession.js (localStorage)<br/>wakingUp.js (arranque en frío)"]
+    API["api/<br/>auth · exercises · workouts · sessions · progress · health"]
     AX["api/client.js<br/>axios + interceptores"]
 
     P --> CO
@@ -129,9 +131,9 @@ flowchart TB
 - **`api/client.js`** es el único punto que habla con el backend: añade el token en cada
   petición, cronometra las peticiones para detectar el arranque en frío y, si recibe un 401 con
   token, borra el token y anuncia la sesión caducada (ver [auth.md](auth.md)).
-- **Lógica de negocio fuera de los componentes:** el cálculo del 1RM y del progreso vive en
-  `utils/performance.js` ([0007](../DECISIONS.md)); la sesión en curso, en
-  `utils/activeSession.js` ([0009](../DECISIONS.md)).
+- **Lógica de negocio fuera de los componentes:** el 1RM y el progreso se calculan en el
+  servidor (`utils/unaRM.js`, `utils/progreso.js`, [0026](../DECISIONS.md)); el cliente solo los
+  muestra. La sesión en curso vive en `utils/activeSession.js` ([0009](../DECISIONS.md)).
 - **Fondos WebGL** ([0011](../DECISIONS.md)): `Dither` solo en Welcome (carga diferida);
   `DarkVeil` dentro de `Layout`, así que está en todas las pantallas privadas.
 

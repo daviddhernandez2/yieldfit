@@ -89,8 +89,14 @@ Antes, haz un backup del estado actual, aunque esté dañado.
 
 ## Reparaciones puntuales de producción
 
-Para corregir datos de producción con un script (p. ej. `npm run reparar:borrados`, que borra
-las sesiones vacías y limpia las rutinas que apuntan a ejercicios inexistentes). Ningún usuario
+Para corregir o migrar datos de producción con un script:
+
+| Script | Qué hace | Comprobación del paso 6 |
+|---|---|---|
+| `npm run reparar:borrados` | Borra las sesiones vacías y limpia las rutinas que apuntan a ejercicios inexistentes (bloque 1) | `npm run diagnostico:borrados`: apartados 1 y 2 a 0 |
+| `npm run migrar:1rm` | Rellena `mejor1RM` en las sesiones guardadas antes del bloque 4. Se puede repetir sin efecto | la propia salida: "quedan pendientes: 0" |
+
+Los pasos de abajo usan `reparar:borrados` como ejemplo; con `migrar:1rm` son los mismos. Ningún usuario
 permanente puede escribir en producción salvo el de la app, así que cada reparación usa un
 **usuario temporal** que se crea para ella y desaparece después.
 

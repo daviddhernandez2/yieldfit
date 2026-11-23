@@ -63,6 +63,7 @@ erDiagram
         ObjectId exerciseId FK
         string nombreSnapshot "copia al guardar"
         string trackingSnapshot "copia al guardar"
+        number mejor1RM "calculado al guardar; null en cardio"
         number descansoSegundos
         number orden
     }
@@ -133,8 +134,29 @@ Entrenamiento realizado.
 - **No se editan:** no hay `PUT /api/sessions/:id`. El que había regeneraba los snapshots con
   los nombres actuales y el cliente nunca lo usó; se eliminó en el bloque 1. Una sesión solo se
   crea o se borra.
-- **Índice `{ userId: 1, fecha: -1 }`:** sirve para listar las sesiones de un usuario de la más
-  reciente a la más antigua, que es la query de `GET /api/sessions`.
+- **`mejor1RM`** en cada ejercicio ([0026](../DECISIONS.md)): el mejor 1RM estimado (Epley) de sus
+  series, calculado una vez al guardar con `utils/unaRM.js`; null en tiempo/distancia. Las
+  sesiones anteriores al bloque 4 lo recibieron con `npm run migrar:1rm`.
+- **Índice `{ userId: 1, fecha: -1 }`:** lo usan las dos consultas que crecen con el historial:
+  la lista paginada (`GET /api/sessions`, de la más reciente a la más antigua) y el progreso de
+  un rango (`GET /api/progress`).
+
+#### Cómo se calcula el progreso
+
+`GET /api/progress?desde&hasta` lee solo fecha, `exerciseId` y `mejor1RM` de las sesiones del
+rango, y `utils/progreso.js` calcula:
+
+```mermaid
+flowchart LR
+    S["sesiones del rango<br/>(fecha, exerciseId, mejor1RM)"] --> P["puntos por ejercicio<br/>(mejor por sesión;<br/>sin borrados ni cardio)"]
+    P --> E["% por ejercicio<br/>último / primero − 1"]
+    P --> I["índice base 100<br/>media de los índices,<br/>cada uno con su último valor"]
+    E --> G["% del grupo<br/>media de los %"]
+    I --> L["línea del gráfico<br/>(último punto − 100 = % del grupo)"]
+```
+
+Ejemplo: sentadilla 150 → 165 (+10 %, índice 110) y curl 20 → 21 (+5 %, índice 105): el grupo
+sube un 7,5 % y la línea acaba en 107,5.
 
 ### Chart
 Grupo de ejercicios para el progreso (`nombre`, `exerciseIds[]`). CRUD hecho en el backend,
@@ -171,7 +193,7 @@ Dónde se nota en el cliente:
 | Sitio | Qué hace |
 |---|---|
 | Diálogo de borrado (`utils/borradoEjercicio.js`) | Explica que se quita de rutinas y grupos y que el historial se conserva |
-| Dashboard (`quitarEjerciciosBorrados` en `utils/performance.js`) | Excluye del progreso los ejercicios que ya no existen (en el bloque 4 pasa al backend) |
+| Progreso (`GET /api/progress`) | El servidor excluye del cálculo los ejercicios que ya no existen |
 | Historial | Muestra la sesión tal cual, con el nombre del snapshot |
 | Empezar sesión desde rutina (`useStartSession`) | No incluye ejercicios inexistentes; si no queda ninguno, pide editar la rutina |
 | Terminar sesión activa (`ActiveSession.jsx`) | Comprueba qué ejercicios siguen existiendo; no envía las series de los borrados y avisa con su nombre |
@@ -187,6 +209,6 @@ crecen sin límite:
 
 | Colección | Crecimiento | Estado |
 |---|---|---|
-| Session | una por entrenamiento, indefinidamente | indexada; **`GET /api/sessions` sin paginar** (bloque 4) |
+| Session | una por entrenamiento, indefinidamente | indexada; lista paginada por cursor y progreso por rango, sin leer las series (bloque 4) |
 | Exercise | ~58 + los que cree el usuario | acotada |
 | Workout, Chart | pocas por usuario | acotadas |

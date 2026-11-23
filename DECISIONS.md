@@ -25,7 +25,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0004 | Snapshots en Session para un historial inmutable | vigente |
 | 0005 | Cascada `$pull` al borrar un ejercicio | sustituida por 0020 |
 | 0006 | `tracking` persistido y derivado en `pre('save')` | vigente |
-| 0007 | 1RM estimado con Epley, calculado en el cliente | vigente |
+| 0007 | 1RM estimado con Epley, calculado en el cliente | sustituida por 0026 |
 | 0008 | JWT de 7 días en `localStorage` | vigente |
 | 0009 | Sesión activa persistida en `localStorage` | vigente |
 | 0010 | CSS Modules + tokens en `variables.css` | vigente |
@@ -44,6 +44,8 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0023 | Hook que pide confirmación para git dentro de cualquier comando | vigente |
 | 0024 | Grupos musculares y tipos: el servidor es la única fuente | vigente |
 | 0025 | Aviso de arranque en frío y 401 sin recarga | vigente |
+| 0026 | Progreso en el servidor: 1RM precalculado, % tipo bolsa e índice base 100 | vigente |
+| 0027 | Historial paginado por cursor | vigente |
 
 ---
 
@@ -202,7 +204,7 @@ El usuario no lo elige.
 
 ## 0007 — 1RM estimado con Epley, calculado en el cliente
 
-Fecha: anterior a la entrega (≤ 2026-07) · Estado: vigente · Bloque: —
+Fecha: anterior a la entrega (≤ 2026-07) · Estado: sustituida por 0026 · Bloque: —
 Origen del porqué: la elección de Epley está documentada en `client/src/utils/performance.js`;
 calcularlo en el cliente no fue una elección consciente: no se pensó en hacerlo en el backend
 (confirmado por David)
@@ -822,3 +824,77 @@ también ante un 401 de contraseña incorrecta.
   con la pestaña abierta también es un arranque en frío.
 - Si el plan de Render cambia a uno sin suspensión, el aviso simplemente no aparecerá; no hay
   que quitar nada.
+
+---
+
+## 0026 — Progreso en el servidor: 1RM precalculado, % tipo bolsa e índice base 100
+
+Fecha: 2026-11-22 · Estado: vigente · Bloque: 4 · Sustituye a: 0007
+
+**Contexto:** el Dashboard descargaba todas las sesiones con sus series (2,7 MB con 10 años de
+historial en el seed) y recalculaba Epley sobre cada serie en cada visita (0007). Además, la
+métrica engañaba: el % era la *media de las variaciones* entre sesiones consecutivas
+(100 → 200 → 100 daba +25 % aunque se acabara donde se empezó), y la línea del gráfico era la
+media de los 1RM del día, dominada por los ejercicios pesados y por qué rutina tocaba.
+
+**Decisión** (de David):
+- **Epley se mantiene**, pero el 1RM se calcula **en el servidor, una vez, al guardar**:
+  cada ejercicio de sesión guarda `mejor1RM` (null en tiempo/distancia). Una sola copia de la
+  fórmula, `server/utils/unaRM.js`, usada por `create`, el seed y la migración
+  (`npm run migrar:1rm`). Las series no se editan (no hay PUT), así que el valor no se desfasa.
+- **`GET /api/progress?desde&hasta`** calcula el progreso leyendo solo fecha, `exerciseId` y
+  `mejor1RM` del rango, con el índice `{ userId, fecha }`. Excluye los ejercicios borrados
+  (0020) en el servidor. Acepta rango desde el principio para el selector del bloque 9.
+- **% tipo bolsa:** del primer punto del rango al último, `(último / primero − 1) × 100`.
+  Solo cuentan los ejercicios con al menos 2 puntos en el rango.
+- **Índice base 100 para el grupo:** cada ejercicio vale 100 en su primer punto del rango; la
+  línea es, en cada sesión, la media de los índices de los ejercicios ya empezados, y cada uno
+  mantiene su último valor hasta que se vuelve a hacer. El último punto − 100 = % del grupo.
+
+**Alternativas descartadas:**
+- *Mantener la media de variaciones y cambiarla en el bloque 9:* calcular dos veces lo mismo,
+  y la métrica antigua da números que no se corresponden con el progreso real.
+- *Media de los 1RM del día para la línea:* la sentadilla pesa más que el curl y el día de
+  piernas sube la línea aunque nadie haya progresado.
+- *Calcular el 1RM al leer (agregación sobre las series) en vez de guardarlo:* repite en cada
+  consulta un cálculo cuyo resultado no cambia nunca.
+
+**Consecuencias:**
+- Los porcentajes que se veían antes del bloque 4 cambian: miden otra cosa.
+- **Límite del % tipo bolsa:** un día malo justo al principio o al final del rango mueve mucho
+  el número. Usar el mejor 1RM de cada sesión (no la media de sus series) lo suaviza.
+- **Límite del índice:** un ejercicio que empieza a mitad del rango entra con 100 y tira de la
+  media hacia 100 ese día, aunque nadie haya empeorado.
+- En rangos cortos puede no haber ningún ejercicio con 2 puntos (con 3 rutinas que rotan, una
+  semana no repite ninguno): el grupo sale sin %. A tener en cuenta en el selector del bloque 9.
+- Con el rango total, la línea tiene un punto por sesión (~1.400 en 10 años, 73 KB). Si el
+  gráfico se vuelve lento, el bloque 9 puede agrupar puntos por semana en rangos largos.
+- Si cambia la fórmula del 1RM, hay que recalcular `mejor1RM` en todas las sesiones con una
+  migración.
+
+---
+
+## 0027 — Historial paginado por cursor
+
+Fecha: 2026-11-22 · Estado: vigente · Bloque: 4
+
+**Contexto:** `GET /api/sessions` devolvía todas las sesiones con sus series. Con el progreso ya
+en el servidor (0026), solo lo usa el Historial, que no necesita más que las primeras.
+
+**Decisión:**
+- `GET /api/sessions?cursor=…&limite=…` devuelve 20 sesiones (máximo 50) y `siguienteCursor`,
+  que señala la última enviada (`<fecha ISO>_<id>`); `null` cuando no hay más.
+- El Historial muestra un botón **"Cargar más"** (de David).
+
+**Alternativas descartadas:**
+- *Paginación por número de página (`skip`):* si se guarda una sesión mientras el usuario mira
+  el Historial, al pasar de página se repetiría una; y `skip` recorre todos los documentos
+  saltados, cada vez más lento al avanzar.
+- *Scroll infinito:* más complejo y más difícil de probar; se puede añadir encima del botón.
+
+**Consecuencias:**
+- Un cliente antiguo que espere la lista completa solo verá las 20 primeras. Durante el
+  despliegue del bloque 4 hay un par de minutos así (aceptado por David).
+- El orden desempata por `_id` cuando dos sesiones tienen la misma fecha; el índice
+  `{ userId, fecha }` no lo incluye, pero los empates son raros y se resuelven en memoria.
+

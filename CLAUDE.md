@@ -77,6 +77,7 @@ npm run backup   # backup de producción (ver docs/operaciones.md)
 npm run backup:restore-test
 npm run diagnostico:borrados   # solo lectura en producción (usuario de backup); -- --desarrollo para yieldfit-dev
 npm run reparar:borrados       # ESCRIBE en producción con usuario temporal; simula sin -- --aplicar (ver docs/operaciones.md)
+npm run migrar:1rm             # ESCRIBE en producción: rellena mejor1RM (bloque 4); mismo procedimiento
 
 # Frontend (desde /client) — requiere client/.env con VITE_API_URL
 npm run dev      # http://localhost:5173
@@ -93,7 +94,7 @@ client/src/
   pages/        # una carpeta por vista; todas cargadas con lazy() en App.jsx
   context/      # AuthContext
   hooks/        # useAuth, useActiveSession, useStartSession, useInView
-  utils/        # performance.js (cálculo de progreso), activeSession.js (localStorage)
+  utils/        # activeSession.js (localStorage), wakingUp.js (arranque en frío), borradoEjercicio.js
   styles/       # variables.css — tokens de diseño
 server/
   models/       # User, Exercise, Workout, Session, Chart
@@ -101,7 +102,7 @@ server/
   routes/       # un router por recurso; requireAuth aplicado a nivel router
   middlewares/  # requireAuth, notFoundHandler, errorHandler
   data/         # exercisePresets.js — ejercicios clonados a cada usuario al registrarse
-  utils/        # jwt.js, presets.js (clonado de presets)
+  utils/        # jwt.js, presets.js (clonado de presets), unaRM.js (Epley), progreso.js (+ .test.js)
   scripts/      # seed.js (datos de desarrollo), backup.sh, restore-test.sh, diagnostico-borrados.js y reparar-borrados.js;
                 # lib/ (credenciales.sh oculta la URI; recuentos.sh lee los logs;
                 # conexion.js: conexión y filtro de credenciales de los scripts Node)
@@ -117,7 +118,9 @@ Import alias en cliente: `@` → `client/src`.
   pero las sesiones lo conservan y el progreso lo ignora (0020; 409 si es el único de una rutina).
 - **Workout**: rutina (plantilla) con ejercicios embebidos (`numSeries`, `descansoSegundos`, `orden`).
 - **Session**: entrenamiento realizado. Ejercicios embebidos con **snapshots** (`nombreSnapshot`,
-  `trackingSnapshot`) para que el historial sea inmutable. Índice `{ userId: 1, fecha: -1 }`.
+  `trackingSnapshot`) para que el historial sea inmutable, y `mejor1RM` calculado al guardar.
+  Índice `{ userId: 1, fecha: -1 }`. El progreso lo calcula `GET /api/progress` (0026) y el
+  historial se pagina por cursor (0027).
 - **Chart**: grupo de ejercicios del usuario (`nombre`, `exerciseIds`). CRUD en backend hecho;
   **sin uso en el frontend todavía** (no existe `api/charts.js`).
 
@@ -181,8 +184,6 @@ Aplicar en cada cambio y avisar cuando algo existente no los cumpla:
 
 No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 
-- `GET /api/sessions` devuelve **todas** las sesiones sin paginar, y el progreso se calcula
-  en el cliente (`utils/performance.js`) sobre esa lista completa. Bloque 4.
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
 - JWT de 7 días en `localStorage` (`yieldfit_token`), sin refresh token ni rate limiting en login.
   Bloque 11 (en iPhone, almacenamiento seguro nativo en el bloque 12).

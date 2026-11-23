@@ -79,6 +79,7 @@ npm run backup:restore-test
 npm run diagnostico:borrados   # solo lectura en producción (usuario de backup); -- --desarrollo para yieldfit-dev
 npm run reparar:borrados       # ESCRIBE en producción con usuario temporal; simula sin -- --aplicar (ver docs/operaciones.md)
 npm run migrar:1rm             # ESCRIBE en producción: rellena mejor1RM (bloque 4); mismo procedimiento
+npm run admin -- correo        # ESCRIBE en producción: da el rol de admin (--quitar); mismo procedimiento
 
 # Frontend (desde /client) — requiere client/.env con VITE_API_URL
 npm run dev      # http://localhost:5173

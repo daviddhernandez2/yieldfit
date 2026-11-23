@@ -14,7 +14,8 @@
     "diagnostico:borrados": "node scripts/diagnostico-borrados.js",
     "diagnostico:cardio": "node scripts/diagnostico-cardio.js",
     "reparar:borrados": "node scripts/reparar-borrados.js",
-    "migrar:1rm": "node scripts/migrar-1rm.js"
+    "migrar:1rm": "node scripts/migrar-1rm.js",
+    "admin": "node scripts/asignar-admin.js"
   },
   "keywords": [],
   "author": "David Hernández Pérez",

@@ -95,8 +95,9 @@ Para corregir o migrar datos de producción con un script:
 |---|---|---|
 | `npm run reparar:borrados` | Borra las sesiones vacías y limpia las rutinas que apuntan a ejercicios inexistentes (bloque 1) | `npm run diagnostico:borrados`: apartados 1 y 2 a 0 |
 | `npm run migrar:1rm` | Rellena `mejor1RM` en las sesiones guardadas antes del bloque 4. Se puede repetir sin efecto | la propia salida: "quedan pendientes: 0" |
+| `npm run admin -- correo` | Da el rol de admin a ese usuario (`--quitar` lo devuelve a `usuario`). Bloque 11b | la propia salida: rol nuevo y "Admins en esta base: 1" |
 
-Los pasos de abajo usan `reparar:borrados` como ejemplo; con `migrar:1rm` son los mismos. Ningún usuario
+Los pasos de abajo usan `reparar:borrados` como ejemplo; con los demás son los mismos. Ningún usuario
 permanente puede escribir en producción salvo el de la app, así que cada reparación usa un
 **usuario temporal** que se crea para ella y desaparece después.
 

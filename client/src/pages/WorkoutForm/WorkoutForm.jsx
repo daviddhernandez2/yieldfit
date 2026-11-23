@@ -14,6 +14,7 @@ import ExercisePicker from '@/components/ExercisePicker/ExercisePicker.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import useOpcionesEjercicio, { tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
+import formulario from '@/styles/paginaFormulario.module.css';
 import styles from '@/pages/WorkoutForm/WorkoutForm.module.css';
 
 const DEFAULT_NUM_SERIES = 3;
@@ -159,32 +160,32 @@ export default function WorkoutForm() {
   };
 
   if (errorOpciones) {
-    return <p className={styles.feedback}>{errorOpciones}</p>;
+    return <p className={formulario.feedback}>{errorOpciones}</p>;
   }
 
   if (loading || !opciones) {
-    return <p className={styles.feedback}>Cargando...</p>;
+    return <p className={formulario.feedback}>Cargando...</p>;
   }
 
   return (
-    <div className={styles.page}>
+    <div className={formulario.page}>
       {/* Header: botón atrás delante del título, mismo patrón que
           SessionDetail y ExerciseForm. */}
-      <header className={styles.header}>
+      <header className={formulario.header}>
         <button
           type="button"
           onClick={() => navigate('/workouts')}
-          className={styles.backButton}
+          className={formulario.backButton}
           aria-label="Volver al listado de rutinas"
         >
           <IconChevronLeft />
         </button>
-        <h1 className={styles.title}>
+        <h1 className={formulario.title}>
           {isEditMode ? 'Editar rutina' : 'Nueva rutina'}
         </h1>
       </header>
 
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <form className={formulario.form} onSubmit={handleSubmit} noValidate>
         <Input
           id="nombre"
           label="Nombre"
@@ -197,8 +198,8 @@ export default function WorkoutForm() {
         />
 
         {ejercicios.length > 0 && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>
+          <section className={formulario.section}>
+            <h2 className={formulario.sectionTitle}>
               Ejercicios añadidos ({ejercicios.length})
             </h2>
             <div className={styles.addedList}>
@@ -253,8 +254,8 @@ export default function WorkoutForm() {
           </section>
         )}
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Añadir desde tu catálogo</h2>
+        <section className={formulario.section}>
+          <h2 className={formulario.sectionTitle}>Añadir desde tu catálogo</h2>
 
           {/* Buscador, chips y lista viven en ExercisePicker (compartido con la sesión
               activa). Pulsar un ejercicio lo añade o lo quita de la rutina. */}
@@ -267,14 +268,14 @@ export default function WorkoutForm() {
         </section>
 
         {errorMessage && (
-          <div className={styles.errorBanner} role="alert">
+          <div className={formulario.errorBanner} role="alert">
             {errorMessage}
           </div>
         )}
 
         {/* Botón principal centrado y con ancho contenido, coherente con
             ExerciseForm. Sin fullWidth para no dominar la pantalla. */}
-        <div className={styles.submitWrapper}>
+        <div className={formulario.submitWrapper}>
           <Button
             type="submit"
             variant="primary"
@@ -288,7 +289,7 @@ export default function WorkoutForm() {
       {/* Zona de eliminación (solo en modo edición). DeleteButton estándar
           discreto, alineado a la derecha, mismo patrón que ExerciseForm. */}
       {isEditMode && (
-        <div className={styles.deleteWrapper}>
+        <div className={formulario.deleteWrapper}>
           <DeleteButton
             onClick={() => setConfirmOpen(true)}
             disabled={submitting || deleting}

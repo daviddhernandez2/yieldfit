@@ -9,6 +9,7 @@ import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
 import ExercisePicker from "@/components/ExercisePicker/ExercisePicker.jsx";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import { contar } from "@/utils/activeSession.js";
+import formulario from "@/styles/paginaFormulario.module.css";
 import styles from "@/pages/GroupForm/GroupForm.module.css";
 
 const IconChevronLeft = () => (
@@ -89,19 +90,19 @@ export default function GroupForm() {
     }
   };
 
-  if (errorOpciones) return <p className={styles.feedback}>{errorOpciones}</p>;
-  if (!catalogo || !opciones) return <p className={styles.feedback}>Cargando...</p>;
+  if (errorOpciones) return <p className={formulario.feedback}>{errorOpciones}</p>;
+  if (!catalogo || !opciones) return <p className={formulario.feedback}>Cargando...</p>;
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <button type="button" onClick={() => navigate("/dashboard")} className={styles.backButton} aria-label="Volver al progreso">
+    <div className={formulario.page}>
+      <header className={formulario.header}>
+        <button type="button" onClick={() => navigate("/dashboard")} className={formulario.backButton} aria-label="Volver al progreso">
           <IconChevronLeft />
         </button>
-        <h1 className={styles.title}>{editando ? "Editar grupo" : "Nuevo grupo"}</h1>
+        <h1 className={formulario.title}>{editando ? "Editar grupo" : "Nuevo grupo"}</h1>
       </header>
 
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <form className={formulario.form} onSubmit={handleSubmit} noValidate>
         <Input
           id="nombre"
           label="Nombre"
@@ -113,8 +114,8 @@ export default function GroupForm() {
           autoFocus={!editando}
         />
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>
+        <section className={formulario.section}>
+          <h2 className={formulario.sectionTitle}>
             Ejercicios del grupo ({contar(seleccionados.size, "elegido", "elegidos")})
           </h2>
           <p className={styles.ayuda}>
@@ -129,12 +130,12 @@ export default function GroupForm() {
         </section>
 
         {errorMessage && (
-          <div className={styles.errorBanner} role="alert">
+          <div className={formulario.errorBanner} role="alert">
             {errorMessage}
           </div>
         )}
 
-        <div className={styles.submitWrapper}>
+        <div className={formulario.submitWrapper}>
           <Button type="submit" variant="primary" disabled={guardando || !nombre.trim() || seleccionados.size === 0}>
             {guardando ? "Guardando..." : editando ? "Guardar cambios" : "Crear grupo"}
           </Button>
@@ -142,7 +143,7 @@ export default function GroupForm() {
       </form>
 
       {editando && (
-        <div className={styles.deleteWrapper}>
+        <div className={formulario.deleteWrapper}>
           <DeleteButton onClick={() => setConfirmBorrar(true)} disabled={guardando}>
             Eliminar grupo
           </DeleteButton>

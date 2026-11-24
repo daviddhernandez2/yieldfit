@@ -201,6 +201,11 @@ elementos de una página van al mismo ancho.
 pequeños y elementos dentro de una tarjeta `radius-sm` o `radius-xs`; botones, chips, barras y
 círculos `radius-pill`. Nunca un valor suelto. **Botones:** su texto nunca se parte en dos líneas;
 si dos no caben, `GrupoBotones` los apila.
+**Widgets del Dashboard** (bloque 9d): todos siguen la anatomía común de la tarjeta **Widget** del
+design system (relleno de 16 px, cabecera de 20 px con etiqueta y dato secundario, contenido
+alineado arriba, separaciones fijas, escala de texto por tamaño y nada que se estire para
+rellenar). **Cada widget nuevo se diseña con esa anatomía en todos sus tamaños (P, M, G) y David lo
+aprueba en el artefacto (tarjetas Widget y Dashboard) antes de implementarlo.**
 
 ## Criterios de escalabilidad
 

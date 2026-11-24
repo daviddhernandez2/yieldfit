@@ -81,6 +81,7 @@ npm run diagnostico:huerfanos  # solo lectura en producción: datos de usuarios 
 npm run reparar:borrados       # ESCRIBE en producción con usuario temporal; simula sin -- --aplicar (ver docs/operaciones.md)
 npm run reparar:huerfanos      # ESCRIBE en producción: borra esos datos; mismo procedimiento (1c)
 npm run migrar:1rm             # ESCRIBE en producción: rellena mejor1RM (bloque 4); mismo procedimiento
+npm run migrar:pr              # ESCRIBE en producción: marca los récords (bloque 4b); mismo procedimiento
 npm run admin -- correo        # ESCRIBE en producción: da el rol de admin (--quitar); mismo procedimiento
 npm run restablecer -- correo  # ESCRIBE en producción: contraseña temporal (bloque 11b); mismo procedimiento
 

@@ -17,6 +17,7 @@
     "reparar:borrados": "node scripts/reparar-borrados.js",
     "reparar:huerfanos": "node scripts/reparar-huerfanos.js",
     "migrar:1rm": "node scripts/migrar-1rm.js",
+    "migrar:pr": "node scripts/migrar-pr.js",
     "admin": "node scripts/asignar-admin.js",
     "restablecer": "node scripts/restablecer-contrasena.js"
   },

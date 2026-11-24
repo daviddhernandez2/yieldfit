@@ -95,6 +95,7 @@ Para corregir o migrar datos de producción con un script:
 |---|---|---|
 | `npm run reparar:borrados` | Borra las sesiones vacías y limpia las rutinas que apuntan a ejercicios inexistentes (bloque 1) | `npm run diagnostico:borrados`: apartados 1 y 2 a 0 |
 | `npm run migrar:1rm` | Rellena `mejor1RM` en las sesiones guardadas antes del bloque 4. Se puede repetir sin efecto | la propia salida: "quedan pendientes: 0" |
+| `npm run migrar:pr` | Marca los récords personales (`esPR`, `prAnterior`) en las sesiones y rellena `record1RM` en los ejercicios (bloque 4b). Solo escribe lo que cambia: se puede repetir, y sirve para reconstruir los récords si no cuadran | la propia salida: "Comprobación: sesiones pendientes 0" |
 | `npm run admin -- correo` | Da el rol de admin a ese usuario (`--quitar` lo devuelve a `usuario`). Bloque 11b | la propia salida: rol nuevo y "Admins en esta base: 1" |
 | `npm run reparar:huerfanos` | Borra los datos de usuarios que ya no existen (los 4 borrados a mano), en todas las colecciones con `userId`. Para si encuentra más de 10 usuarios huérfanos. Bloque 1c | `npm run diagnostico:huerfanos`: "Usuarios inexistentes con datos: 0" |
 | `npm run restablecer -- correo` | Pone una contraseña temporal a quien ha olvidado la suya y cierra todas sus sesiones. Bloque 11b ([auth.md](auth.md#cambiar-la-contraseña)) | la propia salida: la contraseña temporal, que no se guarda en ningún sitio |

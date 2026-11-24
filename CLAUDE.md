@@ -77,7 +77,9 @@ npm run seed     # BORRA yieldfit-dev y la rellena con datos de prueba (--anios 
 npm run backup   # backup de producción (ver docs/operaciones.md)
 npm run backup:restore-test
 npm run diagnostico:borrados   # solo lectura en producción (usuario de backup); -- --desarrollo para yieldfit-dev
+npm run diagnostico:huerfanos  # solo lectura en producción: datos de usuarios que ya no existen (1c)
 npm run reparar:borrados       # ESCRIBE en producción con usuario temporal; simula sin -- --aplicar (ver docs/operaciones.md)
+npm run reparar:huerfanos      # ESCRIBE en producción: borra esos datos; mismo procedimiento (1c)
 npm run migrar:1rm             # ESCRIBE en producción: rellena mejor1RM (bloque 4); mismo procedimiento
 npm run admin -- correo        # ESCRIBE en producción: da el rol de admin (--quitar); mismo procedimiento
 npm run restablecer -- correo  # ESCRIBE en producción: contraseña temporal (bloque 11b); mismo procedimiento
@@ -212,10 +214,11 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
 - **Datos huérfanos de usuarios inexistentes:** en producción hay ejercicios de 11 usuarios
   distintos pero solo 7 usuarios (diagnóstico de cardio, 2026-11-23). Parece que se borraron 4
-  usuarios a mano sin borrar sus datos: ejercicios y quizá rutinas, sesiones o grupos. Pendiente:
-  un diagnóstico de solo lectura que los cuente y una limpieza con el procedimiento de
-  reparaciones (`docs/operaciones.md`). Desde el 11b.4 la app borra la cuenta con todos sus datos,
-  así que no deberían aparecer huérfanos nuevos.
+  usuarios a mano sin borrar sus datos: ejercicios y quizá rutinas, sesiones o grupos. Desde el
+  bloque 1c existen `npm run diagnostico:huerfanos` (solo lectura) y `npm run reparar:huerfanos`
+  (procedimiento de reparaciones, `docs/operaciones.md`): **pendiente de ejecutarlos en
+  producción**. Desde el 11b.4 la app borra la cuenta con todos sus datos, y desde el 1c el seed
+  vacía todas las colecciones con `userId`, así que no deberían aparecer huérfanos nuevos.
 - **Cardio en la sesión activa:** solo tiene campos de peso y reps, así que hoy no se puede
   registrar tiempo y distancia desde la app (los ejercicios `tiempo_distancia` se guardan con
   peso y reps a 0). El seed sí crea sesiones de cardio porque escribe directamente en la base.
@@ -239,16 +242,10 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - **Backups solo en el portátil:** la revisión prevista en la 0018 ("backups automáticos fuera
   del portátil cuando haya usuarios reales además de David") ya aplica con la beta del 11b. Si
   el portátil se pierde o se estropea, no hay copia. Desde la 0039 se conservan los 3 últimos.
-- **Vulnerabilidades de dependencias (`npm audit`, 2026-11-24).** El servidor se actualizó el
-  2026-11-24 con `npm audit fix` (mongoose 9.13, proxy-addr 2.0.8, body-parser 2.4, morgan 1.12,
-  qs 6.17): 0 vulnerabilidades en producción. Quedan, para revisar en su propio paso:
-  - **Servidor, solo desarrollo (2 moderadas):** `nodemon`; el arreglo es un cambio incompatible
-    (`npm audit fix --force`).
-  - **Cliente, producción (4 altas):** `axios`, `follow-redirects`, `react-router` y
-    `react-router-dom`. Riesgo bajo en el navegador: casi todos los avisos de `axios` son del
-    adaptador de Node, que el navegador no usa, y el de `react-router` es del modo RSC, que no se usa.
-  - **Cliente, solo desarrollo (4 altas):** `vite`, `postcss`, `nanoid` y `source-map-js`: afectan
-    al servidor de desarrollo y al build, no a la app publicada.
+- **Vulnerabilidades de dependencias** (`npm audit`): servidor y cliente actualizados con
+  `npm audit fix` el 2026-11-24 (bloques 9c y 1c): 0 en producción y 0 en el cliente. Queda
+  `nodemon` (2 moderadas, solo desarrollo), cuyo arreglo es un cambio incompatible
+  (`npm audit fix --force`).
 - `Dither.jsx`: `useFrame` incompleto (solo actualiza el tiempo; las props no reaccionan tras
   montar y `prevColor` no se usa). Bloque 12.
 

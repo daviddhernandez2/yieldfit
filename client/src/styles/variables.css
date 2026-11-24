@@ -127,6 +127,26 @@
    --duration-fast: 150ms;
    --duration-overlay: 280ms;
    --transition-base: all 0.15s ease;
+   /* Transición de los controles (botones, chips, opciones, campos): solo las propiedades que
+      cambian al pasar el ratón, pulsar o enfocar, nunca `all`. */
+   --transition-control:
+     background-color var(--duration-fast) var(--ease-standard),
+     border-color var(--duration-fast) var(--ease-standard),
+     color var(--duration-fast) var(--ease-standard),
+     box-shadow var(--duration-fast) var(--ease-standard),
+     transform var(--duration-fast) var(--ease-standard);
+}
+
+/* Movimiento reducido: si el sistema lo pide, nada se mueve (ni escala al pulsar ni entra
+   deslizándose). Los cambios de color se quedan: no son movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-control:
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard);
+  }
 }
 
 /* Elimina el outline azul del navegador y lo sustituye por uno verde

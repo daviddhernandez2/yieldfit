@@ -6,7 +6,7 @@
   gap: var(--space-sm);
   border-radius: var(--radius-pill);
   font-weight: var(--font-weight-medium);
-  transition: var(--transition-base);
+  transition: var(--transition-control);
   /* Sin nowrap: si un botón no cabe ni a ancho completo, el texto baja de línea en vez de
      salirse. En filas de botones, quien decide si se apilan es GrupoBotones. */
   max-width: 100%;
@@ -88,4 +88,15 @@
 /* Modificador opcional: ocupar todo el ancho disponible */
 .fullWidth {
   width: 100%;
+}
+
+/* Al pulsar se hunde un poco (tema Premium). Sin movimiento si el sistema lo pide. */
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button:active:not(:disabled) {
+    transform: none;
+  }
 }

@@ -31,13 +31,13 @@
   color: var(--color-text);
   font-size: var(--font-size-base);
   cursor: pointer;
-  transition: var(--transition-base);
+  transition: var(--transition-control);
   min-height: 48px;
   user-select: none;
 }
 
 .option:hover {
-  border-color: var(--color-text-muted);
+  border-color: var(--color-border-strong);
 }
 
 /* Estado seleccionado: borde y texto en verde, fondo ligeramente teñido.
@@ -58,4 +58,15 @@
 .errorMessage {
   font-size: var(--font-size-sm);
   color: var(--color-error);
+}
+
+/* Al pulsar se hunde un poco (tema Premium). Sin movimiento si el sistema lo pide. */
+.option:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option:active {
+    transform: none;
+  }
 }

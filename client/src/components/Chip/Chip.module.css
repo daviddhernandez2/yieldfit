@@ -9,15 +9,27 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
-  transition: var(--transition-base);
+  transition: var(--transition-control);
 }
 
 .chip:hover {
   color: var(--color-text);
+  border-color: var(--color-border-strong);
 }
 
 .selected {
   background-color: rgba(62, 248, 126, 0.08);
   border-color: var(--color-accent);
   color: var(--color-accent);
+}
+
+/* Al pulsar se hunde un poco (tema Premium). Sin movimiento si el sistema lo pide. */
+.chip:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip:active {
+    transform: none;
+  }
 }

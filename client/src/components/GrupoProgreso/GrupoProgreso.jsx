@@ -185,15 +185,15 @@ export default function GrupoProgreso({ grupoId = null, nombre, numEjercicios })
                   <AreaChart data={serieGrafica} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id={idDegradado} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#3EF87E" stopOpacity={0.6} />
-                        <stop offset="50%" stopColor="#3EF87E" stopOpacity={0.2} />
-                        <stop offset="100%" stopColor="#3EF87E" stopOpacity={0} />
+                        {/* Área del color de la línea, del 22 % al 0 % (design system, bloque 9c). */}
+                        <stop offset="0%" stopColor="var(--chart-gain)" stopOpacity={0.22} />
+                        <stop offset="100%" stopColor="var(--chart-gain)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid stroke="#1f1f1f" vertical={false} />
-                    <XAxis dataKey="etiqueta" stroke="#888888" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
+                    <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                    <XAxis dataKey="etiqueta" stroke="var(--chart-neutral)" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
                     <YAxis
-                      stroke="#888888"
+                      stroke="var(--chart-neutral)"
                       fontSize={11}
                       tickLine={false}
                       axisLine={false}
@@ -202,19 +202,26 @@ export default function GrupoProgreso({ grupoId = null, nombre, numEjercicios })
                       tickFormatter={(v) => formatPorcentaje(v - 100)}
                     />
                     <Tooltip
-                      contentStyle={{ backgroundColor: "#0a0a0a", border: "1px solid #1f1f1f", borderRadius: "8px", color: "#ffffff" }}
+                      // Colores de las gráficas y superficies desde los tokens (bloque 9c): Recharts
+                      // pinta SVG y estilos en línea, que aceptan variables CSS.
+                      contentStyle={{
+                        backgroundColor: "var(--surface-2)",
+                        border: "1px solid var(--color-border)",
+                        borderRadius: "var(--radius-sm)",
+                        color: "var(--color-text)",
+                      }}
                       formatter={(value) => [formatPorcentaje(value - 100), "Progreso"]}
                       labelFormatter={(etiqueta, payload) => payload?.[0]?.payload.fechaCompleta ?? etiqueta}
-                      labelStyle={{ color: "#888888" }}
+                      labelStyle={{ color: "var(--color-text-muted)" }}
                     />
                     <Area
                       type="monotone"
                       dataKey="indice"
-                      stroke="#3EF87E"
-                      strokeWidth={2.5}
+                      stroke="var(--chart-gain)"
+                      strokeWidth={1.5}
                       fill={`url(#${idDegradado})`}
                       dot={false}
-                      activeDot={{ r: 5, fill: "#3EF87E" }}
+                      activeDot={{ r: 5, fill: "var(--chart-gain)" }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>

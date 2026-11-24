@@ -22,6 +22,7 @@ import Session from '../models/Session.js';
 import Chart from '../models/Chart.js';
 import { clonarPresetsAUsuario } from '../utils/presets.js';
 import { mejor1RMDeEjercicio } from '../utils/unaRM.js';
+import { recalcularRecords } from '../utils/records.js';
 import { MODELOS_DEL_USUARIO } from '../utils/borrarCuenta.js';
 
 // Credenciales del usuario de prueba. Pueden estar en un repo público: solo
@@ -212,11 +213,17 @@ const main = async () => {
   // insertMany sí ejecuta las validaciones del schema (no así los pre('save')).
   await Session.insertMany(sesiones);
 
+  // Récords (bloque 4b): las sesiones se insertan de golpe, sin pasar por el controlador,
+  // así que se marcan después con la misma función que usa la app al borrar una sesión.
+  const ids1RM = ejercicios.filter((ex) => ex.tracking === '1RM').map((ex) => ex._id);
+  const records = await recalcularRecords({ db: mongoose.connection.db, userId: user._id, exerciseIds: ids1RM });
+
   console.log('Seed completado:');
   console.log(`  usuario:    ${USUARIO_PRUEBA.email} / ${USUARIO_PRUEBA.password}`);
   console.log(`  ejercicios: ${ejercicios.length}`);
   console.log(`  rutinas:    ${workouts.length}`);
   console.log(`  sesiones:   ${sesiones.length} (${anios} años)`);
+  console.log(`  récords:    ${records.sesionesCambiadas} sesiones con algún récord`);
 };
 
 main()

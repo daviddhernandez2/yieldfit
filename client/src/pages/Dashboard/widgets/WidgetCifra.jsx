@@ -12,7 +12,7 @@ export default function WidgetCifra({ tipo, progreso, error, className = '' }) {
   const etiqueta = esProgreso ? 'Progreso total' : 'Sesiones';
 
   return (
-    <section className={`${styles.widget} glassCard ${className}`} aria-label={etiqueta}>
+    <section className={`${styles.widget} ${styles.cifras} glassCard ${className}`} aria-label={etiqueta}>
       <h2 className={styles.etiqueta}>{etiqueta}</h2>
       {error ? (
         <p className={styles.error}>No se ha podido cargar.</p>

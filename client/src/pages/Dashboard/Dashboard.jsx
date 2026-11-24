@@ -138,7 +138,8 @@ export default function Dashboard() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Progreso</h1>
+        {/* "Inicio", como en el menú: la pantalla ya no es solo el progreso (bloque 9d). */}
+        <h1 className={styles.title}>Inicio</h1>
         {/* Hasta el catálogo del modo edición (paso 3), los grupos se siguen creando aquí. */}
         <button type="button" className={styles.newGroupButton} onClick={() => navigate('/groups/new')} aria-label="Nuevo grupo">
           <IconPlus />

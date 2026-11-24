@@ -14,6 +14,7 @@ import progressRoutes from './routes/progressRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import estadisticasRoutes from './routes/estadisticasRoutes.js';
 
 const app = express();
 
@@ -97,6 +98,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/estadisticas', estadisticasRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

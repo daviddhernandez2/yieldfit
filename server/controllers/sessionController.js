@@ -4,6 +4,7 @@ import Exercise from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
 import { mejor1RMDeEjercicio } from '../utils/unaRM.js';
 import { evaluarEjercicioEnSesion, recalcularRecords } from '../utils/records.js';
+import { zonaValida } from '../utils/zona.js';
 
 // Verifica que el workoutId (si viene) pertenezca al usuario.
 const verificarOwnershipDeWorkout = async (workoutId, userId) => {
@@ -144,15 +145,6 @@ export const list = async (req, res, next) => {
 
 const MAX_DIAS_CALENDARIO = 366;
 
-// ¿Es una zona horaria IANA válida ("Europe/Madrid")? Intl lanza un error si no.
-const zonaValida = (zona) => {
-  try {
-    new Intl.DateTimeFormat('es-ES', { timeZone: zona });
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 // GET /api/sessions/days?desde=…&hasta=…&zona=Europe/Madrid
 // Días entrenados en un rango, para el calendario (bloque 8, DECISIONS.md 0033). Solo

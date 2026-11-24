@@ -411,16 +411,38 @@ export const create = async (req, res, next) => {
 };
 
 // DELETE /api/sessions/:id
-// Borra una sesión del usuario. No tiene efectos en cascada: una sesión no es
-// referenciada por nadie más, su borrado es simple.
+// Borra una sesión del usuario. Nadie más la referencia, pero sí afecta a los récords
+// (bloque 4b): si la sesión borrada tenía la marca de un ejercicio, o era un error (500 kg en
+// vez de 50), los récords posteriores de ese ejercicio cambian. Por eso, en la misma
+// transacción, se recalculan los récords de sus ejercicios de fuerza (decisión de David:
+// opción b de la 0051). Cuesta leer el historial de esos ejercicios (sin series), pero borrar
+// una sesión es raro.
 export const remove = async (req, res, next) => {
+  const transaccion = await mongoose.startSession();
   try {
-    const result = await Session.deleteOne({
-      _id: req.params.id,
-      userId: req.user._id,
+    let encontrada = false;
+    await transaccion.withTransaction(async () => {
+      const borrada = await Session.findOneAndDelete(
+        { _id: req.params.id, userId: req.user._id },
+        { session: transaccion, projection: { 'ejercicios.exerciseId': 1, 'ejercicios.trackingSnapshot': 1 } }
+      );
+      encontrada = Boolean(borrada);
+      if (!borrada) return;
+
+      const ids1RM = borrada.ejercicios
+        .filter((ej) => ej.trackingSnapshot === '1RM')
+        .map((ej) => ej.exerciseId);
+      if (ids1RM.length) {
+        await recalcularRecords({
+          db: mongoose.connection.db,
+          userId: req.user._id,
+          exerciseIds: ids1RM,
+          session: transaccion,
+        });
+      }
     });
 
-    if (result.deletedCount === 0) {
+    if (!encontrada) {
       return res.status(404).json({
         error: 'Not Found',
         message: 'Sesión no encontrada',
@@ -436,5 +458,7 @@ export const remove = async (req, res, next) => {
       });
     }
     next(error);
+  } finally {
+    await transaccion.endSession();
   }
 };

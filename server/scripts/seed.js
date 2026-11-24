@@ -22,6 +22,7 @@ import Session from '../models/Session.js';
 import Chart from '../models/Chart.js';
 import { clonarPresetsAUsuario } from '../utils/presets.js';
 import { mejor1RMDeEjercicio } from '../utils/unaRM.js';
+import { MODELOS_DEL_USUARIO } from '../utils/borrarCuenta.js';
 
 // Credenciales del usuario de prueba. Pueden estar en un repo público: solo
 // existen en la base de desarrollo, que se regenera con este script.
@@ -125,7 +126,10 @@ const main = async () => {
   }
 
   console.log(`Vaciando ${nombreBase}...`);
-  await Promise.all([User, Exercise, Workout, Session, Chart].map((M) => M.deleteMany({})));
+  // El usuario y TODAS las colecciones con userId (la misma lista que borra una cuenta). Antes
+  // solo vaciaba cinco, y las del bloque 11b (reportes, tokens, enlaces de recuperación) se
+  // quedaban huérfanas de usuarios que el seed acababa de borrar (bloque 1c).
+  await Promise.all([User, ...MODELOS_DEL_USUARIO].map((M) => M.deleteMany({})));
 
   // save() (y no insertMany) para que pre('save') hashee la contraseña.
   const user = await new User(USUARIO_PRUEBA).save();

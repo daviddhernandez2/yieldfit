@@ -563,87 +563,93 @@ function SetRow({
   };
 
   return (
-    <div
-      className={`${styles.setRow} ${set.completada ? styles.setRowCompleted : ""}`}
-      onClick={handleRowClick}
-    >
-      <span className={styles.setIndex}>{setIndex + 1}</span>
-      <input
-        type="number"
-        inputMode="decimal"
-        step="0.5"
-        min="0"
-        className={styles.setInput}
-        value={set.peso}
-        onChange={(e) => onChangePeso(e.target.value)}
-        // Vacío, muestra en gris lo de la vez anterior (setInput::placeholder usa el
-        // color de texto secundario, para no confundirlo con un valor escrito).
-        placeholder={anterior?.peso != null ? String(anterior.peso) : "—"}
-        aria-label={
-          anterior?.peso != null
-            ? `Peso de la serie ${setIndex + 1}. La vez anterior: ${anterior.peso} kg`
-            : `Peso de la serie ${setIndex + 1}`
-        }
-      />
-      <input
-        type="number"
-        inputMode="numeric"
-        min="0"
-        className={styles.setInput}
-        value={set.reps}
-        onChange={(e) => onChangeReps(e.target.value)}
-        placeholder={anterior?.reps != null ? String(anterior.reps) : "—"}
-        aria-label={
-          anterior?.reps != null
-            ? `Repeticiones de la serie ${setIndex + 1}. La vez anterior: ${anterior.reps}`
-            : `Repeticiones de la serie ${setIndex + 1}`
-        }
-      />
-      {/* Pill de descanso: siempre visible si hay descanso configurado.
-          - En serie completada + timer activo: cuenta atrás en verde brillante.
-          - En el resto: descanso total en gris como referencia. */}
-      {tiempoLabel ? (
-        <span
-          className={`${styles.restPill} ${timerCorriendo ? styles.restPillActive : ""}`}
-          aria-hidden="true"
-        >
-          {tiempoLabel}
-        </span>
-      ) : (
-        <span />
-      )}
-      <button
-        type="button"
-        onClick={onToggleCompletada}
-        className={`${styles.completeButton} ${set.completada ? styles.completed : ""}`}
-        aria-label={
-          set.completada
-            ? "Desmarcar como completada"
-            : "Marcar como completada"
-        }
+    // Envoltorio de la fila (bloque 11d): la barra del descanso va aquí y no dentro de la fila,
+    // que es una retícula. En el iPhone (WebKit), un hijo con position: absolute dentro de una
+    // retícula no se pintaba donde tocaba y la barra no se veía.
+    <div className={styles.filaSerie}>
+      <div
+        className={`${styles.setRow} ${set.completada ? styles.setRowCompleted : ""}`}
+        onClick={handleRowClick}
       >
-        {set.completada ? (
-          <IconCheck />
+        <span className={styles.setIndex}>{setIndex + 1}</span>
+        <input
+          type="number"
+          inputMode="decimal"
+          step="0.5"
+          min="0"
+          className={styles.setInput}
+          value={set.peso}
+          onChange={(e) => onChangePeso(e.target.value)}
+          // Vacío, muestra en gris lo de la vez anterior (setInput::placeholder usa el
+          // color de texto secundario, para no confundirlo con un valor escrito).
+          placeholder={anterior?.peso != null ? String(anterior.peso) : "—"}
+          aria-label={
+            anterior?.peso != null
+              ? `Peso de la serie ${setIndex + 1}. La vez anterior: ${anterior.peso} kg`
+              : `Peso de la serie ${setIndex + 1}`
+          }
+        />
+        <input
+          type="number"
+          inputMode="numeric"
+          min="0"
+          className={styles.setInput}
+          value={set.reps}
+          onChange={(e) => onChangeReps(e.target.value)}
+          placeholder={anterior?.reps != null ? String(anterior.reps) : "—"}
+          aria-label={
+            anterior?.reps != null
+              ? `Repeticiones de la serie ${setIndex + 1}. La vez anterior: ${anterior.reps}`
+              : `Repeticiones de la serie ${setIndex + 1}`
+          }
+        />
+        {/* Pill de descanso: siempre visible si hay descanso configurado.
+            - En serie completada + timer activo: cuenta atrás en verde brillante.
+            - En el resto: descanso total en gris como referencia. */}
+        {tiempoLabel ? (
+          <span
+            className={`${styles.restPill} ${timerCorriendo ? styles.restPillActive : ""}`}
+            aria-hidden="true"
+          >
+            {tiempoLabel}
+          </span>
         ) : (
-          <span className={styles.circle}></span>
+          <span />
         )}
-      </button>
-      <button
-        type="button"
-        onClick={onQuitar}
-        className={styles.deleteSetButton}
-        aria-label="Quitar serie"
-      >
-        <IconTrash />
-      </button>
+        <button
+          type="button"
+          onClick={onToggleCompletada}
+          className={`${styles.completeButton} ${set.completada ? styles.completed : ""}`}
+          aria-label={
+            set.completada
+              ? "Desmarcar como completada"
+              : "Marcar como completada"
+          }
+        >
+          {set.completada ? (
+            <IconCheck />
+          ) : (
+            <span className={styles.circle}></span>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={onQuitar}
+          className={styles.deleteSetButton}
+          aria-label="Quitar serie"
+        >
+          <IconTrash />
+        </button>
+      </div>
 
-      {/* Barra de progreso animada del timer de descanso. Se dibuja como
-          borde inferior de la fila y se rellena de izquierda a derecha. */}
+      {/* Barra de progreso animada del timer de descanso. Se dibuja como borde inferior de
+          la fila y se rellena de izquierda a derecha con scaleX (no con width): WebKit la
+          anima mejor y no obliga a recalcular el diseño de la página cada segundo. */}
       {timerActivo && (
         <div className={styles.timerTrack} aria-hidden="true">
           <div
             className={styles.timerFill}
-            style={{ width: `${progresoPct}%` }}
+            style={{ transform: `scaleX(${progresoPct / 100})` }}
           />
         </div>
       )}

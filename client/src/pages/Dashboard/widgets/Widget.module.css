@@ -133,12 +133,13 @@
   overflow: hidden;
 }
 
-/* La gráfica ocupa lo que sobra, pero nunca menos de 96 px: así, al desplegar la lista, la
-   medida del contenido la incluye y no se queda en nada. */
+/* Alto fijo: en una misma fila, las gráficas de los grupos miden lo mismo tengan los ejercicios
+   que tengan (antes ocupaba lo que sobraba y "+N ejercicios" la acortaba). Si sobra espacio,
+   queda debajo de la lista. Al desplegar, la gráfica no cambia y la lista crece. */
 .zonaGrafica {
   display: flex;
-  flex: 1;
-  min-height: 96px;
+  flex: none;
+  height: 96px;
 }
 
 /* Lista de ejercicios: tres, y el resto con "+N ejercicios". */

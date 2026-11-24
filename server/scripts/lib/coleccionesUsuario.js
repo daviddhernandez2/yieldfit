@@ -12,4 +12,5 @@ export const COLECCIONES_DEL_USUARIO = [
   'bugreports',
   'refreshtokens',
   'passwordresets',
+  'dashboards',
 ];

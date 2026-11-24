@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
 import Workout from '../models/Workout.js';
 import Exercise from '../models/Exercise.js';
+import Dashboard from '../models/Dashboard.js';
 
 // Comprueba que todos los exerciseIds existan y pertenezcan al usuario.
 // Recibe la lista de objetos {exerciseId, numSeries, ...} del workout.
@@ -165,10 +167,19 @@ export const update = async (req, res, next) => {
 // Borra una rutina del usuario. Las sesiones existentes basadas en ella no se ven
 // afectadas porque las sesiones guardan snapshots independientes de la rutina.
 export const remove = async (req, res, next) => {
+  // Transacción (bloque 9d): la rutina y su widget "Empezar rutina" del Dashboard, todo o nada.
+  // Un widget que apunta a una rutina borrada no se podría usar.
+  const session = await mongoose.startSession();
   try {
-    const result = await Workout.deleteOne({
-      _id: req.params.id,
-      userId: req.user._id,
+    let result;
+    await session.withTransaction(async () => {
+      result = await Workout.deleteOne({ _id: req.params.id, userId: req.user._id }, { session });
+      if (result.deletedCount === 0) return;
+      await Dashboard.updateOne(
+        { userId: req.user._id },
+        { $pull: { widgets: { workoutId: req.params.id } } },
+        { session }
+      );
     });
 
     if (result.deletedCount === 0) {
@@ -187,5 +198,7 @@ export const remove = async (req, res, next) => {
       });
     }
     next(error);
+  } finally {
+    await session.endSession();
   }
 };

@@ -40,12 +40,14 @@ export const get = async (req, res, next) => {
     let idsDelGrupo = null;
     if (req.query.grupo !== undefined) {
       const grupo = mongoose.isValidObjectId(req.query.grupo)
-        ? await Chart.findOne({ _id: req.query.grupo, userId: req.user._id }, { exerciseIds: 1 }).lean()
+        ? await Chart.findOne({ _id: req.query.grupo, userId: req.user._id }, { exerciseIds: 1, todos: 1 }).lean()
         : null;
       if (!grupo) {
         return res.status(404).json({ error: 'Not Found', message: 'Grupo no encontrado' });
       }
-      idsDelGrupo = new Set(grupo.exerciseIds.map(String));
+      // El grupo "Todos" (bloque 9d) no tiene lista: cuenta con todos los ejercicios, igual
+      // que la petición sin grupo.
+      idsDelGrupo = grupo.todos ? null : new Set(grupo.exerciseIds.map(String));
     }
 
     const filtro = { userId: req.user._id };

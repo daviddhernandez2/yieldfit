@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Exercise, { OPCIONES_GRUPO_MUSCULAR, OPCIONES_TIPO, tipoDisponible } from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
 import Chart from '../models/Chart.js';
+import Dashboard from '../models/Dashboard.js';
 
 // GET /api/exercises
 // Lista los ejercicios del usuario autenticado.
@@ -224,6 +225,13 @@ export const remove = async (req, res, next) => {
       await Chart.updateMany(
         { userId, exerciseIds: exercise._id },
         { $pull: { exerciseIds: exercise._id } },
+        { session }
+      );
+
+      // Y su widget "Récord de un ejercicio" del Dashboard (bloque 9d), si lo tiene.
+      await Dashboard.updateOne(
+        { userId },
+        { $pull: { widgets: { exerciseId: exercise._id } } },
         { session }
       );
 

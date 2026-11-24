@@ -19,3 +19,30 @@ export const alturasBarras = (semanas) => {
 // Texto de la racha: "5 semanas", "1 semana", "más de 104 semanas".
 export const textoRacha = ({ semanas, masDe }) =>
   `${masDe ? 'más de ' : ''}${semanas} ${semanas === 1 ? 'semana' : 'semanas'}`;
+
+// Textos de la racha según su estado (bloque 9d), para el widget y la pastilla junto a "Inicio".
+// tamano: "P" (el texto de "en riesgo" se acorta: el largo no cabe) o "M".
+// Devuelve { etiqueta, cifra (número o null si está rota), unidad, pie, accesible }.
+export const textosRacha = ({ semanas, masDe, estado }, tamano = 'M') => {
+  const unidad = semanas === 1 ? 'semana' : 'semanas';
+  const cifra = `${masDe ? '+' : ''}${semanas}`;
+  if (estado === 'rota') {
+    return { etiqueta: 'Racha', cifra: null, unidad, pie: 'Empieza una racha nueva', accesible: 'Sin racha. Empieza una racha nueva' };
+  }
+  if (estado === 'enRiesgo') {
+    return {
+      etiqueta: tamano === 'M' ? 'Racha · en riesgo' : 'Racha',
+      cifra,
+      unidad,
+      pie: tamano === 'M' ? 'Entrena esta semana para mantenerla' : 'Entrena esta semana',
+      accesible: `Racha en riesgo: ${textoRacha({ semanas, masDe })}. Entrena esta semana para mantenerla`,
+    };
+  }
+  return { etiqueta: 'Racha', cifra, unidad, pie: 'seguidas entrenando', accesible: `Racha: ${textoRacha({ semanas, masDe })} seguidas entrenando` };
+};
+
+// Cuántos círculos de semana caben en `ancho` px (círculos de 12 px con 8 px de hueco: 20 px por
+// semana, menos el último hueco). Lo que cambia con el ancho es cuántas semanas se ven, no su
+// tamaño (anatomía de widget, bloque 9d). Como mucho, las que hay.
+export const semanasQueCaben = (ancho, disponibles) =>
+  Math.max(0, Math.min(disponibles, Math.floor((ancho + 8) / 20)));

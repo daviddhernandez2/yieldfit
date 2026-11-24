@@ -15,32 +15,38 @@ const IconoBicho = () => (
   </svg>
 );
 
-// Botón flotante para reportar un fallo (bloque 11b, paso 11b.2). Está en Layout, así que
-// aparece en todas las pantallas con sesión iniciada.
-//   - Móvil: círculo abajo a la derecha, por encima de las barras (opción C). Va justo
-//     encima de la barra de menú, y sube cuando aparece la MiniSession o el botón
-//     "Reemplazar". Las dos alturas están en un solo sitio: ReportarFallo.module.css.
-//   - Escritorio: píldora "Reportar" en la esquina inferior derecha.
+// Botón para reportar un fallo (bloque 11b, paso 11b.2), en todas las pantallas con sesión.
+// Dos sitios, según `ubicacion`:
+//   - "flotante" (en Layout): solo en el móvil. Círculo abajo a la derecha, por encima de las
+//     barras (opción C): justo encima de la barra de menú, y sube cuando aparece la MiniSession
+//     o el botón "Reemplazar". Sus alturas, en variables.css (--reportar-*).
+//   - "barraLateral" (en Sidebar): solo en escritorio, debajo del menú (bloque 9d: la píldora
+//     flotante de la esquina tapaba la última tarjeta al bajar del todo).
 // La pantalla (ruta) se toma al abrir el formulario: es donde estaba el usuario al pulsar.
-export default function ReportarFallo() {
+export default function ReportarFallo({ ubicacion = 'flotante' }) {
   const [abierto, setAbierto] = useState(false);
   const { pathname } = useLocation();
   const session = useActiveSession();
   const elevado = hayMiniSession(session, pathname) || hayBotonReemplazar(pathname);
 
+  const clase =
+    ubicacion === 'barraLateral' ? styles.enBarraLateral : `${styles.boton} ${elevado ? styles.elevado : ''}`;
+
   return (
     <>
       <button
         type="button"
-        className={`${styles.boton} ${elevado ? styles.elevado : ''}`}
+        className={clase}
         onClick={() => setAbierto(true)}
         aria-label="Reportar un fallo"
         aria-haspopup="dialog"
       >
         <IconoBicho />
-        <span className={styles.texto} aria-hidden="true">
-          Reportar
-        </span>
+        {ubicacion === 'barraLateral' && (
+          <span className={styles.texto} aria-hidden="true">
+            Reportar un fallo
+          </span>
+        )}
       </button>
       {abierto && <FormularioReporte ruta={pathname} onCerrar={() => setAbierto(false)} />}
     </>

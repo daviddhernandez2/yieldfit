@@ -49,26 +49,40 @@
   flex-shrink: 0;
 }
 
-/* El texto "Reportar" solo se ve en escritorio. En el móvil, el nombre accesible lo da
-   aria-label ("Reportar un fallo"). */
-.texto {
-  display: none;
-}
-
-/* Escritorio: píldora en la esquina inferior derecha, que ahí está libre (sin TabBar;
-   MiniSession y el aviso de servidor van centrados). */
+/* El círculo flotante es solo del móvil: en escritorio, "Reportar" va en la barra lateral,
+   debajo del menú (bloque 9d). */
 @media (min-width: 768px) {
   .boton {
-    right: var(--space-lg);
-    bottom: var(--reportar-bottom-escritorio);
-    width: auto;
-    height: var(--reportar-alto-escritorio);
-    padding: 0 var(--space-md) 0 var(--space-sm);
+    display: none;
   }
+}
 
-  .texto {
-    display: inline;
-  }
+/* En la barra lateral: un elemento discreto bajo la tarjeta del menú, con el icono alineado
+   con los del menú (el relleno de la tarjeta + el de cada opción + su borde, como el logo). */
+.enBarraLateral {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md) var(--space-sm) calc(var(--space-md) * 2 + 1px);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.enBarraLateral:hover,
+.enBarraLateral:focus-visible {
+  color: var(--color-text);
+}
+
+.enBarraLateral svg {
+  flex-shrink: 0;
 }
 
 /* ---------------------------------------------------------------------------

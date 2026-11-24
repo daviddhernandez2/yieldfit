@@ -129,12 +129,10 @@
       la más alta. Cuándo se eleva lo decide utils/barrasInferiores.js, la misma regla que usa
       MiniSession. La zona segura del iPhone (barra de inicio) se suma porque MiniSession crece
       con ella. Si algún día se añade otra barra abajo, se cambian estos valores y esa regla.
-      En escritorio es una píldora en la esquina inferior derecha. */
+      En escritorio no flota: va en la barra lateral, debajo del menú. */
    --reportar-bottom-movil: 96px;
    --reportar-bottom-movil-elevado: calc(172px + env(safe-area-inset-bottom));
    --reportar-alto-movil: 44px;
-   --reportar-bottom-escritorio: var(--space-lg);
-   --reportar-alto-escritorio: 40px;
 
    /* Radios de borde. Concéntricos: el radio interior es el exterior menos el padding. */
    --radius-xs: 4px;

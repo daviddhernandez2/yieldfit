@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from '@/components/NavItems.jsx';
 import Logo from '@/components/Logo/Logo.jsx';
+import ReportarFallo from '@/components/ReportarFallo/ReportarFallo.jsx';
 import styles from '@/components/Sidebar/Sidebar.module.css';
 
 // Sidebar vertical para pantallas desktop. Solo se muestra en >=768px.
@@ -29,6 +30,9 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Reportar un fallo, debajo del menú (bloque 9d). En el móvil es el círculo flotante. */}
+      <ReportarFallo ubicacion="barraLateral" />
     </aside>
   );
 }

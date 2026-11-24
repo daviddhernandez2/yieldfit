@@ -39,13 +39,11 @@
 
 @media (min-width: 768px) {
   .main {
+    /* En escritorio no hay nada fijo abajo ("Reportar" va en la barra lateral). */
     padding: var(--space-2xl);
-    /* La píldora "Reportar" de la esquina: su espacio, para que no tape la última tarjeta. */
-    padding-bottom: calc(var(--reportar-bottom-escritorio) + var(--reportar-alto-escritorio) + var(--space-md));
   }
 
-  /* En escritorio no hay barras abajo: el mismo espacio siempre. */
   .mainElevado {
-    padding-bottom: calc(var(--reportar-bottom-escritorio) + var(--reportar-alto-escritorio) + var(--space-md));
+    padding-bottom: var(--space-2xl);
   }
 }

@@ -46,7 +46,9 @@ flowchart LR
 - `node utils/borrarCuenta.test.js` desde `server/`: la lista de los scripts coincide con
   `MODELOS_DEL_USUARIO`.
 - `npm audit` en el cliente: 0 vulnerabilidades.
-- Producción: limpieza hecha por David con el procedimiento de reparaciones.
+- Producción: limpieza hecha por David con el procedimiento de reparaciones. Había datos de
+  4 usuarios inexistentes: se borraron 230 ejercicios, 2 rutinas y 5 sesiones huérfanas, y el
+  diagnóstico posterior dio 0.
 
 ## Decisiones del bloque
 

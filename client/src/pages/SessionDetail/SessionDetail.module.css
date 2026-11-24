@@ -78,9 +78,32 @@
   gap: var(--space-md);
 }
 
+.exerciseHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
 .exerciseName {
+  min-width: 0;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+/* Línea del récord bajo el nombre (bloque 4b). El gap de la tarjeta la separa demasiado del
+   nombre: se acerca con margen negativo, igual que la fecha bajo los títulos. */
+.record {
+  margin-top: calc(-1 * var(--space-sm));
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.recordCifra {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  white-space: nowrap;
 }
 
 /* Mini-tabla de series: cabecera + filas alineadas en 3 columnas. */

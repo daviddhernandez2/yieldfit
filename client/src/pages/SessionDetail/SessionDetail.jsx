@@ -4,6 +4,8 @@ import { getSession, deleteSession } from '@/api/sessions.js';
 import BotonIcono from '@/components/BotonIcono/BotonIcono.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import MarcaPR from '@/components/MarcaPR/MarcaPR.jsx';
+import { formatKg } from '@/utils/formato.js';
 import styles from '@/pages/SessionDetail/SessionDetail.module.css';
 
 const formatDuracion = (segundos) => {
@@ -119,7 +121,20 @@ export default function SessionDetail() {
       <div className={styles.exercisesList}>
         {session.ejercicios.map((ej) => (
           <div key={ej._id} className={`${styles.exerciseCard} glassCard`}>
-            <h2 className={styles.exerciseName}>{ej.nombreSnapshot}</h2>
+            {/* Récord (bloque 4b): la marca junto al nombre y el 1RM estimado que batió la
+                marca anterior. Lo decide el servidor al guardar (esPR, prAnterior). */}
+            <div className={styles.exerciseHeader}>
+              <h2 className={styles.exerciseName}>{ej.nombreSnapshot}</h2>
+              {ej.esPR && <MarcaPR />}
+            </div>
+            {ej.esPR && (
+              <p className={styles.record}>
+                Nuevo récord · 1RM estimado{' '}
+                <span className={styles.recordCifra}>
+                  {formatKg(ej.prAnterior)} → {formatKg(ej.mejor1RM)} kg
+                </span>
+              </p>
+            )}
 
             <div className={styles.setsTable}>
               <div className={styles.setsHeader}>

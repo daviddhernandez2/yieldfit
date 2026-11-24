@@ -5,6 +5,8 @@ import Button from '@/components/Button/Button.jsx';
 import Calendario from '@/components/Calendario/Calendario.jsx';
 import { formatDuracion } from '@/utils/formato.js';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
+import MarcaPR from '@/components/MarcaPR/MarcaPR.jsx';
+import { listarNombres, recordsDeSesion } from '@/utils/records.js';
 import styles from '@/pages/History/History.module.css';
 
 // Formatea fecha + hora en el estilo del historial.
@@ -148,7 +150,11 @@ export default function History() {
 
       {!loading && !error && sessions.length > 0 && (
         <div className={styles.list}>
-          {sessions.map((sesion) => (
+          {sessions.map((sesion) => {
+            // Récords de la sesión (bloque 4b): la marca junto al nombre y, debajo, en qué
+            // ejercicios. Los marca el servidor; aquí solo se leen.
+            const records = recordsDeSesion(sesion);
+            return (
             <button
               type="button"
               key={sesion._id}
@@ -156,7 +162,10 @@ export default function History() {
               onClick={() => navigate(`/history/${sesion._id}`)}
             >
               <div className={styles.cardText}>
-                <span className={styles.cardName}>{sesion.nombre}</span>
+                <span className={styles.cardTitulo}>
+                  <span className={styles.cardName}>{sesion.nombre}</span>
+                  {records.length > 0 && <MarcaPR />}
+                </span>
                 <span className={styles.cardDate}>{formatFecha(sesion.fecha)}</span>
               </div>
               <div className={styles.cardStats}>
@@ -170,8 +179,17 @@ export default function History() {
               <span className={styles.chevron}>
                 <IconChevronRight />
               </span>
+              {/* En una fila propia, a todo el ancho de la tarjeta: al lado de las cifras no
+                  cabía ni un nombre en el móvil. */}
+              {records.length > 0 && (
+                <span className={styles.cardRecords}>
+                  {records.length === 1 ? 'Récord en ' : 'Récords en '}
+                  {listarNombres(records.map((r) => r.nombre))}
+                </span>
+              )}
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
 

@@ -1,6 +1,6 @@
 // Pruebas de formato. Ejecutar desde client/: node src/utils/formato.test.js
 import assert from 'node:assert/strict';
-import { formatConSigno, formatDuracion, formatPorcentaje } from './formato.js';
+import { formatConSigno, formatDuracion, formatKg, formatPorcentaje } from './formato.js';
 
 assert.equal(formatConSigno(3.14), '+3,1');
 assert.equal(formatConSigno(-2), '-2');
@@ -9,6 +9,10 @@ assert.equal(formatConSigno(0.04), '0'); // redondea a 0: sin signo
 assert.equal(formatConSigno(12.45), '+12,4'); // un decimal (redondeo de toFixed)
 assert.equal(formatPorcentaje(3.14), '+3,1%');
 assert.equal(formatPorcentaje(-7.25), '-7,3%');
+
+assert.equal(formatKg(103.33), '103,3');
+assert.equal(formatKg(110), '110');
+assert.equal(formatKg(129.17), '129,2');
 
 assert.equal(formatDuracion(59), '0 min');
 assert.equal(formatDuracion(52 * 60), '52 min');

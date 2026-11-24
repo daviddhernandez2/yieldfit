@@ -24,3 +24,7 @@ export const formatDuracion = (segundos) => {
 export const formatHora = (fecha) =>
   new Date(fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
+
+// Kilos con un decimal como mucho y coma: 103.33 → "103,3"; 110 → "110". Para el 1RM estimado
+// de los récords (bloque 4b): más decimales no aportan nada en una estimación.
+export const formatKg = (n) => n.toLocaleString('es-ES', { maximumFractionDigits: 1 });

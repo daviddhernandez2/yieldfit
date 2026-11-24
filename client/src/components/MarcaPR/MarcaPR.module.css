@@ -1,0 +1,28 @@
+/* Píldora "PR" (bloque 4b). Verde de "dato bueno" (color-accent) sobre su fondo suave, como
+   las cifras del Historial; Geist Mono para que se lea como un dato y no como un botón.
+   No se encoge ni se parte: va junto a nombres que sí se cortan con puntos suspensivos. */
+.marca {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  background-color: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-medium);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.sm {
+  padding: 0 6px;
+  font-size: 0.6875rem;
+}
+
+/* Celdas del calendario: lo justo para leerse a 375 px sin tapar el número del día. */
+.xs {
+  padding: 0 3px;
+  font-size: 0.5625rem;
+}

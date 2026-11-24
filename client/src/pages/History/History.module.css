@@ -122,8 +122,31 @@
   min-width: 0;
 }
 
+.cardTitulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
 .cardName {
+  min-width: 0;
+  overflow: hidden;
   font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* "Récord en Press banca y Sentadilla" (bloque 4b): fila propia bajo todo lo demás (ocupa
+   las tres columnas de la tarjeta), una línea, cortada si no cabe. */
+.cardRecords {
+  grid-column: 1 / -1;
+  margin-top: calc(-1 * var(--space-sm));
+  overflow: hidden;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cardDate {

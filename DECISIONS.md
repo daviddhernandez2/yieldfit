@@ -67,6 +67,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0046 | Filas de botones que se apilan (`GrupoBotones`) y responsive obligatorio | vigente |
 | 0047 | Design system Premium como tema único y fuente de verdad del diseño | vigente |
 | 0048 | Ajustes al tema Premium: botón verde, rojo más vivo, botones de icono y portada en negro puro | vigente |
+| 0049 | Calendario en dos columnas en escritorio, con panel del día | vigente |
 
 ---
 
@@ -1671,3 +1672,43 @@ que el código.
 - El tema de la app ya no es el Premium tal cual: es el Premium con estos ajustes, y el artefacto
   lo refleja.
 - La portada mantiene sus colores originales; sus `rgba` sueltos quedan fuera de la limpieza.
+
+---
+
+## 0049 — Calendario en dos columnas en escritorio, con panel del día
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 8b · Matiza a: 0033
+
+**Contexto:** en escritorio el calendario del Historial (0033) era la misma rejilla pequeña que en
+el móvil, con mucho espacio vacío. David propuso una referencia de concepto (no de estilo): mes a
+la izquierda y un panel lateral con el día seleccionado.
+
+**Decisión** (de David):
+- **Dos columnas cuando el propio calendario mide 860 px o más** (desde unos 1220 px de pantalla,
+  por la barra lateral). Lo mide el componente con `ResizeObserver` (caja exterior), no el ancho
+  de la pantalla. Por debajo, como antes.
+- **Mes:** cabecera con el mes en grande, "Semana N · X sesiones en <mes>" y ‹ Hoy ›; celdas
+  altas con el número y hasta 2 píldoras con el nombre de la sesión ("+N" si hay más); hoy, número
+  en círculo verde; seleccionado, la celda entera (`surface-3` y borde verde). Fines de semana como
+  el resto.
+- **Panel:** el día en grande; sus sesiones con hora, nombre, duración y número de ejercicios
+  (abren el detalle); y el mes comparado con el anterior: sesiones, días entrenados y tiempo
+  total, con flecha y signo.
+- **Sin mapa de actividad** (ya está la vista Año) **ni barras de progreso** (la app no tiene
+  objetivos; una barra sin meta no mide nada).
+- **Datos:** `GET /api/sessions/days` añade a cada sesión `fecha`, `duracionSegundos` y
+  `numEjercicios` (`$size`), sin series. Mismo índice, mismo límite de 366 días; unos 120 bytes por
+  sesión. El resumen del mes y la semana ISO se calculan en el cliente (`utils/calendario.js`).
+- **Móvil:** la lista del día añade hora y duración. Historial puede medir 1120 px en escritorio,
+  pero solo el calendario usa ese ancho; lo demás sigue en 800.
+
+**Alternativas descartadas:**
+- *Endpoint por día al seleccionarlo:* una petición por clic, con el año ya pedido.
+- *Traer las sesiones enteras:* las series multiplican el tamaño y crece con el historial.
+- *Decidir por el ancho de la pantalla (media query):* a 1024 px, con la barra lateral, no quedan
+  ni 700 px; las celdas no cabrían.
+
+**Consecuencias:**
+- La forma de escritorio solo aparece en pantallas de unos 1220 px o más.
+- Comparar enero pide también el año anterior (se guarda como los demás).
+

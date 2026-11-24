@@ -305,6 +305,12 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
         menú de compartir.
 - [x] **8 — Calendario de días entrenados**: endpoint que devuelva solo fechas por rango
       (sin traer sesiones completas).
+- [ ] **8b — Calendario en escritorio** (0049): con espacio (el calendario ≥ 860 px), dos
+      columnas: el mes con celdas altas y píldoras de sesión, y un panel del día seleccionado
+      (sesiones con hora, duración y ejercicios; el mes comparado con el anterior). Cabecera con
+      el mes en grande, semana y ‹ Hoy ›. Sin mapa de actividad (ya está la vista Año). En el
+      móvil, como antes, con hora y duración en la lista del día. El endpoint de días añade
+      `fecha`, `duracionSegundos` y `numEjercicios` (sin series).
 - [x] **9 — Grupos de progreso**: botón "Nuevo grupo" en el Dashboard usando el modelo Chart;
       misma lógica de cálculo que el grupo "Todos", aplicada a los ejercicios seleccionados.
       Además, en cada grupo (incluido "Todos"):

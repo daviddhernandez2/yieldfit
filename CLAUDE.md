@@ -317,7 +317,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
       ("Pecho · Máquinas"), descanso y series con selector por pasos (1:30), arrastrar para
       reordenar (rutina, sesión activa y grupos del Dashboard) y animaciones de carga
       (esqueletos y ticker de servidor dormido).
-- [ ] **9c — Design system Premium** (0047): el tema Premium del design system del artefacto
+- [x] **9c — Design system Premium** (0047, 0048): el tema Premium del design system del artefacto
       como tema único: tokens nuevos en `variables.css`, Geist Mono, Button (tamaños, `ghost`,
       `primary` en `color-action`, `danger` tonal), foco suave en campos, iconos de trazo 1.5,
       componente `Metrica` (fila "Progreso" y "Sesiones" en el Dashboard), transiciones por

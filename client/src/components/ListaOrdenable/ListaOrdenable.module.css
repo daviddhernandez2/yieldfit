@@ -35,5 +35,5 @@
 
 .arrastrando > * {
   outline: 1px solid var(--color-border-accent);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg); /* el de las tarjetas que se arrastran */
 }

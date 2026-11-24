@@ -5,7 +5,7 @@
   flex-direction: column;
   gap: var(--space-lg);
   padding: var(--space-lg);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
 }
 
 .groupHeader {
@@ -65,7 +65,7 @@
   width: 36px;
   height: 36px;
   background-color: rgba(62, 248, 126, 0.12);
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   color: var(--color-accent);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);

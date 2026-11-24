@@ -107,7 +107,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 

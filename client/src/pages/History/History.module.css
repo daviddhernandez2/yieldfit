@@ -97,7 +97,7 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: none;
   text-align: left;
   color: var(--color-text);

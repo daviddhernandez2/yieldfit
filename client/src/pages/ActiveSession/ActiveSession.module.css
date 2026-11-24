@@ -56,7 +56,7 @@
 
 /* Cada ejercicio es una card colapsable tipo acordeón. */
 .exerciseCard {
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid transparent;
   transition: border-color 300ms ease;
@@ -226,7 +226,7 @@
   border: none;
   cursor: pointer;
   color: var(--color-text-muted);
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   transition: var(--transition-base);
 }
 
@@ -239,7 +239,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid currentColor;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
 }
 
 .completed {
@@ -279,7 +279,7 @@
   right: 0;
   height: 3px;
   background-color: rgba(62, 248, 126, 0.15);
-  border-radius: 2px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
   pointer-events: none;
 }
@@ -287,7 +287,7 @@
 .timerFill {
   height: 100%;
   background: linear-gradient(90deg, var(--color-accent), #41cb7e);
-  border-radius: 2px;
+  border-radius: var(--radius-pill);
   transition: width 1s linear;
 }
 

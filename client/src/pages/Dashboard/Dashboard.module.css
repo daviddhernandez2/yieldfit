@@ -93,7 +93,7 @@
 /* Modo ordenar: una fila por grupo, con el asa ⋮⋮ para arrastrar. */
 .listaOrden {
   padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
 }
 
 .filaOrden {

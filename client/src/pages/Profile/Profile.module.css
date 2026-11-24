@@ -25,7 +25,7 @@
   height: 100px;
   background-color: rgba(62, 248, 126, 0.12);
   color: var(--color-accent);
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   font-size: 2rem;
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.02em;
@@ -44,7 +44,7 @@
 /* Card de datos personales. Recibe glass desde la clase global. */
 .detailsSection {
   padding: var(--space-md);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
@@ -168,7 +168,7 @@
   flex-direction: column;
   gap: var(--space-md);
   padding: var(--space-lg);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   /* Borde rojo: es la única tarjeta de la app que destruye datos de forma permanente. */
   border-color: var(--color-error);
 }
@@ -209,7 +209,7 @@
   flex-direction: column;
   gap: var(--space-md);
   padding: var(--space-md);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
 }
 
 .contrasenaCabecera {

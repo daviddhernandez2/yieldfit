@@ -15,7 +15,7 @@
   flex-direction: column;
   gap: var(--space-lg);
   padding: var(--space-lg);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
 }
 
 /* La columna del mes: en la forma estrecha es todo el calendario; en la ancha, la izquierda. */
@@ -196,7 +196,7 @@
   height: var(--casilla);
   padding: 0;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 /* Día sin sesiones: casilla apagada, para que se vea la forma del año. */

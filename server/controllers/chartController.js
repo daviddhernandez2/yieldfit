@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Chart from '../models/Chart.js';
 import Exercise from '../models/Exercise.js';
 import Dashboard from '../models/Dashboard.js';
+import { MAX_WIDGETS } from '../data/catalogoWidgets.js';
 
 // Comprueba que todos los exerciseIds existan y pertenezcan al usuario.
 // Una sola query con countDocuments es más eficiente que un find + comparación.
@@ -78,14 +79,33 @@ export const create = async (req, res, next) => {
       });
     }
 
-    const chart = new Chart({
-      userId: req.user._id,
-      nombre,
-      exerciseIds,
-      // Solo se guarda si es true: en los grupos normales el campo no existe.
-      todos: todos === true ? true : undefined,
-    });
-    await chart.save();
+    // El grupo nuevo aparece al final del Dashboard (bloque 9d), en mediano: crearlo y añadirlo
+    // van juntos en una transacción. Si el usuario aún no tiene dashboard, no se añade nada:
+    // asegurarDashboard incluirá todos sus grupos al crearlo. Si ya tiene MAX_WIDGETS, el grupo
+    // se crea igual pero no entra (el filtro 'widgets.N' exige que haya sitio).
+    // withTransaction puede repetir la función ante errores transitorios: el documento se crea
+    // dentro, en cada intento, para que siempre se inserte como nuevo.
+    let chart;
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        chart = new Chart({
+          userId: req.user._id,
+          nombre,
+          exerciseIds,
+          // Solo se guarda si es true: en los grupos normales el campo no existe.
+          todos: todos === true ? true : undefined,
+        });
+        await chart.save({ session });
+        await Dashboard.updateOne(
+          { userId: req.user._id, [`widgets.${MAX_WIDGETS - 1}`]: { $exists: false } },
+          { $push: { widgets: { tipo: 'grupo', tamano: 'M', chartId: chart._id } } },
+          { session }
+        );
+      });
+    } finally {
+      await session.endSession();
+    }
 
     res.status(201).json({ chart });
   } catch (error) {

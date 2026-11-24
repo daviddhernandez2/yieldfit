@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { readdirSync } from 'node:fs';
 import mongoose from 'mongoose';
 import { MODELOS_DEL_USUARIO } from './borrarCuenta.js';
+import { COLECCIONES_DEL_USUARIO } from '../scripts/lib/coleccionesUsuario.js';
 
 const carpeta = new URL('../models/', import.meta.url);
 for (const archivo of readdirSync(carpeta).filter((a) => a.endsWith('.js'))) {
@@ -18,4 +19,10 @@ const olvidados = conUserId.filter((M) => !enLaLista.has(M)).map((M) => M.modelN
 
 assert.deepEqual(olvidados, [], `Modelos con userId que borrar una cuenta no borra: ${olvidados.join(', ')}`);
 assert.equal(conUserId.length, MODELOS_DEL_USUARIO.length);
-console.log(`borrarCuenta: los ${conUserId.length} modelos con userId se borran con la cuenta`);
+// La lista de colecciones de los scripts de mantenimiento (bloque 1c) tiene que ser la misma.
+assert.deepEqual(
+  [...COLECCIONES_DEL_USUARIO].sort(),
+  MODELOS_DEL_USUARIO.map((M) => M.collection.collectionName).sort(),
+  'scripts/lib/coleccionesUsuario.js no coincide con MODELOS_DEL_USUARIO',
+);
+console.log(`borrarCuenta: los ${conUserId.length} modelos con userId se borran con la cuenta (y los scripts usan las mismas colecciones)`);

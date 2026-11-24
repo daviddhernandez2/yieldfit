@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { listSessions } from '@/api/sessions.js';
 import Button from '@/components/Button/Button.jsx';
 import Calendario from '@/components/Calendario/Calendario.jsx';
 import { formatDuracion } from '@/utils/formato.js';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import MarcaPR from '@/components/MarcaPR/MarcaPR.jsx';
+import AvisoRecords from '@/components/AvisoRecords/AvisoRecords.jsx';
 import { listarNombres, recordsDeSesion } from '@/utils/records.js';
 import styles from '@/pages/History/History.module.css';
 
@@ -57,6 +58,15 @@ const IconChevronRight = () => (
 // El borrado se hace desde el detalle de cada sesión, no desde esta lista.
 export default function History() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Récords del entreno que se acaba de terminar (bloque 4b): llegan de ActiveSession en el
+  // estado de la navegación. Se copian aquí y se borran de ese estado (replace), para que no
+  // vuelvan a salir al recargar la página ni al volver atrás desde el detalle de una sesión.
+  const [avisoRecords, setAvisoRecords] = useState(() => location.state?.records ?? []);
+  useEffect(() => {
+    if (location.state?.records) navigate(location.pathname, { replace: true, state: null });
+  }, [location, navigate]);
 
   const [sessions, setSessions] = useState([]);
   // Cursor de la página siguiente; null cuando ya están todas.
@@ -117,6 +127,10 @@ export default function History() {
           </button>
         )}
       </header>
+
+      {avisoRecords.length > 0 && (
+        <AvisoRecords records={avisoRecords} onCerrar={() => setAvisoRecords([])} />
+      )}
 
       {/* Días entrenados (bloque 8): vista de mes o de año, arriba de la lista. En escritorio
           va en dos columnas (bloque 8b). */}

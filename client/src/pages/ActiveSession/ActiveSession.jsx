@@ -10,6 +10,7 @@ import {
   contar,
 } from "@/utils/activeSession.js";
 import { createSession, getPreviousSets } from "@/api/sessions.js";
+import { recordsDeSesion } from "@/utils/records.js";
 import { sesionReducer } from "@/utils/activeSessionReducer.js";
 import { listExercises } from "@/api/exercises.js";
 import Button from "@/components/Button/Button.jsx";
@@ -287,9 +288,11 @@ export default function ActiveSession() {
           })),
       };
 
-      await createSession(payload);
+      const { data } = await createSession(payload);
       clearActiveSession();
-      navigate("/history");
+      // Récords del entreno (bloque 4b): el servidor los marca al guardar y vienen en la
+      // respuesta. Viajan al Historial en el estado de la navegación, que los muestra en un aviso.
+      navigate("/history", { state: { records: recordsDeSesion(data.session) } });
     } catch (err) {
       const data = err.response?.data;
       const message =

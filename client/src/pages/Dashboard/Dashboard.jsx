@@ -56,7 +56,7 @@ const useCarga = (activo, cargar) => {
   return estado;
 };
 
-const TIPOS_ACTIVIDAD = ['sesionesTotales', 'racha', 'frecuenciaSemanal'];
+const TIPOS_ACTIVIDAD = ['racha', 'frecuenciaSemanal'];
 const cargarActividad = () => getActividad().then((res) => res.data.actividad);
 // 6: los que caben en el tamaño G (en M se ven 2).
 const cargarRecords = () => getRecordsRecientes(6).then((res) => res.data.records);
@@ -131,7 +131,7 @@ export default function Dashboard() {
     };
   }, [usaGeneral]);
 
-  // Datos compartidos: actividad (Sesiones, Racha y Frecuencia), récords y última sesión.
+  // Datos compartidos: actividad (Racha y Frecuencia), récords y última sesión.
   const actividad = useCarga(widgets?.some((w) => TIPOS_ACTIVIDAD.includes(w.tipo)), cargarActividad);
   const records = useCarga(widgets?.some((w) => w.tipo === 'nuevosRecords'), cargarRecords);
   const ultima = useCarga(widgets?.some((w) => w.tipo === 'ultimaSesion'), cargarUltima);
@@ -173,9 +173,9 @@ export default function Dashboard() {
       case 'progresoTotal':
         return <WidgetCifra tipo="progresoTotal" progreso={general.progreso} error={general.error} />;
       case 'sesionesTotales':
-        return <WidgetCifra tipo="sesionesTotales" progreso={general.progreso} error={general.error} mes={actividad.datos?.mes ?? null} />;
+        return <WidgetCifra tipo="sesionesTotales" progreso={general.progreso} error={general.error} />;
       case 'racha':
-        return <WidgetRacha actividad={actividad.datos} error={actividad.error} />;
+        return <WidgetRacha tamano={widget.tamano} actividad={actividad.datos} error={actividad.error} />;
       case 'frecuenciaSemanal':
         return <WidgetFrecuencia actividad={actividad.datos} error={actividad.error} />;
       case 'ultimaSesion':

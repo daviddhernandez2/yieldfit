@@ -83,6 +83,32 @@
   }
 }
 
+/* Pista "dd/mm/aaaa" de la fecha vacía (ver Input.jsx). */
+.campoFecha {
+  position: relative;
+}
+
+/* Vacía y sin foco: el texto propio del navegador ("dd/mm/aaaa" en Chrome, nada en el iPhone)
+   se vuelve transparente y se ve la pista, igual en todos. */
+.fechaVacia:not(:focus) {
+  color: transparent;
+}
+
+/* Misma posición, tamaño y color que un placeholder (padding y borde del campo). */
+.pistaFecha {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--space-md) + 1px);
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  pointer-events: none;
+}
+
+.campoFecha:focus-within .pistaFecha {
+  display: none;
+}
+
 /* Webkit muestra un icono por defecto; lo recoloreamos al verde de marca. */
 .input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(74%) sepia(83%) saturate(530%) hue-rotate(76deg) brightness(105%);

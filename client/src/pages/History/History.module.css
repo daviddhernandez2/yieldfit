@@ -40,7 +40,7 @@
 }
 
 .exportButton:hover:not(:disabled) {
-  background-color: rgba(62, 248, 126, 0.08);
+  background-color: var(--color-accent-soft);
 }
 
 .exportButton:disabled {
@@ -139,7 +139,7 @@
 
 .stat {
   padding: var(--space-xs) var(--space-sm);
-  background-color: rgba(62, 248, 126, 0.08);
+  background-color: var(--color-accent-soft);
   border: 1px solid rgba(62, 248, 126, 0.2);
   border-radius: var(--radius-pill);
   color: var(--color-accent);

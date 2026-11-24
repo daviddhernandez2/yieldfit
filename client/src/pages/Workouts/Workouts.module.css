@@ -44,7 +44,7 @@
 }
 
 .newButton:hover {
-  background-color: rgba(62, 248, 126, 0.08);
+  background-color: var(--color-accent-soft);
 }
 
 /* En móvil ocultamos el texto para que el botón solo muestre el "+".

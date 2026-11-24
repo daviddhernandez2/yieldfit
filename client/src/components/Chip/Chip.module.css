@@ -18,7 +18,7 @@
 }
 
 .selected {
-  background-color: rgba(62, 248, 126, 0.08);
+  background-color: var(--color-accent-soft);
   border-color: var(--color-accent);
   color: var(--color-accent);
 }

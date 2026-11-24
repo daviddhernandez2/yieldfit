@@ -46,7 +46,7 @@
 
 .removeButton:hover {
   color: var(--color-error);
-  background-color: rgba(255, 48, 0, 0.08);
+  background-color: var(--color-danger-fill);
 }
 
 .addedItemControls {

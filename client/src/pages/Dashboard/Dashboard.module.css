@@ -39,7 +39,7 @@
 }
 
 .newGroupButton:hover:not(:disabled) {
-  background-color: rgba(62, 248, 126, 0.08);
+  background-color: var(--color-accent-soft);
 }
 
 .newGroupButton:disabled {

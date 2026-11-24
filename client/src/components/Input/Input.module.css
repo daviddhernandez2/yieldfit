@@ -44,6 +44,8 @@
 
 .input::placeholder {
   color: var(--color-text-muted);
+  /* Firefox aclara el placeholder con su propia opacidad: el color es solo el del token. */
+  opacity: 1;
 }
 
 /* Estado de error: borde rojo */

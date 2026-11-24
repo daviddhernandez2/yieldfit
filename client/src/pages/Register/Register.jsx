@@ -120,6 +120,10 @@ export default function Register() {
             onChange={updateField('email')}
             required
             autoComplete="email"
+            // En el móvil: sin mayúscula inicial ni autocorrección (cambiarían el email).
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
           />
 
           <Input
@@ -153,6 +157,7 @@ export default function Register() {
             onChange={updateField('nombreCompleto')}
             required
             autoComplete="name"
+            autoCapitalize="words"
           />
 
           <Input
@@ -162,6 +167,7 @@ export default function Register() {
             value={formData.fechaNacimiento}
             onChange={updateField('fechaNacimiento')}
             required
+            autoComplete="bday"
           />
 
           <div className={styles.row}>
@@ -169,7 +175,10 @@ export default function Register() {
               id="peso"
               label="Peso (kg)"
               type="number"
-              placeholder="75"
+              // Teclado numérico con coma en el móvil, como el peso de la sesión activa.
+              inputMode="decimal"
+              // "Ej." para que no parezca un valor ya escrito (bloque 11c).
+              placeholder="Ej. 75"
               value={formData.peso}
               onChange={updateField('peso')}
               min="0"
@@ -179,7 +188,8 @@ export default function Register() {
               id="altura"
               label="Altura (cm)"
               type="number"
-              placeholder="178"
+              inputMode="numeric"
+              placeholder="Ej. 178"
               value={formData.altura}
               onChange={updateField('altura')}
               min="0"

@@ -100,7 +100,7 @@ client/src/
   pages/        # una carpeta por vista; todas cargadas con lazy() en App.jsx
   context/      # AuthContext
   hooks/        # useAuth, useActiveSession, useStartSession, useInView
-  utils/        # activeSession.js (localStorage), wakingUp.js (arranque en frío), borradoEjercicio.js
+  utils/        # activeSession.js (localStorage), wakingUp.js (arranque en frío), borradoEjercicio.js, records.js
   styles/       # variables.css — tokens de diseño
 server/
   models/       # User, Exercise, Workout, Session, Chart
@@ -126,7 +126,10 @@ Import alias en cliente: `@` → `client/src`.
 - **Session**: entrenamiento realizado. Ejercicios embebidos con **snapshots** (`nombreSnapshot`,
   `trackingSnapshot`) para que el historial sea inmutable, y `mejor1RM` calculado al guardar.
   Índice `{ userId: 1, fecha: -1 }`. El progreso lo calcula `GET /api/progress` (0026) y el
-  historial se pagina por cursor (0027).
+  historial se pagina por cursor (0027). Récords personales (0051): `esPR` y `prAnterior` en el
+  ejercicio de la sesión que batió la marca; se marcan al guardar y se recalculan al borrar.
+- **Exercise.record1RM**: la marca actual de cada ejercicio, copia reconstruible de las sesiones
+  (`npm run migrar:pr`). Solo la escribe el servidor (`utils/records.js`).
 - **Chart**: grupo de progreso del usuario (`nombre`, `exerciseIds`); en la app se llama "grupo".
   Su progreso lo calcula `GET /api/progress?grupo=<id>` con el mismo cálculo que "Todos" (0034).
 
@@ -234,8 +237,9 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
   escala `green-*` o un `--color-accent-strong`) antes de cambiarlos: alterarían el aspecto. La
   portada (`pages/Welcome`) queda fuera a propósito: mantiene su aspecto original.
 - **Backups solo en el portátil:** la revisión prevista en la 0018 ("backups automáticos fuera
-  del portátil cuando haya usuarios reales además de David") ya aplica con la beta del 11b. Si
-  el portátil se pierde o se estropea, no hay copia. Desde la 0039 se conservan los 3 últimos.
+  del portátil cuando haya usuarios reales además de David") ya aplica: la beta empezó el
+  2026-11-24 y ya hay usuarios registrados además de David. Si el portátil se pierde o se
+  estropea, no hay copia. Desde la 0039 se conservan los 3 últimos.
 - **Vulnerabilidades de dependencias** (`npm audit`): servidor y cliente actualizados con
   `npm audit fix` el 2026-11-24 (bloques 9c y 1c): 0 en producción y 0 en el cliente. Queda
   `nodemon` (2 moderadas, solo desarrollo), cuyo arreglo es un cambio incompatible
@@ -255,21 +259,25 @@ falta de `runValidators` (las actualizaciones usan `save()`), `JSON.parse` sin t
 
 Estado: marcar `[x]` solo cuando David confirme el cierre.
 
-**Orden de trabajo** (decisión de David, 2026-11-24). Los bloques llevan número con letra, junto
+**Orden de trabajo** (decisión de David, 2026-11-24; el 11c se añadió ese mismo día con la beta). Los bloques llevan número con letra, junto
 al bloque del que nacen, para no renumerar:
 
 1. [x] **1c — Dependencias del cliente y datos huérfanos** (hecho, 2026-11-24; 0050): `npm audit fix` en el cliente (sin
    `--force`); diagnóstico de solo lectura de los datos de usuarios inexistentes y su limpieza con
    el procedimiento de reparaciones.
-2. **4b — Récords personales (PR)**: icono de PR en Historial (fila y ejercicio), detalle de la
+2. [x] **4b — Récords personales (PR)** (hecho, 2026-11-24; 0051): icono de PR en Historial (fila y ejercicio), detalle de la
    sesión, calendario (móvil y escritorio) y aviso al terminar el entreno. PR = superar el mejor
    1RM estimado anterior del ejercicio; la primera vez no cuenta; sin cardio. Cálculo en el
    servidor sin traer el historial entero; el widget "Nuevos récords" del 9d usa el mismo.
-3. **9d — Dashboard personalizable**: bento con widgets y grupos al mismo nivel; modo "Editar
+3. **11c — Registro en iOS** (urgente: la beta ya tiene usuarios): campos de fecha que se salen
+   por la derecha en iOS (en `Input`, para toda la app), pista visible en la fecha vacía,
+   placeholders que no parezcan valores y revisión de la pantalla de registro en iOS (teclado
+   numérico, fuente mínima de 16 px, autocompletado).
+4. **9d — Dashboard personalizable**: bento con widgets y grupos al mismo nivel; modo "Editar
    dashboard" (mover, añadir desde un catálogo, quitar, cambiar entre tamaños fijos); "Todos" pasa
    a ser un grupo normal; retícula estricta. Se plantea antes de escribir código.
-4. **1b — Backups automáticos fuera del portátil** (revisión prevista en la 0018).
-5. **6b — Cardio** en la sesión activa (análisis en la deuda técnica).
+5. **1b — Backups automáticos fuera del portátil** (revisión prevista en la 0018).
+6. **6b — Cardio** en la sesión activa (análisis en la deuda técnica).
 
 - [x] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, documentación en Markdown en `/docs`
       (leída en GitHub, sin dependencias ni despliegue; índice en `docs/README.md`).

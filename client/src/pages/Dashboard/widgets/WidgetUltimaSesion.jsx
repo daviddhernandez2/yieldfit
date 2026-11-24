@@ -10,7 +10,8 @@ import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 const EJERCICIOS_EN_G = 4;
 
 // Última sesión (bloque 9d): qué hiciste y cuándo, y la marca PR si batiste algún récord. Toda la
-// tarjeta abre el detalle de la sesión. En G, además, sus ejercicios con el número de series.
+// tarjeta abre el detalle de la sesión. En M, sus ejercicios en una línea; en G, en lista con el
+// número de series.
 // Props: tamano ("M" | "G"), sesion (undefined mientras carga; null si no hay ninguna), error.
 export default function WidgetUltimaSesion({ tamano, sesion, error, className = '' }) {
   const navigate = useNavigate();
@@ -48,6 +49,9 @@ export default function WidgetUltimaSesion({ tamano, sesion, error, className = 
         {formatFechaRelativa(sesion.fecha)} · {formatDuracion(sesion.duracionSegundos)} ·{' '}
         {contar(sesion.ejercicios.length, 'ejercicio', 'ejercicios')}
       </span>
+      {tamano === 'M' && (
+        <span className={styles.ejerciciosEnLinea}>{sesion.ejercicios.map((ej) => ej.nombreSnapshot).join(' · ')}</span>
+      )}
       {tamano === 'G' && (
         <span className={styles.listaSimple}>
           {sesion.ejercicios.slice(0, EJERCICIOS_EN_G).map((ej) => (

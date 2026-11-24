@@ -319,6 +319,15 @@
   color: var(--color-text-muted);
 }
 
+/* Ejercicios de la última sesión en una línea (tamaño M): ocupa el ancho que sobraba. */
+.ejerciciosEnLinea {
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Última sesión: la tarjeta entera es un botón que abre el detalle. */
 .widgetBoton {
   width: 100%;

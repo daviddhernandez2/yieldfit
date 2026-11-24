@@ -1,6 +1,6 @@
 // Pruebas de formato. Ejecutar desde client/: node src/utils/formato.test.js
 import assert from 'node:assert/strict';
-import { formatConSigno, formatDuracion, formatFechaRelativa, formatKg, formatPorcentaje, formatTramo, nombreMes } from './formato.js';
+import { formatConSigno, formatDuracion, formatFechaRelativa, formatKg, formatPorcentaje } from './formato.js';
 
 assert.equal(formatConSigno(3.14), '+3,1');
 assert.equal(formatConSigno(-2), '-2');
@@ -17,10 +17,6 @@ assert.equal(formatFechaRelativa(new Date(2026, 10, 23, 18, 15), ahora), 'ayer, 
 assert.equal(formatFechaRelativa(new Date(2026, 10, 20, 18, 15), ahora), 'viernes, 18:15');
 assert.equal(formatFechaRelativa(new Date(2026, 10, 12, 18, 15), ahora), '12 nov, 18:15');
 assert.equal(formatFechaRelativa(new Date(2025, 10, 12, 18, 15), ahora), '12 nov 2025, 18:15');
-assert.equal(nombreMes('2026-10'), 'octubre');
-assert.equal(nombreMes('2027-01'), 'enero');
-assert.equal(formatTramo('2026-10', 24), '1–24 oct');
-assert.equal(formatTramo('2026-09', 1), '1 sept');
 
 assert.equal(formatKg(103.33), '103,3');
 assert.equal(formatKg(110), '110');

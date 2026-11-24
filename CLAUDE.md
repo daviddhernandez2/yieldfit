@@ -188,6 +188,10 @@ completo si no caben); `Input` y `Select` ya se estrechan dentro de una fila.
 **Anchos de maqueta** (bloque 8b): cada página usa `--ancho-pagina` (1120 px: listas y resumen) o
 `--ancho-formulario` (700 px: formularios, detalles y lectura), nunca un ancho propio. Todos los
 elementos de una página van al mismo ancho.
+**Radios** (bloque 8b): tarjetas y contenedores `radius-lg`; campos y avisos `radius-md`; botones
+pequeños y elementos dentro de una tarjeta `radius-sm` o `radius-xs`; botones, chips, barras y
+círculos `radius-pill`. Nunca un valor suelto. **Botones:** su texto nunca se parte en dos líneas;
+si dos no caben, `GrupoBotones` los apila.
 
 ## Criterios de escalabilidad
 
@@ -308,7 +312,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
         menú de compartir.
 - [x] **8 — Calendario de días entrenados**: endpoint que devuelva solo fechas por rango
       (sin traer sesiones completas).
-- [ ] **8b — Calendario en escritorio** (0049): con espacio (el calendario ≥ 860 px), dos
+- [x] **8b — Calendario en escritorio** (0049): con espacio (el calendario ≥ 860 px), dos
       columnas: el mes con celdas altas y píldoras de sesión, y un panel del día seleccionado
       (sesiones con hora, duración y ejercicios; el mes comparado con el anterior). Cabecera con
       el mes en grande, semana y ‹ Hoy ›. Sin mapa de actividad (ya está la vista Año). En el

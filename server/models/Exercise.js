@@ -83,6 +83,15 @@ const exerciseSchema = new mongoose.Schema(
         message: 'Tracking no válido',
       },
     },
+    // Mejor 1RM estimado de todas las sesiones de este ejercicio (bloque 4b). Es una COPIA
+    // de lo que dicen las sesiones, guardada para decidir si una sesión nueva es récord sin
+    // recorrer el historial. La escribe solo el servidor (utils/records.js): los
+    // controladores no la aceptan del cliente. Si alguna vez no cuadra, se reconstruye con
+    // `npm run migrar:pr`. No existe hasta la primera sesión con 1RM.
+    record1RM: {
+      type: Number,
+      min: 0,
+    },
   },
   {
     // createdAt y updatedAt gestionados automáticamente por Mongoose.

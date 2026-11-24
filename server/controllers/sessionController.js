@@ -3,6 +3,7 @@ import Session from '../models/Session.js';
 import Exercise from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
 import { mejor1RMDeEjercicio } from '../utils/unaRM.js';
+import { evaluarEjercicioEnSesion, recalcularRecords } from '../utils/records.js';
 
 // Verifica que el workoutId (si viene) pertenezca al usuario.
 const verificarOwnershipDeWorkout = async (workoutId, userId) => {
@@ -13,10 +14,12 @@ const verificarOwnershipDeWorkout = async (workoutId, userId) => {
 
 // Construye los subdocumentos sessionExercise rellenando los snapshots
 // (nombre y tracking) leídos del estado actual de cada Exercise referenciado.
+// Devuelve { ejercicios, records }, donde records es la marca actual de cada ejercicio
+// (Map id → record1RM o null) para decidir los récords sin otra consulta.
 // Devuelve null si alguno de los exerciseId es ajeno o inexistente.
 const construirEjerciciosConSnapshots = async (ejerciciosInput, userId) => {
   if (!ejerciciosInput || ejerciciosInput.length === 0) {
-    return [];
+    return { ejercicios: [], records: new Map() };
   }
 
   // Recuperamos los ejercicios referenciados en una sola query.
@@ -38,7 +41,9 @@ const construirEjerciciosConSnapshots = async (ejerciciosInput, userId) => {
 
   // Construimos el array reasignando orden y rellenando los snapshots
   // a partir del Exercise actual. Los datos de sets (peso, reps...) vienen tal cual.
-  return ejerciciosInput.map((ejInput, index) => {
+  // Solo se copian los campos conocidos: esPR y prAnterior los decide el servidor, nunca
+  // el cliente.
+  const ejercicios = ejerciciosInput.map((ejInput, index) => {
     const exercise = exercisesById.get(String(ejInput.exerciseId));
     const sets = ejInput.sets || [];
     return {
@@ -51,6 +56,29 @@ const construirEjerciciosConSnapshots = async (ejerciciosInput, userId) => {
       sets,
     };
   });
+  const records = new Map(
+    ejerciciosDelUsuario.map((ex) => [String(ex._id), ex.record1RM ?? null])
+  );
+  return { ejercicios, records };
+};
+
+// Marca los récords de una sesión NUEVA comparando con la marca guardada de cada ejercicio
+// (utils/records.js). Modifica `ejercicios` (añade esPR y prAnterior) y devuelve las marcas
+// nuevas que hay que guardar en los ejercicios: Map id → record1RM.
+// `excluidos`: ejercicios con fecha atrasada, que se recalculan enteros aparte.
+const marcarRecordsNuevos = (ejercicios, records, excluidos) => {
+  const nuevos = new Map();
+  for (const id of new Set(ejercicios.map((ej) => String(ej.exerciseId)))) {
+    if (excluidos.has(id)) continue;
+    const anterior = records.get(id) ?? null;
+    const { record, indicePR, prAnterior } = evaluarEjercicioEnSesion(anterior, ejercicios, id);
+    if (indicePR !== null) {
+      ejercicios[indicePR].esPR = true;
+      ejercicios[indicePR].prAnterior = prAnterior;
+    }
+    if (record !== anterior) nuevos.set(id, record);
+  }
+  return nuevos;
 };
 
 const LIMITE_POR_DEFECTO = 20;
@@ -286,11 +314,8 @@ export const create = async (req, res, next) => {
       });
     }
 
-    const ejerciciosConSnapshots = await construirEjerciciosConSnapshots(
-      ejercicios,
-      req.user._id
-    );
-    if (ejerciciosConSnapshots === null) {
+    const construidos = await construirEjerciciosConSnapshots(ejercicios, req.user._id);
+    if (construidos === null) {
       return res.status(400).json({
         error: 'Validation Error',
         message: 'Alguno de los ejercicios no existe o no pertenece al usuario',
@@ -303,11 +328,75 @@ export const create = async (req, res, next) => {
       nombre,
       fecha,
       duracionSegundos,
-      ejercicios: ejerciciosConSnapshots,
+      ejercicios: construidos.ejercicios,
     });
-    await session.save();
+    // Se valida antes de usar session.fecha en la consulta de abajo: una fecha no válida
+    // responde 400 (ValidationError, en el catch) en lugar de consultar con undefined.
+    await session.validate();
 
-    res.status(201).json({ session });
+    // Récords (bloque 4b). Lo normal es que la sesión sea la más reciente de sus ejercicios,
+    // y basta con compararla con la marca guardada (record1RM). Si ya hay una sesión POSTERIOR
+    // de alguno de ellos (una sesión guardada con fecha atrasada: hoy la app no lo hace, pero
+    // podría pasar con la app del iPhone sin conexión), comparar con la marca no vale: ese
+    // ejercicio se recalcula entero. La consulta usa el índice
+    // { userId, 'ejercicios.exerciseId', fecha } y normalmente no encuentra nada.
+    const ids1RM = [
+      ...new Set(
+        construidos.ejercicios
+          .filter((ej) => ej.trackingSnapshot === '1RM')
+          .map((ej) => String(ej.exerciseId))
+      ),
+    ];
+    const conPosteriores = ids1RM.length
+      ? await Session.distinct('ejercicios.exerciseId', {
+          userId: req.user._id,
+          'ejercicios.exerciseId': { $in: ids1RM },
+          fecha: { $gt: session.fecha },
+        })
+      : [];
+    // distinct devuelve TODOS los ejercicios de esas sesiones: solo interesan los de esta.
+    const atrasados = new Set(conPosteriores.map(String).filter((id) => ids1RM.includes(id)));
+
+    // El guardado de la sesión y de las marcas, todo o nada: si fallara a mitad, una marca
+    // podría subir sin que existiera la sesión que la batió. withTransaction puede repetir la
+    // función ante errores transitorios: por eso las marcas se recalculan dentro.
+    // Si dos sesiones del mismo ejercicio se guardaran a la vez, las dos compararían con la
+    // misma marca; $max deja bien record1RM y `npm run migrar:pr` corregiría las marcas de
+    // las sesiones. Con un usuario por cuenta no ocurre en la práctica.
+    const transaccion = await mongoose.startSession();
+    try {
+      await transaccion.withTransaction(async () => {
+        for (const ej of session.ejercicios) {
+          ej.esPR = undefined;
+          ej.prAnterior = undefined;
+        }
+        const nuevos = marcarRecordsNuevos(session.ejercicios, construidos.records, atrasados);
+        await session.save({ session: transaccion });
+        if (nuevos.size) {
+          await Exercise.bulkWrite(
+            [...nuevos].map(([id, record]) => ({
+              updateOne: { filter: { _id: id, userId: req.user._id }, update: { $max: { record1RM: record } } },
+            })),
+            { session: transaccion }
+          );
+        }
+        if (atrasados.size) {
+          await recalcularRecords({
+            db: mongoose.connection.db,
+            userId: req.user._id,
+            exerciseIds: [...atrasados],
+            session: transaccion,
+          });
+        }
+      });
+    } finally {
+      await transaccion.endSession();
+    }
+
+    // Si se recalcularon ejercicios atrasados, las marcas de esta sesión pueden haber
+    // cambiado en la base: se devuelve lo guardado.
+    const guardada = atrasados.size ? await Session.findById(session._id) : session;
+    res.status(201).json({ session: guardada });
   } catch (error) {
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map((e) => e.message);

@@ -77,6 +77,18 @@ const sessionExerciseSchema = new mongoose.Schema(
       type: Number,
       min: 0,
     },
+    // Récord personal (bloque 4b, utils/records.js): true si este mejor1RM superó el mejor
+    // de todas las sesiones anteriores del ejercicio, y prAnterior es la marca que batió
+    // ("100 → 105 kg"). Solo existen en los récords: en el resto no hay campo, para que el
+    // documento no crezca. Se calculan al guardar y se recalculan al borrar una sesión
+    // anterior del mismo ejercicio; nunca los envía el cliente.
+    esPR: {
+      type: Boolean,
+    },
+    prAnterior: {
+      type: Number,
+      min: 0,
+    },
     sets: {
       type: [setSchema],
       validate: {

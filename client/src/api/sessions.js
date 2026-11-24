@@ -44,3 +44,10 @@ export const getTrainedDays = ({ desde, hasta }) => {
   return apiClient.get('/sessions/days', { params: { desde, hasta, zona } });
 };
 
+
+// GET /api/sessions/records?limite=5 → { records: [{ sessionId, fecha, exerciseId, nombre,
+// anterior, nuevo }] }: los récords personales más recientes, con el 1RM estimado anterior y
+// el nuevo (widget "Nuevos récords" del Dashboard, bloque 9d).
+export const getRecordsRecientes = (limite = 5) => {
+  return apiClient.get('/sessions/records', { params: { limite } });
+};

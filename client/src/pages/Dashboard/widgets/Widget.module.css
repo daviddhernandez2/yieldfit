@@ -232,3 +232,156 @@
   gap: var(--space-sm);
   min-height: 0;
 }
+
+/* --- Widgets del paso 4 y 5 (bloque 9d) --- */
+
+/* Cabecera con la etiqueta a la izquierda y un dato a la derecha ("3,1 por semana",
+   "1RM estimado"). */
+.cabeceraCifra {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.dato {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Frecuencia semanal: barras que ocupan el alto que queda, alineadas abajo. */
+.barras {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  gap: var(--space-xs);
+  min-height: 0;
+  padding-top: var(--space-xs);
+}
+
+.columnaBarra {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  min-width: 0;
+}
+
+.barra {
+  width: 100%;
+  min-height: 2px;
+  background-color: var(--color-accent-medium);
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+/* La semana en curso, en el verde de los datos. */
+.barraActual {
+  background-color: var(--chart-gain);
+}
+
+/* Semana sin sesiones: una línea en la base, en gris. */
+.barraVacia {
+  background-color: var(--color-border);
+}
+
+.numeroBarra {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.fechasBarras {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Última sesión: la tarjeta entera es un botón que abre el detalle. */
+.widgetBoton {
+  width: 100%;
+  border: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.widgetBoton:hover {
+  box-shadow: var(--elevation-2);
+}
+
+.tituloFila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.nombreSesion {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listaSimple {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-xs);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Nuevos récords: una fila por récord, que abre su sesión. */
+.listaRecords {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.filaRecord {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.listaRecords li:last-child .filaRecord {
+  border-bottom: none;
+}
+
+.filaRecord:hover .nombreEjercicio {
+  text-decoration: underline;
+}
+
+.mejora {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.mejora strong {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}

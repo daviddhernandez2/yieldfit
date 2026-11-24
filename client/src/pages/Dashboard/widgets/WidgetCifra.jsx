@@ -1,13 +1,16 @@
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import Variacion from '@/pages/Dashboard/widgets/Variacion.jsx';
+import { nombreMes } from '@/utils/formato.js';
 import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 
 // Widgets de una cifra, tamaño P (bloque 9d): "Progreso total" y "Sesiones totales". Los dos
 // salen del progreso de todo el historial (GET /api/progress sin fechas), que el Dashboard pide
 // una sola vez y reparte. Sin gráfica: la gráfica ya está en el grupo "Todos".
+// "Sesiones totales" añade cómo va este mes frente al anterior (`mes`, de la actividad).
 //
-// Props: tipo ("progresoTotal" | "sesionesTotales"), progreso (null mientras carga), error.
-export default function WidgetCifra({ tipo, progreso, error, className = '' }) {
+// Props: tipo ("progresoTotal" | "sesionesTotales"), progreso (null mientras carga), error,
+// mes ({ actual, anterior, mesAnterior } o null mientras carga).
+export default function WidgetCifra({ tipo, progreso, error, mes = null, className = '' }) {
   const esProgreso = tipo === 'progresoTotal';
   const etiqueta = esProgreso ? 'Progreso total' : 'Sesiones';
 
@@ -34,7 +37,15 @@ export default function WidgetCifra({ tipo, progreso, error, className = '' }) {
       ) : (
         <div className={styles.valor}>
           <span className={styles.cifra}>{progreso.sesiones.toLocaleString('es-ES')}</span>
-          <p className={styles.pie}>en total</p>
+          {mes ? (
+            // Diferencia de sesiones de este mes con el anterior ("↗ +2 vs. octubre"). El
+            // texto accesible lo dice entero.
+            <p className={styles.pie} aria-label={`Este mes, ${mes.actual} sesiones; en ${nombreMes(mes.mesAnterior)}, ${mes.anterior}`}>
+              <Variacion valor={mes.actual - mes.anterior} unidad="" /> vs. {nombreMes(mes.mesAnterior)}
+            </p>
+          ) : (
+            <p className={styles.pie}>en total</p>
+          )}
         </div>
       )}
     </section>

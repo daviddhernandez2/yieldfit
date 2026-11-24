@@ -28,3 +28,24 @@ export const formatHora = (fecha) =>
 // Kilos con un decimal como mucho y coma: 103.33 → "103,3"; 110 → "110". Para el 1RM estimado
 // de los récords (bloque 4b): más decimales no aportan nada en una estimación.
 export const formatKg = (n) => n.toLocaleString('es-ES', { maximumFractionDigits: 1 });
+
+// Fecha de una sesión respecto a hoy, en la hora del dispositivo: "hoy, 18:15", "ayer, 18:15",
+// "lunes, 18:15" (en la última semana), "12 nov, 18:15" y, de otro año, "12 nov 2025, 18:15".
+// `ahora` se pasa para poder probarlo con una fecha fija.
+export const formatFechaRelativa = (fecha, ahora = new Date()) => {
+  const d = new Date(fecha);
+  const hora = formatHora(d);
+  const inicioDia = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
+  const dias = Math.round((inicioDia(ahora) - inicioDia(d)) / (24 * 60 * 60 * 1000));
+  if (dias === 0) return `hoy, ${hora}`;
+  if (dias === 1) return `ayer, ${hora}`;
+  if (dias > 1 && dias < 7) return `${d.toLocaleDateString('es-ES', { weekday: 'long' })}, ${hora}`;
+  const opciones = d.getFullYear() === ahora.getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' };
+  return `${d.toLocaleDateString('es-ES', opciones)}, ${hora}`;
+};
+
+// Nombre del mes de 'YYYY-MM': "octubre".
+export const nombreMes = (mes) => {
+  const [a, m] = mes.split('-').map(Number);
+  return new Date(a, m - 1, 1).toLocaleDateString('es-ES', { month: 'long' });
+};

@@ -49,3 +49,11 @@ export const nombreMes = (mes) => {
   const [a, m] = mes.split('-').map(Number);
   return new Date(a, m - 1, 1).toLocaleDateString('es-ES', { month: 'long' });
 };
+
+// Tramo de un mes, del día 1 al `hastaDia`: "1–24 oct" (o "1 oct" si es solo el día 1). Para
+// comparar este mes con el mismo tramo del anterior (Sesiones totales, bloque 9d).
+export const formatTramo = (mes, hastaDia) => {
+  const [a, m] = mes.split('-').map(Number);
+  const corto = new Date(a, m - 1, 1).toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
+  return hastaDia === 1 ? `1 ${corto}` : `1–${hastaDia} ${corto}`;
+};

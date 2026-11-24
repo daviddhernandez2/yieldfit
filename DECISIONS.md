@@ -70,6 +70,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0049 | Calendario en dos columnas en escritorio, con panel del día | vigente |
 | 0050 | Datos huérfanos: diagnóstico y limpieza por script, y seed que vacía todo lo del usuario | vigente |
 | 0051 | Récords personales marcados al guardar, con la marca de cada ejercicio como copia | vigente |
+| 0052 | Dashboard personalizable en el servidor, con "Todos" como grupo normal | vigente |
 
 ---
 
@@ -1796,3 +1797,55 @@ cálculo tiene que hacerse en el servidor y no puede crecer con el historial (00
 - Si `record1RM` y las sesiones dejaran de cuadrar (dos sesiones del mismo ejercicio guardadas a
   la vez, un cambio de criterio), `npm run migrar:pr` lo corrige: solo escribe lo que cambia.
 - El widget "Nuevos récords" del 9d leerá `esPR`; su índice se decide allí.
+
+---
+
+## 0052 — Dashboard personalizable en el servidor, con "Todos" como grupo normal
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 9d · Matiza a: 0034
+
+**Contexto:** el Dashboard era una lista fija: la fila de resumen y los grupos de progreso, con
+el orden, el rango y el plegado guardados en cada dispositivo (`localStorage`), y "Todos" como
+grupo especial que no se podía tocar. David quiere un dashboard tipo bento, con widgets y grupos
+al mismo nivel, que se edite (mover, añadir, quitar, cambiar de tamaño) y se vea igual en el
+ordenador y en el iPhone.
+
+**Decisión** (de David):
+- **En el servidor:** colección `Dashboard`, un documento por usuario con la lista de widgets
+  (`tipo`, `tamano`, la referencia que necesite y el `rango`). Como mucho 24. Se guarda el orden,
+  no coordenadas.
+- **Catálogo en el servidor** (`data/catalogoWidgets.js`), única fuente de los tipos, sus tamaños
+  permitidos y los rangos; el cliente lo pide a `GET /api/dashboard/catalogo` (como en la 0024).
+  Cada tipo se marca `disponible` cuando el cliente sabe pintarlo.
+- **Retícula estricta** de 4 columnas (si el dashboard mide 880 px o más) o 2, con tamaños fijos:
+  P = 1×1, M = 2×1, G = 2×2. Sin redimensionar libre.
+- **Sin `grid-auto-flow: dense`**, ni en edición ni fuera: el orden visual es siempre el del DOM
+  y el guardado (lectores de pantalla y teclado), y nada salta al mover un widget. Si un M no cabe
+  al final de una fila queda un hueco, visible en el modo edición para que el usuario lo resuelva.
+- **"Todos" es un grupo normal** (`Chart.todos: true`, sin lista: cuenta todos los ejercicios que
+  existen hoy). Se puede renombrar, borrar y volver a crear desde el catálogo; nunca tiene una
+  lista elegida a mano. Un índice único parcial impide dos por usuario.
+- **Sin migración en producción:** `asegurarDashboard` crea "Todos" y el dashboard por defecto la
+  primera vez que se pide `GET /api/dashboard`. Aguanta peticiones a la vez gracias a los índices
+  únicos. El orden que cada dispositivo guardaba se pierde una vez.
+- **Los tamaños sustituyen al plegado** y **el rango pasa al servidor** (antes, en cada dispositivo).
+- **Al borrar** un grupo, un ejercicio o una rutina se quita su widget en la misma transacción.
+- **Primera tanda:** grupos, Progreso total (sin gráfica), Sesiones totales, Última sesión, Nuevos
+  récords, Frecuencia semanal, Racha, Récord de un ejercicio y Empezar rutina.
+
+**Alternativas descartadas:**
+- *Seguir en `localStorage`:* el dashboard sería distinto en cada dispositivo.
+- *Dentro del documento del usuario:* `/api/auth/me` lo enviaría en cada carga, y ese documento ya
+  se escribe con `ultimoAcceso`.
+- *Coordenadas x/y por widget:* una maqueta por ancho de pantalla que mantener.
+- *`dense` solo fuera del modo edición:* lo que se ordena no sería lo que se ve al pulsar "Hecho",
+  y el orden cambiaría según el ancho.
+- *"Todos" como grupo con la lista de todos los ejercicios:* los ejercicios nuevos no entrarían solos.
+- *Script de migración:* hace falta el procedimiento de reparaciones para algo que se puede crear
+  al pedirlo.
+- *Mapa de actividad como widget:* ya está la vista Año del calendario.
+
+**Consecuencias:**
+- `Dashboard` entra en el borrado de cuenta y en las colecciones de los scripts.
+- Hasta que el cliente use el dashboard (paso 2), nadie lo pide y no se crea ningún "Todos": el
+  Dashboard de ahora no ve un grupo repetido.

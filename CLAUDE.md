@@ -103,11 +103,11 @@ client/src/
   utils/        # activeSession.js (localStorage), wakingUp.js (arranque en frío), borradoEjercicio.js, records.js
   styles/       # variables.css — tokens de diseño
 server/
-  models/       # User, Exercise, Workout, Session, Chart
+  models/       # User, Exercise, Workout, Session, Chart, Dashboard
   controllers/  # lógica por recurso (list/getOne/create/update/remove)
   routes/       # un router por recurso; requireAuth aplicado a nivel router
   middlewares/  # requireAuth, notFoundHandler, errorHandler
-  data/         # exercisePresets.js — ejercicios clonados a cada usuario al registrarse
+  data/         # exercisePresets.js (ejercicios clonados al registrarse), catalogoWidgets.js (9d)
   utils/        # jwt.js, presets.js (clonado de presets), unaRM.js (Epley), progreso.js (+ .test.js)
   scripts/      # seed.js (datos de desarrollo), backup.sh, restore-test.sh, diagnostico-borrados.js y reparar-borrados.js;
                 # lib/ (credenciales.sh oculta la URI; recuentos.sh lee los logs;
@@ -132,6 +132,9 @@ Import alias en cliente: `@` → `client/src`.
   (`npm run migrar:pr`). Solo la escribe el servidor (`utils/records.js`).
 - **Chart**: grupo de progreso del usuario (`nombre`, `exerciseIds`); en la app se llama "grupo".
   Su progreso lo calcula `GET /api/progress?grupo=<id>` con el mismo cálculo que "Todos" (0034).
+  "Todos" es un grupo con `todos: true` y sin lista (0052).
+- **Dashboard**: widgets del Dashboard de cada usuario en orden (tipo, tamaño P/M/G, referencia y
+  rango). Catálogo en `server/data/catalogoWidgets.js` (0052).
 
 Todas las queries filtran por `userId: req.user._id`; los controladores verifican
 ownership de los ids referenciados. Mantener siempre ese patrón.

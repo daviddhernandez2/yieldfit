@@ -227,6 +227,25 @@ Se crea y edita en `/groups/new` y `/groups/:id/edit`. Su progreso lo calcula
 `GET /api/progress?grupo=<id>` con **exactamente el mismo cálculo que "Todos"**, solo con sus
 ejercicios: la lista la lee el servidor del propio grupo. Al borrar un ejercicio se quita de
 los grupos (0020); un grupo puede quedarse vacío y la tarjeta lo avisa.
+- **"Todos"** ([0052](../DECISIONS.md), bloque 9d) es un grupo normal con `todos: true` y sin
+  lista: su progreso cuenta todos los ejercicios que existen hoy, también los que se creen
+  después. Se puede renombrar, borrar y volver a crear (`POST /api/charts` con `todos: true`);
+  nunca lleva una lista elegida a mano. Índice único parcial: como mucho uno por usuario.
+
+### Dashboard
+Dashboard personalizable de cada usuario ([0052](../DECISIONS.md), bloque 9d): un documento con
+la lista de widgets en orden (`tipo`, `tamano` P/M/G, `chartId`, `exerciseId` o `workoutId` según
+el tipo, y `rango`). Los tipos, sus tamaños y los rangos vienen de `data/catalogoWidgets.js`, que
+el cliente pide a `GET /api/dashboard/catalogo`. `PUT /api/dashboard` guarda la lista entera tras
+validarla (`utils/dashboard.js`). Al borrar un grupo, un ejercicio o una rutina se quita su widget
+en la misma transacción.
+
+```mermaid
+flowchart LR
+    G["GET /api/dashboard"] --> A{"¿tiene dashboard?"}
+    A -- sí --> D[("Dashboard")]
+    A -- "no (1.ª vez)" --> T["crear «Todos»<br/>(si no existe)"] --> P["dashboard por defecto:<br/>Progreso total · Sesiones<br/>· Todos (G) · grupos (M)"] --> D
+```
 
 ### BugReport
 Reporte de un fallo enviado con el botón de la app (bloque 11b): `POST /api/reports`, 5 por hora

@@ -39,15 +39,6 @@ ok('sin sesiones esta semana: cuenta desde la anterior y se corta en el hueco', 
 a = calcularActividad([ses('2026-11-22T22:30:00Z')], M, ahora);
 ok('domingo 23:30 en Madrid: semana del 16', [a.semanas.at(-1).sesiones, a.semanas.at(-2).sesiones], [0, 1]);
 
-// Meses: el mismo tramo (del 1 al 24) en los dos.
-a = calcularActividad([ses('2026-11-02T10:00:00Z'), ses('2026-11-20T10:00:00Z'), ses('2026-10-31T23:30:00Z'), ses('2026-10-05T10:00:00Z'), ses('2026-10-24T20:00:00Z'), ses('2026-10-25T10:00:00Z')], M, ahora);
-ok('mismo tramo: 1–24 de este mes y del anterior (el 25 de octubre no cuenta; el 31 a las 23:30 UTC ya es noviembre en Madrid)',
-  a.mes, { mes: '2026-11', actual: 3, mesAnterior: '2026-10', anterior: 2, hastaDia: 24 });
-ok('enero: el mes anterior es diciembre del año pasado',
-  calcularActividad([], M, new Date('2027-01-10T10:00:00Z')).mes, { mes: '2027-01', actual: 0, mesAnterior: '2026-12', anterior: 0, hastaDia: 10 });
-ok('31 de marzo: el tramo de febrero llega a su último día',
-  calcularActividad([ses('2027-02-28T10:00:00Z')], M, new Date('2027-03-31T10:00:00Z')).mes, { mes: '2027-03', actual: 0, mesAnterior: '2027-02', anterior: 1, hastaDia: 28 });
-
 // Tope de la racha
 const muchas = Array.from({ length: MAX_SEMANAS_RACHA + 5 }, (_, i) => ses(new Date(ahora.getTime() - i * 7 * 864e5).toISOString()));
 ok('racha larga: tope y "más de"', calcularActividad(muchas, M, ahora).racha, { semanas: MAX_SEMANAS_RACHA, masDe: true });

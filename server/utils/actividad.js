@@ -1,5 +1,5 @@
-// Actividad del Dashboard (bloque 9d, paso 4): sesiones por semana (Frecuencia semanal), racha
-// de semanas seguidas (Racha) y sesiones de este mes y del anterior (Sesiones totales).
+// Actividad del Dashboard (bloque 9d, paso 4): sesiones por semana (Frecuencia semanal y los
+// círculos de la Racha) y la racha de semanas seguidas (Racha).
 // Pura: recibe las sesiones y la zona horaria y no toca la base de datos (pruebas en
 // actividad.test.js).
 //
@@ -32,25 +32,14 @@ export const lunesDe = (dia) => {
   return sumarDias(dia, -dow);
 };
 
-// Mes anterior a 'YYYY-MM'.
-const mesAnterior = (mes) => {
-  const [a, m] = mes.split('-').map(Number);
-  return m === 1 ? `${a - 1}-12` : `${a}-${String(m - 1).padStart(2, '0')}`;
-};
-
 // sesiones: [{ fecha, duracionSegundos }] (al menos las de los últimos MAX_SEMANAS_RACHA + 1
 // semanas). Devuelve:
 //   - semanas: las últimas `numSemanas`, de la más antigua a la actual: [{ inicio, sesiones, segundos }].
 //   - racha: { semanas, masDe } con las semanas seguidas con al menos una sesión, contando
 //     desde la actual. La semana en curso no rompe la racha mientras no termina: si aún no tiene
 //     sesiones, se empieza a contar por la anterior. masDe: se llegó al tope que se mira.
-//   - mes: { mes, actual, mesAnterior, anterior, hastaDia }: las sesiones de este mes hasta hoy y
-//     las del mes anterior en el MISMO tramo (del día 1 al día de hoy, o al último día de ese
-//     mes si es más corto). Comparar un mes a medias con uno entero saldría siempre negativo a
-//     principio de mes (decisión de David). hastaDia: el último día que cuenta del mes anterior.
 export const calcularActividad = (sesiones, zona, ahora = new Date(), numSemanas = 12) => {
   const porSemana = new Map();
-  const porDia = []; // días 'YYYY-MM-DD' de cada sesión, para contar por tramos de mes
   for (const s of sesiones) {
     const dia = diaLocal(new Date(s.fecha), zona);
     const lunes = lunesDe(dia);
@@ -58,7 +47,6 @@ export const calcularActividad = (sesiones, zona, ahora = new Date(), numSemanas
     semana.sesiones += 1;
     semana.segundos += s.duracionSegundos ?? 0;
     porSemana.set(lunes, semana);
-    porDia.push(dia);
   }
 
   const hoy = diaLocal(ahora, zona);
@@ -77,21 +65,8 @@ export const calcularActividad = (sesiones, zona, ahora = new Date(), numSemanas
     lunes = sumarDias(lunes, -7);
   }
 
-  const mes = hoy.slice(0, 7);
-  const anterior = mesAnterior(mes);
-  const [a, m] = anterior.split('-').map(Number);
-  const diasAnterior = new Date(Date.UTC(a, m, 0)).getUTCDate(); // día 0 del mes siguiente = último
-  const hastaDia = Math.min(Number(hoy.slice(8, 10)), diasAnterior);
-  const finTramo = `${anterior}-${String(hastaDia).padStart(2, '0')}`;
   return {
     semanas,
     racha: { semanas: racha, masDe: racha === MAX_SEMANAS_RACHA },
-    mes: {
-      mes,
-      actual: porDia.filter((d) => d.startsWith(mes) && d <= hoy).length,
-      mesAnterior: anterior,
-      anterior: porDia.filter((d) => d.startsWith(anterior) && d <= finTramo).length,
-      hastaDia,
-    },
   };
 };

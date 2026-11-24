@@ -1,7 +1,8 @@
 /* Calendario de días entrenados, arriba del Historial. Mismas medidas que las tarjetas
    del Dashboard (relleno y separación --space-lg, título en negrita). Solo colores del
-   design system (variables.css). La tarjeta mide siempre lo mismo: las dos vistas están
-   superpuestas y el mes tiene siempre 6 filas. */
+   design system (variables.css). En la forma estrecha la tarjeta mide siempre lo mismo: las
+   dos vistas están superpuestas y el mes tiene siempre 6 filas. En la ancha (escritorio,
+   bloque 8b) la vista oculta no ocupa sitio y la tarjeta encoge en la vista Año. */
 .calendario {
   /* Medidas propias del calendario, en un solo sitio. */
   --alto-celda: 96px; /* celda de la forma ancha (escritorio) */
@@ -235,9 +236,9 @@
   background-color: var(--color-accent);
 }
 
-/* Mes: círculos de cristal (como las glassCard): fondo verde translúcido con desenfoque y
-   un brillo arriba. Una sesión: fondo suave y borde medio, número en blanco. Dos o más:
-   fondo medio, borde y número en el verde de acento (como un chip seleccionado). */
+/* Mes (forma estrecha): el mismo verde que las píldoras del escritorio (bloque 8b): número en
+   verde de acento sobre verde translúcido, con desenfoque y un brillo arriba. Una sesión,
+   fondo suave; dos o más, fondo medio y borde verde. */
 .nivel1 .circulo,
 .nivel2 .circulo {
   backdrop-filter: blur(12px);
@@ -250,7 +251,7 @@
 .nivel1 .circulo {
   background-color: var(--color-accent-soft);
   border-color: var(--color-accent-medium);
-  color: var(--color-text);
+  color: var(--color-accent);
 }
 
 .nivel2 .circulo {
@@ -269,14 +270,14 @@
   border-color: var(--color-accent-hover);
 }
 
-/* Hoy: anillo, para situarse aunque no se haya entrenado. */
+/* Hoy: anillo verde, como en el escritorio, para situarse aunque no se haya entrenado. */
 .diaHoy .circulo {
-  border-color: var(--color-text);
-  color: var(--color-text);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .cuadro.diaHoy {
-  outline: 1px solid var(--color-text);
+  outline: 1px solid var(--color-accent);
   outline-offset: -1px;
 }
 
@@ -350,11 +351,23 @@
    =================================================================================== */
 
 .ancha {
+  padding: var(--space-xl);
+}
+
+/* Vista de mes en la forma ancha: mes a la izquierda y panel del día a la derecha. */
+.conPanel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--ancho-panel);
   gap: var(--space-xl);
   align-items: start;
-  padding: var(--space-xl);
+}
+
+/* Vista de año en la forma ancha: el mapa ocupa todo el ancho de la tarjeta y las casillas
+   crecen para llenarlo (de 11 a 18 px): se ve el año entero sin desplazarse. cqi es el ancho
+   del propio mapa (container-type). */
+.ancha .mapaAnual {
+  container-type: inline-size;
+  --casilla: clamp(11px, calc((100cqi - (var(--columnas) - 1) * var(--hueco-casilla)) / var(--columnas)), 18px);
 }
 
 /* ---------- Cabecera ancha: mes en grande, dato pequeño, controles ---------- */
@@ -395,8 +408,13 @@
   gap: var(--space-xs);
 }
 
-/* En la forma ancha el mes es mucho más alto (celdas de 96 px): el mapa del año va arriba,
-   junto a la cabecera, en vez de centrado en todo ese alto. */
+/* En la forma ancha la vista oculta no ocupa sitio (decisión de David, bloque 8b): el mes es
+   mucho más alto (celdas de 96 px) y en la vista Año dejaba un hueco vacío. La tarjeta encoge
+   al pasar a Año. En la forma estrecha se mantiene el mismo alto en las dos vistas (no salta). */
+.ancha .oculta {
+  display: none;
+}
+
 .ancha .vistaAnio {
   justify-content: flex-start;
 }

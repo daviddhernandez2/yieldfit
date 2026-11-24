@@ -85,6 +85,9 @@ export default function Calendario() {
   const calendarioRef = useRef(null);
   const ancho = useAncho(calendarioRef);
   const ancha = ancho >= ANCHO_DOS_COLUMNAS;
+  // El panel del día solo acompaña a la vista de mes. En la de año, el mapa ocupa todo el
+  // ancho para que quepa el año entero (bloque 8b); tocar un día lleva a su mes.
+  const conPanel = ancha && vista === "mes";
 
   const dias = porAnio[mes.anio];
   // Mes anterior al que se ve, para comparar en el panel. En enero es diciembre del año
@@ -156,6 +159,12 @@ export default function Calendario() {
   const tocarDia = (dia) => {
     if (ancha) {
       setSeleccionado(dia);
+      if (vista === "anio") {
+        // Del mapa del año al mes de ese día, con el día seleccionado en el panel.
+        const [anio, mesDelDia] = dia.split("-").map(Number);
+        setMes({ anio, mes: mesDelDia - 1 });
+        setVista("mes");
+      }
       return;
     }
     const sesiones = dias[dia];
@@ -319,7 +328,10 @@ export default function Calendario() {
   );
 
   return (
-    <section ref={calendarioRef} className={`${styles.calendario} ${ancha ? styles.ancha : ""} glassCard`}>
+    <section
+      ref={calendarioRef}
+      className={`${styles.calendario} ${ancha ? styles.ancha : ""} ${conPanel ? styles.conPanel : ""} glassCard`}
+    >
       <div className={styles.columnaMes}>
         {ancha ? cabeceraAncha() : cabeceraEstrecha()}
 
@@ -349,9 +361,11 @@ export default function Calendario() {
           </div>
 
           <div className={`${styles.vista} ${styles.vistaAnio} ${vista === "anio" ? "" : styles.oculta}`} inert={vista !== "anio"}>
-            <div className={styles.mapaAnual} ref={mapaAnualRef}>
+            {/* --columnas: semanas del año (53 o 54); lo usan los nombres de los meses y, en la
+                forma ancha, el tamaño de las casillas. */}
+            <div className={styles.mapaAnual} ref={mapaAnualRef} style={{ "--columnas": semanasDelAnio.length }}>
               {/* Nombres de los meses encima de la columna en la que empieza cada uno. */}
-              <div className={styles.meses} style={{ "--columnas": semanasDelAnio.length }}>
+              <div className={styles.meses}>
                 {inicioDeMeses(semanasDelAnio).map(({ mes: m, columna }) => (
                   <span key={m} style={{ gridColumn: columna + 1 }}>
                     {MESES_CORTOS[m]}
@@ -409,7 +423,7 @@ export default function Calendario() {
         </div>
       </div>
 
-      {ancha && (
+      {conPanel && (
         <PanelDia
           dia={seleccionado}
           sesiones={porAnio[fechaSeleccionada.getFullYear()]?.[seleccionado]}

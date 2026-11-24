@@ -26,14 +26,26 @@
   flex: 1;
   min-width: 0;
   padding: var(--space-lg);
-  /* Espacio inferior extra en móvil para que la TabBar flotante no tape
-     el contenido. En escritorio no hace falta porque no hay TabBar. */
-  padding-bottom: calc(var(--space-lg) + 80px);
+  /* Espacio al final de la página para que nada fijo de abajo tape el contenido (bloque 9d):
+     llega hasta encima del botón "Reportar", que es lo más alto de la esquina (por encima de
+     la TabBar). Sus alturas, en variables.css. */
+  padding-bottom: calc(var(--reportar-bottom-movil) + var(--reportar-alto-movil) + var(--space-md));
+}
+
+/* Con MiniSession o «Reemplazar» abajo, el botón sube y el espacio también. */
+.mainElevado {
+  padding-bottom: calc(var(--reportar-bottom-movil-elevado) + var(--reportar-alto-movil) + var(--space-md));
 }
 
 @media (min-width: 768px) {
   .main {
     padding: var(--space-2xl);
-    padding-bottom: var(--space-2xl);
+    /* La píldora "Reportar" de la esquina: su espacio, para que no tape la última tarjeta. */
+    padding-bottom: calc(var(--reportar-bottom-escritorio) + var(--reportar-alto-escritorio) + var(--space-md));
+  }
+
+  /* En escritorio no hay barras abajo: el mismo espacio siempre. */
+  .mainElevado {
+    padding-bottom: calc(var(--reportar-bottom-escritorio) + var(--reportar-alto-escritorio) + var(--space-md));
   }
 }

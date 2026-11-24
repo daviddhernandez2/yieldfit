@@ -4,6 +4,9 @@ import MiniSession from '@/components/MiniSession/MiniSession.jsx';
 import DarkVeil from '@/components/DarkVeil/DarkVeil.jsx';
 import ServerWakingUp from '@/components/ServerWakingUp/ServerWakingUp.jsx';
 import ReportarFallo from '@/components/ReportarFallo/ReportarFallo.jsx';
+import { useLocation } from 'react-router-dom';
+import { useActiveSession } from '@/hooks/useActiveSession.js';
+import { hayBotonReemplazar, hayMiniSession } from '@/utils/barrasInferiores.js';
 import styles from '@/components/Layout/Layout.module.css';
 
 // Layout de las rutas privadas.
@@ -13,13 +16,19 @@ import styles from '@/components/Layout/Layout.module.css';
 // independientemente del scroll, por lo que un solo componente cubre toda
 // la experiencia de sesión.
 export default function Layout({ children }) {
+  // Con MiniSession o «Reemplazar» abajo, la página deja más espacio al final (la misma regla
+  // que sube el botón "Reportar": utils/barrasInferiores.js).
+  const { pathname } = useLocation();
+  const session = useActiveSession();
+  const elevado = hayMiniSession(session, pathname) || hayBotonReemplazar(pathname);
+
   return (
     <div className={styles.layout}>
       <div className={styles.veil} aria-hidden="true">
         <DarkVeil />
       </div>
       <Sidebar />
-      <main className={styles.main}>{children}</main>
+      <main className={`${styles.main} ${elevado ? styles.mainElevado : ''}`}>{children}</main>
       <TabBar />
       <MiniSession />
       <ServerWakingUp flotante />

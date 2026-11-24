@@ -3,23 +3,11 @@
    --------------------------------------------------------------------------- */
 
 .boton {
-  /* ALTURAS DEL BOTÓN EN EL MÓVIL: el único sitio donde se deciden.
-     Pila fija de abajo, de abajo arriba:
-       - TabBar:              bottom 16px, ~67px de alto       → llega a ~83px (siempre)
-       - MiniSession:         bottom 97px, ~55px + zona segura → llega a ~152px (a veces)
-       - «Reemplazar» (sticky en ReplaceExercise): bottom 96px, ~62px → ~158px (a veces)
-       - Aviso de servidor dormido: bottom 96px, centrado: no llega a la esquina
-     Normal: 96px, unos 12px por encima de la TabBar.
-     Elevado (.elevado): 172px, unos 14px por encima de la más alta. Cuándo se eleva lo
-     decide utils/barrasInferiores.js, la misma regla que usa MiniSession.
-     La zona segura del iPhone (barra de inicio) se suma porque MiniSession crece con ella.
-     Si algún día se añade otra barra abajo, se cambian estos valores y esa regla. */
-  --bug-bottom-movil: 96px;
-  --bug-bottom-movil-elevado: calc(172px + env(safe-area-inset-bottom));
-
+  /* Alturas en variables.css (--reportar-*), con la explicación de la pila de barras: el
+     Layout las usa también para dejar su espacio al final de la página. */
   position: fixed;
   right: var(--space-md);
-  bottom: var(--bug-bottom-movil);
+  bottom: var(--reportar-bottom-movil);
   /* Por encima del contenido y al nivel de la TabBar (100); por debajo del aviso de
      servidor (110) y de los diálogos (1000). No se solapa con ninguno. */
   z-index: 100;
@@ -28,8 +16,8 @@
   justify-content: center;
   gap: var(--space-sm);
   /* 44px: el mínimo cómodo para el dedo (guía de Apple). */
-  width: 44px;
-  height: 44px;
+  width: var(--reportar-alto-movil);
+  height: var(--reportar-alto-movil);
   padding: 0;
   background-color: var(--color-bg-glass);
   backdrop-filter: blur(20px);
@@ -46,7 +34,7 @@
 
 /* Con MiniSession o «Reemplazar» abajo, el botón sube por encima de ellos. */
 .elevado {
-  bottom: var(--bug-bottom-movil-elevado);
+  bottom: var(--reportar-bottom-movil-elevado);
 }
 
 /* :active para el dedo en el móvil, donde no hay :hover. */
@@ -72,9 +60,9 @@
 @media (min-width: 768px) {
   .boton {
     right: var(--space-lg);
-    bottom: var(--space-lg);
+    bottom: var(--reportar-bottom-escritorio);
     width: auto;
-    height: 40px;
+    height: var(--reportar-alto-escritorio);
     padding: 0 var(--space-md) 0 var(--space-sm);
   }
 

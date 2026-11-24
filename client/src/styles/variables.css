@@ -117,6 +117,25 @@
       G, dos. Las columnas (2 o 4) las decide utils/reticula.js por el ancho del dashboard. */
    --alto-fila-dashboard: 132px;
 
+   /* Botón flotante "Reportar" (bloque 11b.2): sus alturas, el único sitio donde se deciden.
+      Las usan el propio botón (ReportarFallo) y el Layout, que deja al final de la página el
+      espacio que ocupa el botón para que nunca tape contenido (bloque 9d).
+      Pila fija de abajo en el móvil, de abajo arriba:
+        - TabBar:              bottom 16px, ~67px de alto       → llega a ~83px (siempre)
+        - MiniSession:         bottom 97px, ~55px + zona segura → llega a ~152px (a veces)
+        - «Reemplazar» (sticky en ReplaceExercise): bottom 96px, ~62px → ~158px (a veces)
+        - Aviso de servidor dormido: bottom 96px, centrado: no llega a la esquina
+      Normal: 96px, unos 12px por encima de la TabBar. Elevado: 172px, unos 14px por encima de
+      la más alta. Cuándo se eleva lo decide utils/barrasInferiores.js, la misma regla que usa
+      MiniSession. La zona segura del iPhone (barra de inicio) se suma porque MiniSession crece
+      con ella. Si algún día se añade otra barra abajo, se cambian estos valores y esa regla.
+      En escritorio es una píldora en la esquina inferior derecha. */
+   --reportar-bottom-movil: 96px;
+   --reportar-bottom-movil-elevado: calc(172px + env(safe-area-inset-bottom));
+   --reportar-alto-movil: 44px;
+   --reportar-bottom-escritorio: var(--space-lg);
+   --reportar-alto-escritorio: 40px;
+
    /* Radios de borde. Concéntricos: el radio interior es el exterior menos el padding. */
    --radius-xs: 4px;
    --radius-sm: 8px;

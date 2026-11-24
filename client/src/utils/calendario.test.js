@@ -2,7 +2,7 @@
 // Se fuerza la zona de Madrid para que los resultados no dependan del ordenador.
 process.env.TZ = 'Europe/Madrid';
 
-const { claveDia, rejillaDelMes, rangoDelMes, nombreDelMes, moverMes, rangoDelAnio, rejillaDelAnio, inicioDeMeses, nivelDeDia } = await import('./calendario.js');
+const { claveDia, rejillaDelMes, rangoDelMes, nombreDelMes, moverMes, rangoDelAnio, rejillaDelAnio, inicioDeMeses, nivelDeDia, semanaDelAnio, resumenDelMes } = await import('./calendario.js');
 
 let fallos = 0;
 const ok = (desc, real, esperado) => {
@@ -47,6 +47,21 @@ ok('2026: 12 meses con su columna, enero en la 0', [meses.length, meses[0]], [12
 ok('2026: febrero empieza en la columna 4 (el 1 es domingo)', meses[1], { mes: 1, columna: 4 });
 ok('rango de 2026 en UTC (≤ 366 días)', rangoDelAnio(2026), { desde: '2025-12-31T23:00:00.000Z', hasta: '2026-12-31T23:00:00.000Z' });
 ok('niveles de intensidad', [0, 1, 2, 5].map(nivelDeDia), [0, 1, 2, 2]);
+
+// --- Bloque 8b: semana ISO y resumen del mes ---
+ok('semana ISO: 24-nov-2026 es la 48', semanaDelAnio(new Date(2026, 10, 24)), 48);
+ok('semana ISO: 1-ene-2027 (viernes) es la 53 de 2026', semanaDelAnio(new Date(2027, 0, 1)), 53);
+ok('semana ISO: 4-ene-2027 (lunes) es la 1', semanaDelAnio(new Date(2027, 0, 4)), 1);
+ok('semana ISO: 29-dic-2025 (lunes) es la 1 de 2026', semanaDelAnio(new Date(2025, 11, 29)), 1);
+const diasEjemplo = {
+  '2026-10-31': [{ duracionSegundos: 1800 }],
+  '2026-11-03': [{ duracionSegundos: 3000 }, { duracionSegundos: 600 }],
+  '2026-11-20': [{ duracionSegundos: 2400 }],
+  '2026-12-01': [{ duracionSegundos: 999 }],
+};
+ok('resumen de noviembre: 3 sesiones, 2 días, 6000 s', resumenDelMes(diasEjemplo, 2026, 10), { sesiones: 3, diasEntrenados: 2, segundos: 6000 });
+ok('resumen de un mes sin sesiones', resumenDelMes(diasEjemplo, 2026, 8), { sesiones: 0, diasEntrenados: 0, segundos: 0 });
+ok('resumen sin datos del año: null', resumenDelMes(undefined, 2026, 10), null);
 
 console.log(fallos === 0 ? '\nTODO CORRECTO' : `\n${fallos} FALLOS`);
 if (fallos > 0) process.exitCode = 1;

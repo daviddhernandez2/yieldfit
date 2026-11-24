@@ -10,3 +10,17 @@ export const formatConSigno = (n) => {
 
 // Porcentaje con signo: 3.14 → "+3,1%".
 export const formatPorcentaje = (n) => `${formatConSigno(n)}%`;
+
+// Duración legible: 52 min · 1h 5 min. La misma que usa la lista del Historial.
+export const formatDuracion = (segundos) => {
+  const totalMin = Math.floor(segundos / 60);
+  if (totalMin < 60) return `${totalMin} min`;
+  const horas = Math.floor(totalMin / 60);
+  const minutos = totalMin % 60;
+  return `${horas}h ${minutos} min`;
+};
+
+// Hora local de una fecha: "18:30".
+export const formatHora = (fecha) =>
+  new Date(fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+

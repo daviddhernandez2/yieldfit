@@ -2,9 +2,22 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-  max-width: 800px;
+  /* Hasta 1120 px para que quepa el calendario en dos columnas (bloque 8b); todo lo demás
+     se queda en 800 px, centrado. */
+  max-width: 1120px;
   margin: 0 auto;
   width: 100%;
+}
+
+.page > * {
+  width: 100%;
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+/* Solo el calendario usa el ancho completo de la página. */
+.page > .calendarioAncho {
+  max-width: none;
 }
 
 .header {

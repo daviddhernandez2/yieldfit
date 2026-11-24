@@ -82,3 +82,36 @@ export const inicioDeMeses = (semanas) =>
 // Intensidad del color de un día según cuántas sesiones tiene: 0 (ninguna), 1 (una) o 2
 // (dos o más). Con ~3 sesiones por semana, más niveles no aportarían nada.
 export const nivelDeDia = (sesiones) => Math.min(sesiones, 2);
+
+// ---------------------------------------------------------------------------
+// Escritorio: cabecera y panel del día (bloque 8b)
+
+// Número de semana ISO 8601 (la que se usa en España): las semanas empiezan en lunes y la
+// semana 1 es la que contiene el primer jueves del año. Así el 1 de enero puede ser de la
+// semana 52 o 53 del año anterior, y el 31 de diciembre de la semana 1 del siguiente.
+export const semanaDelAnio = (fecha) => {
+  const d = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7)); // el jueves de esa semana
+  const primerJueves = new Date(d.getFullYear(), 0, 4);
+  primerJueves.setDate(primerJueves.getDate() + 3 - ((primerJueves.getDay() + 6) % 7));
+  return 1 + Math.round((d - primerJueves) / (7 * 24 * 60 * 60 * 1000));
+};
+
+// Resumen de un mes a partir de los días que da el servidor ({ "2026-11-03": [sesiones] }):
+// cuántas sesiones, cuántos días distintos y cuánto tiempo en total (segundos).
+// Devuelve null si no hay datos de ese mes (el año aún no se ha pedido).
+export const resumenDelMes = (dias, anio, mes) => {
+  if (!dias) return null;
+  const prefijo = `${anio}-${dosCifras(mes + 1)}-`;
+  let sesiones = 0;
+  let diasEntrenados = 0;
+  let segundos = 0;
+  for (const [dia, lista] of Object.entries(dias)) {
+    if (!dia.startsWith(prefijo)) continue;
+    diasEntrenados += 1;
+    sesiones += lista.length;
+    segundos += lista.reduce((total, s) => total + (s.duracionSegundos ?? 0), 0);
+  }
+  return { sesiones, diasEntrenados, segundos };
+};
+

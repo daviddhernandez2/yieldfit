@@ -3,17 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { listSessions } from '@/api/sessions.js';
 import Button from '@/components/Button/Button.jsx';
 import Calendario from '@/components/Calendario/Calendario.jsx';
+import { formatDuracion } from '@/utils/formato.js';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import styles from '@/pages/History/History.module.css';
-
-// Formatea segundos como "1h 24 min" o "24 min" según duración.
-const formatDuracion = (segundos) => {
-  const totalMin = Math.floor(segundos / 60);
-  if (totalMin < 60) return `${totalMin} min`;
-  const horas = Math.floor(totalMin / 60);
-  const minutos = totalMin % 60;
-  return `${horas}h ${minutos} min`;
-};
 
 // Formatea fecha + hora en el estilo del historial.
 const formatFecha = (fecha) => {
@@ -124,8 +116,14 @@ export default function History() {
         )}
       </header>
 
-      {/* Días entrenados (bloque 8): vista de mes o de año, arriba de la lista. */}
-      {!loading && !error && sessions.length > 0 && <Calendario />}
+      {/* Días entrenados (bloque 8): vista de mes o de año, arriba de la lista. Su envoltorio
+          puede ser más ancho que el resto de la página (bloque 8b): en escritorio, el
+          calendario va en dos columnas. */}
+      {!loading && !error && sessions.length > 0 && (
+        <div className={styles.calendarioAncho}>
+          <Calendario />
+        </div>
+      )}
 
       {/* Mientras llegan las sesiones: cuatro tarjetas con la forma de las de verdad. */}
       {loading && (

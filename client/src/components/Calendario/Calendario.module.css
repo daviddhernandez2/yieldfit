@@ -4,6 +4,8 @@
    superpuestas y el mes tiene siempre 6 filas. */
 .calendario {
   /* Medidas propias del calendario, en un solo sitio. */
+  --alto-celda: 96px; /* celda de la forma ancha (escritorio) */
+  --ancho-panel: 320px; /* panel del día en la forma ancha */
   --celda-mes: 44px; /* tamaño máximo de un día en la vista de mes */
   --casilla: 11px; /* casilla del mapa anual: 53 semanas caben en la tarjeta de escritorio */
   --hueco-casilla: 3px;
@@ -13,6 +15,14 @@
   gap: var(--space-lg);
   padding: var(--space-lg);
   border-radius: var(--radius-md);
+}
+
+/* La columna del mes: en la forma estrecha es todo el calendario; en la ancha, la izquierda. */
+.columnaMes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 0;
 }
 
 /* ---------- Cabecera: título a la izquierda, Mes / Año a la derecha ---------- */
@@ -60,9 +70,10 @@
 }
 
 .periodo {
+  /* inline-block para que ::first-letter funcione (pone en mayúscula solo la primera letra:
+     toLocaleDateString lo da en minúscula, "noviembre de 2026"). */
+  display: inline-block;
   font-weight: var(--font-weight-medium);
-  /* toLocaleDateString lo da en minúscula ("noviembre de 2026"). */
-  text-transform: capitalize;
   white-space: nowrap;
 }
 
@@ -280,7 +291,12 @@
   bottom: 0;
   z-index: 1;
   padding: var(--space-md);
+  /* Fondo sólido de nivel 2 (menús y hojas): el cristal translúcido dejaba ver los números
+     del calendario a través de la lista (bloque 8b). */
+  background-color: var(--surface-2);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  box-shadow: var(--elevation-3);
 }
 
 .capaDiaCabecera {
@@ -325,3 +341,342 @@
   color: var(--color-error);
   font-size: var(--font-size-sm);
 }
+
+/* ===================================================================================
+   Forma ancha (escritorio, bloque 8b): mes a la izquierda y panel del día a la derecha.
+   La activa Calendario.jsx según el ancho del propio calendario (ANCHO_DOS_COLUMNAS).
+   =================================================================================== */
+
+.ancha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--ancho-panel);
+  gap: var(--space-xl);
+  align-items: start;
+  padding: var(--space-xl);
+}
+
+/* ---------- Cabecera ancha: mes en grande, dato pequeño, controles ---------- */
+
+.cabeceraAncha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md) var(--space-lg);
+}
+
+/* page-title con peso 500 (en títulos grandes, mejor 500 que 600). */
+.mesGrande {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* Solo la primera letra en mayúscula ("Noviembre de 2026", no "Noviembre De 2026"). */
+.mesGrande::first-letter,
+.periodo::first-letter {
+  text-transform: uppercase;
+}
+
+.controles {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.navegacionAncha {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* ---------- Rejilla de celdas altas ---------- */
+
+.rejillaAncha {
+  gap: var(--space-xs);
+}
+
+.rejillaAncha .diaSemana {
+  justify-content: flex-start;
+  padding-left: var(--space-sm);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.celda {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  min-width: 0;
+  min-height: var(--alto-celda);
+  padding: var(--space-xs);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.celda:hover {
+  background-color: var(--color-hover);
+}
+
+/* Seleccionado: la celda entera, con fondo de nivel 3 y borde verde. */
+.celdaSeleccionada,
+.celdaSeleccionada:hover {
+  background-color: var(--surface-3);
+  border-color: var(--color-border-accent);
+}
+
+.huecoAncho {
+  min-height: var(--alto-celda);
+}
+
+/* Número del día en un círculo pequeño (radio concéntrico con la celda). */
+.numero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.numeroEntrenado {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Hoy: el número dentro de un círculo verde, distinto del seleccionado (la celda). */
+.numeroHoy {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Sesión dentro de la celda: verde translúcido, nombre recortado si no cabe. */
+.pildora {
+  display: block;
+  max-width: 100%;
+  padding: 2px var(--space-sm);
+  overflow: hidden;
+  background-color: var(--color-accent-soft);
+  border-radius: var(--radius-xs);
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mas {
+  padding-left: var(--space-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+/* ---------- Panel del día ---------- */
+
+/* Separado del mes por una línea, no como otra tarjeta dentro de la tarjeta. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  min-width: 0;
+  padding-left: var(--space-xl);
+  border-left: 1px solid var(--color-border);
+}
+
+.panelFecha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* kpi-xl */
+.panelNumero {
+  font-size: 3.5rem;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.panelDiaSemana {
+  color: var(--color-text-muted);
+}
+
+.panelDiaSemana::first-letter {
+  text-transform: uppercase;
+}
+
+.panelSeccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* metric-label */
+.panelEtiqueta {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.panelEtiquetaSuave {
+  opacity: 0.7;
+}
+
+.panelLista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panelSesion {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.panelSesion:hover {
+  background-color: var(--color-hover);
+}
+
+/* data: Geist Mono */
+.panelHora {
+  padding-top: 1px;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.panelTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.panelNombre {
+  overflow: hidden;
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panelDato,
+.panelVacio {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Cifras del mes comparadas con el anterior. */
+.cifrasMes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0;
+}
+
+.cifraMes {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.cifraMes dd {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin: 0;
+}
+
+.cifraValor {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.variacion {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.flecha {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sube {
+  color: var(--chart-gain);
+}
+
+.baja {
+  color: var(--chart-loss);
+}
+
+.igual {
+  color: var(--chart-neutral);
+}
+
+/* ---------- Forma estrecha: hora y duración en la lista del día (bloque 8b) ---------- */
+
+.sesionDiaTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sesionDiaDato {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-regular);
+}
+

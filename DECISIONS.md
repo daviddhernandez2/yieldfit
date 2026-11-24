@@ -66,6 +66,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0045 | Data router y aviso de cambios sin guardar | vigente |
 | 0046 | Filas de botones que se apilan (`GrupoBotones`) y responsive obligatorio | vigente |
 | 0047 | Design system Premium como tema único y fuente de verdad del diseño | vigente |
+| 0048 | Ajustes al tema Premium: botón verde, rojo más vivo, botones de icono y portada en negro puro | vigente |
 
 ---
 
@@ -1637,3 +1638,36 @@ concepto, menos volumen).
 - Si el artefacto cambia, `variables.css` se actualiza a mano desde él: no hay sincronización
   automática.
 
+---
+
+## 0048 — Ajustes al tema Premium: botón verde, rojo más vivo, botones de icono y portada en negro puro
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 9c · Matiza a: 0047
+
+**Contexto:** al ver el tema Premium aplicado (0047), David pidió cambiar cuatro cosas. El design
+system del artefacto es la fuente de verdad, así que se actualizó también, para que diga lo mismo
+que el código.
+
+**Decisión** (de David):
+- **Botón principal verde** en toda la app: `color-action`, `color-action-hover` y
+  `color-on-action` apuntan a `color-accent`, `color-accent-hover` y `color-accent-text`. El
+  Premium original lo ponía en blanco roto.
+- **Rojo más vivo, `#ec5850`** (80 % de saturación, 5,5:1 sobre `surface-1`) en lugar de
+  `#dc6b67`: `color-error`, `chart-loss` y los rojos translúcidos del botón de peligro (8, 14 y 24 %).
+- **`BotonIcono`**: los botones de volver, avanzar, abrir y cerrar dejan de ser cuadrados con
+  borde. Círculo de 40 px para navegar (volver en las cabeceras, flechas del calendario); sin fondo
+  dentro de las tarjetas (plegar un grupo, cerrar el panel del día). Zona táctil de 48 px en los
+  dos. Iconos SVG de trazo 1.5, también el "×".
+- **Negro puro en la portada sin sesión y en la intro**: no usan el negro del tema (`#08090a`).
+
+**Alternativas descartadas:**
+- *Botón principal en blanco roto (Premium original):* a David no le encaja con la marca.
+- *Rojos más vivos (`#f04b43`) o el antiguo `#FF3000`:* demasiado chillones junto al verde.
+- *Todos los botones de icono circulares, o todos sin fondo:* más volumen dentro de las tarjetas,
+  o un botón de volver que se ve menos.
+- *Verde solo en las pantallas de entrada:* dos criterios para el mismo botón.
+
+**Consecuencias:**
+- El tema de la app ya no es el Premium tal cual: es el Premium con estos ajustes, y el artefacto
+  lo refleja.
+- La portada mantiene sus colores originales; sus `rgba` sueltos quedan fuera de la limpieza.

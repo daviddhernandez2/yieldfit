@@ -173,10 +173,13 @@ en un artefacto de claude.ai, https://claude.ai/artifact/FRZyFL1pqgwGnvcaMCLoR3 
 de `project/components/bundle.css`. Si no se puede leer, se dice y no se inventan valores.
 Figma (fileKey `FM0tXObXUAJsRipf0D0gXs`) queda como referencia histórica, desactualizada.
 
-Tema único **Premium** (valores en `:root`): superficies por niveles (`surface-0..3`), texto
-`#ededed`, botón principal en `color-action` (blanco roto), verde `#3EF87E` para datos, estados,
-selección y foco, y rojo `#dc6b67` para pérdidas, errores y peligro (siempre tonal, nunca sólido).
-Tipografía Geist; cifras y datos técnicos en Geist Mono (`--font-mono`).
+Tema único **Premium** (valores en `:root`) con los ajustes de David (DECISIONS 0048): superficies
+por niveles (`surface-0..3`), texto `#ededed`, verde `#3EF87E` para la acción principal
+(`color-action` apunta al acento), datos, estados, selección y foco, y rojo `#ec5850` para
+pérdidas, errores y peligro (siempre tonal, nunca sólido). La portada sin sesión y la intro
+mantienen el negro puro. Botones de solo icono con `BotonIcono` (círculo para navegar, sin fondo
+dentro de tarjetas, zona táctil de 48 px). Tipografía Geist; cifras y datos técnicos en Geist Mono
+(`--font-mono`).
 Colores, espaciados, sombras y movimiento siempre desde `styles/variables.css`, nunca valores sueltos.
 **Responsive obligatorio:** todo cambio de interfaz se comprueba a 375 y 390 px de ancho (y en
 escritorio), sin desbordes ni scroll horizontal. Los fallos se arreglan en el componente común,
@@ -219,11 +222,13 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
     y atajo de repetir también para cardio; Historial y detalle muestran tiempo y distancia;
     quitar el bloqueo (una línea en `OPCIONES_TIPO`). Las sesiones de cardio guardadas con
     peso y reps a 0 no se pueden recuperar.
-- **Verdes translúcidos sueltos:** la app usa `rgba(62, 248, 126, α)` con 11 opacidades
-  distintas en varios CSS. Desde el bloque 8 existen `--color-accent-soft` (0.08) y
-  `--color-accent-medium` (0.25) en `variables.css`: sustituir los sueltos por tokens.
-  En el mismo repaso: `TabBar` (`rgba(15, 15, 15, 0.75)`) y `ConfirmDialog` (`rgba(0, 0, 0, 0.7)`)
-  tienen sueltos los valores de `--color-bg-glass` y `--color-overlay` (tokens del bloque 11b).
+- **Colores translúcidos sin token** (revisado en el 9c: TabBar, ConfirmDialog, bordes, banners
+  de error y el verde al 8 % ya usan tokens). Quedan los que no coinciden con ningún token en valor
+  y uso: verdes al 4, 5, 6, 12, 15, 20, 30, 35 y 50 % (estados de la sesión activa, MiniSession,
+  TabBar, ExercisePicker, Workouts, Profile, History), fondos negros al 30 y 50 % (campos internos,
+  velo del modal de rutina) y el cristal de Sidebar y MiniSession. Proponer tokens (p. ej. la
+  escala `green-*` o un `--color-accent-strong`) antes de cambiarlos: alterarían el aspecto. La
+  portada (`pages/Welcome`) queda fuera a propósito: mantiene su aspecto original.
 - **Backups solo en el portátil:** la revisión prevista en la 0018 ("backups automáticos fuera
   del portátil cuando haya usuarios reales además de David") ya aplica con la beta del 11b. Si
   el portátil se pierde o se estropea, no hay copia. Desde la 0039 se conservan los 3 últimos.

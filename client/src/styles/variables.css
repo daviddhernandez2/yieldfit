@@ -20,8 +20,8 @@
    --color-text: #ededed;
    --color-text-muted: #8b9098;
 
-   /* Verde de marca ("trading subiendo"). En Premium es para datos y estados: cifras de
-      ganancia, lo seleccionado, lo activo y el foco. El botón principal usa color-action. */
+   /* Verde de marca ("trading subiendo"): la acción principal (a través de color-action),
+      cifras de ganancia, lo seleccionado, lo activo y el foco. */
    --color-accent: #3EF87E;
    --color-accent-hover: #2dd968;
    --color-accent-text: #04140a;
@@ -43,10 +43,12 @@
    --green-800: #0f5c2d;
    --green-900: #0a3a1d;
 
-   /* Acción principal: el relleno del botón primario. Blanco roto con texto casi negro. */
-   --color-action: #ededed;
-   --color-action-hover: #ffffff;
-   --color-on-action: #08090a;
+   /* Acción principal: el relleno del botón primario. Verde de marca con texto casi negro
+      (decisión de David, DECISIONS 0048: se aparta del Premium original, que lo ponía en
+      blanco roto). Apuntan al acento para que haya un solo verde. */
+   --color-action: var(--color-accent);
+   --color-action-hover: var(--color-accent-hover);
+   --color-on-action: var(--color-accent-text);
 
    /* Rojo apagado: error, pérdida y peligro. Una señal, nunca un fondo sólido: los botones
       destructivos son tonales (fill + border, texto on-danger). */

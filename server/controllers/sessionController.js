@@ -198,6 +198,9 @@ export const days = async (req, res, next) => {
               fecha: '$fecha',
               duracionSegundos: '$duracionSegundos',
               numEjercicios: { $size: { $ifNull: ['$ejercicios', []] } },
+              // ¿Algún ejercicio de la sesión fue récord? (bloque 4b). '$ejercicios.esPR' da la
+              // lista de los esPR que existen (solo los récords lo tienen): un booleano, no la lista.
+              tienePR: { $in: [true, { $ifNull: ['$ejercicios.esPR', []] }] },
             },
           },
         },

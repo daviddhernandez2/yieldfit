@@ -7,9 +7,14 @@
   border-radius: var(--radius-pill);
   font-weight: var(--font-weight-medium);
   transition: var(--transition-control);
-  /* Sin nowrap: si un botón no cabe ni a ancho completo, el texto baja de línea en vez de
-     salirse. En filas de botones, quien decide si se apilan es GrupoBotones. */
+  /* El texto de un botón NUNCA se parte en dos líneas (decisión de David, bloque 8b). Si dos
+     botones no caben juntos, GrupoBotones los apila a ancho completo. Como red de seguridad,
+     si un botón suelto no cabe ni a ancho completo, el texto se corta con "…" en vez de
+     partirse o salirse. */
   max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-align: center;
 }
 
@@ -39,6 +44,14 @@
   min-height: 52px;
   padding: var(--space-md) var(--space-xl);
   font-size: var(--font-size-lg);
+}
+
+/* Móvil estrecho: menos relleno lateral, para que el texto quepa en una línea. */
+@media (max-width: 480px) {
+  .md,
+  .lg {
+    padding-inline: var(--space-lg);
+  }
 }
 
 /* --- Variantes --- */

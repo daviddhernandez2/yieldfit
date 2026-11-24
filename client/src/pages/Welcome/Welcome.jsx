@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { despertarServidor } from "@/api/health.js";
 import Logo from "@/components/Logo/Logo.jsx";
 import Button from "@/components/Button/Button.jsx";
+import GrupoBotones from "@/components/GrupoBotones/GrupoBotones.jsx";
 import FeatureRutinas from "@/pages/Welcome/sections/FeatureRutinas.jsx";
 import FeatureTracking from "@/pages/Welcome/sections/FeatureTracking.jsx";
 import FeatureProgreso from "@/pages/Welcome/sections/FeatureProgreso.jsx";
@@ -88,16 +89,20 @@ export default function Welcome() {
 
         {/* Footer: solo se muestra en móvil, con los botones apilados en fila. */}
         <footer className={styles.footer}>
-          <Link to="/login" className={styles.linkWrapper}>
-            <Button variant="outline" fullWidth>
-              Iniciar sesión
-            </Button>
-          </Link>
-          <Link to="/register" className={styles.linkWrapper}>
-            <Button variant="primary" fullWidth>
-              Registrarse
-            </Button>
-          </Link>
+          {/* GrupoBotones: lado a lado si caben; si no (móvil estrecho), apilados a ancho
+              completo, sin partir nunca el texto de un botón. */}
+          <GrupoBotones>
+            <Link to="/login" className={styles.linkWrapper}>
+              <Button variant="outline" fullWidth>
+                Iniciar sesión
+              </Button>
+            </Link>
+            <Link to="/register" className={styles.linkWrapper}>
+              <Button variant="primary" fullWidth>
+                Registrarse
+              </Button>
+            </Link>
+          </GrupoBotones>
         </footer>
       </div>
 

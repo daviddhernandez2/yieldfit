@@ -94,9 +94,6 @@
 .footer {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-sm);
   padding: var(--space-md);
   margin: 0 var(--space-md) var(--space-md);
 }

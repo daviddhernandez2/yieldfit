@@ -71,6 +71,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0050 | Datos huérfanos: diagnóstico y limpieza por script, y seed que vacía todo lo del usuario | vigente |
 | 0051 | Récords personales marcados al guardar, con la marca de cada ejercicio como copia | vigente |
 | 0052 | Dashboard personalizable en el servidor, con "Todos" como grupo normal | vigente |
+| 0053 | Campos de fecha sin aspecto nativo en iOS y con pista propia | vigente |
 
 ---
 
@@ -1849,3 +1850,34 @@ ordenador y en el iPhone.
 - `Dashboard` entra en el borrado de cuenta y en las colecciones de los scripts.
 - Hasta que el cliente use el dashboard (paso 2), nadie lo pide y no se crea ningún "Todos": el
   Dashboard de ahora no ve un grupo repetido.
+
+---
+
+## 0053 — Campos de fecha sin aspecto nativo en iOS y con pista propia
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 11c
+
+**Contexto:** con la beta ya abierta, en el iPhone (Chrome y Safari usan WebKit) el campo "Fecha
+de nacimiento" del registro se salía por la derecha: WebKit da a los campos de fecha nativos un
+ancho mínimo propio que no respeta `width: 100%`. Además, vacío no mostraba nada (los navegadores
+ignoran `placeholder` en las fechas). Las medidas con Chrome de escritorio no lo detectaban.
+
+**Decisión:**
+- **En `Input`, para todos los campos de fecha de la app** (también los filtros de `/developer`,
+  que pasan a usar `Input`).
+- **Solo en iOS** (`@supports (-webkit-touch-callout: none)`), el campo de fecha pierde el aspecto
+  nativo (`appearance: none`) y alinea la fecha a la izquierda. Tocarlo sigue abriendo la rueda del
+  sistema. En escritorio no cambia.
+- **Pista propia "dd/mm/aaaa"** encima del campo vacío y sin foco, con el texto del navegador
+  transparente: la misma pista en el iPhone, Chrome y Firefox. Con el foco desaparece.
+- **Registro:** placeholders "Ej. 75" y "Ej. 178"; teclado decimal en el peso y numérico en la
+  altura (como en la sesión activa); `autoComplete="bday"`; email sin mayúsculas ni autocorrección.
+
+**Alternativas descartadas:**
+- *Cambiar a `type="text"` hasta que se toca:* en iOS el cambio de tipo con el foco es frágil y
+  se perdería la rueda de fechas.
+- *Tres selects (día, mes, año):* más toques para lo mismo y otra validación que mantener.
+
+**Consecuencias:**
+- Las medidas con Chrome de escritorio no sustituyen a la prueba en un iPhone: no hay simulador de
+  iOS en el portátil (no está Xcode). David lo probó en su iPhone, con Chrome y Safari.

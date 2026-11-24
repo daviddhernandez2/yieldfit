@@ -272,7 +272,7 @@ al bloque del que nacen, para no renumerar:
    sesión, calendario (móvil y escritorio) y aviso al terminar el entreno. PR = superar el mejor
    1RM estimado anterior del ejercicio; la primera vez no cuenta; sin cardio. Cálculo en el
    servidor sin traer el historial entero; el widget "Nuevos récords" del 9d usa el mismo.
-3. **11c — Registro en iOS** (urgente: la beta ya tiene usuarios): campos de fecha que se salen
+3. [x] **11c — Registro en iOS** (hecho, 2026-11-24; 0053): campos de fecha que se salen
    por la derecha en iOS (en `Input`, para toda la app), pista visible en la fecha vacía,
    placeholders que no parezcan valores y revisión de la pantalla de registro en iOS (teclado
    numérico, fuente mínima de 16 px, autocompletado).

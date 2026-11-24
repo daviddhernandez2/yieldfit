@@ -40,6 +40,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 9c — Design system Premium | [bloques/9c-design-system-premium.md](bloques/9c-design-system-premium.md) |
 | 11 — Auth robusta | [bloques/11-auth-robusta.md](bloques/11-auth-robusta.md) |
 | 11b — Beta cerrada | [bloques/11b-beta-cerrada.md](bloques/11b-beta-cerrada.md) |
+| 11c — Registro en iOS | [bloques/11c-registro-ios.md](bloques/11c-registro-ios.md) |
 
 ## Cómo mantener esta documentación
 

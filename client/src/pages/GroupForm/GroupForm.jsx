@@ -30,6 +30,8 @@ export default function GroupForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [confirmBorrar, setConfirmBorrar] = useState(false);
+  // Grupo "Todos" (bloque 9d): solo se le cambia el nombre; no lleva lista de ejercicios.
+  const [esTodos, setEsTodos] = useState(false);
   const { opciones, error: errorOpciones } = useOpcionesEjercicio();
 
   // Aviso al salir con cambios sin guardar (11b.7). Foto del estado inicial: vacío al crear;
@@ -49,6 +51,7 @@ export default function GroupForm() {
           };
           setNombre(cargado.nombre);
           setSeleccionados(cargado.seleccionados);
+          setEsTodos(grupoRes.data.chart.todos === true);
           setInicial(cargado);
         }
       } catch {
@@ -74,7 +77,8 @@ export default function GroupForm() {
     setErrorMessage("");
     setGuardando(true);
     try {
-      const datos = { nombre: nombre.trim(), exerciseIds: [...seleccionados] };
+      // A "Todos" solo se le envía el nombre: el servidor no acepta una lista para él.
+      const datos = esTodos ? { nombre: nombre.trim() } : { nombre: nombre.trim(), exerciseIds: [...seleccionados] };
       if (editando) await updateChart(id, datos);
       else await createChart(datos);
       aviso.permitirSalida(); // guardado: salir no pierde nada
@@ -121,25 +125,31 @@ export default function GroupForm() {
           autoFocus={!editando}
         />
 
-        <section className={formulario.section}>
-          <h2 className={formulario.sectionTitle}>
-            Ejercicios del grupo ({contar(seleccionados.size, "elegido", "elegidos")})
-          </h2>
+        {esTodos ? (
           <p className={styles.ayuda}>
-            Su progreso se calcula igual que el de "Todos", solo con estos ejercicios.
+            Este grupo incluye todos tus ejercicios, también los que crees más adelante: no se eligen a mano.
           </p>
-          <ExercisePicker
-            ejercicios={catalogo}
-            opciones={opciones}
-            seleccionados={seleccionados}
-            onElegir={alternar}
-            // Creado desde el buscador: entra en el catálogo y queda marcado en el grupo.
-            onCreado={(ex) => {
-              setCatalogo((prev) => [...prev, ex]);
-              alternar(ex._id);
-            }}
-          />
-        </section>
+        ) : (
+          <section className={formulario.section}>
+            <h2 className={formulario.sectionTitle}>
+              Ejercicios del grupo ({contar(seleccionados.size, "elegido", "elegidos")})
+            </h2>
+            <p className={styles.ayuda}>
+              Su progreso se calcula igual que el de "Todos", solo con estos ejercicios.
+            </p>
+            <ExercisePicker
+              ejercicios={catalogo}
+              opciones={opciones}
+              seleccionados={seleccionados}
+              onElegir={alternar}
+              // Creado desde el buscador: entra en el catálogo y queda marcado en el grupo.
+              onCreado={(ex) => {
+                setCatalogo((prev) => [...prev, ex]);
+                alternar(ex._id);
+              }}
+            />
+          </section>
+        )}
 
         {errorMessage && (
           <div className={formulario.errorBanner} role="alert">
@@ -148,7 +158,7 @@ export default function GroupForm() {
         )}
 
         <div className={formulario.submitWrapper}>
-          <Button type="submit" variant="primary" disabled={guardando || !nombre.trim() || seleccionados.size === 0}>
+          <Button type="submit" variant="primary" disabled={guardando || !nombre.trim() || (!esTodos && seleccionados.size === 0)}>
             {guardando ? "Guardando..." : editando ? "Guardar cambios" : "Crear grupo"}
           </Button>
         </div>

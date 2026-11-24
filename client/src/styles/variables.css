@@ -113,6 +113,9 @@
         detalle de una sesión). Más estrecho a propósito: se lee y se rellena mejor. */
    --ancho-pagina: 1120px;
    --ancho-formulario: 700px;
+   /* Dashboard (bloque 9d): alto de una fila de la retícula. Un widget P o M mide una fila; un
+      G, dos. Las columnas (2 o 4) las decide utils/reticula.js por el ancho del dashboard. */
+   --alto-fila-dashboard: 132px;
 
    /* Radios de borde. Concéntricos: el radio interior es el exterior menos el padding. */
    --radius-xs: 4px;

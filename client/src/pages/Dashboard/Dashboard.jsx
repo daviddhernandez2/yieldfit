@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listCharts } from '@/api/charts.js';
-import GrupoProgreso from '@/components/GrupoProgreso/GrupoProgreso.jsx';
-import ResumenProgreso from '@/pages/Dashboard/ResumenProgreso.jsx';
-import { ID_TODOS, guardarOrden, leerOrden, ordenarGrupos } from '@/utils/grupos.js';
-import { moverElemento } from '@/utils/orden.js';
-import ListaOrdenable, { Asa } from '@/components/ListaOrdenable/ListaOrdenable.jsx';
+import { getCatalogo, getDashboard, updateDashboard } from '@/api/dashboard.js';
+import { getProgress } from '@/api/progress.js';
+import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
+import useColumnasDashboard from '@/hooks/useColumnasDashboard.js';
+import WidgetCifra from '@/pages/Dashboard/widgets/WidgetCifra.jsx';
+import WidgetGrupo from '@/pages/Dashboard/widgets/WidgetGrupo.jsx';
+import { limpiarPreferenciasAntiguas } from '@/utils/grupos.js';
+import { colocarWidgets } from '@/utils/reticula.js';
 import styles from '@/pages/Dashboard/Dashboard.module.css';
 
 // Icono + para el botón "Nuevo grupo" del header.
@@ -16,78 +19,149 @@ const IconPlus = () => (
   </svg>
 );
 
-// Pantalla principal del progreso (bloque 9, DECISIONS.md 0034).
-// "Todos" (todos los ejercicios; no se edita ni se borra) y los grupos del usuario, en el
-// orden que él elija ("Ordenar", arrastrando). El orden se guarda en este dispositivo (utils/grupos.js).
-// Cada tarjeta (GrupoProgreso) pide su propio progreso con su rango, así que aquí solo se
-// cargan los grupos.
+// Silueta mientras carga: el dashboard por defecto (P P, un G y un M), en la misma retícula.
+const ESQUELETO = [
+  { _id: 'e1', tamano: 'P' },
+  { _id: 'e2', tamano: 'P' },
+  { _id: 'e3', tamano: 'G' },
+  { _id: 'e4', tamano: 'M' },
+];
+
+// Posición de un widget en la retícula: fila y columna explícitas (utils/reticula.js).
+const estiloCelda = ({ fila, columna, ancho, alto }) => ({
+  gridRow: `${fila} / span ${alto}`,
+  gridColumn: `${columna} / span ${ancho}`,
+});
+
+// Dashboard personalizable (bloque 9d, DECISIONS 0052): widgets en una retícula estricta de 4 o 2
+// columnas, en el orden y con los tamaños que el usuario guardó en el servidor. Fuera del modo
+// edición (paso 3) solo se mira; el rango de cada grupo sí se cambia aquí.
+//
+// Cada widget de grupo pide su propio progreso; "Progreso total" y "Sesiones" comparten el de
+// todo el historial, que se pide aquí una sola vez.
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [grupos, setGrupos] = useState(null);
+  const [ref, columnas] = useColumnasDashboard();
+  const [widgets, setWidgets] = useState(null);
+  const [grupos, setGrupos] = useState(null); // Map id → grupo
+  const [rangos, setRangos] = useState(null);
+  const [general, setGeneral] = useState({ progreso: null, error: false });
   const [error, setError] = useState('');
-  const [ordenGuardado, setOrdenGuardado] = useState(() => leerOrden());
-  const [ordenando, setOrdenando] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
 
   useEffect(() => {
-    listCharts()
-      .then((res) => setGrupos(res.data.charts))
-      .catch((err) => setError(err.response?.data?.message || 'Error al cargar tus grupos.'));
+    // El rango, el plegado y el orden que antes guardaba cada dispositivo ya no se usan.
+    limpiarPreferenciasAntiguas();
+
+    const cargar = async () => {
+      try {
+        // Primero el dashboard: la primera vez el servidor crea el grupo "Todos", y la lista de
+        // grupos tiene que pedirse después para incluirlo.
+        const [resDashboard, resCatalogo] = await Promise.all([getDashboard(), getCatalogo()]);
+        const resGrupos = await listCharts();
+        setRangos(resCatalogo.data.rangos);
+        setGrupos(new Map(resGrupos.data.charts.map((g) => [g._id, g])));
+        setWidgets(resDashboard.data.dashboard.widgets);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Error al cargar tu progreso.');
+      }
+    };
+    cargar();
   }, []);
 
-  // Mientras cargan los grupos, solo se puede mostrar "Todos".
-  const porId = new Map((grupos ?? []).map((g) => [g._id, g]));
-  const orden = ordenarGrupos([ID_TODOS, ...(grupos ?? []).map((g) => g._id)], ordenGuardado);
-  const nombreDe = (id) => (id === ID_TODOS ? 'Todos' : porId.get(id).nombre);
+  // El progreso de todo el historial, solo si algún widget lo usa.
+  const usaGeneral = widgets?.some((w) => w.tipo === 'progresoTotal' || w.tipo === 'sesionesTotales');
+  useEffect(() => {
+    if (!usaGeneral) return;
+    let montado = true;
+    getProgress()
+      .then((res) => montado && setGeneral({ progreso: res.data.progreso, error: false }))
+      .catch(() => montado && setGeneral({ progreso: null, error: true }));
+    return () => {
+      montado = false;
+    };
+  }, [usaGeneral]);
 
-  const mover = (desde, hasta) => {
-    const nuevo = moverElemento(orden, desde, hasta);
-    setOrdenGuardado(nuevo);
-    guardarOrden(nuevo);
+  // Cambiar el rango de un grupo: se ve al momento y se guarda en el servidor. Si falla, vuelve
+  // al rango anterior y se avisa.
+  const cambiarRango = async (widgetId, rango) => {
+    const anteriores = widgets;
+    const nuevos = widgets.map((w) => (w._id === widgetId ? { ...w, rango } : w));
+    setWidgets(nuevos);
+    setErrorGuardar('');
+    try {
+      const res = await updateDashboard(nuevos);
+      setWidgets(res.data.dashboard.widgets);
+    } catch {
+      setWidgets(anteriores);
+      setErrorGuardar('No se ha podido guardar el rango. Inténtalo de nuevo.');
+    }
+  };
+
+  // Un widget de grupo cuyo grupo no está en la lista (borrado en otra pestaña) no se pinta.
+  const visibles = widgets?.filter((w) => w.tipo !== 'grupo' || grupos.has(w.chartId)) ?? [];
+  const { colocados } = colocarWidgets(widgets ? visibles : ESQUELETO, columnas);
+
+  const pintar = (widget) => {
+    if (widget.tipo === 'grupo') {
+      return (
+        <WidgetGrupo
+          tamano={widget.tamano}
+          grupo={grupos.get(widget.chartId)}
+          rango={widget.rango}
+          rangos={rangos}
+          onCambiarRango={(rango) => cambiarRango(widget._id, rango)}
+        />
+      );
+    }
+    if (widget.tipo === 'progresoTotal' || widget.tipo === 'sesionesTotales') {
+      return <WidgetCifra tipo={widget.tipo} progreso={general.progreso} error={general.error} />;
+    }
+    return null; // tipo que este cliente aún no sabe pintar
   };
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>Progreso</h1>
-        <div className={styles.acciones}>
-          {grupos?.length > 0 && (
-            <button type="button" className={styles.botonSecundario} onClick={() => setOrdenando((o) => !o)}>
-              {ordenando ? 'Hecho' : 'Ordenar'}
-            </button>
-          )}
-          {!ordenando && (
-            <button type="button" className={styles.newGroupButton} onClick={() => navigate('/groups/new')} aria-label="Nuevo grupo">
-              <IconPlus />
-              <span className={styles.newGroupButtonLabel}>Nuevo grupo</span>
-            </button>
-          )}
-        </div>
+        {/* Hasta el catálogo del modo edición (paso 3), los grupos se siguen creando aquí. */}
+        <button type="button" className={styles.newGroupButton} onClick={() => navigate('/groups/new')} aria-label="Nuevo grupo">
+          <IconPlus />
+          <span className={styles.newGroupButtonLabel}>Nuevo grupo</span>
+        </button>
       </header>
 
       {error && <p className={styles.feedbackError}>{error}</p>}
+      {errorGuardar && (
+        <p className={styles.errorGuardar} role="alert">
+          {errorGuardar}
+        </p>
+      )}
 
-      {/* Resumen de todo el historial (bloque 9c). No se muestra mientras se ordena. */}
-      {!ordenando && <ResumenProgreso />}
+      {!error && !widgets && (
+        <ZonaCarga etiqueta="Cargando tu progreso">
+          <div ref={ref} className={styles.reticula} style={{ '--columnas': columnas }}>
+            {colocados.map((c) => (
+              <div key={c.widget._id} className={styles.celda} style={estiloCelda(c)}>
+                <Esqueleto forma="bloque" alto="100%" />
+              </div>
+            ))}
+          </div>
+        </ZonaCarga>
+      )}
 
-      {ordenando ? (
-        // Modo ordenar: lista compacta que se reordena arrastrando desde el asa ⋮⋮ (bloque
-        // 9b; antes eran flechas). Las tarjetas no se cargan mientras tanto.
-        <ListaOrdenable ids={orden} nombreDe={nombreDe} onMover={mover} className={`${styles.listaOrden} glassCard`}>
-          {(id, asa) => (
-            <div className={styles.filaOrden}>
-              <Asa {...asa} />
-              <span className={styles.nombreOrden}>{nombreDe(id)}</span>
+      {widgets && (
+        <div ref={ref} className={styles.reticula} style={{ '--columnas': columnas }}>
+          {colocados.map((c) => (
+            <div key={c.widget._id} className={styles.celda} style={estiloCelda(c)}>
+              {pintar(c.widget)}
             </div>
-          )}
-        </ListaOrdenable>
-      ) : (
-        orden.map((id) =>
-          id === ID_TODOS ? (
-            <GrupoProgreso key={id} nombre="Todos" />
-          ) : (
-            <GrupoProgreso key={id} grupoId={id} nombre={porId.get(id).nombre} numEjercicios={porId.get(id).exerciseIds.length} />
-          ),
-        )
+          ))}
+        </div>
+      )}
+
+      {widgets && visibles.length === 0 && (
+        <p className={styles.vacio}>Tu dashboard está vacío. Crea un grupo para ver su progreso aquí.</p>
       )}
     </div>
   );

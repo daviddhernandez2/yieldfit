@@ -1,0 +1,128 @@
+/* Menú pequeño de opciones (bloque 9d). */
+.menu {
+  position: relative;
+  display: inline-flex;
+}
+
+/* El botón es texto secundario con una flecha: se lee como un dato que se puede cambiar, no
+   como una acción principal. Zona táctil de 44 px de alto con ::before, sin ocupar más. */
+.boton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--space-xs);
+  margin-left: calc(-1 * var(--space-xs));
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.boton::before {
+  content: '';
+  position: absolute;
+  inset: -10px 0;
+}
+
+.boton:hover,
+.boton[aria-expanded='true'] {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+.flecha {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lista {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  z-index: 10;
+  min-width: 140px;
+  padding: var(--space-xs);
+  background-color: var(--surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-2);
+  list-style: none;
+  animation: entrada var(--duration-fast) var(--ease-standard);
+}
+
+.fin {
+  left: auto;
+  right: 0;
+}
+
+@keyframes entrada {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lista {
+    animation: none;
+  }
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.opcion:hover {
+  background-color: var(--color-hover);
+}
+
+.opcion[aria-current='true'] {
+  color: var(--color-accent);
+}
+
+.marca {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Las opciones son textos que también van dentro de frases ("todo el historial"): en el menú,
+   con la primera letra en mayúscula. */
+.opcion > span::first-letter {
+  text-transform: uppercase;
+}

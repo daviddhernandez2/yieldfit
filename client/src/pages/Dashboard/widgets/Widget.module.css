@@ -1,0 +1,205 @@
+/* Widgets del Dashboard (bloque 9d, DECISIONS 0052). Todos comparten el marco: tarjeta con el
+   alto que le da la retícula (una fila para P y M, dos para G) y el contenido repartido sin
+   textos grandes ni espacios vacíos. */
+
+.widget {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+}
+
+/* Con el menú del rango abierto, el widget pasa por encima de los siguientes: la tarjeta crea
+   su propio contexto de apilamiento (glassCard usa backdrop-filter) y, sin esto, la lista
+   quedaría debajo del widget de al lado. */
+.widget:has([data-menu-abierto]) {
+  z-index: 2;
+}
+
+/* --- Widgets de una cifra (P): etiqueta, cifra y pie. Ningún texto se corta: si no cabe en
+   una línea, baja a la siguiente (el alto de la fila deja sitio a dos líneas de pie). --- */
+
+.etiqueta {
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+
+/* La cifra y su pie van abajo; la etiqueta, arriba. */
+.valor {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+}
+
+.cifra {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.pie {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+
+/* --- Variación con flecha y signo --- */
+
+.variacion {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.variacionGrande {
+  gap: var(--space-xs);
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.flecha {
+  width: 0.8em;
+  height: 0.8em;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sube {
+  color: var(--chart-gain);
+}
+
+.baja {
+  color: var(--chart-loss);
+}
+
+.igual {
+  color: var(--color-text-muted);
+}
+
+/* --- Grupo de progreso --- */
+
+/* M y G: nombre a la izquierda; rango y % a la derecha, en una sola fila. */
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.nombreGrupo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* En P el nombre no se corta: hasta dos líneas. Solo un nombre muy largo (el usuario puede
+   escribir hasta 60 caracteres) se corta en la segunda, con el nombre entero en `title`. */
+.nombreGrupoP {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.pieGrupoP {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  margin-top: auto;
+}
+
+/* Lápiz para editar el grupo (hasta el modo edición del paso 3). */
+.editar {
+  flex-shrink: 0;
+}
+
+/* Lista de ejercicios del G: los que caben en su alto, y "+N ejercicios" si hay más. */
+.ejercicios {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  border-top: 1px solid var(--color-border);
+}
+
+.ejercicio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-height: 28px;
+  font-size: var(--font-size-sm);
+}
+
+.nombreEjercicio {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mas {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Mensajes dentro del widget (sin datos, error, grupo vacío). */
+.mensaje {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
+.enlace {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.esqueleto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-height: 0;
+}

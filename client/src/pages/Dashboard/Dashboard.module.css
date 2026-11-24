@@ -63,63 +63,39 @@
   padding: var(--space-xl);
 }
 
-
-/* Botones de la cabecera: "Ordenar" y "Nuevo grupo". */
-.acciones {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-/* "Ordenar" / "Hecho": misma píldora que "Nuevo grupo", en gris (acción secundaria). */
-.botonSecundario {
+.errorGuardar {
   padding: var(--space-sm) var(--space-md);
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  color: var(--color-text);
-  font-family: inherit;
+  background-color: var(--color-danger-fill);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: var(--transition-base);
-  white-space: nowrap;
 }
 
-.botonSecundario:hover {
-  border-color: var(--color-text-muted);
-}
-
-/* Modo ordenar: una fila por grupo, con el asa ⋮⋮ para arrastrar. */
-.listaOrden {
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-lg);
-}
-
-.filaOrden {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-/* El último de la lista (cada fila va dentro de un envoltorio de ListaOrdenable). */
-.listaOrden > :last-child .filaOrden {
-  border-bottom: none;
-}
-
-.nombreOrden {
-  font-weight: var(--font-weight-medium);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Fila de métricas (bloque 9c). Rejilla fluida del design system (README de Metrica): tantas
-   columnas de al menos 200 px como quepan; si no cabe ni una, una sola a ancho completo. */
-.resumen {
+/* --- Retícula del Dashboard (bloque 9d, DECISIONS 0052) ---
+   Columnas (4 o 2) por el ancho del propio dashboard (useColumnasDashboard) y filas de alto fijo.
+   Cada widget va en su fila y columna explícitas (utils/reticula.js): sin colocación automática
+   ni `dense`, el orden visual es siempre el del DOM y el guardado. */
+.reticula {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  grid-template-columns: repeat(var(--columnas), minmax(0, 1fr));
+  grid-auto-rows: var(--alto-fila-dashboard);
   gap: var(--space-md);
+}
+
+/* La celda estira su widget a todo el espacio que ocupa en la retícula. */
+.celda {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+.celda > * {
+  flex: 1;
+}
+
+.vacio {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-xl);
 }

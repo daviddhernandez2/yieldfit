@@ -1,0 +1,7 @@
+/* Ocupa el espacio que le deja su widget (flex: 1). min-height: 0 para que pueda encogerse
+   dentro de una fila de alto fijo. */
+.grafica {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}

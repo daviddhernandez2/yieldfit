@@ -272,6 +272,12 @@
   gap: 2px;
   height: 100%;
   min-width: 0;
+  border-radius: var(--radius-xs);
+}
+
+/* La semana en curso, marcada con un fondo aunque aún no tenga sesiones. */
+.columnaActual {
+  background-color: var(--color-accent-soft);
 }
 
 .barra {
@@ -286,15 +292,24 @@
   background-color: var(--chart-gain);
 }
 
-/* Semana sin sesiones: una línea en la base, en gris. */
+/* Semana sin sesiones: una línea en la base, en gris (en verde si es la actual). */
 .barraVacia {
   background-color: var(--color-border);
 }
 
+.barraActual.barraVacia {
+  background-color: var(--chart-gain);
+}
+
 .numeroBarra {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
+  line-height: 1.2;
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+.columnaActual .numeroBarra {
+  color: var(--color-accent);
 }
 
 .fechasBarras {

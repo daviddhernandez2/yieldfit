@@ -34,9 +34,12 @@ export const CATALOGO = [
   {
     tipo: 'grupo',
     nombre: 'Grupo de progreso',
-    descripcion: 'El % de un grupo de ejercicios, como en bolsa. Mediano con gráfica; grande con la lista de ejercicios.',
-    tamanos: ['P', 'M', 'G'],
-    tamanoPorDefecto: 'M',
+    // Solo G (decisión de David): un grupo siempre se ve con su gráfica y su lista de
+    // ejercicios (tres, y el resto en un desplegable). Antes también P y M; los dashboards que
+    // los tenían se corrigen solos al pedirlos (utils/dashboard.js, normalizarWidgets).
+    descripcion: 'El % de un grupo de ejercicios, como en bolsa, con su gráfica y sus ejercicios.',
+    tamanos: ['G'],
+    tamanoPorDefecto: 'G',
     necesita: 'chart',
     conRango: true,
     disponible: true,

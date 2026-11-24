@@ -39,6 +39,14 @@ const dashboardSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    // true mientras el usuario no lo haya personalizado (mover, añadir, quitar o cambiar
+    // tamaños; cambiar el rango no cuenta): entonces se rehace con el dashboard por defecto
+    // cada vez que se pide, así recibe los widgets nuevos y sus grupos (asegurarDashboard).
+    // Por defecto true: los dashboards anteriores a este campo nunca se pudieron personalizar.
+    porDefecto: {
+      type: Boolean,
+      default: true,
+    },
     widgets: {
       type: [widgetSchema],
       validate: {

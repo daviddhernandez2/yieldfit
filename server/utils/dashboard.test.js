@@ -2,7 +2,7 @@
 //   node utils/dashboard.test.js
 // Solo las funciones puras: no conecta a la base de datos.
 
-import { dashboardPorDefecto, validarWidgets } from './dashboard.js';
+import { cambiaEstructura, dashboardPorDefecto, mismoDashboard, normalizarWidgets, rehacerPorDefecto, validarWidgets } from './dashboard.js';
 import { CATALOGO, MAX_WIDGETS } from '../data/catalogoWidgets.js';
 
 let fallos = 0;
@@ -18,11 +18,12 @@ ok('no es una lista', validarWidgets({}), { error: 'widgets tiene que ser una li
 ok('tipo desconocido', validarWidgets([{ tipo: 'clima', tamano: 'P' }]), { error: 'Tipo de widget no válido: clima' });
 ok('tipo aún no disponible', validarWidgets([{ tipo: 'racha', tamano: 'P' }]), { error: '«Racha» aún no está disponible' });
 ok('tamaño no permitido', validarWidgets([{ tipo: 'progresoTotal', tamano: 'G' }]), { error: '«Progreso total» no admite el tamaño G' });
-ok('grupo sin chartId', validarWidgets([{ tipo: 'grupo', tamano: 'M' }]), { error: '«Grupo de progreso» necesita chartId' });
+ok('grupo sin chartId', validarWidgets([{ tipo: 'grupo', tamano: 'G' }]), { error: '«Grupo de progreso» necesita chartId' });
 ok('mismo grupo dos veces',
-  validarWidgets([{ tipo: 'grupo', tamano: 'M', chartId: 'a' }, { tipo: 'grupo', tamano: 'P', chartId: 'a' }]),
+  validarWidgets([{ tipo: 'grupo', tamano: 'G', chartId: 'a' }, { tipo: 'grupo', tamano: 'G', chartId: 'a' }]),
   { error: 'Ese grupo ya está en el dashboard' });
-ok('rango no válido', validarWidgets([{ tipo: 'grupo', tamano: 'M', chartId: 'a', rango: '3D' }]), { error: 'Rango no válido: 3D' });
+ok('rango no válido', validarWidgets([{ tipo: 'grupo', tamano: 'G', chartId: 'a', rango: '3D' }]), { error: 'Rango no válido: 3D' });
+ok('grupo en M ya no se admite', validarWidgets([{ tipo: 'grupo', tamano: 'M', chartId: 'a' }]), { error: '«Grupo de progreso» no admite el tamaño M' });
 ok('limpia campos que no tocan y conserva _id y rango',
   validarWidgets([
     { _id: 'w1', tipo: 'grupo', tamano: 'G', chartId: 'a', rango: '1M', exerciseId: 'x', color: 'rojo' },
@@ -33,17 +34,14 @@ const muchos = Array.from({ length: MAX_WIDGETS + 1 }, () => ({ tipo: 'progresoT
 ok(`más de ${MAX_WIDGETS}`, validarWidgets(muchos), { error: `Como mucho ${MAX_WIDGETS} widgets` });
 
 // --- dashboardPorDefecto ---
-ok('por defecto: con un grupo además de Todos, Todos en grande',
+ok('por defecto: resumen y grupos en G, Todos primero',
   dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }]),
   [
     { tipo: 'progresoTotal', tamano: 'P' },
     { tipo: 'sesionesTotales', tamano: 'P' },
     { tipo: 'grupo', tamano: 'G', chartId: 't' },
-    { tipo: 'grupo', tamano: 'M', chartId: 'e' },
+    { tipo: 'grupo', tamano: 'G', chartId: 'e' },
   ]);
-ok('por defecto: con dos grupos además de Todos, Todos en mediano',
-  dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }, { _id: 'p' }]).map((w) => w.tamano),
-  ['P', 'P', 'M', 'M', 'M']);
 ok('el dashboard por defecto pasa la validación',
   'widgets' in validarWidgets(dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }])), true);
 
@@ -68,18 +66,46 @@ const huecos = (widgets, columnas) => {
   }
   return (ultimaFila + 1) * columnas - ocupado.size;
 };
-const sinHuecos = [];
+const porGrupos = [];
 for (let n = 0; n <= 10; n++) {
-  const charts = [{ _id: 't', todos: true }, ...Array.from({ length: n }, (_, i) => ({ _id: `g${i}` }))];
-  const d = dashboardPorDefecto(charts);
-  sinHuecos.push([n, huecos(d, 4), huecos(d, 2)]);
+  const d = dashboardPorDefecto([{ _id: 't', todos: true }, ...Array.from({ length: n }, (_, i) => ({ _id: `g${i}` }))]);
+  porGrupos.push([huecos(d, 2), huecos(d, 4)]);
 }
-ok('por defecto, de 0 a 10 grupos además de Todos: 0 huecos a 4 y a 2 columnas',
-  sinHuecos.filter(([, h4, h2]) => h4 || h2), []);
-const sinTodos = [0, 1, 2, 3].map((n) => dashboardPorDefecto(Array.from({ length: n }, (_, i) => ({ _id: `g${i}` }))));
-ok('sin Todos (lo borró): la parte de grupos con 2 columnas nunca deja huecos',
-  sinTodos.map((d) => huecos(d, 2)), [0, 0, 0, 0]);
+// A 4 columnas, 2 + 4n celdas dejan siempre media fila (2 celdas) libre: la llena el widget M
+// del dashboard por defecto del paso 4 (Frecuencia semanal). A 2 columnas, ninguna.
+ok('por defecto, de 0 a 10 grupos además de Todos: 0 huecos a 2 columnas y 2 a 4',
+  [...new Set(porGrupos.map(([h2, h4]) => `${h2}/${h4}`))], ['0/2']);
 ok('como mucho MAX_WIDGETS', dashboardPorDefecto(Array.from({ length: 40 }, (_, i) => ({ _id: `g${i}` }))).length, MAX_WIDGETS);
+
+// --- normalizarWidgets ---
+ok('grupos en M o P pasan a G; lo válido no cambia',
+  normalizarWidgets([{ tipo: 'grupo', tamano: 'M', chartId: 'a' }, { tipo: 'grupo', tamano: 'P', chartId: 'b' }, { tipo: 'progresoTotal', tamano: 'P' }]),
+  { widgets: [{ tipo: 'grupo', tamano: 'G', chartId: 'a' }, { tipo: 'grupo', tamano: 'G', chartId: 'b' }, { tipo: 'progresoTotal', tamano: 'P' }], cambiado: true });
+ok('tipo que ya no existe o no está disponible: se quita',
+  normalizarWidgets([{ tipo: 'clima', tamano: 'P' }, { tipo: 'racha', tamano: 'P' }]), { widgets: [], cambiado: true });
+ok('nada que ajustar', normalizarWidgets([{ tipo: 'sesionesTotales', tamano: 'P' }]).cambiado, false);
+
+// --- rehacerPorDefecto ---
+const antes = [
+  { _id: 'w1', tipo: 'progresoTotal', tamano: 'P' },
+  { _id: 'w2', tipo: 'grupo', tamano: 'M', chartId: 'e', rango: '1M' },
+];
+ok('rehecho: conserva _id y rango; lo nuevo, sin _id',
+  rehacerPorDefecto(antes, [{ _id: 't', todos: true }, { _id: 'e' }]),
+  [
+    { tipo: 'progresoTotal', tamano: 'P', _id: 'w1' },
+    { tipo: 'sesionesTotales', tamano: 'P' },
+    { tipo: 'grupo', tamano: 'G', chartId: 't' },
+    { tipo: 'grupo', tamano: 'G', chartId: 'e', _id: 'w2', rango: '1M' },
+  ]);
+
+// --- cambiaEstructura y mismoDashboard ---
+const base = [{ tipo: 'grupo', tamano: 'G', chartId: 'a' }, { tipo: 'progresoTotal', tamano: 'P' }];
+ok('cambiar el rango no cambia la estructura', cambiaEstructura(base, [{ ...base[0], rango: '1A' }, base[1]]), false);
+ok('mover sí', cambiaEstructura(base, [base[1], base[0]]), true);
+ok('quitar sí', cambiaEstructura(base, [base[0]]), true);
+ok('mismo dashboard con las claves en otro orden', mismoDashboard(base, [{ chartId: 'a', tamano: 'G', tipo: 'grupo' }, { tamano: 'P', tipo: 'progresoTotal' }]), true);
+ok('otro rango: no es el mismo', mismoDashboard(base, [{ ...base[0], rango: '1A' }, base[1]]), false);
 
 // --- coherencia del catálogo ---
 ok('cada tamaño por defecto está entre los permitidos',

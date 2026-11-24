@@ -56,18 +56,15 @@ export const validarWidgets = (widgets) => {
   return { widgets: limpios };
 };
 
-// Dashboard de un usuario nuevo o de uno que aún no tenía (los de antes del 9d): las dos cifras
-// de resumen y sus grupos, "Todos" primero y el resto en orden de creación (el orden que cada
-// dispositivo guardaba antes se pierde una vez: decisión de David).
+// Dashboard de un usuario nuevo, de uno de antes del 9d o de uno que aún no lo ha personalizado
+// (porDefecto): las cifras de resumen y sus grupos, "Todos" primero y el resto en orden de
+// creación. Los grupos van siempre en G (gráfica y ejercicios).
 // `charts`: los grupos del usuario, ya ordenados ("Todos" primero), con { _id, todos }.
 //
-// Sin huecos ni a 4 ni a 2 columnas (P = 1×1, M = 2×1, G = 2×2; colocación en orden, sin
-// dense). Las dos P llenan media fila; los grupos van en M, salvo "Todos":
-//   - A 4 columnas: P P + Todos G ocupan dos filas y dejan libre media fila de la segunda, que
-//     llena el primer M. Después, los M van de dos en dos. Así que "Todos" va en G solo si el
-//     número de grupos restantes es impar; si es par (también 0), "Todos" va en M y cada fila es
-//     P P M o M M.
-//   - A 2 columnas: P P llenan una fila y cada M o G ocupa el ancho entero: nunca hay huecos.
+// Huecos (P = 1×1, M = 2×1, G = 2×2; colocación en orden, sin dense): a 2 columnas no hay
+// ninguno (P P llenan una fila y cada G ocupa el ancho). A 4 columnas, dos P y n grupos G suman
+// 2 + 4n celdas, que nunca es múltiplo de 4: queda media fila libre al final. La llena el
+// primer widget M del dashboard por defecto (Frecuencia semanal, paso 4 del 9d).
 // Si hay tantos grupos que no caben (como mucho MAX_WIDGETS widgets), entran los primeros.
 export const dashboardPorDefecto = (charts) => {
   const resumen = [
@@ -75,32 +72,91 @@ export const dashboardPorDefecto = (charts) => {
     { tipo: 'sesionesTotales', tamano: 'P' },
   ];
   const grupos = charts.slice(0, MAX_WIDGETS - resumen.length);
-  const restantes = grupos.filter((c) => !c.todos).length;
-  return [
-    ...resumen,
-    ...grupos.map((c) => ({
-      tipo: 'grupo',
-      tamano: c.todos && restantes % 2 === 1 ? 'G' : 'M',
-      chartId: c._id,
-    })),
-  ];
+  return [...resumen, ...grupos.map((c) => ({ tipo: 'grupo', tamano: 'G', chartId: c._id }))];
 };
+
+// Ajusta un dashboard guardado al catálogo actual: un tamaño que el tipo ya no admite pasa a su
+// tamaño por defecto (p. ej. los grupos en M o P de antes de que solo existiera G), y un tipo
+// que ya no existe o no está disponible se quita. Pura: devuelve { widgets, cambiado }.
+export const normalizarWidgets = (widgets) => {
+  let cambiado = false;
+  const resultado = [];
+  for (const w of widgets) {
+    const def = widgetDelCatalogo(w.tipo);
+    if (!def || !def.disponible) {
+      cambiado = true;
+      continue;
+    }
+    if (!def.tamanos.includes(w.tamano)) {
+      cambiado = true;
+      resultado.push({ ...w, tamano: def.tamanoPorDefecto });
+    } else {
+      resultado.push(w);
+    }
+  }
+  return { widgets: resultado, cambiado };
+};
+
+// Clave de un widget para reconocerlo entre dos versiones del dashboard: su tipo y su
+// referencia (dos grupos distintos son widgets distintos).
+const claveWidget = (w) => `${w.tipo}:${w.chartId ?? w.exerciseId ?? w.workoutId ?? ''}`;
+
+// El dashboard por defecto para unos grupos, conservando de `actuales` el _id (el cliente lo usa
+// de clave) y el rango que el usuario eligiera en cada widget. Pura.
+export const rehacerPorDefecto = (actuales, charts) => {
+  const previos = new Map(actuales.map((w) => [claveWidget(w), w]));
+  return dashboardPorDefecto(charts).map((w) => {
+    const previo = previos.get(claveWidget(w));
+    if (!previo) return w;
+    return { ...w, _id: previo._id, ...(previo.rango ? { rango: previo.rango } : {}) };
+  });
+};
+
+// ¿Cambia la estructura (orden, tipos, tamaños o referencias) entre dos listas? Cambiar solo el
+// rango no cuenta: no es personalizar el dashboard, es una forma de mirarlo. Pura.
+const estructura = (widgets) =>
+  JSON.stringify(widgets.map((w) => [w.tipo, w.tamano, String(w.chartId ?? ''), String(w.exerciseId ?? ''), String(w.workoutId ?? '')]));
+export const cambiaEstructura = (antes, despues) => estructura(antes) !== estructura(despues);
+
+// ¿Son el mismo dashboard? Misma estructura y mismos rangos (las claves de cada objeto pueden
+// venir en otro orden, por eso no se comparan los objetos tal cual). Pura.
+const rangos = (widgets) => widgets.map((w) => w.rango ?? '').join(',');
+export const mismoDashboard = (a, b) => !cambiaEstructura(a, b) && rangos(a) === rangos(b);
 
 // E11000: clave duplicada (otra petición acaba de crear el mismo documento).
 const esDuplicado = (error) => error?.code === 11000;
 
-// Devuelve el dashboard del usuario y, si no tiene, lo crea junto con su grupo "Todos".
-// La llama GET /api/dashboard: así los usuarios de antes del 9d lo reciben la primera vez que
-// abren el Dashboard nuevo, sin script de migración en producción.
+// Grupos del usuario en el orden del dashboard por defecto: "Todos" primero y el resto en orden
+// de creación.
+const gruposEnOrden = async (userId) => {
+  const charts = await Chart.find({ userId }, { todos: 1 }).sort({ createdAt: 1 }).lean();
+  return charts.sort((a, b) => Number(Boolean(b.todos)) - Number(Boolean(a.todos)));
+};
+
+// Devuelve el dashboard del usuario, al día:
+//   - Si no tiene, lo crea junto con su grupo "Todos" (los usuarios de antes del 9d lo reciben
+//     la primera vez que abren el Dashboard nuevo, sin script de migración en producción).
+//   - Si no lo ha personalizado (porDefecto), lo rehace con el dashboard por defecto: así
+//     recibe los widgets nuevos de cada paso y sus grupos, sin perder los rangos elegidos.
+//   - Si lo ha personalizado, solo lo ajusta al catálogo (normalizarWidgets).
+// Solo escribe si algo cambia.
 //
-// Se puede repetir sin efecto y aguanta dos peticiones a la vez: los índices únicos (un
-// dashboard y un "Todos" por usuario) hacen fallar la segunda creación, y entonces se lee lo
-// que creó la primera. Por eso no hace falta una transacción.
-//
-// Si el usuario ya tiene dashboard, no se toca: si borró "Todos", no vuelve a aparecer.
+// La creación aguanta dos peticiones a la vez: los índices únicos (un dashboard y un "Todos"
+// por usuario) hacen fallar la segunda, y entonces se lee lo que creó la primera. Por eso no
+// hace falta una transacción. Si el usuario borró "Todos", no vuelve a aparecer.
 export const asegurarDashboard = async (userId) => {
   const existente = await Dashboard.findOne({ userId });
-  if (existente) return existente;
+  if (existente) {
+    const actuales = existente.widgets.map((w) => w.toObject());
+    const nuevos = existente.porDefecto
+      ? rehacerPorDefecto(actuales, await gruposEnOrden(userId))
+      : normalizarWidgets(actuales).widgets;
+    if (!mismoDashboard(nuevos, actuales)) {
+      existente.widgets = nuevos;
+      await existente.save();
+    }
+    return existente;
+  }
 
   try {
     await Chart.create({ userId, nombre: NOMBRE_TODOS, todos: true, exerciseIds: [] });
@@ -108,12 +164,8 @@ export const asegurarDashboard = async (userId) => {
     if (!esDuplicado(error)) throw error; // ya lo tenía: se usa ese
   }
 
-  const charts = await Chart.find({ userId }, { todos: 1 }).sort({ createdAt: 1 }).lean();
-  // "Todos" primero; el resto, en orden de creación.
-  charts.sort((a, b) => Number(Boolean(b.todos)) - Number(Boolean(a.todos)));
-
   try {
-    return await Dashboard.create({ userId, widgets: dashboardPorDefecto(charts) });
+    return await Dashboard.create({ userId, widgets: dashboardPorDefecto(await gruposEnOrden(userId)) });
   } catch (error) {
     if (!esDuplicado(error)) throw error;
     return Dashboard.findOne({ userId });

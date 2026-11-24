@@ -2,7 +2,7 @@ import Chart from '../models/Chart.js';
 import Exercise from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
 import { CATALOGO, MAX_WIDGETS, RANGOS, RANGO_POR_DEFECTO, TAMANOS } from '../data/catalogoWidgets.js';
-import { asegurarDashboard, validarWidgets } from '../utils/dashboard.js';
+import { asegurarDashboard, cambiaEstructura, validarWidgets } from '../utils/dashboard.js';
 
 // Dashboard personalizable (bloque 9d, DECISIONS 0052).
 
@@ -61,6 +61,9 @@ export const update = async (req, res, next) => {
     }
 
     const dashboard = await asegurarDashboard(userId);
+    // Mover, añadir, quitar o cambiar tamaños lo personaliza: desde entonces ya no se rehace con
+    // el dashboard por defecto. Cambiar solo el rango no cuenta (utils/dashboard.js).
+    if (cambiaEstructura(dashboard.widgets.map((w) => w.toObject()), widgets)) dashboard.porDefecto = false;
     dashboard.widgets = widgets;
     await dashboard.save();
     res.status(200).json({ dashboard });

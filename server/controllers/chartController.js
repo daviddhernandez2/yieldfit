@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import Chart from '../models/Chart.js';
 import Exercise from '../models/Exercise.js';
 import Dashboard from '../models/Dashboard.js';
-import { MAX_WIDGETS } from '../data/catalogoWidgets.js';
+import { MAX_WIDGETS, widgetDelCatalogo } from '../data/catalogoWidgets.js';
 
 // Comprueba que todos los exerciseIds existan y pertenezcan al usuario.
 // Una sola query con countDocuments es más eficiente que un find + comparación.
@@ -79,7 +79,7 @@ export const create = async (req, res, next) => {
       });
     }
 
-    // El grupo nuevo aparece al final del Dashboard (bloque 9d), en mediano: crearlo y añadirlo
+    // El grupo nuevo aparece al final del Dashboard (bloque 9d), con su tamaño por defecto: crearlo y añadirlo
     // van juntos en una transacción. Si el usuario aún no tiene dashboard, no se añade nada:
     // asegurarDashboard incluirá todos sus grupos al crearlo. Si ya tiene MAX_WIDGETS, el grupo
     // se crea igual pero no entra (el filtro 'widgets.N' exige que haya sitio).
@@ -99,7 +99,7 @@ export const create = async (req, res, next) => {
         await chart.save({ session });
         await Dashboard.updateOne(
           { userId: req.user._id, [`widgets.${MAX_WIDGETS - 1}`]: { $exists: false } },
-          { $push: { widgets: { tipo: 'grupo', tamano: 'M', chartId: chart._id } } },
+          { $push: { widgets: { tipo: 'grupo', tamano: widgetDelCatalogo('grupo').tamanoPorDefecto, chartId: chart._id } } },
           { session }
         );
       });

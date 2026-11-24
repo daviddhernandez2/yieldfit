@@ -2,33 +2,34 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProgress } from '@/api/progress.js';
 import BotonIcono from '@/components/BotonIcono/BotonIcono.jsx';
-import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import GraficaProgreso from '@/components/GraficaProgreso/GraficaProgreso.jsx';
 import MenuOpciones from '@/components/MenuOpciones/MenuOpciones.jsx';
+import MarcoWidget from '@/pages/Dashboard/widgets/MarcoWidget.jsx';
+import Cargando from '@/pages/Dashboard/widgets/Cargando.jsx';
 import Variacion from '@/pages/Dashboard/widgets/Variacion.jsx';
 import { desdeDeRango } from '@/utils/grupos.js';
 import { filasParaAlto } from '@/utils/reticula.js';
 import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 
-// Ejercicios que se ven sin desplegar: los que caben en un widget G (dos filas) bajo la gráfica.
+// Ejercicios que se ven sin desplegar: los que caben en un G bajo la gráfica.
 const EJERCICIOS_VISIBLES = 3;
 
-// Widget de un grupo de progreso (bloque 9d; antes GrupoProgreso, bloque 9). Siempre tamaño G y
-// siempre con el diseño de antes (decisión de David): gráfica y lista de ejercicios. Se ven tres;
-// "+N ejercicios" despliega el resto y el widget ocupa las filas que necesite (onCambiarFilas):
-// lo de debajo baja, nada queda tapado. Desplegar es una forma de mirar: no se guarda.
-//
-// El rango se cambia desde la etiqueta ("1 año ▾") sin entrar en el modo edición. Lo guarda el
-// Dashboard en el servidor (onCambiarRango).
-//
-// Props: grupo ({ _id, nombre, todos, exerciseIds }), rango (valor), rangos (del catálogo),
-// onCambiarRango(valor), onCambiarFilas(filas o null para volver a su tamaño).
+// Widget de un grupo de progreso (bloque 9d), siempre en G. Anatomía (tarjeta Widget):
+//   - Cabecera: el nombre del grupo y el lápiz para editarlo.
+//   - El % en grande (28 px) y, a la derecha, el rango ("Total ▾"), que se cambia sin entrar en
+//     el modo edición (es una forma de mirar) y se guarda en el servidor (onCambiarRango).
+//   - Gráfica de alto fijo (72 px), tres ejercicios en filas de 28 px y "+N ejercicios", que
+//     despliega el resto: el widget ocupa las filas que necesite (onCambiarFilas) y lo de debajo
+//     baja. Desplegar no se guarda.
+// Con menos de tres ejercicios, el sitio de las filas que faltan queda libre (decisión de David).
+// Props: grupo ({ _id, nombre, todos, exerciseIds }), rango, rangos (del catálogo),
+// onCambiarRango(valor), onCambiarFilas(filas o null).
 export default function WidgetGrupo({ grupo, rango, rangos, onCambiarRango, onCambiarFilas, className = '' }) {
   const navigate = useNavigate();
   const [progreso, setProgreso] = useState(null);
   const [error, setError] = useState('');
   const [desplegado, setDesplegado] = useState(false);
-  const tarjeta = useRef(null);
+  const caja = useRef(null);
 
   // Un grupo normal sin ejercicios (se borraron todos): no se pide nada, se avisa. "Todos" no
   // tiene lista: cuenta con todos.
@@ -51,22 +52,32 @@ export default function WidgetGrupo({ grupo, rango, rangos, onCambiarRango, onCa
   const ocultos = Math.max(0, ejercicios.length - EJERCICIOS_VISIBLES);
   const abierto = desplegado && ocultos > 0;
 
-  // Al desplegar, se mide lo que ocupa el contenido entero y se piden las filas necesarias; al
-  // plegar (o si cambia el rango y ya no sobra nada), se vuelve al tamaño G.
+  // Al desplegar, se mide lo que ocupa el contenido entero (la tarjeta es la sección más
+  // cercana) y se piden las filas necesarias; al plegar, se vuelve al tamaño G.
   useLayoutEffect(() => {
     if (!abierto) {
       onCambiarFilas(null);
       return;
     }
-    const el = tarjeta.current;
-    onCambiarFilas(filasParaAlto(el.scrollHeight, el.closest('[data-reticula]')));
+    const tarjeta = caja.current.closest('section');
+    onCambiarFilas(filasParaAlto(tarjeta.scrollHeight, tarjeta.closest('[data-reticula]')));
   }, [abierto, ejercicios.length, onCambiarFilas]);
 
   const rangoActual = rangos.find((r) => r.valor === rango) ?? rangos.at(-1);
-  // En el botón, "1 año"; pero "todo el historial" no cabe junto al nombre y el % en el móvil:
-  // para ese, su etiqueta corta ("Total"). El menú muestra siempre los nombres completos.
+  // En el botón, "1 año"; "todo el historial" no cabe en el móvil: su etiqueta corta, "Total".
   const textoRango = rangoActual.valor === 'TOTAL' ? rangoActual.etiqueta : rangoActual.titulo;
   const conDatos = progreso && progreso.porcentaje !== null;
+
+  const menuRango = (
+    <MenuOpciones
+      texto={textoRango}
+      etiqueta={`Rango de ${grupo.nombre}: ${rangoActual.titulo}`}
+      opciones={rangos.map((r) => ({ valor: r.valor, texto: r.titulo }))}
+      valor={rangoActual.valor}
+      onElegir={onCambiarRango}
+      alinear="fin"
+    />
+  );
 
   let cuerpo;
   if (vacio) {
@@ -82,29 +93,35 @@ export default function WidgetGrupo({ grupo, rango, rangos, onCambiarRango, onCa
   } else if (error) {
     cuerpo = <p className={styles.error}>{error}</p>;
   } else if (!progreso) {
-    cuerpo = (
-      <ZonaCarga etiqueta={`Cargando el progreso de ${grupo.nombre}`} className={styles.esqueleto}>
-        <Esqueleto forma="bloque" alto="100%" />
-      </ZonaCarga>
-    );
+    cuerpo = <Cargando que={`el progreso de ${grupo.nombre}`} />;
   } else if (!conDatos) {
     cuerpo = (
-      <p className={styles.mensaje}>
-        {progreso.sesiones === 0 && rangoActual.valor === 'TOTAL'
-          ? 'Aún no hay sesiones.'
-          : `Pocas sesiones en ${rangoActual.titulo}: cada ejercicio necesita dos.`}
-      </p>
+      <>
+        <div className={`${styles.cifra} ${styles.cifraGrupo}`}>
+          <span>—</span>
+          {menuRango}
+        </div>
+        <p className={`${styles.mensaje} ${styles.listaGrupo}`}>
+          {progreso.sesiones === 0 && rangoActual.valor === 'TOTAL'
+            ? 'Aún no hay sesiones.'
+            : `Pocas sesiones en ${rangoActual.titulo}: cada ejercicio necesita dos.`}
+        </p>
+      </>
     );
   } else {
     cuerpo = (
       <>
-        <div className={styles.zonaGrafica}>
-          <GraficaProgreso serie={progreso.serie} conEjes />
+        <div className={`${styles.cifra} ${styles.cifraGrupo}`}>
+          <Variacion valor={progreso.porcentaje} tamano="grande" />
+          {menuRango}
         </div>
-        <ul className={styles.ejercicios}>
+        <div className={styles.zonaGrafica}>
+          <GraficaProgreso serie={progreso.serie} />
+        </div>
+        <ul className={`${styles.lista} ${styles.listaGrupo}`}>
           {(abierto ? ejercicios : ejercicios.slice(0, EJERCICIOS_VISIBLES)).map((ej) => (
-            <li key={ej.exerciseId} className={styles.ejercicio}>
-              <span className={styles.nombreEjercicio}>{ej.nombre}</span>
+            <li key={ej.exerciseId} className={styles.fila}>
+              <span className={styles.nombre}>{ej.nombre}</span>
               <Variacion valor={ej.porcentaje} />
             </li>
           ))}
@@ -122,11 +139,9 @@ export default function WidgetGrupo({ grupo, rango, rangos, onCambiarRango, onCa
   }
 
   return (
-    <section ref={tarjeta} className={`${styles.widget} ${styles.grupo} glassCard ${className}`} aria-label={grupo.nombre}>
-      <div className={styles.cabecera}>
-        <h2 className={styles.nombreGrupo} title={grupo.nombre}>
-          {grupo.nombre}
-        </h2>
+    <MarcoWidget
+      etiqueta={grupo.nombre}
+      dato={
         <BotonIcono
           variante="sinFondo"
           icono="editar"
@@ -134,17 +149,12 @@ export default function WidgetGrupo({ grupo, rango, rangos, onCambiarRango, onCa
           className={styles.editar}
           onClick={() => navigate(`/groups/${grupo._id}/edit`)}
         />
-        <MenuOpciones
-          texto={textoRango}
-          etiqueta={`Rango de ${grupo.nombre}: ${rangoActual.titulo}`}
-          opciones={rangos.map((r) => ({ valor: r.valor, texto: r.titulo }))}
-          valor={rangoActual.valor}
-          onElegir={onCambiarRango}
-          alinear="fin"
-        />
-        {conDatos && <Variacion valor={progreso.porcentaje} />}
+      }
+      className={className}
+    >
+      <div ref={caja} style={{ display: 'contents' }}>
+        {cuerpo}
       </div>
-      {cuerpo}
-    </section>
+    </MarcoWidget>
   );
 }

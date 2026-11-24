@@ -1,12 +1,16 @@
-/* Widgets del Dashboard (bloque 9d, DECISIONS 0052). Todos comparten el marco: tarjeta con el
-   alto que le da la retícula (una fila para P y M, dos para G) y el contenido repartido sin
-   textos grandes ni espacios vacíos. */
+/* Widgets del Dashboard (bloque 9d, DECISIONS 0052). Anatomía común, la de la tarjeta Widget del
+   design system (aprobada por David):
+     - Marco: tarjeta con 16 px de relleno en todos los tamaños.
+     - Cabecera de 20 px arriba: etiqueta (11 px, mayúsculas) y dato secundario (13 px).
+     - Contenido 8 px por debajo, ALINEADO ARRIBA: si sobra espacio, queda abajo. Nunca centrado.
+     - Separaciones fijas: 8 px entre bloques, 4 px entre una cifra y su pie.
+     - Nada se estira para rellenar: gráficas, barras, círculos y filas tienen medidas fijas.
+   Cada widget nuevo se diseña con esta anatomía y se aprueba en el artefacto antes de hacerlo. */
 
 .widget {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
   min-width: 0;
   min-height: 0;
   padding: var(--space-md);
@@ -20,44 +24,90 @@
   z-index: 2;
 }
 
-/* --- Widgets de una cifra (P): etiqueta, cifra y pie, centrados en alto para que el espacio
-   quede repartido arriba y abajo. Ningún texto se corta: si no cabe en una línea, baja a la
-   siguiente. Cifras en Geist con números tabulares (no Geist Mono: decisión de David). --- */
+/* --- Cabecera --- */
 
-.cifras {
-  justify-content: center;
+.cabecera {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-sm);
+  height: var(--widget-alto-cabecera);
+  min-width: 0;
 }
 
 .etiqueta {
-  font-size: 0.75rem;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.6875rem;
   font-weight: var(--font-weight-medium);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
+  line-height: var(--widget-alto-cabecera);
+  text-overflow: ellipsis;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--color-text-muted);
-  line-height: 1.3;
 }
 
-/* La cifra y su pie, juntos. */
-.valor {
+.dato {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+/* --- Contenido: arriba, con separaciones fijas --- */
+
+.contenido {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 2px;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 0;
+  margin-top: var(--space-sm);
 }
 
+/* Cifra principal: 28 px en todos los tamaños, Geist con números tabulares. */
 .cifra {
-  font-size: 1.5rem;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-sm);
+  height: var(--widget-cifra);
+  font-size: var(--widget-cifra);
   font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1;
+  white-space: nowrap;
   color: var(--color-text);
 }
 
-.pie {
+/* Unidad junto a la cifra ("semanas"). */
+.unidad {
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
   color: var(--color-text-muted);
-  line-height: 1.3;
+}
+
+/* Pie: la frase bajo la cifra, 4 px por debajo. En P, hasta dos líneas; .unaLinea para M y G. */
+.pie {
+  margin-top: var(--space-xs);
+  font-size: 0.8125rem;
+  line-height: 18px;
+  color: var(--color-text-muted);
+}
+
+.unaLinea {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* --- Variación con flecha y signo --- */
@@ -74,9 +124,9 @@
 
 .variacionGrande {
   gap: var(--space-xs);
-  font-size: 1.5rem;
+  font-size: var(--widget-cifra);
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1;
 }
 
 .flecha {
@@ -102,84 +152,79 @@
   color: var(--color-text-muted);
 }
 
-/* --- Grupo de progreso --- */
+/* --- Listas: filas de alto fijo --- */
 
-/* M y G: nombre a la izquierda; rango y % a la derecha, en una sola fila. */
-.cabecera {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  min-width: 0;
-}
-
-.nombreGrupo {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Lápiz para editar el grupo (hasta el modo edición del paso 3). */
-.editar {
-  flex-shrink: 0;
-}
-
-/* El grupo se ve entero: si está desplegado, la retícula le da las filas que pide; mientras
-   llega esa medida, lo que sobra no se pinta fuera de la tarjeta. */
-.grupo {
-  overflow: hidden;
-}
-
-/* Alto fijo: en una misma fila, las gráficas de los grupos miden lo mismo tengan los ejercicios
-   que tengan (antes ocupaba lo que sobraba y "+N ejercicios" la acortaba). Si sobra espacio,
-   queda debajo de la lista. Al desplegar, la gráfica no cambia y la lista crece. */
-.zonaGrafica {
+.lista {
   display: flex;
   flex: none;
-  height: 96px;
-}
-
-/* Lista de ejercicios: tres, y el resto con "+N ejercicios". */
-.ejercicios {
-  display: flex;
   flex-direction: column;
   list-style: none;
-  border-top: 1px solid var(--color-border);
 }
 
-.ejercicio {
+.fila {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
-  min-height: 28px;
+  min-width: 0;
+  height: 28px;
+  border-top: 1px solid var(--color-border);
   font-size: var(--font-size-sm);
 }
 
-.nombreEjercicio {
+.fila:first-child {
+  border-top: none;
+}
+
+.nombre {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* "+N ejercicios" / "Ver menos": un botón de verdad (despliega la lista), con aspecto de
-   enlace discreto y flecha que dice hacia dónde se abre. */
+.secundario {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+/* --- Grupo de progreso (G) --- */
+
+/* El % en grande y, a la derecha, el rango. */
+.cifraGrupo {
+  justify-content: space-between;
+}
+
+/* Gráfica de alto fijo, 8 px por debajo de la cifra. */
+.zonaGrafica {
+  display: flex;
+  flex: none;
+  height: 72px;
+  margin-top: var(--space-sm);
+}
+
+.listaGrupo {
+  margin-top: var(--space-sm);
+}
+
+/* "+N ejercicios" / "Ver menos": despliega la lista (el widget pide más filas). */
 .desplegar {
   position: relative;
   display: inline-flex;
+  flex: none;
   align-items: center;
   align-self: flex-start;
   gap: 2px;
-  padding: 2px 0;
+  height: 20px;
+  padding: 0;
   background: none;
   border: none;
   color: var(--color-accent);
   font-family: inherit;
-  font-size: var(--font-size-sm);
+  font-size: 0.8125rem;
   cursor: pointer;
 }
 
@@ -187,7 +232,7 @@
 .desplegar::before {
   content: '';
   position: absolute;
-  inset: -10px -4px;
+  inset: -12px -4px;
 }
 
 .desplegar:hover {
@@ -204,11 +249,186 @@
   stroke-linejoin: round;
 }
 
-/* Mensajes dentro del widget (sin datos, error, grupo vacío). */
+/* El lápiz de la cabecera (BotonIcono sin fondo, con su zona táctil de 48 px). */
+.editar {
+  margin-right: calc(-1 * var(--space-xs));
+}
+
+/* --- Racha --- */
+
+/* Fila de las semanas: círculos de 12 px con 8 px de hueco, alineados a la izquierda. Se pintan
+   los que caben en el ancho (de los más recientes hacia atrás); no se estiran. */
+.semanasRacha {
+  display: flex;
+  flex: none;
+  gap: var(--space-sm);
+  height: 12px;
+  margin-top: 6px;
+  /* Sin overflow: hidden: solo se pintan las semanas que caben, y el anillo de la actual
+     (3,5 px por fuera del círculo) tiene que verse entero. */
+}
+
+.circuloSemana {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+}
+
+.circuloLleno {
+  background-color: var(--chart-gain);
+  border-color: var(--chart-gain);
+}
+
+/* La semana en curso: anillo verde (gris si la racha está rota). */
+.circuloActual {
+  box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 3.5px var(--color-accent);
+}
+
+.semanasRota .circuloActual {
+  box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 3.5px var(--color-border-strong);
+}
+
+.pieRacha {
+  margin-top: 6px;
+}
+
+.sinRacha {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+}
+
+/* --- Frecuencia semanal: barras de 14 px con 6 px de hueco, alto fijo por tamaño --- */
+
+.barras {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.columnaBarra {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  width: 14px;
+}
+
+.barra {
+  width: 14px;
+  min-height: 2px;
+  background-color: var(--color-accent-medium);
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+.barraActual {
+  background-color: var(--chart-gain);
+}
+
+.barraVacia {
+  background-color: var(--color-border);
+}
+
+.barraActual.barraVacia {
+  background-color: var(--chart-gain);
+}
+
+.numeroBarra {
+  height: 14px;
+  font-size: 0.6875rem;
+  line-height: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.fechasBarras {
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  margin-top: var(--space-xs);
+  font-size: 0.6875rem;
+  line-height: 12px;
+  color: var(--color-text-muted);
+}
+
+/* --- Última sesión --- */
+
+/* La tarjeta entera es un botón que abre el detalle. */
+.widgetBoton {
+  width: 100%;
+  /* El mismo borde de 1 px que las demás tarjetas: sin él, el contenido subiría 1 px y no
+     quedaría alineado con el de los otros widgets de la fila. */
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.widgetBoton:hover {
+  box-shadow: var(--elevation-2);
+}
+
+.tituloSesion {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-sm);
+  height: 22px;
+  min-width: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.listaSesion {
+  margin-top: var(--space-sm);
+}
+
+/* --- Nuevos récords: filas de 32 px (M) o 36 px (G) que abren la sesión --- */
+
+.filaRecord {
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.listaRecords li:first-child .filaRecord {
+  border-top: none;
+}
+
+.filaRecordG {
+  height: 36px;
+}
+
+.filaRecord:hover .nombre {
+  text-decoration: underline;
+}
+
+.mejora strong {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* --- Mensajes y carga --- */
+
 .mensaje {
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
   line-height: 1.4;
+  color: var(--color-text-muted);
 }
 
 .error {
@@ -230,210 +450,5 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: var(--space-sm);
   min-height: 0;
-}
-
-/* --- Widgets del paso 4 y 5 (bloque 9d) --- */
-
-/* Cabecera con la etiqueta a la izquierda y un dato a la derecha ("3,1 por semana",
-   "1RM estimado"). */
-.cabeceraCifra {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
-}
-
-.dato {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* Frecuencia semanal: barras que ocupan el alto que queda, alineadas abajo. */
-.barras {
-  display: flex;
-  flex: 1;
-  align-items: flex-end;
-  gap: var(--space-xs);
-  min-height: 0;
-  padding-top: var(--space-xs);
-}
-
-.columnaBarra {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 2px;
-  height: 100%;
-  min-width: 0;
-  border-radius: var(--radius-xs);
-}
-
-/* La semana en curso, marcada con un fondo aunque aún no tenga sesiones. */
-.columnaActual {
-  background-color: var(--color-accent-soft);
-}
-
-.barra {
-  width: 100%;
-  min-height: 2px;
-  background-color: var(--color-accent-medium);
-  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
-}
-
-/* La semana en curso, en el verde de los datos. */
-.barraActual {
-  background-color: var(--chart-gain);
-}
-
-/* Semana sin sesiones: una línea en la base, en gris (en verde si es la actual). */
-.barraVacia {
-  background-color: var(--color-border);
-}
-
-.barraActual.barraVacia {
-  background-color: var(--chart-gain);
-}
-
-.numeroBarra {
-  font-size: 0.6875rem;
-  line-height: 1.2;
-  color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.columnaActual .numeroBarra {
-  color: var(--color-accent);
-}
-
-.fechasBarras {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
-
-/* Ejercicios de la última sesión en una línea (tamaño M): ocupa el ancho que sobraba. */
-.ejerciciosEnLinea {
-  overflow: hidden;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Última sesión: la tarjeta entera es un botón que abre el detalle. */
-.widgetBoton {
-  width: 100%;
-  border: none;
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: var(--transition-control);
-}
-
-.widgetBoton:hover {
-  box-shadow: var(--elevation-2);
-}
-
-.tituloFila {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  min-width: 0;
-}
-
-.nombreSesion {
-  min-width: 0;
-  overflow: hidden;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.listaSimple {
-  display: flex;
-  flex-direction: column;
-  margin-top: var(--space-xs);
-  border-top: 1px solid var(--color-border);
-}
-
-/* Nuevos récords: una fila por récord, que abre su sesión. */
-.listaRecords {
-  display: flex;
-  flex-direction: column;
-  list-style: none;
-}
-
-.filaRecord {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  width: 100%;
-  min-height: 32px;
-  padding: 0;
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: var(--font-size-sm);
-  text-align: left;
-  cursor: pointer;
-}
-
-.listaRecords li:last-child .filaRecord {
-  border-bottom: none;
-}
-
-.filaRecord:hover .nombreEjercicio {
-  text-decoration: underline;
-}
-
-.mejora {
-  color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.mejora strong {
-  color: var(--color-accent);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Racha en M (como en Strava): una fila de círculos, uno por semana, que reparte el ancho. */
-.semanasRacha {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-xs);
-  margin: var(--space-xs) 0;
-}
-
-.circuloSemana {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-  border: 1.5px solid var(--color-border-strong);
-  border-radius: var(--radius-pill);
-}
-
-/* Semana con entreno: verde de los datos. */
-.circuloLleno {
-  background-color: var(--chart-gain);
-  border-color: var(--chart-gain);
-}
-
-/* La semana en curso: anillo verde alrededor, tenga o no sesiones. */
-.circuloActual {
-  box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 3.5px var(--color-accent);
 }

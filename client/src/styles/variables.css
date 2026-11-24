@@ -116,6 +116,11 @@
    /* Dashboard (bloque 9d): alto de una fila de la retícula. Un widget P o M mide una fila; un
       G, dos. Las columnas (2 o 4) las decide utils/reticula.js por el ancho del dashboard. */
    --alto-fila-dashboard: 132px;
+   /* Anatomía común de los widgets (bloque 9d, tarjeta Widget del design system): relleno de 16 px
+      (--space-md), cabecera de 20 px, contenido 8 px por debajo (--space-sm) y cifra principal de
+      28 px, igual en P, M y G para que en una fila todo quede alineado. */
+   --widget-alto-cabecera: 20px;
+   --widget-cifra: 28px;
 
    /* Botón flotante "Reportar" (bloque 11b.2): sus alturas, el único sitio donde se deciden.
       Las usan el propio botón (ReportarFallo) y el Layout, que deja al final de la página el

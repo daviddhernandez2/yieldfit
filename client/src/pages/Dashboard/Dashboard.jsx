@@ -177,7 +177,7 @@ export default function Dashboard() {
       case 'racha':
         return <WidgetRacha tamano={widget.tamano} actividad={actividad.datos} error={actividad.error} />;
       case 'frecuenciaSemanal':
-        return <WidgetFrecuencia actividad={actividad.datos} error={actividad.error} />;
+        return <WidgetFrecuencia tamano={widget.tamano} actividad={actividad.datos} error={actividad.error} />;
       case 'ultimaSesion':
         return <WidgetUltimaSesion tamano={widget.tamano} sesion={ultima.datos} error={ultima.error} />;
       case 'nuevosRecords':

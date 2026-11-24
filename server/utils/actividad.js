@@ -10,6 +10,10 @@
 // la consulta no crece con el historial.
 export const MAX_SEMANAS_RACHA = 104;
 
+// Semanas que se devuelven, de la más antigua a la actual. La fila de la Racha muestra las que
+// caben en su ancho (hasta unas 32 a 1024 px); Frecuencia semanal usa las 12 últimas.
+export const SEMANAS_HISTORIAL = 32;
+
 // 'YYYY-MM-DD' de una fecha en una zona horaria (en-CA da justo ese formato).
 const formatos = new Map();
 export const diaLocal = (fecha, zona) => {
@@ -34,11 +38,16 @@ export const lunesDe = (dia) => {
 
 // sesiones: [{ fecha, duracionSegundos }] (al menos las de los últimos MAX_SEMANAS_RACHA + 1
 // semanas). Devuelve:
-//   - semanas: las últimas `numSemanas`, de la más antigua a la actual: [{ inicio, sesiones, segundos }].
-//   - racha: { semanas, masDe } con las semanas seguidas con al menos una sesión, contando
-//     desde la actual. La semana en curso no rompe la racha mientras no termina: si aún no tiene
-//     sesiones, se empieza a contar por la anterior. masDe: se llegó al tope que se mira.
-export const calcularActividad = (sesiones, zona, ahora = new Date(), numSemanas = 12) => {
+//   - semanas: las últimas `numSemanas` (SEMANAS_HISTORIAL), de la más antigua a la actual:
+//     [{ inicio, sesiones, segundos }].
+//   - racha: { semanas, masDe, estado } con las semanas seguidas con al menos una sesión,
+//     contando desde la actual. La semana en curso no rompe la racha mientras no termina: si aún
+//     no tiene sesiones, se empieza a contar por la anterior. masDe: se llegó al tope que se mira.
+//     estado (el símbolo de la llama, bloque 9d):
+//       - 'activa': ya se ha entrenado esta semana.
+//       - 'enRiesgo': la racha sigue, pero esta semana aún no se ha entrenado.
+//       - 'rota': una semana completa sin entrenar (o aún sin racha).
+export const calcularActividad = (sesiones, zona, ahora = new Date(), numSemanas = SEMANAS_HISTORIAL) => {
   const porSemana = new Map();
   for (const s of sesiones) {
     const dia = diaLocal(new Date(s.fecha), zona);
@@ -65,8 +74,9 @@ export const calcularActividad = (sesiones, zona, ahora = new Date(), numSemanas
     lunes = sumarDias(lunes, -7);
   }
 
+  const estado = porSemana.has(lunesActual) ? 'activa' : racha > 0 ? 'enRiesgo' : 'rota';
   return {
     semanas,
-    racha: { semanas: racha, masDe: racha === MAX_SEMANAS_RACHA },
+    racha: { semanas: racha, masDe: racha === MAX_SEMANAS_RACHA, estado },
   };
 };

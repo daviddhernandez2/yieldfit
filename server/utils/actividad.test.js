@@ -22,18 +22,20 @@ ok('el mismo instante en UTC ya es otro día', diaLocal(new Date('2026-11-22T23:
 ok('y en Madrid es lunes', diaLocal(new Date('2026-11-22T23:30:00Z'), M), '2026-11-23');
 
 let a = calcularActividad([], M, ahora);
-ok('sin sesiones: 12 semanas a cero', [a.semanas.length, a.semanas.every((s) => s.sesiones === 0)], [12, true]);
-ok('sin sesiones: racha 0', a.racha, { semanas: 0, masDe: false });
-ok('semanas de la más antigua a la actual', [a.semanas[0].inicio, a.semanas.at(-1).inicio], ['2026-09-07', '2026-11-23']);
+ok('sin sesiones: 32 semanas a cero', [a.semanas.length, a.semanas.every((s) => s.sesiones === 0)], [32, true]);
+ok('sin sesiones: racha 0, rota', a.racha, { semanas: 0, masDe: false, estado: 'rota' });
+ok('semanas de la más antigua a la actual', [a.semanas[0].inicio, a.semanas.at(-1).inicio], ['2026-04-20', '2026-11-23']);
 
 a = calcularActividad([ses('2026-11-24T08:00:00Z', 50), ses('2026-11-23T17:00:00Z', 40), ses('2026-11-18T17:00:00Z')], M, ahora);
 ok('sesiones y minutos de la semana actual', [a.semanas.at(-1).sesiones, a.semanas.at(-1).segundos], [2, 5400]);
 ok('semana anterior', a.semanas.at(-2).sesiones, 1);
-ok('racha de 2 semanas', a.racha.semanas, 2);
+ok('racha de 2 semanas, activa (ya entrenó esta semana)', [a.racha.semanas, a.racha.estado], [2, 'activa']);
 
 // La semana en curso sin sesiones aún no rompe la racha.
 a = calcularActividad([ses('2026-11-18T17:00:00Z'), ses('2026-11-11T17:00:00Z'), ses('2026-10-28T17:00:00Z')], M, ahora);
-ok('sin sesiones esta semana: cuenta desde la anterior y se corta en el hueco', a.racha.semanas, 2);
+ok('sin sesiones esta semana: cuenta desde la anterior, se corta en el hueco y está en riesgo', [a.racha.semanas, a.racha.estado], [2, 'enRiesgo']);
+a = calcularActividad([ses('2026-11-11T17:00:00Z'), ses('2026-11-04T17:00:00Z')], M, ahora);
+ok('una semana completa sin entrenar (la pasada): rota', [a.racha.semanas, a.racha.estado], [0, 'rota']);
 
 // Domingo por la noche en Madrid cuenta en esa semana, no en la siguiente.
 a = calcularActividad([ses('2026-11-22T22:30:00Z')], M, ahora);
@@ -41,7 +43,7 @@ ok('domingo 23:30 en Madrid: semana del 16', [a.semanas.at(-1).sesiones, a.seman
 
 // Tope de la racha
 const muchas = Array.from({ length: MAX_SEMANAS_RACHA + 5 }, (_, i) => ses(new Date(ahora.getTime() - i * 7 * 864e5).toISOString()));
-ok('racha larga: tope y "más de"', calcularActividad(muchas, M, ahora).racha, { semanas: MAX_SEMANAS_RACHA, masDe: true });
+ok('racha larga: tope y "más de"', calcularActividad(muchas, M, ahora).racha, { semanas: MAX_SEMANAS_RACHA, masDe: true, estado: 'activa' });
 
 console.log(fallos === 0 ? '\nTodo bien.' : `\n${fallos} fallo(s).`);
 process.exitCode = fallos === 0 ? 0 : 1;

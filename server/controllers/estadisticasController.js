@@ -4,7 +4,7 @@ import { zonaValida } from '../utils/zona.js';
 
 // GET /api/estadisticas/actividad?zona=Europe/Madrid
 // Datos de los widgets Frecuencia semanal y Racha del Dashboard (bloque 9d):
-// { actividad: { semanas: [{ inicio, sesiones, segundos }] (12), racha: { semanas, masDe } } }.
+// { actividad: { semanas: [{ inicio, sesiones, segundos }] (32), racha: { semanas, masDe, estado } } }.
 // El cálculo, en utils/actividad.js.
 //
 // No crece con el historial: lee solo `fecha` y `duracionSegundos` de las sesiones de las

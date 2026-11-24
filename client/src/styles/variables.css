@@ -105,6 +105,15 @@
    --space-xl: 2rem;
    --space-2xl: 3rem;
 
+   /* Ancho de la maqueta (bloque 8b): todas las páginas usan uno de estos dos, nunca un valor
+      propio, para que la maquetación sea siempre la misma.
+      - pagina: pantallas de listas y resumen (Dashboard, Historial, Ejercicios, Rutinas,
+        Developer). Todo su contenido, cabecera incluida, usa este ancho.
+      - formulario: formularios y detalles (rutina, ejercicio, grupo, Perfil, sesión activa,
+        detalle de una sesión). Más estrecho a propósito: se lee y se rellena mejor. */
+   --ancho-pagina: 1120px;
+   --ancho-formulario: 700px;
+
    /* Radios de borde. Concéntricos: el radio interior es el exterior menos el padding. */
    --radius-xs: 4px;
    --radius-sm: 8px;

@@ -185,6 +185,9 @@ Colores, espaciados, sombras y movimiento siempre desde `styles/variables.css`, 
 escritorio), sin desbordes ni scroll horizontal. Los fallos se arreglan en el componente común,
 no página a página: dos o más botones juntos van siempre en `GrupoBotones` (se apilan a ancho
 completo si no caben); `Input` y `Select` ya se estrechan dentro de una fila.
+**Anchos de maqueta** (bloque 8b): cada página usa `--ancho-pagina` (1120 px: listas y resumen) o
+`--ancho-formulario` (700 px: formularios, detalles y lectura), nunca un ancho propio. Todos los
+elementos de una página van al mismo ancho.
 
 ## Criterios de escalabilidad
 

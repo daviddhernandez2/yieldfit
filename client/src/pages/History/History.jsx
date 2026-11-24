@@ -116,14 +116,9 @@ export default function History() {
         )}
       </header>
 
-      {/* Días entrenados (bloque 8): vista de mes o de año, arriba de la lista. Su envoltorio
-          puede ser más ancho que el resto de la página (bloque 8b): en escritorio, el
-          calendario va en dos columnas. */}
-      {!loading && !error && sessions.length > 0 && (
-        <div className={styles.calendarioAncho}>
-          <Calendario />
-        </div>
-      )}
+      {/* Días entrenados (bloque 8): vista de mes o de año, arriba de la lista. En escritorio
+          va en dos columnas (bloque 8b). */}
+      {!loading && !error && sessions.length > 0 && <Calendario />}
 
       {/* Mientras llegan las sesiones: cuatro tarjetas con la forma de las de verdad. */}
       {loading && (

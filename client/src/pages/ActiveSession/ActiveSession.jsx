@@ -22,13 +22,11 @@ import ListaOrdenable, { Asa } from "@/components/ListaOrdenable/ListaOrdenable.
 import { indiceTrasMover } from "@/utils/orden.js";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import styles from "@/pages/ActiveSession/ActiveSession.module.css";
+import { formatCronometro } from "@/utils/formato.js";
 
 // Formatea segundos como MM:SS. Sigue creciendo pasada la hora (65:30).
-const formatTiempo = (segundos) => {
-  const mm = Math.floor(segundos / 60);
-  const ss = segundos % 60;
-  return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
-};
+// Cronómetro y descanso: "07:05", y desde la hora "1:30:05" (utils/formato.js, bloque 11d).
+const formatTiempo = formatCronometro;
 
 const IconChevronDown = () => (
   <svg

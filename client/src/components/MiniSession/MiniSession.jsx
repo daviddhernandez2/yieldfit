@@ -3,16 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useActiveSession } from '@/hooks/useActiveSession.js';
 import { hayMiniSession } from '@/utils/barrasInferiores.js';
 import styles from '@/components/MiniSession/MiniSession.module.css';
+import { formatCronometro } from '@/utils/formato.js';
 
 // Formatea segundos como MM:SS o HH:MM:SS según duración.
-const formatTiempo = (segundos) => {
-  const hh = Math.floor(segundos / 3600);
-  const mm = Math.floor((segundos % 3600) / 60);
-  const ss = segundos % 60;
-  const pad = (n) => String(n).padStart(2, '0');
-  if (hh > 0) return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
-  return `${pad(mm)}:${pad(ss)}`;
-};
+// El mismo formato que el cronómetro de la sesión activa (utils/formato.js, bloque 11d).
+const formatTiempo = formatCronometro;
 
 const IconChevronUp = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

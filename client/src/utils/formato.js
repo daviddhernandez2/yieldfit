@@ -43,3 +43,14 @@ export const formatFechaRelativa = (fecha, ahora = new Date()) => {
   const opciones = d.getFullYear() === ahora.getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' };
   return `${d.toLocaleDateString('es-ES', opciones)}, ${hora}`;
 };
+
+// Cronómetro (bloque 11d): "07:05" por debajo de una hora y "1:30:05" desde la hora, en vez de
+// "90:05". Lo usan el cronómetro y el descanso de la sesión activa y la MiniSession.
+export const formatCronometro = (segundos) => {
+  const total = Math.max(0, Math.floor(segundos));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const dos = (n) => String(n).padStart(2, '0');
+  return h > 0 ? `${h}:${dos(m)}:${dos(s)}` : `${dos(m)}:${dos(s)}`;
+};

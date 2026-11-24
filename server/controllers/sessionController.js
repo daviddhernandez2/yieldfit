@@ -160,7 +160,18 @@ export const days = async (req, res, next) => {
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$fecha', timezone: zona } },
-          sesiones: { $push: { _id: '$_id', nombre: '$nombre' } },
+          // Lo justo para el calendario (bloque 8b): la hora sale de `fecha` y el número de
+          // ejercicios se cuenta aquí ($size), sin traer los ejercicios ni sus series. Son
+          // unos 120 bytes por sesión: un año entero sigue siendo una respuesta pequeña.
+          sesiones: {
+            $push: {
+              _id: '$_id',
+              nombre: '$nombre',
+              fecha: '$fecha',
+              duracionSegundos: '$duracionSegundos',
+              numEjercicios: { $size: { $ifNull: ['$ejercicios', []] } },
+            },
+          },
         },
       },
       { $sort: { _id: 1 } },

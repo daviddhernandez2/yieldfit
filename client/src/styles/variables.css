@@ -50,12 +50,14 @@
    --color-action-hover: var(--color-accent-hover);
    --color-on-action: var(--color-accent-text);
 
-   /* Rojo apagado: error, pérdida y peligro. Una señal, nunca un fondo sólido: los botones
-      destructivos son tonales (fill + border, texto on-danger). */
-   --color-error: #dc6b67;
-   --color-danger-fill: rgba(220, 107, 103, 0.08);
-   --color-danger-hover: rgba(220, 107, 103, 0.14);
-   --color-danger-border: rgba(220, 107, 103, 0.24);
+   /* Rojo: error, pérdida y peligro. Más vivo que el del Premium original (#dc6b67): 80 % de
+      saturación, 5,5:1 sobre surface-1 (DECISIONS 0048). Una señal, nunca un fondo sólido: los
+      botones destructivos son tonales (fill + border, texto on-danger), el mismo rojo al 8,
+      14 y 24 %. */
+   --color-error: #ec5850;
+   --color-danger-fill: rgba(236, 88, 80, 0.08);
+   --color-danger-hover: rgba(236, 88, 80, 0.14);
+   --color-danger-border: rgba(236, 88, 80, 0.24);
    --color-on-danger: var(--color-error);
 
    /* Capas flotantes. Cristal: barras y botones que flotan sobre el contenido (con
@@ -75,7 +77,7 @@
 
    /* Gráficas. Ganancia y pérdida siempre con flecha o signo, no solo color. */
    --chart-gain: #3ef87e;
-   --chart-loss: #dc6b67;
+   --chart-loss: #ec5850;
    --chart-neutral: #8b9098;
    --chart-grid: rgba(255, 255, 255, 0.04);
    --chart-series-1: #3ef87e;

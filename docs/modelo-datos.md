@@ -45,6 +45,7 @@ erDiagram
         string grupoMuscular "enum"
         string tipo "enum"
         string tracking "1RM o tiempo_distancia, derivado"
+        number record1RM "récord actual; copia reconstruible"
     }
     Workout {
         ObjectId userId FK "indexado"
@@ -68,6 +69,8 @@ erDiagram
         string nombreSnapshot "copia al guardar"
         string trackingSnapshot "copia al guardar"
         number mejor1RM "calculado al guardar; null en cardio"
+        boolean esPR "solo si fue récord"
+        number prAnterior "marca que batió; solo si fue récord"
         number descansoSegundos
         number orden
     }
@@ -139,6 +142,10 @@ flowchart LR
     A -- no --> C["tracking = 1RM"]
 ```
 
+- **`record1RM`** ([0051](../DECISIONS.md)): el mejor 1RM estimado de todas las sesiones del
+  ejercicio. Es una copia de lo que dicen las sesiones, para decidir los récords sin recorrer el
+  historial (ver [Récords personales](#récords-personales)). Solo la escribe el servidor.
+
 La regla vive en una sola función, `derivarTracking`, exportada desde `models/Exercise.js`. La
 usan el `pre('save')` y el clonado de presets (`utils/presets.js`). El clonado no puede depender
 del middleware porque usa `insertMany`, que no ejecuta `pre('save')`.
@@ -182,6 +189,37 @@ flowchart LR
 
 Ejemplo: sentadilla 150 → 165 (+10 %, índice 110) y curl 20 → 21 (+5 %, índice 105): el grupo
 sube un 7,5 % y la línea acaba en 107,5.
+
+#### Récords personales
+
+Decisión [0051](../DECISIONS.md), bloque 4b. Un ejercicio de una sesión es **récord** (PR) cuando su
+`mejor1RM` supera estrictamente el mejor de todas las sesiones anteriores de ese ejercicio. La
+primera vez solo fija la marca; igualar no cuenta; el cardio nunca. Si un ejercicio sale dos veces
+en la sesión, solo cuenta la mejor. La regla vive en `utils/records.js` (con pruebas en
+`records.test.js`).
+
+- **Al guardar** se compara con `Exercise.record1RM`: no se lee el historial. La sesión guarda
+  `esPR` y `prAnterior` en el ejercicio que batió la marca, y `record1RM` sube con `$max`, todo en
+  una transacción. La respuesta del `POST` lleva las marcas (para el aviso del Historial).
+- **Al borrar una sesión** se recalculan desde cero sus ejercicios de fuerza: todas sus sesiones
+  en orden de fecha (sin series) y `record1RM`. Si la borrada era un error (500 kg en vez de 50),
+  los récords reales posteriores vuelven a aparecer.
+- **Una sesión con fecha atrasada** (anterior a otra ya guardada del mismo ejercicio; hoy la app
+  no lo hace) también recalcula ese ejercicio entero.
+- **Borrar un ejercicio** no toca nada: las sesiones conservan sus marcas, como su nombre.
+- `GET /api/sessions/days` añade `tienePR` a cada sesión. `npm run migrar:pr` marca las sesiones
+  anteriores al bloque y reconstruye todo si alguna vez no cuadra ([operaciones.md](operaciones.md)).
+
+```mermaid
+flowchart TD
+    N["POST /api/sessions"] --> Q{"¿hay sesiones posteriores<br/>de este ejercicio?"}
+    Q -- "no (lo normal)" --> C["comparar mejor1RM con record1RM<br/>esPR + prAnterior · $max record1RM"]
+    Q -- "sí (fecha atrasada)" --> R["recalcularRecords<br/>(historial del ejercicio)"]
+    D["DELETE /api/sessions/:id"] --> R
+    M["npm run migrar:pr · seed"] --> R
+    C --> T[("transacción")]
+    R --> T
+```
 
 ### Chart
 Grupo de progreso (`nombre`, `exerciseIds[]`); en la app se llama "grupo" ([0034](../DECISIONS.md)).
@@ -251,6 +289,6 @@ crecen sin límite:
 
 | Colección | Crecimiento | Estado |
 |---|---|---|
-| Session | una por entrenamiento, indefinidamente | indexada; lista paginada por cursor, progreso por rango sin leer las series (bloque 4) y serie anterior por índice (bloque 5) |
+| Session | una por entrenamiento, indefinidamente | indexada; lista paginada por cursor, progreso por rango sin leer las series (bloque 4), serie anterior por índice (bloque 5) y récords al guardar sin leer el historial (bloque 4b) |
 | Exercise | ~58 + los que cree el usuario | acotada |
 | Workout, Chart | pocas por usuario | acotadas |

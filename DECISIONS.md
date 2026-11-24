@@ -69,6 +69,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0048 | Ajustes al tema Premium: botón verde, rojo más vivo, botones de icono y portada en negro puro | vigente |
 | 0049 | Calendario en dos columnas en escritorio, con panel del día | vigente |
 | 0050 | Datos huérfanos: diagnóstico y limpieza por script, y seed que vacía todo lo del usuario | vigente |
+| 0051 | Récords personales marcados al guardar, con la marca de cada ejercicio como copia | vigente |
 
 ---
 
@@ -1749,3 +1750,49 @@ Además, el cliente tenía dependencias con vulnerabilidades conocidas.
 - No deberían aparecer huérfanos nuevos: la app borra la cuenta entera y el seed ya no los deja.
   Si aparecen, el diagnóstico los detecta.
 - Queda `nodemon` con 2 vulnerabilidades moderadas (solo desarrollo; su arreglo es incompatible).
+
+---
+
+## 0051 — Récords personales marcados al guardar, con la marca de cada ejercicio como copia
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 4b
+
+**Contexto:** David quiere ver los récords personales (PR) en el Historial, el detalle de la
+sesión, el calendario y al terminar el entreno, y más adelante en un widget del Dashboard (9d). El
+cálculo tiene que hacerse en el servidor y no puede crecer con el historial (0015).
+
+**Decisión** (de David):
+- **Criterio:** el mejor 1RM estimado (`mejor1RM`, 0026) del ejercicio en la sesión supera
+  estrictamente el mejor de todas sus sesiones anteriores. La primera vez no cuenta, igualar
+  tampoco y el cardio nunca. Si el ejercicio sale dos veces en la sesión, solo cuenta la mejor.
+- **Se marca al guardar:** `esPR` y `prAnterior` (la marca batida, para "100 → 105 kg") en el
+  ejercicio de la sesión, solo cuando hay récord.
+- **`Exercise.record1RM`:** la marca actual de cada ejercicio, como **copia reconstruible** de lo
+  que dicen las sesiones. Al guardar se compara con ella y sube con `$max`, en la misma
+  transacción que la sesión. Es un dato duplicado a propósito: es la única forma de no recorrer el
+  historial en cada entreno. Se reconstruye con `npm run migrar:pr`.
+- **Al borrar una sesión se recalculan las posteriores** de sus ejercicios (opción b): el caso
+  típico de borrar es corregir un error (500 kg en vez de 50), y sin recalcular los récords reales
+  posteriores quedarían sin marcar para siempre. Cuesta leer el historial de esos ejercicios (sin
+  series), pero borrar es raro.
+- **Sesión con fecha atrasada** (hoy no ocurre; podría con el iPhone sin conexión): ese ejercicio
+  se recalcula entero.
+- **Borrar un ejercicio** no cambia nada: las sesiones conservan sus marcas, como su nombre (0020).
+- **Marca:** píldora "PR" en Geist Mono, verde sobre verde suave (opción A), añadida al design
+  system. **Aviso** al terminar en el Historial, con animación de entrada que respeta "reducir
+  movimiento".
+
+**Alternativas descartadas:**
+- *Calcular al consultar* (recorrer el historial al pedir el Historial o el calendario): crece
+  con el historial en cada petición.
+- *Calcular al guardar leyendo el máximo de las sesiones anteriores* (sin `record1RM`): sin
+  duplicar datos, pero cada entreno lee todo el historial de sus ejercicios.
+- *No recalcular al borrar* (opción a, "fue récord el día que lo hiciste"): más simple, pero un
+  error borrado dejaría sin marca los récords reales que vinieron después.
+- *Trofeo* o *"ATH"* como marca: el trofeo se lee mal a 12 px; "ATH" encaja con la metáfora de
+  inversión pero no todo el que va al gimnasio lo entiende.
+
+**Consecuencias:**
+- Si `record1RM` y las sesiones dejaran de cuadrar (dos sesiones del mismo ejercicio guardadas a
+  la vez, un cambio de criterio), `npm run migrar:pr` lo corrige: solo escribe lo que cambia.
+- El widget "Nuevos récords" del 9d leerá `esPR`; su índice se decide allí.

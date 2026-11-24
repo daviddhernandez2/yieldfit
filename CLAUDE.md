@@ -212,13 +212,6 @@ Aplicar en cada cambio y avisar cuando algo existente no los cumpla:
 No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 
 - `window.__yieldfitReplayIntro` se asigna durante el render de `App.jsx` (efecto secundario en render).
-- **Datos huérfanos de usuarios inexistentes:** en producción hay ejercicios de 11 usuarios
-  distintos pero solo 7 usuarios (diagnóstico de cardio, 2026-11-23). Parece que se borraron 4
-  usuarios a mano sin borrar sus datos: ejercicios y quizá rutinas, sesiones o grupos. Desde el
-  bloque 1c existen `npm run diagnostico:huerfanos` (solo lectura) y `npm run reparar:huerfanos`
-  (procedimiento de reparaciones, `docs/operaciones.md`): **pendiente de ejecutarlos en
-  producción**. Desde el 11b.4 la app borra la cuenta con todos sus datos, y desde el 1c el seed
-  vacía todas las colecciones con `userId`, así que no deberían aparecer huérfanos nuevos.
 - **Cardio en la sesión activa:** solo tiene campos de peso y reps, así que hoy no se puede
   registrar tiempo y distancia desde la app (los ejercicios `tiempo_distancia` se guardan con
   peso y reps a 0). El seed sí crea sesiones de cardio porque escribe directamente en la base.
@@ -264,7 +257,7 @@ Estado: marcar `[x]` solo cuando David confirme el cierre.
 **Orden de trabajo** (decisión de David, 2026-11-24). Los bloques llevan número con letra, junto
 al bloque del que nacen, para no renumerar:
 
-1. **1c — Dependencias del cliente y datos huérfanos**: `npm audit fix` en el cliente (sin
+1. [x] **1c — Dependencias del cliente y datos huérfanos** (hecho, 2026-11-24; 0050): `npm audit fix` en el cliente (sin
    `--force`); diagnóstico de solo lectura de los datos de usuarios inexistentes y su limpieza con
    el procedimiento de reparaciones.
 2. **4b — Récords personales (PR)**: icono de PR en Historial (fila y ejercicio), detalle de la

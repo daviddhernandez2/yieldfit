@@ -68,6 +68,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0047 | Design system Premium como tema único y fuente de verdad del diseño | vigente |
 | 0048 | Ajustes al tema Premium: botón verde, rojo más vivo, botones de icono y portada en negro puro | vigente |
 | 0049 | Calendario en dos columnas en escritorio, con panel del día | vigente |
+| 0050 | Datos huérfanos: diagnóstico y limpieza por script, y seed que vacía todo lo del usuario | vigente |
 
 ---
 
@@ -1712,3 +1713,39 @@ la izquierda y un panel lateral con el día seleccionado.
 - La forma de escritorio solo aparece en pantallas de unos 1220 px o más.
 - Comparar enero pide también el año anterior (se guarda como los demás).
 
+---
+
+## 0050 — Datos huérfanos: diagnóstico y limpieza por script, y seed que vacía todo lo del usuario
+
+Fecha: 2026-11-24 · Estado: vigente · Bloque: 1c
+
+**Contexto:** en producción había ejercicios de 11 usuarios distintos pero solo 7 usuarios: se
+habían borrado 4 a mano sin sus datos. En desarrollo, el seed borraba los usuarios pero solo
+5 colecciones, así que también dejaba huérfanos (reportes, tokens, enlaces de recuperación).
+Además, el cliente tenía dependencias con vulnerabilidades conocidas.
+
+**Decisión:**
+- **Dos scripts con el procedimiento de reparaciones** (`docs/operaciones.md`):
+  `diagnostico:huerfanos` (solo lectura, usuario de backup) agrupa por `userId` cada colección y
+  cuenta los documentos de usuarios que no existen; `reparar:huerfanos` (usuario temporal) los
+  borra en una transacción, simula por defecto, exige un backup de menos de 60 minutos con
+  `--aplicar`, para si hay más de 10 usuarios huérfanos y comprueba que lo borrado coincide con
+  lo contado. Los documentos sin `userId` solo se informan.
+- **Una sola lista de colecciones del usuario** para los scripts
+  (`scripts/lib/coleccionesUsuario.js`), y una prueba que la compara con `MODELOS_DEL_USUARIO`
+  (el borrado de cuenta, 0042): si se añade un modelo con `userId`, falla hasta que se añade en
+  los dos sitios.
+- **El seed vacía el usuario y todos los `MODELOS_DEL_USUARIO`.**
+- **`npm audit fix` en el cliente, sin `--force`:** 0 vulnerabilidades.
+- **Limpieza ejecutada en producción por David** el 2026-11-24.
+
+**Alternativas descartadas:**
+- *Borrar a mano desde Atlas:* sin simulación, sin backup previo comprobado y sin rastro.
+- *Un índice o una referencia con borrado en cascada:* MongoDB no los tiene; la cascada ya la
+  hace el borrado de cuenta (0042) en una transacción.
+- *Listas de colecciones distintas en los scripts y en la app:* se desincronizan en silencio.
+
+**Consecuencias:**
+- No deberían aparecer huérfanos nuevos: la app borra la cuenta entera y el seed ya no los deja.
+  Si aparecen, el diagnóstico los detecta.
+- Queda `nodemon` con 2 vulnerabilidades moderadas (solo desarrollo; su arreglo es incompatible).

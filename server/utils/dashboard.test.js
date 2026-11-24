@@ -33,7 +33,7 @@ const muchos = Array.from({ length: MAX_WIDGETS + 1 }, () => ({ tipo: 'progresoT
 ok(`más de ${MAX_WIDGETS}`, validarWidgets(muchos), { error: `Como mucho ${MAX_WIDGETS} widgets` });
 
 // --- dashboardPorDefecto ---
-ok('por defecto: resumen y grupos (Todos en grande)',
+ok('por defecto: con un grupo además de Todos, Todos en grande',
   dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }]),
   [
     { tipo: 'progresoTotal', tamano: 'P' },
@@ -41,8 +41,45 @@ ok('por defecto: resumen y grupos (Todos en grande)',
     { tipo: 'grupo', tamano: 'G', chartId: 't' },
     { tipo: 'grupo', tamano: 'M', chartId: 'e' },
   ]);
+ok('por defecto: con dos grupos además de Todos, Todos en mediano',
+  dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }, { _id: 'p' }]).map((w) => w.tamano),
+  ['P', 'P', 'M', 'M', 'M']);
 ok('el dashboard por defecto pasa la validación',
   'widgets' in validarWidgets(dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }])), true);
+
+// Colocación en orden y sin dense, como la retícula del cliente (client/src/utils/reticula.js):
+// devuelve las celdas libres que quedan, también al final de la última fila.
+const TAM = { P: [1, 1], M: [2, 1], G: [2, 2] };
+const huecos = (widgets, columnas) => {
+  const ocupado = new Set();
+  let fila = 0, col = 0, ultimaFila = 0;
+  for (const w of widgets) {
+    const [ancho, alto] = TAM[w.tamano].map((n, i) => (i === 0 ? Math.min(n, columnas) : n));
+    for (;;) {
+      if (col + ancho > columnas) { fila++; col = 0; continue; }
+      let libre = true;
+      for (let f = fila; f < fila + alto; f++) for (let c = col; c < col + ancho; c++) if (ocupado.has(`${f},${c}`)) libre = false;
+      if (libre) break;
+      col++;
+    }
+    for (let f = fila; f < fila + alto; f++) for (let c = col; c < col + ancho; c++) ocupado.add(`${f},${c}`);
+    ultimaFila = Math.max(ultimaFila, fila + alto - 1);
+    col += ancho;
+  }
+  return (ultimaFila + 1) * columnas - ocupado.size;
+};
+const sinHuecos = [];
+for (let n = 0; n <= 10; n++) {
+  const charts = [{ _id: 't', todos: true }, ...Array.from({ length: n }, (_, i) => ({ _id: `g${i}` }))];
+  const d = dashboardPorDefecto(charts);
+  sinHuecos.push([n, huecos(d, 4), huecos(d, 2)]);
+}
+ok('por defecto, de 0 a 10 grupos además de Todos: 0 huecos a 4 y a 2 columnas',
+  sinHuecos.filter(([, h4, h2]) => h4 || h2), []);
+const sinTodos = [0, 1, 2, 3].map((n) => dashboardPorDefecto(Array.from({ length: n }, (_, i) => ({ _id: `g${i}` }))));
+ok('sin Todos (lo borró): la parte de grupos con 2 columnas nunca deja huecos',
+  sinTodos.map((d) => huecos(d, 2)), [0, 0, 0, 0]);
+ok('como mucho MAX_WIDGETS', dashboardPorDefecto(Array.from({ length: 40 }, (_, i) => ({ _id: `g${i}` }))).length, MAX_WIDGETS);
 
 // --- coherencia del catálogo ---
 ok('cada tamaño por defecto está entre los permitidos',

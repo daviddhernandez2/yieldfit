@@ -57,14 +57,34 @@ export const validarWidgets = (widgets) => {
 };
 
 // Dashboard de un usuario nuevo o de uno que aún no tenía (los de antes del 9d): las dos cifras
-// de resumen y sus grupos, "Todos" en grande y el resto en mediano, en orden de creación (el
-// orden que cada dispositivo guardaba antes se pierde una vez: decisión de David).
-// `charts`: los grupos del usuario, ya ordenados, con { _id, todos }.
-export const dashboardPorDefecto = (charts) => [
-  { tipo: 'progresoTotal', tamano: 'P' },
-  { tipo: 'sesionesTotales', tamano: 'P' },
-  ...charts.map((c) => ({ tipo: 'grupo', tamano: c.todos ? 'G' : 'M', chartId: c._id })),
-];
+// de resumen y sus grupos, "Todos" primero y el resto en orden de creación (el orden que cada
+// dispositivo guardaba antes se pierde una vez: decisión de David).
+// `charts`: los grupos del usuario, ya ordenados ("Todos" primero), con { _id, todos }.
+//
+// Sin huecos ni a 4 ni a 2 columnas (P = 1×1, M = 2×1, G = 2×2; colocación en orden, sin
+// dense). Las dos P llenan media fila; los grupos van en M, salvo "Todos":
+//   - A 4 columnas: P P + Todos G ocupan dos filas y dejan libre media fila de la segunda, que
+//     llena el primer M. Después, los M van de dos en dos. Así que "Todos" va en G solo si el
+//     número de grupos restantes es impar; si es par (también 0), "Todos" va en M y cada fila es
+//     P P M o M M.
+//   - A 2 columnas: P P llenan una fila y cada M o G ocupa el ancho entero: nunca hay huecos.
+// Si hay tantos grupos que no caben (como mucho MAX_WIDGETS widgets), entran los primeros.
+export const dashboardPorDefecto = (charts) => {
+  const resumen = [
+    { tipo: 'progresoTotal', tamano: 'P' },
+    { tipo: 'sesionesTotales', tamano: 'P' },
+  ];
+  const grupos = charts.slice(0, MAX_WIDGETS - resumen.length);
+  const restantes = grupos.filter((c) => !c.todos).length;
+  return [
+    ...resumen,
+    ...grupos.map((c) => ({
+      tipo: 'grupo',
+      tamano: c.todos && restantes % 2 === 1 ? 'G' : 'M',
+      chartId: c._id,
+    })),
+  ];
+};
 
 // E11000: clave duplicada (otra petición acaba de crear el mismo documento).
 const esDuplicado = (error) => error?.code === 11000;

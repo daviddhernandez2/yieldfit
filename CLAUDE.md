@@ -220,8 +220,8 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
   registrar tiempo y distancia desde la app (los ejercicios `tiempo_distancia` se guardan con
   peso y reps a 0). El seed sí crea sesiones de cardio porque escribe directamente en la base.
   Mientras tanto, el cardio está bloqueado en la app con "Próximamente" (bloque 5b, 0030).
-  **Sin bloque asignado en el roadmap.** Análisis para cuando se implemente (si se le da
-  número, uno con letra como "6b": no renumerar, DECISIONS y el código citan los números):
+  **Bloque 6b** en el orden de trabajo del roadmap (quinto). Análisis para cuando se implemente
+  (no renumerar: DECISIONS y el código citan los números):
   - **Dónde:** después del 6, que refactoriza `ActiveSession.jsx` (quizá a `useReducer`), y antes
     del 7, para que el CSV nazca con tiempo y distancia reales. El 8 y el 9 no dependen de él.
   - **Alcance:** la sesión activa conoce el tracking de cada ejercicio; filas de cardio con
@@ -263,6 +263,22 @@ falta de `runValidators` (las actualizaciones usan `save()`), `JSON.parse` sin t
 ## Roadmap por bloques
 
 Estado: marcar `[x]` solo cuando David confirme el cierre.
+
+**Orden de trabajo** (decisión de David, 2026-11-24). Los bloques llevan número con letra, junto
+al bloque del que nacen, para no renumerar:
+
+1. **1c — Dependencias del cliente y datos huérfanos**: `npm audit fix` en el cliente (sin
+   `--force`); diagnóstico de solo lectura de los datos de usuarios inexistentes y su limpieza con
+   el procedimiento de reparaciones.
+2. **4b — Récords personales (PR)**: icono de PR en Historial (fila y ejercicio), detalle de la
+   sesión, calendario (móvil y escritorio) y aviso al terminar el entreno. PR = superar el mejor
+   1RM estimado anterior del ejercicio; la primera vez no cuenta; sin cardio. Cálculo en el
+   servidor sin traer el historial entero; el widget "Nuevos récords" del 9d usa el mismo.
+3. **9d — Dashboard personalizable**: bento con widgets y grupos al mismo nivel; modo "Editar
+   dashboard" (mover, añadir desde un catálogo, quitar, cambiar entre tamaños fijos); "Todos" pasa
+   a ser un grupo normal; retícula estricta. Se plantea antes de escribir código.
+4. **1b — Backups automáticos fuera del portátil** (revisión prevista en la 0018).
+5. **6b — Cardio** en la sesión activa (análisis en la deuda técnica).
 
 - [x] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, documentación en Markdown en `/docs`
       (leída en GitHub, sin dependencias ni despliegue; índice en `docs/README.md`).

@@ -14,20 +14,34 @@
   margin-top: var(--space-md);
 }
 
-/* En las pantallas privadas: píldora fija abajo, por encima de la TabBar (z-index 100)
-   y de MiniSession (90), para que se vea esté donde esté el usuario. */
+/* En las pantallas privadas: fijo abajo, por encima de la TabBar (z-index 100) y de
+   MiniSession (90), para que se vea esté donde esté el usuario.
+   Móvil (bloque 11d): de lado a lado con 16 px de margen (left y right, no left: 50% con
+   translateX, que dejaba al aviso solo la mitad del ancho y partía el texto en seis líneas),
+   esquinas de tarjeta porque el texto ocupa dos líneas, y por encima del botón de reportar
+   para no taparlo. Escritorio: píldora centrada. */
 .flotante.visible {
   position: fixed;
-  left: 50%;
-  bottom: calc(var(--space-2xl) * 2);
-  transform: translateX(-50%);
+  left: var(--space-md);
+  right: var(--space-md);
+  bottom: calc(var(--reportar-bottom-movil) + var(--reportar-alto-movil) + var(--space-sm));
   z-index: 110;
-  margin: 0;
-  max-width: calc(100vw - var(--space-xl));
+  width: fit-content;
+  max-width: 480px;
+  margin: 0 auto;
   padding: var(--space-sm) var(--space-md);
   background-color: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-lg);
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  .flotante.visible {
+    bottom: var(--space-2xl);
+    max-width: calc(100vw - var(--space-xl) * 2);
+    border-radius: var(--radius-pill);
+  }
 }
 
 /* Ticker: la línea se dibuja (stroke-dashoffset), el punto la recorre (offset-path) y al

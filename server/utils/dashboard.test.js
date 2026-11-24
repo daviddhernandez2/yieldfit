@@ -16,7 +16,7 @@ const ok = (desc, real, esperado) => {
 ok('lista vacía', validarWidgets([]), { widgets: [] });
 ok('no es una lista', validarWidgets({}), { error: 'widgets tiene que ser una lista' });
 ok('tipo desconocido', validarWidgets([{ tipo: 'clima', tamano: 'P' }]), { error: 'Tipo de widget no válido: clima' });
-ok('tipo aún no disponible', validarWidgets([{ tipo: 'racha', tamano: 'P' }]), { error: '«Racha» aún no está disponible' });
+ok('tipo aún no disponible', validarWidgets([{ tipo: 'recordEjercicio', tamano: 'P', exerciseId: 'x' }]), { error: '«Récord de un ejercicio» aún no está disponible' });
 ok('tamaño no permitido', validarWidgets([{ tipo: 'progresoTotal', tamano: 'G' }]), { error: '«Progreso total» no admite el tamaño G' });
 ok('grupo sin chartId', validarWidgets([{ tipo: 'grupo', tamano: 'G' }]), { error: '«Grupo de progreso» necesita chartId' });
 ok('mismo grupo dos veces',
@@ -34,13 +34,16 @@ const muchos = Array.from({ length: MAX_WIDGETS + 1 }, () => ({ tipo: 'progresoT
 ok(`más de ${MAX_WIDGETS}`, validarWidgets(muchos), { error: `Como mucho ${MAX_WIDGETS} widgets` });
 
 // --- dashboardPorDefecto ---
-ok('por defecto: resumen y grupos en G, Todos primero',
+ok('por defecto: resumen, frecuencia, grupos en G (Todos primero), última sesión y récords',
   dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }]),
   [
     { tipo: 'progresoTotal', tamano: 'P' },
     { tipo: 'sesionesTotales', tamano: 'P' },
+    { tipo: 'frecuenciaSemanal', tamano: 'M' },
     { tipo: 'grupo', tamano: 'G', chartId: 't' },
     { tipo: 'grupo', tamano: 'G', chartId: 'e' },
+    { tipo: 'ultimaSesion', tamano: 'M' },
+    { tipo: 'nuevosRecords', tamano: 'M' },
   ]);
 ok('el dashboard por defecto pasa la validación',
   'widgets' in validarWidgets(dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }])), true);
@@ -71,10 +74,9 @@ for (let n = 0; n <= 10; n++) {
   const d = dashboardPorDefecto([{ _id: 't', todos: true }, ...Array.from({ length: n }, (_, i) => ({ _id: `g${i}` }))]);
   porGrupos.push([huecos(d, 2), huecos(d, 4)]);
 }
-// A 4 columnas, 2 + 4n celdas dejan siempre media fila (2 celdas) libre: la llena el widget M
-// del dashboard por defecto del paso 4 (Frecuencia semanal). A 2 columnas, ninguna.
-ok('por defecto, de 0 a 10 grupos además de Todos: 0 huecos a 2 columnas y 2 a 4',
-  [...new Set(porGrupos.map(([h2, h4]) => `${h2}/${h4}`))], ['0/2']);
+ok('por defecto, de 0 a 10 grupos además de Todos: 0 huecos a 2 y a 4 columnas',
+  [...new Set(porGrupos.map(([h2, h4]) => `${h2}/${h4}`))], ['0/0']);
+ok('sin ningún grupo (borró Todos): tampoco', [huecos(dashboardPorDefecto([]), 2), huecos(dashboardPorDefecto([]), 4)], [0, 0]);
 ok('como mucho MAX_WIDGETS', dashboardPorDefecto(Array.from({ length: 40 }, (_, i) => ({ _id: `g${i}` }))).length, MAX_WIDGETS);
 
 // --- normalizarWidgets ---
@@ -82,7 +84,7 @@ ok('grupos en M o P pasan a G; lo válido no cambia',
   normalizarWidgets([{ tipo: 'grupo', tamano: 'M', chartId: 'a' }, { tipo: 'grupo', tamano: 'P', chartId: 'b' }, { tipo: 'progresoTotal', tamano: 'P' }]),
   { widgets: [{ tipo: 'grupo', tamano: 'G', chartId: 'a' }, { tipo: 'grupo', tamano: 'G', chartId: 'b' }, { tipo: 'progresoTotal', tamano: 'P' }], cambiado: true });
 ok('tipo que ya no existe o no está disponible: se quita',
-  normalizarWidgets([{ tipo: 'clima', tamano: 'P' }, { tipo: 'racha', tamano: 'P' }]), { widgets: [], cambiado: true });
+  normalizarWidgets([{ tipo: 'clima', tamano: 'P' }, { tipo: 'empezarRutina', tamano: 'P', workoutId: 'w' }]), { widgets: [], cambiado: true });
 ok('nada que ajustar', normalizarWidgets([{ tipo: 'sesionesTotales', tamano: 'P' }]).cambiado, false);
 
 // --- rehacerPorDefecto ---
@@ -95,8 +97,11 @@ ok('rehecho: conserva _id y rango; lo nuevo, sin _id',
   [
     { tipo: 'progresoTotal', tamano: 'P', _id: 'w1' },
     { tipo: 'sesionesTotales', tamano: 'P' },
+    { tipo: 'frecuenciaSemanal', tamano: 'M' },
     { tipo: 'grupo', tamano: 'G', chartId: 't' },
     { tipo: 'grupo', tamano: 'G', chartId: 'e', _id: 'w2', rango: '1M' },
+    { tipo: 'ultimaSesion', tamano: 'M' },
+    { tipo: 'nuevosRecords', tamano: 'M' },
   ]);
 
 // --- cambiaEstructura y mismoDashboard ---

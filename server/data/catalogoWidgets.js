@@ -55,7 +55,7 @@ export const CATALOGO = [
   {
     tipo: 'sesionesTotales',
     nombre: 'Sesiones totales',
-    descripcion: 'Cuántas sesiones llevas.',
+    descripcion: 'Cuántas sesiones llevas, y cómo va este mes frente al anterior.',
     tamanos: ['P'],
     tamanoPorDefecto: 'P',
     disponible: true,
@@ -66,7 +66,7 @@ export const CATALOGO = [
     descripcion: 'Semanas seguidas entrenando.',
     tamanos: ['P'],
     tamanoPorDefecto: 'P',
-    disponible: false,
+    disponible: true,
   },
   {
     tipo: 'frecuenciaSemanal',
@@ -74,7 +74,7 @@ export const CATALOGO = [
     descripcion: 'Sesiones por semana de las últimas semanas.',
     tamanos: ['M', 'G'],
     tamanoPorDefecto: 'M',
-    disponible: false,
+    disponible: true,
   },
   {
     tipo: 'ultimaSesion',
@@ -82,15 +82,15 @@ export const CATALOGO = [
     descripcion: 'Qué hiciste y cuándo, con acceso al detalle.',
     tamanos: ['M', 'G'],
     tamanoPorDefecto: 'M',
-    disponible: false,
+    disponible: true,
   },
   {
     tipo: 'nuevosRecords',
     nombre: 'Nuevos récords',
-    descripcion: 'Tus récords personales más recientes.',
+    descripcion: 'Tus récords personales más recientes, con el 1RM estimado anterior y el nuevo.',
     tamanos: ['M', 'G'],
     tamanoPorDefecto: 'M',
-    disponible: false,
+    disponible: true,
   },
   {
     tipo: 'recordEjercicio',

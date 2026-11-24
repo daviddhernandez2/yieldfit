@@ -57,22 +57,30 @@ export const validarWidgets = (widgets) => {
 };
 
 // Dashboard de un usuario nuevo, de uno de antes del 9d o de uno que aún no lo ha personalizado
-// (porDefecto): las cifras de resumen y sus grupos, "Todos" primero y el resto en orden de
-// creación. Los grupos van siempre en G (gráfica y ejercicios).
+// (porDefecto). En este orden:
+//   1. Progreso total (P), Sesiones totales (P) y Frecuencia semanal (M): una fila a 4 columnas.
+//   2. Los grupos, siempre en G: "Todos" primero y el resto en orden de creación.
+//   3. Última sesión (M) y Nuevos récords (M).
 // `charts`: los grupos del usuario, ya ordenados ("Todos" primero), con { _id, todos }.
 //
-// Huecos (P = 1×1, M = 2×1, G = 2×2; colocación en orden, sin dense): a 2 columnas no hay
-// ninguno (P P llenan una fila y cada G ocupa el ancho). A 4 columnas, dos P y n grupos G suman
-// 2 + 4n celdas, que nunca es múltiplo de 4: queda media fila libre al final. La llena el
-// primer widget M del dashboard por defecto (Frecuencia semanal, paso 4 del 9d).
+// Sin huecos ni a 4 ni a 2 columnas (P = 1×1, M = 2×1, G = 2×2; colocación en orden, sin dense):
+//   - A 4 columnas, los G van de dos en dos. Con un número par de grupos, los dos M del final
+//     llenan una fila; con uno impar, quedan apilados junto al último G y llenan su hueco.
+//   - A 2 columnas, P P llenan una fila y cada M o G ocupa el ancho entero.
 // Si hay tantos grupos que no caben (como mucho MAX_WIDGETS widgets), entran los primeros.
+// Racha y los demás quedan en el catálogo.
 export const dashboardPorDefecto = (charts) => {
-  const resumen = [
+  const inicio = [
     { tipo: 'progresoTotal', tamano: 'P' },
     { tipo: 'sesionesTotales', tamano: 'P' },
+    { tipo: 'frecuenciaSemanal', tamano: 'M' },
   ];
-  const grupos = charts.slice(0, MAX_WIDGETS - resumen.length);
-  return [...resumen, ...grupos.map((c) => ({ tipo: 'grupo', tamano: 'G', chartId: c._id }))];
+  const final = [
+    { tipo: 'ultimaSesion', tamano: 'M' },
+    { tipo: 'nuevosRecords', tamano: 'M' },
+  ];
+  const grupos = charts.slice(0, MAX_WIDGETS - inicio.length - final.length);
+  return [...inicio, ...grupos.map((c) => ({ tipo: 'grupo', tamano: 'G', chartId: c._id })), ...final];
 };
 
 // Ajusta un dashboard guardado al catálogo actual: un tamaño que el tipo ya no admite pasa a su

@@ -1,5 +1,6 @@
 import { formatDuracion, formatHora } from "@/utils/formato.js";
 import { contar } from "@/utils/activeSession.js";
+import MarcaPR from "@/components/MarcaPR/MarcaPR.jsx";
 import styles from "@/components/Calendario/Calendario.module.css";
 
 // Flecha de variación de trazo (design system: ↗ sube, ↘ baja; nunca solo color).
@@ -58,7 +59,10 @@ export default function PanelDia({ dia, sesiones, esFuturo, mes, onAbrir }) {
                 <button type="button" className={styles.panelSesion} onClick={() => onAbrir(s._id)}>
                   <span className={styles.panelHora}>{s.fecha ? formatHora(s.fecha) : "—"}</span>
                   <span className={styles.panelTexto}>
-                    <span className={styles.panelNombre}>{s.nombre}</span>
+                    <span className={styles.panelNombreFila}>
+                      <span className={styles.panelNombre}>{s.nombre}</span>
+                      {s.tienePR && <MarcaPR />}
+                    </span>
                     <span className={styles.panelDato}>
                       {s.duracionSegundos !== undefined && formatDuracion(s.duracionSegundos)}
                       {s.numEjercicios !== undefined && ` · ${contar(s.numEjercicios, "ejercicio", "ejercicios")}`}

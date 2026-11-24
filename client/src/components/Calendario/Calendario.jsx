@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getTrainedDays } from "@/api/sessions.js";
 import Chip from "@/components/Chip/Chip.jsx";
 import Button from "@/components/Button/Button.jsx";
+import MarcaPR from "@/components/MarcaPR/MarcaPR.jsx";
 import PanelDia from "@/components/Calendario/PanelDia.jsx";
 import { formatDuracion, formatHora } from "@/utils/formato.js";
 import { contar } from "@/utils/activeSession.js";
@@ -187,14 +188,26 @@ export default function Calendario() {
       .join(" ");
     // En la vista de mes el número va dentro de un círculo de tamaño fijo: la celda ocupa
     // el ancho de su columna, pero lo verde no crece con ella.
-    const contenido = conNumero ? <span className={styles.circulo}>{celda.numero}</span> : null;
+    // Récord (bloque 4b): solo en la vista de mes; en el mapa del año los cuadros son demasiado
+    // pequeños. El texto accesible lo dice también.
+    const conPR = sesiones?.some((s) => s.tienePR);
+    const contenido = conNumero ? (
+      <>
+        <span className={styles.circulo}>{celda.numero}</span>
+        {conPR && (
+          <span className={styles.marcaDia}>
+            <MarcaPR tamano="xs" />
+          </span>
+        )}
+      </>
+    ) : null;
     return sesiones ? (
       <button
         key={celda.dia}
         type="button"
         className={clases}
         onClick={() => tocarDia(celda.dia)}
-        aria-label={`${celda.dia}: ${sesiones.map((s) => s.nombre).join(", ")}`}
+        aria-label={`${celda.dia}: ${sesiones.map((s) => s.nombre).join(", ")}${conPR ? " · con récord" : ""}`}
         title={`${celda.dia} · ${sesiones.map((s) => s.nombre).join(", ")}`}
       >
         {contenido}
@@ -219,10 +232,15 @@ export default function Calendario() {
         className={clases}
         onClick={() => tocarDia(celda.dia)}
         aria-pressed={celda.dia === seleccionado}
-        aria-label={`${celda.dia}${sesiones.length ? `: ${sesiones.map((s) => s.nombre).join(", ")}` : ""}`}
+        aria-label={`${celda.dia}${sesiones.length ? `: ${sesiones.map((s) => s.nombre).join(", ")}` : ""}${sesiones.some((s) => s.tienePR) ? " · con récord" : ""}`}
       >
-        <span className={`${styles.numero} ${celda.dia === claveHoy ? styles.numeroHoy : ""} ${sesiones.length ? styles.numeroEntrenado : ""}`}>
-          {celda.numero}
+        {/* La marca de récord va junto al número del día, no dentro de las píldoras: dentro
+            dejaba el nombre de la sesión en "T…". */}
+        <span className={styles.celdaCabecera}>
+          <span className={`${styles.numero} ${celda.dia === claveHoy ? styles.numeroHoy : ""} ${sesiones.length ? styles.numeroEntrenado : ""}`}>
+            {celda.numero}
+          </span>
+          {sesiones.some((s) => s.tienePR) && <MarcaPR tamano="xs" />}
         </span>
         {sesiones.slice(0, PILDORAS_POR_DIA).map((s) => (
           <span key={s._id} className={styles.pildora}>
@@ -404,7 +422,10 @@ export default function Calendario() {
                   <li key={s._id}>
                     <button type="button" className={styles.sesionDia} onClick={() => navigate(`/history/${s._id}`)}>
                       <span className={styles.sesionDiaTexto}>
-                        {s.nombre}
+                        <span className={styles.sesionDiaNombre}>
+                          <span className={styles.sesionDiaNombreTexto}>{s.nombre}</span>
+                          {s.tienePR && <MarcaPR />}
+                        </span>
                         {/* Hora y duración (bloque 8b). Si el servidor aún no las manda, no se ven. */}
                         {s.fecha && (
                           <span className={styles.sesionDiaDato}>

@@ -128,6 +128,7 @@
 }
 
 .dia {
+  position: relative; /* para la marca de récord en la esquina (bloque 4b) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -614,7 +615,15 @@
   min-width: 0;
 }
 
+.panelNombreFila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
 .panelNombre {
+  min-width: 0;
   overflow: hidden;
   font-weight: var(--font-weight-medium);
   text-overflow: ellipsis;
@@ -706,3 +715,48 @@
   font-weight: var(--font-weight-regular);
 }
 
+/* --- Récords (bloque 4b) --- */
+
+/* Móvil, vista de mes: "PR" pequeño en la esquina de arriba a la derecha del día, encima del
+   círculo verde. No recibe toques: el día entero es el botón. */
+.marcaDia {
+  position: absolute;
+  /* Por encima de la esquina del círculo, para no tapar las cifras del día. */
+  top: -5px;
+  right: 0;
+  display: flex;
+  pointer-events: none;
+}
+
+/* Su fondo verde es translúcido y dejaría ver el círculo de debajo: aquí se pone el mismo
+   verde suave sobre el fondo de la tarjeta (surface-1), opaco, para que se lea igual. */
+.marcaDia > span {
+  background: linear-gradient(var(--color-accent-soft), var(--color-accent-soft)) var(--surface-1);
+}
+
+/* Escritorio: número del día y, si hubo récord, la marca a su lado. */
+.celdaCabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Lista del día en el móvil: nombre y marca en una fila. */
+.sesionDiaNombre {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.sesionDiaNombreTexto {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* La flecha de la fila no se encoge cuando el nombre y la marca llenan el ancho. */
+.sesionDia > svg {
+  flex-shrink: 0;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { listExercises } from "@/api/exercises.js";
+import BotonIcono from "@/components/BotonIcono/BotonIcono.jsx";
 import { getPreviousSets } from "@/api/sessions.js";
 import ExercisePicker from "@/components/ExercisePicker/ExercisePicker.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
@@ -10,12 +11,6 @@ import { readActiveSession, writeActiveSession, contar } from "@/utils/activeSes
 import { sesionReducer, seriesAlReemplazar } from "@/utils/activeSessionReducer.js";
 import formulario from "@/styles/paginaFormulario.module.css";
 import styles from "@/pages/ReplaceExercise/ReplaceExercise.module.css";
-
-const IconChevronLeft = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-);
 
 // Lo que se espera a la "vez anterior" del ejercicio nuevo antes de volver a la sesión.
 // Con mala cobertura no merece la pena esperar más: se vuelve sin ella.
@@ -119,14 +114,7 @@ export default function ReplaceExercise() {
   return (
     <div className={styles.page}>
       <header className={formulario.header}>
-        <button
-          type="button"
-          onClick={volverASesion}
-          className={formulario.backButton}
-          aria-label="Volver a la sesión"
-        >
-          <IconChevronLeft />
-        </button>
+        <BotonIcono icono="atras" etiqueta="Volver a la sesión" onClick={volverASesion} />
         <div>
           <h1 className={formulario.title}>Reemplazar ejercicio</h1>
           <p className={styles.subtitle}>

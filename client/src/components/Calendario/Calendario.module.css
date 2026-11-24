@@ -66,32 +66,6 @@
   white-space: nowrap;
 }
 
-/* Mismo estilo que el botón de volver de las páginas de edición. */
-.flecha {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: var(--transition-base);
-}
-
-.flecha:hover:not(:disabled) {
-  border-color: var(--color-text-muted);
-}
-
-.flecha:disabled {
-  color: var(--color-text-muted);
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
 /* ---------- Las dos vistas, superpuestas ---------- */
 
 /* Las dos vistas ocupan la misma celda de una rejilla de 1×1: la altura es la de la más
@@ -315,16 +289,6 @@
   justify-content: space-between;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-}
-
-.cerrar {
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-lg);
-  cursor: pointer;
 }
 
 .listaDia {

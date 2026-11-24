@@ -109,25 +109,6 @@
   flex-shrink: 0;
 }
 
-.plegarTarjeta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: var(--transition-base);
-}
-
-.plegarTarjeta:hover {
-  color: var(--color-text);
-  border-color: var(--color-text-muted);
-}
-
 .nombreFila {
   display: flex;
   align-items: center;

@@ -14,6 +14,7 @@ import {
   rejillaDelMes,
 } from "@/utils/calendario.js";
 import styles from "@/components/Calendario/Calendario.module.css";
+import BotonIcono from "@/components/BotonIcono/BotonIcono.jsx";
 
 const DIAS_SEMANA = ["L", "M", "X", "J", "V", "S", "D"];
 const MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -158,24 +159,18 @@ export default function Calendario() {
 
       {/* ‹ periodo ›: las flechas quedan en los bordes de la rejilla que hay debajo. */}
       <div className={`${styles.navegacion} ${vista === "mes" ? styles.anchoMes : ""}`}>
-        <button
-          type="button"
-          className={styles.flecha}
+        <BotonIcono
+          icono="atras"
+          etiqueta={vista === "mes" ? "Mes anterior" : "Año anterior"}
           onClick={() => mover(-1)}
-          aria-label={vista === "mes" ? "Mes anterior" : "Año anterior"}
-        >
-          <IconChevron direccion="izquierda" />
-        </button>
+        />
         <span className={styles.periodo}>{vista === "mes" ? nombreDelMes(mes.anio, mes.mes) : mes.anio}</span>
-        <button
-          type="button"
-          className={styles.flecha}
+        <BotonIcono
+          icono="adelante"
+          etiqueta={vista === "mes" ? "Mes siguiente" : "Año siguiente"}
           onClick={() => mover(1)}
           disabled={enElPresente}
-          aria-label={vista === "mes" ? "Mes siguiente" : "Año siguiente"}
-        >
-          <IconChevron direccion="derecha" />
-        </button>
+        />
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
@@ -232,9 +227,7 @@ export default function Calendario() {
           <div className={`${styles.capaDia} glassCard`}>
             <div className={styles.capaDiaCabecera}>
               <span>{diaAbierto.split("-").reverse().join("/")}</span>
-              <button type="button" className={styles.cerrar} onClick={() => setDiaAbierto(null)} aria-label="Cerrar">
-                ×
-              </button>
+              <BotonIcono variante="sinFondo" icono="cerrar" etiqueta="Cerrar" onClick={() => setDiaAbierto(null)} />
             </div>
             <ul className={styles.listaDia}>
               {dias[diaAbierto].map((s) => (

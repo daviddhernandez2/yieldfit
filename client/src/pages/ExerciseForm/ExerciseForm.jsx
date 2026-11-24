@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import BotonIcono from "@/components/BotonIcono/BotonIcono.jsx";
 import {
   createExercise,
   getExercise,
@@ -17,21 +18,6 @@ import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from "@/utils/borrado
 import useOpcionesEjercicio, { tipoDisponible } from "@/hooks/useOpcionesEjercicio.js";
 import formulario from "@/styles/paginaFormulario.module.css";
 import styles from "@/pages/ExerciseForm/ExerciseForm.module.css";
-
-const IconChevronLeft = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-);
 
 // Formulario unificado para crear y editar ejercicios.
 // El modo se detecta por la presencia del :id en la URL. Si existe, se
@@ -145,14 +131,7 @@ export default function ExerciseForm() {
           otras vistas de detalle: la navegación queda pegada al inicio
           de la línea de lectura. */}
       <header className={formulario.header}>
-        <button
-          type="button"
-          onClick={() => navigate("/exercises")}
-          className={formulario.backButton}
-          aria-label="Volver al listado de ejercicios"
-        >
-          <IconChevronLeft />
-        </button>
+        <BotonIcono icono="atras" etiqueta="Volver al listado de ejercicios" onClick={() => navigate("/exercises")} />
         <h1 className={formulario.title}>
           {editMode ? "Editar ejercicio" : "Nuevo ejercicio"}
         </h1>

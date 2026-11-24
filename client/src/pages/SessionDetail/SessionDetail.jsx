@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSession, deleteSession } from '@/api/sessions.js';
+import BotonIcono from '@/components/BotonIcono/BotonIcono.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import styles from '@/pages/SessionDetail/SessionDetail.module.css';
@@ -30,14 +31,6 @@ const formatFecha = (fecha) => {
   });
   return `${fechaStr} · ${horaStr}`;
 };
-
-// Icono chevron-left para el botón de volver, alineado con el
-// estilo de iconografía del resto de la app.
-const IconChevronLeft = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-);
 
 // Detalle de una sesión pasada. Solo lectura.
 // Los datos vienen del backend con snapshots (nombreSnapshot del ejercicio),
@@ -101,14 +94,7 @@ export default function SessionDetail() {
           Es un patrón más convencional para pantallas de detalle: la
           navegación queda pegada al inicio de la línea de lectura. */}
       <header className={styles.header}>
-        <button
-          type="button"
-          onClick={() => navigate('/history')}
-          className={styles.backButton}
-          aria-label="Volver al historial"
-        >
-          <IconChevronLeft />
-        </button>
+        <BotonIcono icono="atras" etiqueta="Volver al historial" onClick={() => navigate('/history')} />
         <div className={styles.headerText}>
           <h1 className={styles.title}>{session.nombre}</h1>
           <p className={styles.subtitle}>{formatFecha(session.fecha)}</p>

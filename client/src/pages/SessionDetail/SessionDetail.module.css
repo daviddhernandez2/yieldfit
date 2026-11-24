@@ -21,26 +21,6 @@
   flex: 1;
 }
 
-.backButton {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  font-size: var(--font-size-xl);
-  cursor: pointer;
-  transition: var(--transition-base);
-  flex-shrink: 0;
-}
-
-.backButton:hover {
-  border-color: var(--color-text-muted);
-}
-
 .title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);

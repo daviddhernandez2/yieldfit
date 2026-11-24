@@ -6,6 +6,7 @@ import Chip from "@/components/Chip/Chip.jsx";
 import Esqueleto, { ZonaCarga } from "@/components/Esqueleto/Esqueleto.jsx";
 import { RANGOS, desdeDeRango, guardarPreferencias, leerPreferencias } from "@/utils/grupos.js";
 import styles from "@/components/GrupoProgreso/GrupoProgreso.module.css";
+import BotonIcono from "@/components/BotonIcono/BotonIcono.jsx";
 
 // Formatea un número decimal como porcentaje con signo: 3.14 → "+3,1%".
 const formatPorcentaje = (n) => {
@@ -132,15 +133,13 @@ export default function GrupoProgreso({ grupoId = null, nombre, numEjercicios })
             </div>
           )}
           {/* Plegar la tarjeta entera: quedan solo el nombre y el %. */}
-          <button
-            type="button"
-            className={styles.plegarTarjeta}
+          <BotonIcono
+            variante="sinFondo"
+            icono={preferencias.tarjetaPlegada ? "abajo" : "arriba"}
+            etiqueta={`${preferencias.tarjetaPlegada ? "Desplegar" : "Plegar"} ${nombre}`}
             onClick={() => cambiar({ tarjetaPlegada: !preferencias.tarjetaPlegada })}
             aria-expanded={!preferencias.tarjetaPlegada}
-            aria-label={`${preferencias.tarjetaPlegada ? "Desplegar" : "Plegar"} ${nombre}`}
-          >
-            <IconChevron abierto={!preferencias.tarjetaPlegada} />
-          </button>
+          />
         </div>
       </div>
 

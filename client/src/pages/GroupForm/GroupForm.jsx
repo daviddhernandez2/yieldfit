@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import BotonIcono from "@/components/BotonIcono/BotonIcono.jsx";
 import { listExercises } from "@/api/exercises.js";
 import { createChart, deleteChart, getChart, updateChart } from "@/api/charts.js";
 import Input from "@/components/Input/Input.jsx";
@@ -13,12 +14,6 @@ import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import { contar } from "@/utils/activeSession.js";
 import formulario from "@/styles/paginaFormulario.module.css";
 import styles from "@/pages/GroupForm/GroupForm.module.css";
-
-const IconChevronLeft = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-);
 
 // Crear y editar un grupo de progreso (bloque 9, DECISIONS.md 0034), en /groups/new y
 // /groups/:id/edit. Mismo esquema que WorkoutForm: nombre, ejercicios marcados en el
@@ -110,9 +105,7 @@ export default function GroupForm() {
   return (
     <div className={formulario.page}>
       <header className={formulario.header}>
-        <button type="button" onClick={() => navigate("/dashboard")} className={formulario.backButton} aria-label="Volver al progreso">
-          <IconChevronLeft />
-        </button>
+        <BotonIcono icono="atras" etiqueta="Volver al progreso" onClick={() => navigate("/dashboard")} />
         <h1 className={formulario.title}>{editando ? "Editar grupo" : "Nuevo grupo"}</h1>
       </header>
 

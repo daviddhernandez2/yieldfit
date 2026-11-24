@@ -21,27 +21,6 @@
   gap: var(--space-md);
 }
 
-/* Botón atrás sin fondo, coherente con SessionDetail y ExerciseForm. */
-.backButton {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: var(--transition-base);
-  flex-shrink: 0;
-}
-
-.backButton:hover {
-  border-color: var(--color-text-muted);
-  background-color: rgba(255, 255, 255, 0.04);
-}
-
 .title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);

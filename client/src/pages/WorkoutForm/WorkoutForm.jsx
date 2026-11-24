@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { listExercises } from '@/api/exercises.js';
+import BotonIcono from '@/components/BotonIcono/BotonIcono.jsx';
 import {
   getWorkout,
   createWorkout,
@@ -26,12 +27,6 @@ import styles from '@/pages/WorkoutForm/WorkoutForm.module.css';
 
 const DEFAULT_NUM_SERIES = 3;
 const DEFAULT_DESCANSO = 90;
-
-const IconChevronLeft = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6" />
-  </svg>
-);
 
 const IconClose = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -187,14 +182,7 @@ export default function WorkoutForm() {
       {/* Header: botón atrás delante del título, mismo patrón que
           SessionDetail y ExerciseForm. */}
       <header className={formulario.header}>
-        <button
-          type="button"
-          onClick={() => navigate('/workouts')}
-          className={formulario.backButton}
-          aria-label="Volver al listado de rutinas"
-        >
-          <IconChevronLeft />
-        </button>
+        <BotonIcono icono="atras" etiqueta="Volver al listado de rutinas" onClick={() => navigate('/workouts')} />
         <h1 className={formulario.title}>
           {isEditMode ? 'Editar rutina' : 'Nueva rutina'}
         </h1>

@@ -1,0 +1,66 @@
+/* Botón de solo icono (ver BotonIcono.jsx). */
+.boton {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+/* Zona táctil de 48 px, centrada, aunque el botón se vea de 40 o 32: una capa invisible por
+   encima que también recibe el toque. No ocupa sitio en el diseño. */
+.boton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+}
+
+.boton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.boton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Navegar: círculo de 40 px con fondo de tarjeta (surface-1) y borde fino. */
+.circulo {
+  width: 40px;
+  height: 40px;
+  background-color: var(--surface-1);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.circulo:hover:not(:disabled) {
+  background-color: var(--surface-3);
+  border-color: var(--color-border-strong);
+}
+
+/* Dentro de tarjetas: solo el icono, en gris; el círculo suave aparece al interactuar. */
+.sinFondo {
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  border: none;
+  color: var(--color-text-muted);
+}
+
+.sinFondo:hover:not(:disabled),
+.sinFondo:active:not(:disabled) {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}

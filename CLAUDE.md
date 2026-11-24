@@ -232,12 +232,11 @@ No arreglar sin pedirlo, pero tenerla en cuenta y avisar si un bloque la toca:
 - **Backups solo en el portátil:** la revisión prevista en la 0018 ("backups automáticos fuera
   del portátil cuando haya usuarios reales además de David") ya aplica con la beta del 11b. Si
   el portátil se pierde o se estropea, no hay copia. Desde la 0039 se conservan los 3 últimos.
-- **Vulnerabilidades de dependencias (`npm audit`, 2026-11-24).** Revisar fuera del bloque 9c, en
-  su propio paso, **priorizando el servidor**. Todas tienen arreglo con `npm audit fix` (sin cambios
-  incompatibles en las de producción); hay que probar la app después de actualizar.
-  - **Servidor, producción (5):** `mongoose` y `proxy-addr` (críticas), `body-parser` (alta),
-    `morgan` y `qs` (moderadas). `proxy-addr` calcula `req.ip` con `trust proxy` (0038): de él
-    depende el límite de intentos.
+- **Vulnerabilidades de dependencias (`npm audit`, 2026-11-24).** El servidor se actualizó el
+  2026-11-24 con `npm audit fix` (mongoose 9.13, proxy-addr 2.0.8, body-parser 2.4, morgan 1.12,
+  qs 6.17): 0 vulnerabilidades en producción. Quedan, para revisar en su propio paso:
+  - **Servidor, solo desarrollo (2 moderadas):** `nodemon`; el arreglo es un cambio incompatible
+    (`npm audit fix --force`).
   - **Cliente, producción (4 altas):** `axios`, `follow-redirects`, `react-router` y
     `react-router-dom`. Riesgo bajo en el navegador: casi todos los avisos de `axios` son del
     adaptador de Node, que el navegador no usa, y el de `react-router` es del modo RSC, que no se usa.

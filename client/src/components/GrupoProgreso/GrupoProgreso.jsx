@@ -7,13 +7,8 @@ import Esqueleto, { ZonaCarga } from "@/components/Esqueleto/Esqueleto.jsx";
 import { RANGOS, desdeDeRango, guardarPreferencias, leerPreferencias } from "@/utils/grupos.js";
 import styles from "@/components/GrupoProgreso/GrupoProgreso.module.css";
 import BotonIcono from "@/components/BotonIcono/BotonIcono.jsx";
+import { formatPorcentaje } from "@/utils/formato.js";
 
-// Formatea un número decimal como porcentaje con signo: 3.14 → "+3,1%".
-const formatPorcentaje = (n) => {
-  const redondeado = Number(n.toFixed(1));
-  const signo = redondeado > 0 ? "+" : "";
-  return `${signo}${redondeado.toString().replace(".", ",")}%`;
-};
 
 const claseSigno = (n) => (n > 0 ? styles.positive : n < 0 ? styles.negative : styles.neutral);
 

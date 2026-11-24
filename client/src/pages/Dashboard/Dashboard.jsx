@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listCharts } from '@/api/charts.js';
 import GrupoProgreso from '@/components/GrupoProgreso/GrupoProgreso.jsx';
+import ResumenProgreso from '@/pages/Dashboard/ResumenProgreso.jsx';
 import { ID_TODOS, guardarOrden, leerOrden, ordenarGrupos } from '@/utils/grupos.js';
 import { moverElemento } from '@/utils/orden.js';
 import ListaOrdenable, { Asa } from '@/components/ListaOrdenable/ListaOrdenable.jsx';
@@ -64,6 +65,9 @@ export default function Dashboard() {
       </header>
 
       {error && <p className={styles.feedbackError}>{error}</p>}
+
+      {/* Resumen de todo el historial (bloque 9c). No se muestra mientras se ordena. */}
+      {!ordenando && <ResumenProgreso />}
 
       {ordenando ? (
         // Modo ordenar: lista compacta que se reordena arrastrando desde el asa ⋮⋮ (bloque

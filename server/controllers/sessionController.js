@@ -207,6 +207,61 @@ export const days = async (req, res, next) => {
   }
 };
 
+const LIMITE_RECORDS = 5;
+const MAX_RECORDS = 20;
+
+// GET /api/sessions/records?limite=5
+// Los récords personales más recientes (widget "Nuevos récords" del Dashboard, bloque 9d), del
+// más nuevo al más antiguo: { records: [{ sessionId, fecha, exerciseId, nombre, anterior,
+// nuevo }] }, con el 1RM estimado anterior y el nuevo (bloque 4b).
+//
+// No crece con el historial: el índice parcial { userId, 'ejercicios.esPR', fecha } solo tiene
+// las sesiones con algún récord, y se leen como mucho `limite` sesiones (sin series).
+export const records = async (req, res, next) => {
+  try {
+    const limite = req.query.limite === undefined ? LIMITE_RECORDS : Number(req.query.limite);
+    if (!Number.isInteger(limite) || limite < 1 || limite > MAX_RECORDS) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: `limite tiene que ser un número entero entre 1 y ${MAX_RECORDS}`,
+      });
+    }
+    const sesiones = await Session.find(
+      { userId: req.user._id, 'ejercicios.esPR': true },
+      {
+        fecha: 1,
+        'ejercicios.exerciseId': 1,
+        'ejercicios.nombreSnapshot': 1,
+        'ejercicios.esPR': 1,
+        'ejercicios.prAnterior': 1,
+        'ejercicios.mejor1RM': 1,
+      }
+    )
+      .sort({ fecha: -1 })
+      .limit(limite)
+      .lean();
+
+    // Una sesión puede tener varios récords: se aplanan y se recortan al límite.
+    const lista = sesiones
+      .flatMap((s) =>
+        s.ejercicios
+          .filter((ej) => ej.esPR)
+          .map((ej) => ({
+            sessionId: s._id,
+            fecha: s.fecha,
+            exerciseId: ej.exerciseId,
+            nombre: ej.nombreSnapshot,
+            anterior: ej.prAnterior,
+            nuevo: ej.mejor1RM,
+          }))
+      )
+      .slice(0, limite);
+    res.status(200).json({ records: lista });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const MAX_EJERCICIOS_ANTERIORES = 30;
 
 // GET /api/sessions/previous-sets?exerciseIds=a,b,c

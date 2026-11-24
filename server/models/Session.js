@@ -160,6 +160,14 @@ sessionSchema.index({ userId: 1, fecha: -1 });
 // sesión, ~6 por sesión (DECISIONS.md, 0029).
 sessionSchema.index({ userId: 1, 'ejercicios.exerciseId': 1, fecha: -1 });
 
+// Récords recientes (widget "Nuevos récords" del Dashboard, bloque 9d): parcial, solo con las
+// sesiones que tienen algún récord, así que no crece con cada entreno sino con cada récord.
+// La consulta tiene que incluir 'ejercicios.esPR': true para poder usarlo.
+sessionSchema.index(
+  { userId: 1, 'ejercicios.esPR': 1, fecha: -1 },
+  { partialFilterExpression: { 'ejercicios.esPR': true } }
+);
+
 const Session = mongoose.model('Session', sessionSchema);
 
 export default Session;

@@ -35,6 +35,12 @@ assert.deepEqual(posiciones(r), [[1, 1], [1, 3], [2, 1], [3, 1]]);
 assert.equal(r.filas, 3);
 
 assert.deepEqual(colocarWidgets([], 4), { colocados: [], huecos: [], filas: 0 });
+
+// Un grupo desplegado ocupa más filas (filas sustituye al alto del G); lo de después baja.
+r = colocarWidgets([{ tamano: 'G', filas: 4 }, { tamano: 'G' }, { tamano: 'P' }], 4);
+assert.deepEqual(r.colocados.map((c) => [c.fila, c.columna, c.alto]), [[1, 1, 4], [1, 3, 2], [3, 3, 1]]);
+r = colocarWidgets([{ tamano: 'G', filas: 4 }, { tamano: 'P' }], 2);
+assert.deepEqual(r.colocados.map((c) => [c.fila, c.columna]), [[1, 1], [5, 1]]);
 assert.equal(columnasParaAncho(879), 2);
 assert.equal(columnasParaAncho(880), 4);
 

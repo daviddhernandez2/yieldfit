@@ -11,7 +11,8 @@
 
 export const DIMENSIONES = { P: { ancho: 1, alto: 1 }, M: { ancho: 2, alto: 1 }, G: { ancho: 2, alto: 2 } };
 
-// widgets: [{ tamano, ... }] en orden. columnas: 2 o 4.
+// widgets: [{ tamano, filas?, ... }] en orden. columnas: 2 o 4. `filas` sustituye al alto del
+// tamaño (un grupo desplegado ocupa más filas que su G); no se guarda, es solo para mirar.
 // Devuelve { colocados: [{ widget, fila, columna, ancho, alto }], huecos: [{ fila, columna }], filas }
 // con filas y columnas desde 1 (como grid-row y grid-column en CSS). Los huecos incluyen las
 // celdas vacías al final de la última fila.
@@ -31,7 +32,7 @@ export const colocarWidgets = (widgets, columnas) => {
   for (const widget of widgets) {
     const dim = DIMENSIONES[widget.tamano] ?? DIMENSIONES.P;
     const ancho = Math.min(dim.ancho, columnas);
-    const alto = dim.alto;
+    const alto = widget.filas ?? dim.alto;
     // Avanza el cursor hasta un sitio donde quepa.
     for (;;) {
       if (columna + ancho - 1 > columnas) {
@@ -62,3 +63,13 @@ export const colocarWidgets = (widgets, columnas) => {
 // le deja unos 650 px). Con 880 px o más caben 4 widgets P sin que se aprieten los textos.
 export const ANCHO_CUATRO_COLUMNAS = 880;
 export const columnasParaAncho = (ancho) => (ancho >= ANCHO_CUATRO_COLUMNAS ? 4 : 2);
+
+// Filas que necesita un contenido de `alto` px en la retícula `reticula` (el elemento): lee el
+// alto de fila y el hueco entre filas de su CSS, así no se repiten aquí los valores de
+// variables.css. Una fila más por cada (fila + hueco) que pase de la primera.
+export const filasParaAlto = (alto, reticula) => {
+  const estilo = getComputedStyle(reticula);
+  const fila = parseFloat(estilo.gridAutoRows);
+  const hueco = parseFloat(estilo.rowGap) || 0;
+  return Math.max(1, Math.ceil((alto + hueco) / (fila + hueco)));
+};

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listCharts } from '@/api/charts.js';
 import { getCatalogo, getDashboard, updateDashboard } from '@/api/dashboard.js';
@@ -48,6 +48,20 @@ export default function Dashboard() {
   const [general, setGeneral] = useState({ progreso: null, error: false });
   const [error, setError] = useState('');
   const [errorGuardar, setErrorGuardar] = useState('');
+  // Filas de los grupos desplegados ({ widgetId: filas }). Solo para mirar: no se guarda.
+  const [filasDesplegadas, setFilasDesplegadas] = useState({});
+
+  // Un grupo pide más filas al desplegar su lista, o null para volver a su tamaño. Si no cambia
+  // nada, se devuelve el mismo objeto para no volver a pintar.
+  const cambiarFilas = useCallback((widgetId, filas) => {
+    setFilasDesplegadas((actual) => {
+      if ((actual[widgetId] ?? null) === filas) return actual;
+      const nuevo = { ...actual };
+      if (filas === null) delete nuevo[widgetId];
+      else nuevo[widgetId] = filas;
+      return nuevo;
+    });
+  }, []);
 
   useEffect(() => {
     // El rango, el plegado y el orden que antes guardaba cada dispositivo ya no se usan.
@@ -100,17 +114,18 @@ export default function Dashboard() {
 
   // Un widget de grupo cuyo grupo no está en la lista (borrado en otra pestaña) no se pinta.
   const visibles = widgets?.filter((w) => w.tipo !== 'grupo' || grupos.has(w.chartId)) ?? [];
-  const { colocados } = colocarWidgets(widgets ? visibles : ESQUELETO, columnas);
+  const conFilas = visibles.map((w) => (filasDesplegadas[w._id] ? { ...w, filas: filasDesplegadas[w._id] } : w));
+  const { colocados } = colocarWidgets(widgets ? conFilas : ESQUELETO, columnas);
 
   const pintar = (widget) => {
     if (widget.tipo === 'grupo') {
       return (
         <WidgetGrupo
-          tamano={widget.tamano}
           grupo={grupos.get(widget.chartId)}
           rango={widget.rango}
           rangos={rangos}
           onCambiarRango={(rango) => cambiarRango(widget._id, rango)}
+          onCambiarFilas={(filas) => cambiarFilas(widget._id, filas)}
         />
       );
     }
@@ -151,7 +166,8 @@ export default function Dashboard() {
       )}
 
       {widgets && (
-        <div ref={ref} className={styles.reticula} style={{ '--columnas': columnas }}>
+        // data-reticula: el grupo desplegado lee de aquí el alto de fila para pedir sus filas.
+        <div ref={ref} className={styles.reticula} style={{ '--columnas': columnas }} data-reticula>
           {colocados.map((c) => (
             <div key={c.widget._id} className={styles.celda} style={estiloCelda(c)}>
               {pintar(c.widget)}

@@ -63,6 +63,26 @@
   cursor: pointer;
 }
 
+/* --- Campos de fecha en iOS (bloque 11c) ---
+   En el iPhone (Safari y Chrome usan el mismo motor, WebKit), un campo de fecha con su aspecto
+   nativo tiene un ancho mínimo propio que no respeta width: 100% ni min-width: 0, y se sale por
+   la derecha en pantallas estrechas. Quitando el aspecto nativo (appearance: none) se comporta
+   como un campo normal; el toque sigue abriendo la rueda de fechas del sistema.
+   @supports (-webkit-touch-callout: none) solo lo cumple WebKit en iOS: en escritorio el campo
+   se queda como estaba (con su icono de calendario). */
+@supports (-webkit-touch-callout: none) {
+  .input[type='date'] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+  }
+
+  /* iOS centra la fecha elegida; a la izquierda, como el resto de campos. */
+  .input[type='date']::-webkit-date-and-time-value {
+    text-align: left;
+  }
+}
+
 /* Webkit muestra un icono por defecto; lo recoloreamos al verde de marca. */
 .input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(74%) sepia(83%) saturate(530%) hue-rotate(76deg) brightness(105%);

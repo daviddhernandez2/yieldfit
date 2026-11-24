@@ -4,6 +4,7 @@ import { limitesDias } from '@/utils/filtroFechas.js';
 import Button from '@/components/Button/Button.jsx';
 import Chip from '@/components/Chip/Chip.jsx';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
+import Input from '@/components/Input/Input.jsx';
 import styles from '@/pages/Developer/Developer.module.css';
 
 const ESTADOS = [
@@ -129,14 +130,10 @@ export default function ReportesAdmin({ users }) {
               ))}
             </select>
           </label>
-          <label className={styles.campo}>
-            <span className={styles.etiqueta}>Desde</span>
-            <input type="date" className={styles.control} value={desde} max={hasta || undefined} onChange={(e) => setDesde(e.target.value)} />
-          </label>
-          <label className={styles.campo}>
-            <span className={styles.etiqueta}>Hasta</span>
-            <input type="date" className={styles.control} value={hasta} min={desde || undefined} onChange={(e) => setHasta(e.target.value)} />
-          </label>
+          {/* Fechas con Input (bloque 11c): el arreglo de iOS y la pista de la fecha vacía viven
+              ahí, para todos los campos de fecha de la app. */}
+          <Input id="filtro-desde" label="Desde" type="date" value={desde} max={hasta || undefined} onChange={(e) => setDesde(e.target.value)} />
+          <Input id="filtro-hasta" label="Hasta" type="date" value={hasta} min={desde || undefined} onChange={(e) => setHasta(e.target.value)} />
         </div>
 
         {hayFiltrosExtra && (

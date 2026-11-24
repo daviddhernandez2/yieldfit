@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { useActiveSession } from '@/hooks/useActiveSession.js';
 import { hayBotonReemplazar, hayMiniSession } from '@/utils/barrasInferiores.js';
@@ -48,7 +49,10 @@ export default function ReportarFallo({ ubicacion = 'flotante' }) {
           </span>
         )}
       </button>
-      {abierto && <FormularioReporte ruta={pathname} onCerrar={() => setAbierto(false)} />}
+      {/* La hoja se pinta al final del documento (portal), no junto al botón: el botón de la
+          barra lateral está dentro de un elemento sticky, que crea su propio contexto de
+          apilamiento, y la hoja quedaba por debajo del contenido de la página (bloque 11d). */}
+      {abierto && createPortal(<FormularioReporte ruta={pathname} onCerrar={() => setAbierto(false)} />, document.body)}
     </>
   );
 }

@@ -34,12 +34,12 @@ const muchos = Array.from({ length: MAX_WIDGETS + 1 }, () => ({ tipo: 'progresoT
 ok(`más de ${MAX_WIDGETS}`, validarWidgets(muchos), { error: `Como mucho ${MAX_WIDGETS} widgets` });
 
 // --- dashboardPorDefecto ---
-ok('por defecto: resumen, frecuencia, grupos en G (Todos primero), última sesión y récords',
+ok('por defecto: resumen, racha, grupos en G (Todos primero), última sesión y récords',
   dashboardPorDefecto([{ _id: 't', todos: true }, { _id: 'e' }]),
   [
     { tipo: 'progresoTotal', tamano: 'P' },
     { tipo: 'sesionesTotales', tamano: 'P' },
-    { tipo: 'frecuenciaSemanal', tamano: 'M' },
+    { tipo: 'racha', tamano: 'M' },
     { tipo: 'grupo', tamano: 'G', chartId: 't' },
     { tipo: 'grupo', tamano: 'G', chartId: 'e' },
     { tipo: 'ultimaSesion', tamano: 'M' },
@@ -97,7 +97,7 @@ ok('rehecho: conserva _id y rango; lo nuevo, sin _id',
   [
     { tipo: 'progresoTotal', tamano: 'P', _id: 'w1' },
     { tipo: 'sesionesTotales', tamano: 'P' },
-    { tipo: 'frecuenciaSemanal', tamano: 'M' },
+    { tipo: 'racha', tamano: 'M' },
     { tipo: 'grupo', tamano: 'G', chartId: 't' },
     { tipo: 'grupo', tamano: 'G', chartId: 'e', _id: 'w2', rango: '1M' },
     { tipo: 'ultimaSesion', tamano: 'M' },

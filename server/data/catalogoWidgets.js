@@ -55,7 +55,7 @@ export const CATALOGO = [
   {
     tipo: 'sesionesTotales',
     nombre: 'Sesiones totales',
-    descripcion: 'Cuántas sesiones llevas, y cómo va este mes frente al anterior.',
+    descripcion: 'Cuántas sesiones llevas en total.',
     tamanos: ['P'],
     tamanoPorDefecto: 'P',
     disponible: true,
@@ -63,9 +63,10 @@ export const CATALOGO = [
   {
     tipo: 'racha',
     nombre: 'Racha',
-    descripcion: 'Semanas seguidas entrenando.',
-    tamanos: ['P'],
-    tamanoPorDefecto: 'P',
+    // Como en Strava: en M, las semanas seguidas y una fila de círculos con las últimas.
+    descripcion: 'Semanas seguidas entrenando, con las últimas semanas marcadas.',
+    tamanos: ['P', 'M'],
+    tamanoPorDefecto: 'M',
     disponible: true,
   },
   {

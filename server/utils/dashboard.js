@@ -58,7 +58,7 @@ export const validarWidgets = (widgets) => {
 
 // Dashboard de un usuario nuevo, de uno de antes del 9d o de uno que aún no lo ha personalizado
 // (porDefecto). En este orden:
-//   1. Progreso total (P), Sesiones totales (P) y Frecuencia semanal (M): una fila a 4 columnas.
+//   1. Progreso total (P), Sesiones totales (P) y Racha (M): una fila a 4 columnas.
 //   2. Los grupos, siempre en G: "Todos" primero y el resto en orden de creación.
 //   3. Última sesión (M) y Nuevos récords (M).
 // `charts`: los grupos del usuario, ya ordenados ("Todos" primero), con { _id, todos }.
@@ -68,12 +68,12 @@ export const validarWidgets = (widgets) => {
 //     llenan una fila; con uno impar, quedan apilados junto al último G y llenan su hueco.
 //   - A 2 columnas, P P llenan una fila y cada M o G ocupa el ancho entero.
 // Si hay tantos grupos que no caben (como mucho MAX_WIDGETS widgets), entran los primeros.
-// Racha y los demás quedan en el catálogo.
+// Frecuencia semanal y los demás quedan en el catálogo.
 export const dashboardPorDefecto = (charts) => {
   const inicio = [
     { tipo: 'progresoTotal', tamano: 'P' },
     { tipo: 'sesionesTotales', tamano: 'P' },
-    { tipo: 'frecuenciaSemanal', tamano: 'M' },
+    { tipo: 'racha', tamano: 'M' },
   ];
   const final = [
     { tipo: 'ultimaSesion', tamano: 'M' },

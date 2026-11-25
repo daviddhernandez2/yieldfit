@@ -128,6 +128,11 @@ export const sesionReducer = (sesion, accion) => {
         ],
       };
 
+    // Notas de la sesión (bloque 11d): el texto tal cual se escribe; se recorta al guardar.
+    // { texto }
+    case 'escribirNotas':
+      return { ...sesion, notas: accion.texto };
+
     // Cambiar el orden de los ejercicios arrastrando (bloque 9b): { desde, hasta }.
     case 'moverEjercicio':
       return { ...sesion, ejercicios: moverElemento(sesion.ejercicios, accion.desde, accion.hasta) };

@@ -131,6 +131,11 @@ ok('añadir: los que había son los mismos objetos', s.ejercicios[0] === base.ej
 ok('añadir sin grupo ni tipo: no añade esos campos', ['grupoMuscular' in s.ejercicios[3], 'tipo' in s.ejercicios[3]], [false, false]);
 ok('añadir: misma forma que en localStorage', claves(JSON.parse(JSON.stringify(s)).ejercicios[2]), claves(SESION_ACTUAL.ejercicios[0]));
 
+// --- Notas (bloque 11d) ---
+s = sesionReducer(base, { type: 'escribirNotas', texto: 'hombro cargado ' });
+ok('notas: guarda el texto tal cual (se recorta al guardar la sesión)', s.notas, 'hombro cargado ');
+ok('notas: los ejercicios son los mismos objetos', s.ejercicios === base.ejercicios, true);
+
 // --- Mover ejercicios (bloque 9b) ---
 s = sesionReducer(base, { type: 'moverEjercicio', desde: 0, hasta: 1 });
 ok('mover: cambia el orden de los ejercicios', s.ejercicios.map((e) => e.exerciseId), ['cinta', 'peso-muerto']);

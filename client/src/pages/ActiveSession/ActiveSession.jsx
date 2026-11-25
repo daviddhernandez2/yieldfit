@@ -23,10 +23,14 @@ import { indiceTrasMover } from "@/utils/orden.js";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import styles from "@/pages/ActiveSession/ActiveSession.module.css";
 import { formatCronometro } from "@/utils/formato.js";
+import AreaTexto from "@/components/AreaTexto/AreaTexto.jsx";
 
 // Formatea segundos como MM:SS. Sigue creciendo pasada la hora (65:30).
 // Cronómetro y descanso: "07:05", y desde la hora "1:30:05" (utils/formato.js, bloque 11d).
 const formatTiempo = formatCronometro;
+
+// Límite de las notas: el mismo que el modelo Session del servidor (bloque 11d).
+const MAX_NOTAS = 500;
 
 const IconChevronDown = () => (
   <svg
@@ -271,6 +275,8 @@ export default function ActiveSession() {
         workoutId: session.workoutId,
         fecha: new Date(session.startTime).toISOString(),
         duracionSegundos: elapsedSeconds,
+        // Vacía o solo espacios: no se envía (el servidor tampoco la guardaría).
+        notas: session.notas?.trim() || undefined,
         ejercicios: session.ejercicios
           .filter((ej) => ej.sets.some((s) => s.completada))
           .filter((ej) => !idsBorrados.has(ej.exerciseId))
@@ -466,6 +472,20 @@ export default function ActiveSession() {
       >
         + Añadir ejercicio
       </button>
+
+      {/* Notas (bloque 11d): encima de "Terminar sesión" y no en el diálogo de terminar, para
+          poder escribirlas durante el entreno y porque en el iPhone el teclado tapa un diálogo.
+          Se guardan con la sesión en localStorage mientras se escribe. */}
+      <AreaTexto
+        id="notas-sesion"
+        label="Notas"
+        opcional
+        rows={3}
+        maxLength={MAX_NOTAS}
+        placeholder="Cómo ha ido, qué cambiar la próxima vez…"
+        value={session.notas ?? ""}
+        onChange={(e) => dispatch({ type: "escribirNotas", texto: e.target.value })}
+      />
 
       {errorMessage && (
         <div className={styles.errorBanner} role="alert">

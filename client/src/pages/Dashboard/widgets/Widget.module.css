@@ -488,3 +488,47 @@
   flex-direction: column;
   min-height: 0;
 }
+
+/* --- Récord de un ejercicio (bloque 9d, tarjeta Widget, versión 25) --- */
+
+/* "+5 kg" junto a la cifra: cuánto subió el último récord. */
+.subidaRecord {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0;
+  color: var(--chart-gain);
+}
+
+/* Sin récord todavía: un texto en el lugar de la cifra, del mismo alto. */
+.sinRecord {
+  flex: none;
+  height: var(--widget-cifra);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--widget-cifra);
+}
+
+/* M: la cifra y su pie a la izquierda; la gráfica en escalones a la derecha, de alto fijo. */
+.recordM {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.recordMCifra {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  max-width: 60%;
+}
+
+.recordMGrafica {
+  flex: 1;
+  min-width: 0;
+}
+
+.escalones {
+  display: block;
+  flex: none;
+}

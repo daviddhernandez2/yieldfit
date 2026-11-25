@@ -12,6 +12,7 @@ import WidgetFrecuencia from '@/pages/Dashboard/widgets/WidgetFrecuencia.jsx';
 import WidgetGrupo from '@/pages/Dashboard/widgets/WidgetGrupo.jsx';
 import WidgetNuevosRecords from '@/pages/Dashboard/widgets/WidgetNuevosRecords.jsx';
 import WidgetRacha from '@/pages/Dashboard/widgets/WidgetRacha.jsx';
+import WidgetRecordEjercicio from '@/pages/Dashboard/widgets/WidgetRecordEjercicio.jsx';
 import WidgetUltimaSesion from '@/pages/Dashboard/widgets/WidgetUltimaSesion.jsx';
 import { limpiarPreferenciasAntiguas } from '@/utils/grupos.js';
 import { colocarWidgets } from '@/utils/reticula.js';
@@ -182,6 +183,8 @@ export default function Dashboard() {
         return <WidgetUltimaSesion tamano={widget.tamano} sesion={ultima.datos} error={ultima.error} />;
       case 'nuevosRecords':
         return <WidgetNuevosRecords tamano={widget.tamano} records={records.datos} error={records.error} />;
+      case 'recordEjercicio':
+        return <WidgetRecordEjercicio tamano={widget.tamano} exerciseId={widget.exerciseId} />;
       default:
         return null; // tipo que este cliente aún no sabe pintar
     }

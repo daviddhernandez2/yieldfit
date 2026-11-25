@@ -34,6 +34,13 @@ export const getPreviousSets = (exerciseIds) => {
   });
 };
 
+// GET /api/sessions/previous-note?workoutId=…
+// "La nota de la última vez" (bloque 11d): la nota de la sesión más reciente de esa rutina, si
+// la tiene. Devuelve { notaAnterior: { texto, fecha } } o { notaAnterior: null }.
+export const getPreviousNote = (workoutId) => {
+  return apiClient.get('/sessions/previous-note', { params: { workoutId } });
+};
+
 // GET /api/sessions/days?desde=…&hasta=…&zona=…
 // Días entrenados en un rango (como mucho un año), para el calendario. Devuelve
 // { dias: [{ dia: '2026-11-03', sesiones: [{ _id, nombre, fecha, duracionSegundos,

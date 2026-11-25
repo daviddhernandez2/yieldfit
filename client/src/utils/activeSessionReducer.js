@@ -133,6 +133,13 @@ export const sesionReducer = (sesion, accion) => {
     case 'escribirNotas':
       return { ...sesion, notas: accion.texto };
 
+    // "La nota de la última vez" (bloque 11d), lo que devuelve GET /api/sessions/previous-note:
+    // { texto, fecha } o null. Como `anteriores`, se pide una vez y se guarda en la sesión:
+    // null significa "ya se pidió y no hay"; sin el campo, "aún no se ha pedido".
+    // { notaAnterior }
+    case 'guardarNotaAnterior':
+      return { ...sesion, notaAnterior: accion.notaAnterior };
+
     // Cambiar el orden de los ejercicios arrastrando (bloque 9b): { desde, hasta }.
     case 'moverEjercicio':
       return { ...sesion, ejercicios: moverElemento(sesion.ejercicios, accion.desde, accion.hasta) };

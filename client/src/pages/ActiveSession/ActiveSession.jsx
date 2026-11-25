@@ -9,7 +9,7 @@ import {
   avisoEjerciciosBorrados,
   contar,
 } from "@/utils/activeSession.js";
-import { createSession, getPreviousSets } from "@/api/sessions.js";
+import { createSession, getPreviousSets, getPreviousNote } from "@/api/sessions.js";
 import { recordsDeSesion } from "@/utils/records.js";
 import { sesionReducer } from "@/utils/activeSessionReducer.js";
 import { listExercises } from "@/api/exercises.js";
@@ -22,7 +22,7 @@ import ListaOrdenable, { Asa } from "@/components/ListaOrdenable/ListaOrdenable.
 import { indiceTrasMover } from "@/utils/orden.js";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import styles from "@/pages/ActiveSession/ActiveSession.module.css";
-import { formatCronometro } from "@/utils/formato.js";
+import { formatCronometro, formatFechaRelativa } from "@/utils/formato.js";
 import AreaTexto from "@/components/AreaTexto/AreaTexto.jsx";
 
 // Formatea segundos como MM:SS. Sigue creciendo pasada la hora (65:30).
@@ -101,6 +101,8 @@ export default function ActiveSession() {
   // Al volver de añadir ejercicios (bloque 11d) se abre el primero añadido; si no, el primero.
   const [expandedIndex, setExpandedIndex] = useState(() => location.state?.abrir ?? 0);
   const [restTimer, setRestTimer] = useState(null);
+  // Si la nota de la última vez se ve entera o recortada a 2 líneas (bloque 11d).
+  const [notaAbierta, setNotaAbierta] = useState(false);
   const [confirmTerminar, setConfirmTerminar] = useState(false);
   const [confirmDescartar, setConfirmDescartar] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -154,6 +156,27 @@ export default function ActiveSession() {
     // Solo depende de si faltan: `session` cambia con cada tecla y no debe repetir la petición.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [faltanAnteriores]);
+
+  // "La nota de la última vez" (bloque 11d): igual que la serie anterior, se pide una vez y se
+  // guarda en la sesión (y en localStorage), así se sigue viendo al recargar sin cobertura.
+  // Sin rutina (no debería pasar) no hay nada que buscar. Si falla, se reintenta al reabrir.
+  const faltaNotaAnterior = Boolean(session?.workoutId) && session.notaAnterior === undefined;
+  useEffect(() => {
+    if (!faltaNotaAnterior) return;
+    let montado = true;
+    getPreviousNote(session.workoutId)
+      .then((response) => {
+        if (montado) dispatch({ type: "guardarNotaAnterior", notaAnterior: response.data.notaAnterior });
+      })
+      .catch(() => {
+        // Sin la nota no se rompe nada: se ignora a propósito.
+      });
+    return () => {
+      montado = false;
+    };
+    // Mismo motivo que arriba: solo depende de si falta.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [faltaNotaAnterior]);
 
   if (!session) return null;
 
@@ -336,6 +359,23 @@ export default function ActiveSession() {
         </div>
         <div className={styles.chrono}>{formatTiempo(elapsedSeconds)}</div>
       </header>
+
+      {/* Nota de la sesión anterior de esta rutina (bloque 11d): bajo la cabecera, a todo el
+          ancho (al lado del cronómetro quedaba en una columna estrecha), y como mucho en 2
+          líneas para que sea discreta. Al tocarla se ve entera. */}
+      {session.notaAnterior && (
+        <button
+          type="button"
+          className={`${styles.notaAnterior} ${notaAbierta ? styles.notaAbierta : ""}`}
+          aria-expanded={notaAbierta}
+          onClick={() => setNotaAbierta((abierta) => !abierta)}
+        >
+          <span className={styles.notaAnteriorCuando}>
+            La última vez ({formatFechaRelativa(session.notaAnterior.fecha)}):
+          </span>{" "}
+          «{session.notaAnterior.texto}»
+        </button>
+      )}
 
       {/* Los ejercicios se reordenan arrastrando desde el asa ⋮⋮ (bloque 9b). */}
       <ListaOrdenable

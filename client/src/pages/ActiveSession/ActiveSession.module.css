@@ -33,6 +33,36 @@
   margin-top: var(--space-xs);
 }
 
+/* "La última vez (…): «…»" (bloque 11d): discreta, en el gris de los textos secundarios y
+   como mucho 2 líneas con "…" (line-clamp). Es un botón: al tocarlo se ve entera. Parte las
+   palabras muy largas para no desbordar. */
+.notaAnterior {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.notaAbierta {
+  display: block;
+}
+
+.notaAnteriorCuando {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
 /* Cronómetro grande siempre visible. tabular-nums para que los dígitos no
    dancen al avanzar. */
 .chrono {

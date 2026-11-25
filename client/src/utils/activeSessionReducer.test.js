@@ -135,6 +135,10 @@ ok('añadir: misma forma que en localStorage', claves(JSON.parse(JSON.stringify(
 s = sesionReducer(base, { type: 'escribirNotas', texto: 'hombro cargado ' });
 ok('notas: guarda el texto tal cual (se recorta al guardar la sesión)', s.notas, 'hombro cargado ');
 ok('notas: los ejercicios son los mismos objetos', s.ejercicios === base.ejercicios, true);
+s = sesionReducer(base, { type: 'guardarNotaAnterior', notaAnterior: null });
+ok('nota anterior: null se guarda (ya pedida, no hay)', 'notaAnterior' in s && s.notaAnterior === null, true);
+s = sesionReducer(base, { type: 'guardarNotaAnterior', notaAnterior: { texto: 'bajar peso', fecha: '2026-11-20T18:00:00.000Z' } });
+ok('nota anterior: sobrevive al viaje por localStorage', JSON.parse(JSON.stringify(s)).notaAnterior, { texto: 'bajar peso', fecha: '2026-11-20T18:00:00.000Z' });
 
 // --- Mover ejercicios (bloque 9b) ---
 s = sesionReducer(base, { type: 'moverEjercicio', desde: 0, hasta: 1 });

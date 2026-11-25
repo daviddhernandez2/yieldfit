@@ -118,6 +118,16 @@ export default function SessionDetail() {
         </div>
       </div>
 
+      {/* Notas del entreno (bloque 11d), si las hay: entre el resumen y los ejercicios. */}
+      {session.notas && (
+        <section className={`${styles.notas} glassCard`} aria-labelledby="notas-titulo">
+          <h2 id="notas-titulo" className={styles.statLabel}>
+            Notas
+          </h2>
+          <p className={styles.notasTexto}>{session.notas}</p>
+        </section>
+      )}
+
       <div className={styles.exercisesList}>
         {session.ejercicios.map((ej) => (
           <div key={ej._id} className={`${styles.exerciseCard} glassCard`}>

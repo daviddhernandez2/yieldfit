@@ -137,6 +137,13 @@
   white-space: nowrap;
 }
 
+/* Icono de "con notas" (bloque 11d), discreto, tras el nombre y la marca de PR. No se encoge:
+   si el nombre es largo, se corta el nombre. */
+.iconoNota {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
 /* "Récord en Press banca y Sentadilla" (bloque 4b): fila propia bajo todo lo demás (ocupa
    las tres columnas de la tarjeta), una línea, cortada si no cabe. */
 .cardRecords {

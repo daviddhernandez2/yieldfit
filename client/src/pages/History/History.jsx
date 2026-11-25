@@ -46,6 +46,18 @@ const IconDownload = () => (
   </svg>
 );
 
+// Sesión con notas (bloque 11d): una hoja con líneas, de trazo 1.5 como los iconos del tema
+// Premium. role="img" con etiqueta: el lector de pantalla dice "Con notas".
+const IconNota = () => (
+  <svg className={styles.iconoNota} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" role="img" aria-label="Con notas">
+    <title>Con notas</title>
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 3 14 8 19 8" />
+    <line x1="9" y1="13" x2="15" y2="13" />
+    <line x1="9" y1="17" x2="13" y2="17" />
+  </svg>
+);
+
 const IconChevronRight = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 18 15 12 9 6" />
@@ -179,6 +191,7 @@ export default function History() {
                 <span className={styles.cardTitulo}>
                   <span className={styles.cardName}>{sesion.nombre}</span>
                   {records.length > 0 && <MarcaPR />}
+                  {sesion.notas && <IconNota />}
                 </span>
                 <span className={styles.cardDate}>{formatFecha(sesion.fecha)}</span>
               </div>

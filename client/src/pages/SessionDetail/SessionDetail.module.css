@@ -70,6 +70,22 @@
   gap: var(--space-md);
 }
 
+/* Notas (bloque 11d): tarjeta como las de los ejercicios. pre-wrap conserva los saltos de línea
+   que escribió el usuario; overflow-wrap parte una palabra muy larga en vez de desbordar. */
+.notas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+}
+
+.notasTexto {
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .exerciseCard {
   padding: var(--space-md);
   border-radius: var(--radius-lg);

@@ -24,10 +24,11 @@
 }
 
 /* Botón de confirmar pegado abajo al hacer scroll. En el móvil, por encima de la TabBar
-   flotante (Layout reserva 80 px para ella); en escritorio no hay TabBar. */
+   flotante y del círculo de "Reportar" (bloque 11d: antes lo tapaba), con la misma altura que
+   el aviso de servidor dormido; en escritorio no hay TabBar ni círculo. */
 .confirmar {
   position: sticky;
-  bottom: calc(var(--space-md) + 80px);
+  bottom: calc(var(--reportar-bottom-movil) + var(--reportar-alto-movil) + var(--space-sm));
   z-index: 2;
   padding: var(--space-sm);
   border: 1px solid var(--color-border);

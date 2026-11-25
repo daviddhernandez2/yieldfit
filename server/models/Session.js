@@ -168,6 +168,12 @@ sessionSchema.index({ userId: 1, fecha: -1 });
 // sesión, ~6 por sesión (DECISIONS.md, 0029).
 sessionSchema.index({ userId: 1, 'ejercicios.exerciseId': 1, fecha: -1 });
 
+// "La nota de la última vez" (bloque 11d): la sesión más reciente de una rutina. Sin este
+// índice, MongoDB recorrería hacia atrás todas las sesiones del usuario hasta dar con una de
+// esa rutina (con años de historial y una rutina que no se hace desde hace meses, miles).
+// Con él, salta directo a la más reciente de la rutina. Una entrada por sesión.
+sessionSchema.index({ userId: 1, workoutId: 1, fecha: -1 });
+
 // Récords recientes (widget "Nuevos récords" del Dashboard, bloque 9d): parcial, solo con las
 // sesiones que tienen algún récord, así que no crece con cada entreno sino con cada récord.
 // La consulta tiene que incluir 'ejercicios.esPR': true para poder usarlo.

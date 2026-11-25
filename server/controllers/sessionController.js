@@ -320,6 +320,32 @@ export const previousSets = async (req, res, next) => {
   }
 };
 
+// GET /api/sessions/previous-note?workoutId=…
+// "La nota de la última vez" (bloque 11d): la nota de la sesión más reciente de esa rutina, si
+// la tiene. Decisión de David: solo la sesión anterior; si esa no tiene nota, no se busca más
+// atrás (una nota de hace meses ya no describe cómo vas). La sesión activa lo pide al empezar.
+// Devuelve { notaAnterior: { texto, fecha } } o { notaAnterior: null }. Usa el índice
+// { userId, workoutId, fecha } y lee un solo documento, sin series. Una rutina ajena no
+// encuentra nada (el filtro es por userId).
+export const previousNote = async (req, res, next) => {
+  try {
+    const { workoutId } = req.query;
+    if (!mongoose.isValidObjectId(workoutId)) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'workoutId tiene que ser un id válido',
+      });
+    }
+    const ultima = await Session.findOne({ userId: req.user._id, workoutId }, { fecha: 1, notas: 1 })
+      .sort({ fecha: -1 })
+      .lean();
+    const notaAnterior = ultima?.notas ? { texto: ultima.notas, fecha: ultima.fecha } : null;
+    res.status(200).json({ notaAnterior });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // GET /api/sessions/:id
 // Devuelve una sesión concreta del usuario.
 export const getOne = async (req, res, next) => {

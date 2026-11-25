@@ -182,6 +182,19 @@ sessionSchema.index(
   { partialFilterExpression: { 'ejercicios.esPR': true } }
 );
 
+// Récords de UN ejercicio (widget "Récord de un ejercicio" del Dashboard, bloque 9d): parcial, solo
+// con las sesiones que tienen algún récord, y por ejercicio y fecha (entran todos los ejercicios
+// de esas sesiones; el $elemMatch de la consulta se queda con los récords del que se pide). Sin él, la consulta leería
+// todas las sesiones de ese ejercicio (el índice de arriba) o todas las que tienen un récord de
+// cualquier ejercicio (el parcial de arriba): las dos crecen con el historial. No hace falta
+// userId: un exerciseId es de un solo usuario, y la consulta lo filtra igual. La consulta tiene
+// que incluir 'ejercicios.esPR': true y nombrarlo con hint (estadisticasController.js), porque
+// MongoDB podría elegir el índice por ejercicio de arriba.
+sessionSchema.index(
+  { 'ejercicios.exerciseId': 1, fecha: -1 },
+  { name: 'records_por_ejercicio', partialFilterExpression: { 'ejercicios.esPR': true } }
+);
+
 const Session = mongoose.model('Session', sessionSchema);
 
 export default Session;

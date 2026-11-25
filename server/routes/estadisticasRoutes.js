@@ -1,5 +1,5 @@
 import express from 'express';
-import { actividad } from '../controllers/estadisticasController.js';
+import { actividad, record } from '../controllers/estadisticasController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -8,5 +8,6 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.get('/actividad', actividad);
+router.get('/record', record);
 
 export default router;

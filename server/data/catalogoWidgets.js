@@ -96,11 +96,12 @@ export const CATALOGO = [
   {
     tipo: 'recordEjercicio',
     nombre: 'Récord de un ejercicio',
-    descripcion: 'Tu mejor 1RM estimado en el ejercicio que elijas.',
-    tamanos: ['P', 'M'],
+    // Diseño aprobado en el artefacto (tarjeta Widget, versión 25): P, M y G.
+    descripcion: 'Tu mejor 1RM estimado en el ejercicio que elijas, y cómo ha ido subiendo.',
+    tamanos: ['P', 'M', 'G'],
     tamanoPorDefecto: 'P',
     necesita: 'exercise',
-    disponible: false,
+    disponible: true,
   },
   {
     tipo: 'empezarRutina',

@@ -11,7 +11,8 @@ const FECHA_CORTA = { day: 'numeric', month: 'short' };
 // mientras dura y se apaga si se rompe (LlamaRacha). Tres estados, que decide el servidor: activa,
 // en riesgo (esta semana aún no has entrenado) y rota. Textos en utils/actividad.js (textosRacha).
 // Anatomía (tarjeta Widget):
-//   - P: cabecera, la llama con la cifra (32 px) y el pie, hasta dos líneas.
+//   - P: cabecera, la llama con la cifra (32 px) y el pie, hasta dos líneas, con "semanas" (junto
+//     a la cifra no cabía a 375 px).
 //   - M: sin pie: "3 semanas seguidas" en la cifra, el aviso de en riesgo o rota a la derecha de
 //     la cabecera y la fila de semanas sola debajo, a 20 px. Se pintan las que caben con al menos
 //     8 px de hueco (círculos de 12 px), de la más reciente hacia atrás, repartidas a todo el
@@ -48,7 +49,7 @@ export default function WidgetRacha({ tamano, actividad, error, className = '' }
           {textos.cifra ? (
             <>
               {textos.cifra}
-              <span className={styles.unidad}>{textos.unidad}</span>
+              {textos.unidad && <span className={styles.unidad}>{textos.unidad}</span>}
             </>
           ) : (
             <span className={styles.sinRacha}>Sin racha</span>

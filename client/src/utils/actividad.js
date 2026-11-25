@@ -24,7 +24,9 @@ export const textoRacha = ({ semanas, masDe }) =>
 // Devuelve { etiqueta, cifra (número o null si está rota), unidad, pie, dato, accesible }.
 // En M no hay pie (opción 2 de la tarjeta Espaciado, bloque 9d): las semanas van solas debajo de
 // la cifra. "seguidas" pasa a la unidad ("3 semanas seguidas") y el aviso de en riesgo o rota,
-// más corto, a la derecha de la cabecera (`dato`). En P, como antes: pie de hasta dos líneas.
+// más corto, a la derecha de la cabecera (`dato`).
+// En P no hay unidad junto a la cifra: con la llama y la cifra a 32 px, "3 semanas" no cabía en un
+// P a 375 px (114 px de ancho). "semanas" va al pie, de hasta dos líneas (unidad: null).
 export const textosRacha = ({ semanas, masDe, estado }, tamano = 'M') => {
   const enM = tamano === 'M';
   const unidad = semanas === 1 ? 'semana' : 'semanas';
@@ -43,8 +45,8 @@ export const textosRacha = ({ semanas, masDe, estado }, tamano = 'M') => {
     return {
       etiqueta: enM ? 'Racha · en riesgo' : 'Racha',
       cifra,
-      unidad,
-      pie: enM ? null : 'Entrena esta semana',
+      unidad: enM ? unidad : null,
+      pie: enM ? null : `${unidad} · entrena esta semana`,
       dato: enM ? 'Entrena esta semana' : null,
       accesible: `Racha en riesgo: ${textoRacha({ semanas, masDe })}. Entrena esta semana para mantenerla`,
     };
@@ -52,8 +54,8 @@ export const textosRacha = ({ semanas, masDe, estado }, tamano = 'M') => {
   return {
     etiqueta: 'Racha',
     cifra,
-    unidad: enM ? `${unidad} ${semanas === 1 ? 'seguida' : 'seguidas'}` : unidad,
-    pie: enM ? null : 'seguidas entrenando',
+    unidad: enM ? `${unidad} ${semanas === 1 ? 'seguida' : 'seguidas'}` : null,
+    pie: enM ? null : `${unidad} ${semanas === 1 ? 'seguida' : 'seguidas'}`,
     dato: null,
     accesible: `Racha: ${textoRacha({ semanas, masDe })} seguidas entrenando`,
   };

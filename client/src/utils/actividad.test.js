@@ -15,10 +15,10 @@ assert.deepEqual(textosRacha({ semanas: 3, masDe: false, estado: 'activa' }), { 
 assert.equal(textosRacha({ semanas: 1, masDe: false, estado: 'activa' }).unidad, 'semana seguida');
 assert.deepEqual(textosRacha({ semanas: 3, masDe: false, estado: 'enRiesgo' }, 'M'), { etiqueta: 'Racha · en riesgo', cifra: '3', unidad: 'semanas', pie: null, dato: 'Entrena esta semana', accesible: 'Racha en riesgo: 3 semanas. Entrena esta semana para mantenerla' });
 assert.deepEqual([textosRacha({ semanas: 0, masDe: false, estado: 'rota' }).cifra, textosRacha({ semanas: 0, masDe: false, estado: 'rota' }).pie, textosRacha({ semanas: 0, masDe: false, estado: 'rota' }).dato], [null, null, 'Empieza una nueva']);
-// En P, como antes: pie y sin dato.
-assert.deepEqual(textosRacha({ semanas: 3, masDe: false, estado: 'activa' }, 'P'), { etiqueta: 'Racha', cifra: '3', unidad: 'semanas', pie: 'seguidas entrenando', dato: null, accesible: 'Racha: 3 semanas seguidas entrenando' });
-assert.equal(textosRacha({ semanas: 1, masDe: false, estado: 'activa' }, 'P').unidad, 'semana');
-assert.equal(textosRacha({ semanas: 3, masDe: false, estado: 'enRiesgo' }, 'P').pie, 'Entrena esta semana');
+// En P: sin unidad junto a la cifra (no cabía a 375 px); "semanas" va al pie. Sin dato.
+assert.deepEqual(textosRacha({ semanas: 3, masDe: false, estado: 'activa' }, 'P'), { etiqueta: 'Racha', cifra: '3', unidad: null, pie: 'semanas seguidas', dato: null, accesible: 'Racha: 3 semanas seguidas entrenando' });
+assert.equal(textosRacha({ semanas: 1, masDe: false, estado: 'activa' }, 'P').pie, 'semana seguida');
+assert.equal(textosRacha({ semanas: 3, masDe: false, estado: 'enRiesgo' }, 'P').pie, 'semanas · entrena esta semana');
 assert.equal(textosRacha({ semanas: 0, masDe: false, estado: 'rota' }, 'P').pie, 'Empieza una racha nueva');
 assert.equal(textosRacha({ semanas: 104, masDe: true, estado: 'activa' }).cifra, '+104');
 assert.equal(semanasQueCaben(422, 32), 21);

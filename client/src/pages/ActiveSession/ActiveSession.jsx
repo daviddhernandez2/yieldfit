@@ -1,5 +1,5 @@
 import { useState, useEffect, useReducer } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   readActiveSession,
   writeActiveSession,
@@ -86,6 +86,7 @@ const IconTrash = () => (
 //  - expandedIndex: qué ejercicio está expandido (acordeón).
 export default function ActiveSession() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // La sesión se cambia con acciones (dispatch) y no con setSession: todos los cambios
   // posibles están en utils/activeSessionReducer.js, probados sin React (0031).
@@ -93,7 +94,8 @@ export default function ActiveSession() {
   // Solo para los textos de grupo y tipo bajo cada nombre ("Máquinas" con tilde). Si no
   // llegan (sin cobertura), NombreEjercicio muestra el valor guardado.
   const { opciones } = useOpcionesEjercicio();
-  const [expandedIndex, setExpandedIndex] = useState(0);
+  // Al volver de añadir ejercicios (bloque 11d) se abre el primero añadido; si no, el primero.
+  const [expandedIndex, setExpandedIndex] = useState(() => location.state?.abrir ?? 0);
   const [restTimer, setRestTimer] = useState(null);
   const [confirmTerminar, setConfirmTerminar] = useState(false);
   const [confirmDescartar, setConfirmDescartar] = useState(false);
@@ -454,6 +456,16 @@ export default function ActiveSession() {
           );
         }}
       </ListaOrdenable>
+
+      {/* Añadir ejercicios a la sesión en curso (bloque 11d): la misma página que reemplazar,
+          sin índice. Entran al final y solo en esta sesión; la rutina no cambia. */}
+      <button
+        type="button"
+        className={`${styles.accionEjercicio} ${styles.nuevoEjercicio}`}
+        onClick={() => navigate("/sessions/active/add")}
+      >
+        + Añadir ejercicio
+      </button>
 
       {errorMessage && (
         <div className={styles.errorBanner} role="alert">

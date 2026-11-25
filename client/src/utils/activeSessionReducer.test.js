@@ -117,6 +117,20 @@ ok('añadirAnteriores: suma el nuevo y conserva los que había', Object.keys(s.a
 s = sesionReducer(desdeLocalStorage(SESION_ANTIGUA), { type: 'añadirAnteriores', anteriores: { remo: { sets: [] } } });
 ok('añadirAnteriores sin "anteriores" previos: no los crea (se pedirán todos al reabrir)', 'anteriores' in s, false);
 
+// --- Añadir ejercicios (bloque 11d) ---
+s = sesionReducer(base, { type: 'añadirEjercicios', ejercicios: [
+  { exerciseId: 'remo', exerciseNombre: 'Remo con barra', grupoMuscular: 'Espalda', tipo: 'Pesas libres', descansoSegundos: 90, ids: ['a1', 'a2', 'a3'] },
+  { exerciseId: 'curl', exerciseNombre: 'Curl', descansoSegundos: 90, ids: ['b1'] },
+] });
+ok('añadir: van al final, en el orden elegido', s.ejercicios.map((e) => e.exerciseId), ['peso-muerto', 'cinta', 'remo', 'curl']);
+ok('añadir: con sus series vacías y el descanso de la acción', s.ejercicios[2], {
+  exerciseId: 'remo', exerciseNombre: 'Remo con barra', grupoMuscular: 'Espalda', tipo: 'Pesas libres', bloqueado: false, descansoSegundos: 90,
+  sets: [{ id: 'a1', peso: '', reps: '', completada: false }, { id: 'a2', peso: '', reps: '', completada: false }, { id: 'a3', peso: '', reps: '', completada: false }],
+});
+ok('añadir: los que había son los mismos objetos', s.ejercicios[0] === base.ejercicios[0], true);
+ok('añadir sin grupo ni tipo: no añade esos campos', ['grupoMuscular' in s.ejercicios[3], 'tipo' in s.ejercicios[3]], [false, false]);
+ok('añadir: misma forma que en localStorage', claves(JSON.parse(JSON.stringify(s)).ejercicios[2]), claves(SESION_ACTUAL.ejercicios[0]));
+
 // --- Mover ejercicios (bloque 9b) ---
 s = sesionReducer(base, { type: 'moverEjercicio', desde: 0, hasta: 1 });
 ok('mover: cambia el orden de los ejercicios', s.ejercicios.map((e) => e.exerciseId), ['cinta', 'peso-muerto']);

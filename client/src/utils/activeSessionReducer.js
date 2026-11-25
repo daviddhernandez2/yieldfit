@@ -107,6 +107,27 @@ export const sesionReducer = (sesion, accion) => {
         sets: accion.ids.map((id) => ({ id, peso: '', reps: '', completada: false })),
       }));
 
+    // Añadir ejercicios al final de la sesión (bloque 11d), solo para esta sesión: la rutina no
+    // cambia. Cada uno entra con las series vacías que digan sus ids (la pantalla genera
+    // SERIES_POR_DEFECTO) y el descanso que traiga la acción.
+    // { ejercicios: [{ exerciseId, exerciseNombre, grupoMuscular?, tipo?, descansoSegundos, ids }] }
+    case 'añadirEjercicios':
+      return {
+        ...sesion,
+        ejercicios: [
+          ...sesion.ejercicios,
+          ...accion.ejercicios.map((nuevo) => ({
+            exerciseId: nuevo.exerciseId,
+            exerciseNombre: nuevo.exerciseNombre,
+            ...(nuevo.grupoMuscular && { grupoMuscular: nuevo.grupoMuscular, tipo: nuevo.tipo }),
+            // Como al reemplazar: el buscador solo deja elegir ejercicios disponibles.
+            bloqueado: false,
+            descansoSegundos: nuevo.descansoSegundos,
+            sets: nuevo.ids.map((id) => ({ id, peso: '', reps: '', completada: false })),
+          })),
+        ],
+      };
+
     // Cambiar el orden de los ejercicios arrastrando (bloque 9b): { desde, hasta }.
     case 'moverEjercicio':
       return { ...sesion, ejercicios: moverElemento(sesion.ejercicios, accion.desde, accion.hasta) };

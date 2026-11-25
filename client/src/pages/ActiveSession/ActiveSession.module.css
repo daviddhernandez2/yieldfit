@@ -336,6 +336,12 @@
   border-color: var(--color-border-accent);
 }
 
+/* "+ Añadir ejercicio" bajo la lista: el mismo estilo discontinuo que "+ Añadir serie", a todo
+   el ancho de la lista. */
+.nuevoEjercicio {
+  width: 100%;
+}
+
 .errorBanner {
   padding: var(--space-md);
   background-color: var(--color-danger-fill);

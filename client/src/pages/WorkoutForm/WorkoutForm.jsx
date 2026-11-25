@@ -24,9 +24,7 @@ import useOpcionesEjercicio, { tipoDisponible } from '@/hooks/useOpcionesEjercic
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
 import formulario from '@/styles/paginaFormulario.module.css';
 import styles from '@/pages/WorkoutForm/WorkoutForm.module.css';
-
-const DEFAULT_NUM_SERIES = 3;
-const DEFAULT_DESCANSO = 90;
+import { SERIES_POR_DEFECTO, DESCANSO_POR_DEFECTO } from '@/utils/porDefecto.js';
 
 const IconClose = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -103,8 +101,8 @@ export default function WorkoutForm() {
         ...prev,
         {
           exerciseId,
-          numSeries: DEFAULT_NUM_SERIES,
-          descansoSegundos: DEFAULT_DESCANSO,
+          numSeries: SERIES_POR_DEFECTO,
+          descansoSegundos: DESCANSO_POR_DEFECTO,
         },
       ]);
     }

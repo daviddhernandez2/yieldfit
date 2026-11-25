@@ -166,16 +166,20 @@ const router = createBrowserRouter(
           }
         />
       ))}
-      <Route
-        path="/sessions/active/replace/:index"
-        element={
-          <PrivateRoute>
-            <Layout>
-              <ReplaceExercise />
-            </Layout>
-          </PrivateRoute>
-        }
-      />
+      {/* Reemplazar (bloque 6) y añadir (bloque 11d) usan la misma página: sin índice, añade. */}
+      {['/sessions/active/replace/:index', '/sessions/active/add'].map((ruta) => (
+        <Route
+          key={ruta}
+          path={ruta}
+          element={
+            <PrivateRoute>
+              <Layout>
+                <ReplaceExercise />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+      ))}
       <Route
         path="/history"
         element={

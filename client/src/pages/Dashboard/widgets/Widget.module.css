@@ -1,7 +1,7 @@
 /* Widgets del Dashboard (bloque 9d, DECISIONS 0052). Anatomía común, la de la tarjeta Widget del
    design system (aprobada por David):
      - Marco: tarjeta con relleno de 24 px en escritorio y 20 px en el móvil (--widget-relleno).
-     - Cabecera de 20 px arriba: etiqueta (11 px, mayúsculas) y dato secundario (13 px).
+     - Cabecera de 20 px arriba: etiqueta (12 px) en una pastilla y dato secundario (13 px).
      - Contenido 16 px por debajo, ALINEADO ARRIBA: si sobra espacio, queda abajo. Nunca centrado.
      - Separaciones fijas: 12 px entre bloques (--widget-separacion), 8 px entre una cifra y su pie.
    Medidas con más aire desde la revisión de David (tarjeta Espaciado del artefacto, bloque 9d).
@@ -37,15 +37,26 @@
   min-width: 0;
 }
 
+/* La etiqueta en una pastilla (revisión de David): borde fino y fondo un nivel por encima de la
+   tarjeta, del alto de la cabecera. Su borde izquierdo queda en el borde del contenido, alineado
+   con la cifra y con lo de debajo. Texto de 12 px tal cual se escribe, sin mayúsculas: en
+   mayúsculas "SESIONES TOTALES" no cabía en un P a 375 px (necesita 131 px y hay 114); así
+   necesita 112. Un nombre de grupo largo se corta con puntos suspensivos dentro de la pastilla. */
 .etiqueta {
+  box-sizing: border-box;
   min-width: 0;
+  max-width: 100%;
+  height: var(--widget-alto-cabecera);
   overflow: hidden;
-  font-size: 0.6875rem;
+  padding: 0 var(--space-sm);
+  background-color: var(--surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
   font-weight: var(--font-weight-medium);
-  letter-spacing: 0.05em;
-  line-height: var(--widget-alto-cabecera);
+  /* El alto de la cabecera menos el borde de arriba y el de abajo: el texto queda centrado. */
+  line-height: calc(var(--widget-alto-cabecera) - 2px);
   text-overflow: ellipsis;
-  text-transform: uppercase;
   white-space: nowrap;
   color: var(--color-text-muted);
 }

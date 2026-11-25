@@ -5,7 +5,7 @@ import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 // alineado arriba, 16 px por debajo. Cada widget solo pone su contenido.
 //
 // Props:
-//   - etiqueta: texto de la izquierda de la cabecera (se ve en mayúsculas).
+//   - etiqueta: texto de la izquierda de la cabecera, dentro de una pastilla.
 //   - dato: lo de la derecha (una fecha, "1RM estimado", un botón…). Opcional.
 //   - etiquetaAccesible: nombre de la región (por defecto, la etiqueta).
 //   - onClick: si se pasa, la tarjeta entera es un botón (Última sesión).

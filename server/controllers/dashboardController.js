@@ -1,7 +1,7 @@
 import Chart from '../models/Chart.js';
 import Exercise from '../models/Exercise.js';
 import Workout from '../models/Workout.js';
-import { CATALOGO, MAX_WIDGETS, RANGOS, RANGO_POR_DEFECTO, TAMANOS } from '../data/catalogoWidgets.js';
+import { CAMPO_REFERENCIA, CATALOGO, MAX_WIDGETS, RANGOS, RANGO_POR_DEFECTO, TAMANOS } from '../data/catalogoWidgets.js';
 import { asegurarDashboard, cambiaEstructura, validarWidgets } from '../utils/dashboard.js';
 
 // Dashboard personalizable (bloque 9d, DECISIONS 0052).
@@ -15,6 +15,9 @@ export const catalogo = (req, res) => {
     rangos: RANGOS,
     rangoPorDefecto: RANGO_POR_DEFECTO,
     maxWidgets: MAX_WIDGETS,
+    // En qué campo del widget va cada referencia ({ chart: 'chartId', … }): el modo edición lo
+    // usa al añadir un widget que apunta a un grupo, un ejercicio o una rutina (bloque 9d).
+    camposReferencia: CAMPO_REFERENCIA,
   });
 };
 

@@ -532,3 +532,43 @@
   display: block;
   flex: none;
 }
+
+/* --- Empezar rutina (bloque 9d, tarjeta Widget, versión 25) --- */
+
+/* El texto de la rutina va justo debajo de la cabecera (no bajo una cifra). */
+.pieRutina {
+  margin-top: 0;
+}
+
+/* M: los ejercicios en línea, dos líneas como mucho. */
+.dosLineas {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.filaRutina {
+  height: 36px;
+}
+
+.masEjercicios {
+  flex: none;
+  height: 20px;
+  margin-top: var(--space-xs);
+  font-size: 0.8125rem;
+  line-height: 20px;
+  color: var(--color-accent);
+}
+
+/* El botón, 12 px por debajo de lo de encima y alineado a la izquierda (no se estira). */
+.accionRutina {
+  display: flex;
+  flex: none;
+  margin-top: var(--widget-separacion);
+}
+
+/* "En curso · 24 min": el estado en el verde de los datos. */
+.enCurso {
+  color: var(--color-accent);
+}

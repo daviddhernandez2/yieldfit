@@ -5,9 +5,14 @@ import { getCatalogo, getDashboard, updateDashboard } from '@/api/dashboard.js';
 import { getActividad } from '@/api/estadisticas.js';
 import { getProgress } from '@/api/progress.js';
 import { getRecordsRecientes, listSessions } from '@/api/sessions.js';
+import { getResumenRutinas } from '@/api/workouts.js';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import useColumnasDashboard from '@/hooks/useColumnasDashboard.js';
+import { useActiveSession } from '@/hooks/useActiveSession.js';
+import { useStartSession } from '@/hooks/useStartSession.js';
 import WidgetCifra from '@/pages/Dashboard/widgets/WidgetCifra.jsx';
+import WidgetEmpezarRutina from '@/pages/Dashboard/widgets/WidgetEmpezarRutina.jsx';
 import WidgetFrecuencia from '@/pages/Dashboard/widgets/WidgetFrecuencia.jsx';
 import WidgetGrupo from '@/pages/Dashboard/widgets/WidgetGrupo.jsx';
 import WidgetNuevosRecords from '@/pages/Dashboard/widgets/WidgetNuevosRecords.jsx';
@@ -86,6 +91,10 @@ export default function Dashboard() {
   const [errorGuardar, setErrorGuardar] = useState('');
   // Filas de los grupos desplegados ({ widgetId: filas }). Solo para mirar: no se guarda.
   const [filasDesplegadas, setFilasDesplegadas] = useState({});
+  // Empezar rutina (bloque 9d): el mismo flujo que en Rutinas. Si hay otra sesión en curso,
+  // pregunta antes con su diálogo, que va aquí y no dentro de la tarjeta del widget.
+  const { start, conflicto, confirmarDescartar, cancelarConflicto, error: errorEmpezar } = useStartSession();
+  const activa = useActiveSession();
 
   // Un grupo pide más filas al desplegar su lista, o null para volver a su tamaño. Si no cambia
   // nada, se devuelve el mismo objeto para no volver a pintar.
@@ -137,6 +146,21 @@ export default function Dashboard() {
   const records = useCarga(widgets?.some((w) => w.tipo === 'nuevosRecords'), cargarRecords);
   const ultima = useCarga(widgets?.some((w) => w.tipo === 'ultimaSesion'), cargarUltima);
 
+  // Resumen de las rutinas de los widgets "Empezar rutina", todas en una petición. Se vuelve a
+  // pedir solo si cambian las rutinas (la clave es la lista de ids, no el array de widgets).
+  const idsRutinas = [...new Set((widgets ?? []).filter((w) => w.tipo === 'empezarRutina').map((w) => w.workoutId))].join(',');
+  const [rutinas, setRutinas] = useState({ datos: undefined, error: false });
+  useEffect(() => {
+    if (!idsRutinas) return;
+    let montado = true;
+    getResumenRutinas(idsRutinas.split(','))
+      .then((res) => montado && setRutinas({ datos: res.data.resumenes, error: false }))
+      .catch(() => montado && setRutinas({ datos: undefined, error: true }));
+    return () => {
+      montado = false;
+    };
+  }, [idsRutinas]);
+
   // Cambiar el rango de un grupo: se ve al momento y se guarda en el servidor. Si falla, vuelve
   // al rango anterior y se avisa.
   const cambiarRango = async (widgetId, rango) => {
@@ -185,6 +209,22 @@ export default function Dashboard() {
         return <WidgetNuevosRecords tamano={widget.tamano} records={records.datos} error={records.error} />;
       case 'recordEjercicio':
         return <WidgetRecordEjercicio tamano={widget.tamano} exerciseId={widget.exerciseId} />;
+      case 'empezarRutina': {
+        // Minutos de la sesión en curso, si es de esta rutina (se recalcula al volver a pintar).
+        const enCurso =
+          activa?.workoutId === widget.workoutId ? Math.floor((Date.now() - activa.startTime) / 60000) : null;
+        return (
+          <WidgetEmpezarRutina
+            tamano={widget.tamano}
+            // undefined mientras carga; null si la rutina ya no viene (se borró en otra pestaña).
+            resumen={rutinas.datos === undefined ? undefined : (rutinas.datos[widget.workoutId] ?? null)}
+            error={rutinas.error}
+            enCurso={enCurso}
+            onEmpezar={() => start(widget.workoutId)}
+            onContinuar={() => navigate('/sessions/active')}
+          />
+        );
+      }
       default:
         return null; // tipo que este cliente aún no sabe pintar
     }
@@ -203,9 +243,9 @@ export default function Dashboard() {
       </header>
 
       {error && <p className={styles.feedbackError}>{error}</p>}
-      {errorGuardar && (
+      {(errorGuardar || errorEmpezar) && (
         <p className={styles.errorGuardar} role="alert">
-          {errorGuardar}
+          {errorGuardar || errorEmpezar}
         </p>
       )}
 
@@ -235,6 +275,18 @@ export default function Dashboard() {
       {widgets && visibles.length === 0 && (
         <p className={styles.vacio}>Tu dashboard está vacío. Crea un grupo para ver su progreso aquí.</p>
       )}
+
+      {/* El mismo aviso que en Rutinas al empezar con otra sesión en curso. */}
+      <ConfirmDialog
+        open={conflicto}
+        title="¿Descartar la sesión activa?"
+        message="Tienes una sesión de entrenamiento sin terminar. Si continúas, la perderás."
+        confirmLabel="Descartar y empezar nueva"
+        cancelLabel="Cancelar"
+        confirmVariant="danger"
+        onConfirm={confirmarDescartar}
+        onCancel={cancelarConflicto}
+      />
     </div>
   );
 }

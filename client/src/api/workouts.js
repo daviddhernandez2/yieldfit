@@ -26,3 +26,10 @@ export const updateWorkout = (id, data) => {
 export const deleteWorkout = (id) => {
   return apiClient.delete(`/workouts/${id}`);
 };
+
+// GET /api/workouts/resumen?ids=a,b → { resumenes: { <id>: { nombre, ejercicios: [{ nombre,
+// numSeries }], ultimaSesion } } }: widget "Empezar rutina" del Dashboard (bloque 9d), todas sus
+// rutinas en una petición. Las rutinas que ya no existen no vienen.
+export const getResumenRutinas = (ids) => {
+  return apiClient.get('/workouts/resumen', { params: { ids: [...new Set(ids)].join(',') } });
+};

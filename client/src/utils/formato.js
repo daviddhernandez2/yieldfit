@@ -54,3 +54,20 @@ export const formatCronometro = (segundos) => {
   const dos = (n) => String(n).padStart(2, '0');
   return h > 0 ? `${h}:${dos(m)}:${dos(s)}` : `${dos(m)}:${dos(s)}`;
 };
+
+// Cuánto hace de una fecha, en días (widget "Empezar rutina", bloque 9d): "hoy", "ayer",
+// "hace 3 días", "hace 2 semanas", "hace 3 meses", "hace más de un año". Cuenta días de
+// calendario en la hora del dispositivo. Sin fecha (nunca), "aún sin hacer".
+// `ahora` se pasa para poder probarlo con una fecha fija.
+export const formatHace = (fecha, ahora = new Date()) => {
+  if (!fecha) return 'aún sin hacer';
+  const d = new Date(fecha);
+  const inicioDia = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
+  const dias = Math.max(0, Math.round((inicioDia(ahora) - inicioDia(d)) / (24 * 60 * 60 * 1000)));
+  if (dias === 0) return 'hoy';
+  if (dias === 1) return 'ayer';
+  if (dias < 14) return `hace ${dias} días`;
+  if (dias < 60) return `hace ${Math.floor(dias / 7)} semanas`;
+  if (dias < 365) return `hace ${Math.floor(dias / 30)} meses`;
+  return 'hace más de un año';
+};

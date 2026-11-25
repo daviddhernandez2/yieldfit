@@ -1,6 +1,6 @@
 // Pruebas de formato. Ejecutar desde client/: node src/utils/formato.test.js
 import assert from 'node:assert/strict';
-import { formatConSigno, formatCronometro, formatDuracion, formatFechaRelativa, formatKg, formatPorcentaje } from './formato.js';
+import { formatConSigno, formatCronometro, formatDuracion, formatFechaRelativa, formatHace, formatKg, formatPorcentaje } from './formato.js';
 
 assert.equal(formatConSigno(3.14), '+3,1');
 assert.equal(formatConSigno(-2), '-2');
@@ -34,5 +34,16 @@ assert.equal(formatDuracion(59), '0 min');
 assert.equal(formatDuracion(52 * 60), '52 min');
 assert.equal(formatDuracion(65 * 60 + 30), '1h 5 min');
 assert.equal(formatDuracion(120 * 60), '2h 0 min');
+
+// formatHace (bloque 9d): días de calendario, no horas.
+const hoy = new Date(2026, 10, 25, 9, 0);
+assert.equal(formatHace(null, hoy), 'aún sin hacer');
+assert.equal(formatHace(new Date(2026, 10, 25, 8, 0), hoy), 'hoy');
+assert.equal(formatHace(new Date(2026, 10, 24, 23, 30), hoy), 'ayer');
+assert.equal(formatHace(new Date(2026, 10, 22), hoy), 'hace 3 días');
+assert.equal(formatHace(new Date(2026, 10, 12), hoy), 'hace 13 días');
+assert.equal(formatHace(new Date(2026, 10, 11), hoy), 'hace 2 semanas');
+assert.equal(formatHace(new Date(2026, 7, 25), hoy), 'hace 3 meses');
+assert.equal(formatHace(new Date(2025, 10, 1), hoy), 'hace más de un año');
 
 console.log('formato: todas las pruebas pasan');

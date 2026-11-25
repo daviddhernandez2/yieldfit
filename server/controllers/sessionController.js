@@ -354,7 +354,7 @@ export const getOne = async (req, res, next) => {
 // de cada Exercise. El modelo exige al menos 1 ejercicio.
 export const create = async (req, res, next) => {
   try {
-    const { workoutId, nombre, fecha, duracionSegundos, ejercicios = [] } = req.body;
+    const { workoutId, nombre, fecha, duracionSegundos, notas, ejercicios = [] } = req.body;
 
     const workoutOk = await verificarOwnershipDeWorkout(workoutId, req.user._id);
     if (!workoutOk) {
@@ -378,6 +378,10 @@ export const create = async (req, res, next) => {
       nombre,
       fecha,
       duracionSegundos,
+      // Una nota vacía o solo con espacios no se guarda: así "tiene nota" es simplemente que
+      // exista el campo (el Historial y "la última vez" lo usan). Si no es texto, se deja
+      // tal cual para que la validación del modelo responda 400.
+      notas: typeof notas === 'string' ? notas.trim() || undefined : notas,
       ejercicios: construidos.ejercicios,
     });
     // Se valida antes de usar session.fecha en la consulta de abajo: una fecha no válida

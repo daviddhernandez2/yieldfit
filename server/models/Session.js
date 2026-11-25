@@ -133,6 +133,14 @@ const sessionSchema = new mongoose.Schema(
       type: Number,
       min: 0,
     },
+    // Notas libres del usuario sobre el entreno (bloque 11d): "hombro cargado, bajar peso".
+    // Opcional; sin campo si no hay nota (el controlador no guarda cadenas vacías). Como el
+    // resto de la sesión, no se edita después de guardarla.
+    notas: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Las notas no pueden superar los 500 caracteres'],
+    },
     ejercicios: {
       type: [sessionExerciseSchema],
       validate: {

@@ -107,10 +107,10 @@ export const CATALOGO = [
     tipo: 'empezarRutina',
     nombre: 'Empezar rutina',
     descripcion: 'Acceso directo para empezar la rutina que elijas.',
-    tamanos: ['P', 'M'],
+    tamanos: ['P', 'M', 'G'],
     tamanoPorDefecto: 'P',
     necesita: 'workout',
-    disponible: false,
+    disponible: true,
   },
 ];
 

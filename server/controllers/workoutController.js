@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import Workout from '../models/Workout.js';
 import Exercise from '../models/Exercise.js';
 import Dashboard from '../models/Dashboard.js';
+import Session from '../models/Session.js';
+import { MAX_WIDGETS } from '../data/catalogoWidgets.js';
 
 // Comprueba que todos los exerciseIds existan y pertenezcan al usuario.
 // Recibe la lista de objetos {exerciseId, numSeries, ...} del workout.
@@ -38,6 +40,50 @@ export const list = async (req, res, next) => {
   try {
     const workouts = await Workout.find({ userId: req.user._id }).sort({ createdAt: -1 });
     res.status(200).json({ workouts });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/workouts/resumen?ids=a,b
+// Lo que necesita el widget "Empezar rutina" del Dashboard (bloque 9d), de todas sus rutinas en
+// una petición: { resumenes: { <id>: { nombre, ejercicios: [{ nombre, numSeries }], ultimaSesion } } }.
+//   - ejercicios: con su nombre (la lista normal de rutinas solo trae ids) y en su orden; los que
+//     ya no existen no salen;
+//   - ultimaSesion: la fecha de la sesión más reciente de esa rutina, o null.
+// Las rutinas ajenas o borradas no salen. Como mucho MAX_WIDGETS ids (los que caben en un
+// dashboard). La última sesión, una consulta por rutina con el índice { userId, workoutId, fecha }
+// (bloque 11d): lee un documento, sin series.
+export const resumen = async (req, res, next) => {
+  try {
+    const ids = [...new Set(String(req.query.ids ?? '').split(',').filter(Boolean))];
+    if (ids.length === 0 || ids.length > MAX_WIDGETS || !ids.every((id) => mongoose.isValidObjectId(id))) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: `ids tiene que ser una lista de 1 a ${MAX_WIDGETS} ids separados por comas`,
+      });
+    }
+    const rutinas = await Workout.find({ _id: { $in: ids }, userId: req.user._id })
+      .populate('ejercicios.exerciseId', 'nombre')
+      .lean();
+    const ultimas = await Promise.all(
+      rutinas.map((r) =>
+        Session.findOne({ userId: req.user._id, workoutId: r._id }, { fecha: 1, _id: 0 }).sort({ fecha: -1 }).lean()
+      )
+    );
+    const resumenes = {};
+    rutinas.forEach((r, i) => {
+      resumenes[r._id] = {
+        nombre: r.nombre,
+        ejercicios: [...r.ejercicios]
+          .sort((a, b) => a.orden - b.orden)
+          // populate deja null si el ejercicio ya no existe.
+          .filter((ej) => ej.exerciseId)
+          .map((ej) => ({ nombre: ej.exerciseId.nombre, numSeries: ej.numSeries })),
+        ultimaSesion: ultimas[i]?.fecha ?? null,
+      };
+    });
+    res.status(200).json({ resumenes });
   } catch (error) {
     next(error);
   }

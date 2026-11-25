@@ -1,0 +1,195 @@
+/* Catálogo "Añadir widget" del modo edición (bloque 9d, tarjeta "Editar dashboard"). Mismo
+   patrón que la hoja de Reportar: sube desde abajo en el móvil y es una ventana centrada en
+   escritorio. */
+
+.velo {
+  position: fixed;
+  inset: 0;
+  /* Como ConfirmDialog y la hoja de Reportar: por encima de todo. */
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background-color: var(--color-overlay);
+  animation: aparecer 150ms ease;
+}
+
+.hoja {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* La lista hace scroll por dentro; la cabecera se queda arriba. */
+  max-height: 90svh;
+  padding: var(--space-lg) var(--space-md);
+  padding-bottom: max(var(--space-lg), env(safe-area-inset-bottom));
+  background-color: var(--surface-2);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--elevation-3);
+  animation: subir 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 768px) {
+  .velo {
+    align-items: center;
+    padding: var(--space-xl);
+  }
+
+  .hoja {
+    max-width: 560px;
+    max-height: 80vh;
+    padding: var(--space-xl);
+    border-bottom: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    animation-name: aparecer;
+  }
+}
+
+.cabecera {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.titulo {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  outline: none;
+}
+
+.paso {
+  flex: none;
+  margin: var(--space-xs) 0 var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.cuerpo {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.lista > li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+/* Cada widget del catálogo: botón a todo el ancho, de al menos 48 px de alto. */
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-sm) 0;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover .nombre {
+  color: var(--color-accent);
+}
+
+.texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nombre {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-control);
+}
+
+.descripcion {
+  font-size: var(--font-size-sm);
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+.chips {
+  display: flex;
+  flex: none;
+  gap: var(--space-xs);
+}
+
+.chip {
+  padding: 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 18px;
+  color: var(--color-text-muted);
+}
+
+.flecha {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Los de un solo dato que ya están: atenuados, sin botón. */
+.puesto {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.yaEsta {
+  flex: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.crear {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.mensaje {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
+@keyframes aparecer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes subir {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .velo,
+  .hoja {
+    animation: none;
+  }
+}

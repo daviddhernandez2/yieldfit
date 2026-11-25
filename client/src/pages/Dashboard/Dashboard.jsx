@@ -1,15 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { listCharts } from '@/api/charts.js';
 import { getCatalogo, getDashboard, updateDashboard } from '@/api/dashboard.js';
 import { getActividad } from '@/api/estadisticas.js';
 import { getProgress } from '@/api/progress.js';
 import { getRecordsRecientes, listSessions } from '@/api/sessions.js';
 import { getResumenRutinas } from '@/api/workouts.js';
+import Button from '@/components/Button/Button.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
+import GrupoBotones from '@/components/GrupoBotones/GrupoBotones.jsx';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import useColumnasDashboard from '@/hooks/useColumnasDashboard.js';
 import { useActiveSession } from '@/hooks/useActiveSession.js';
+import { useAvisoSalir } from '@/hooks/useAvisoSalir.js';
 import { useStartSession } from '@/hooks/useStartSession.js';
 import WidgetCifra from '@/pages/Dashboard/widgets/WidgetCifra.jsx';
 import WidgetEmpezarRutina from '@/pages/Dashboard/widgets/WidgetEmpezarRutina.jsx';
@@ -19,17 +24,37 @@ import WidgetNuevosRecords from '@/pages/Dashboard/widgets/WidgetNuevosRecords.j
 import WidgetRacha from '@/pages/Dashboard/widgets/WidgetRacha.jsx';
 import WidgetRecordEjercicio from '@/pages/Dashboard/widgets/WidgetRecordEjercicio.jsx';
 import WidgetUltimaSesion from '@/pages/Dashboard/widgets/WidgetUltimaSesion.jsx';
+import CatalogoWidgets from '@/pages/Dashboard/CatalogoWidgets.jsx';
+import CeldaEditable from '@/pages/Dashboard/CeldaEditable.jsx';
+import { hayCambios } from '@/utils/cambios.js';
+import {
+  cambiarTamano,
+  empezarBorrador,
+  gruposYaPuestos,
+  indiceParaHueco,
+  insertarWidget,
+  moverWidget,
+  nuevoWidget,
+  paraGuardar,
+  quitarWidget,
+  tiposYaPuestos,
+} from '@/utils/edicionDashboard.js';
 import { limpiarPreferenciasAntiguas } from '@/utils/grupos.js';
 import { colocarWidgets } from '@/utils/reticula.js';
 import styles from '@/pages/Dashboard/Dashboard.module.css';
 
-// Icono + para el botón "Nuevo grupo" del header.
-const IconPlus = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
+// Lápiz del botón "Editar" de la cabecera (trazo 1.5, como los iconos del tema Premium).
+const IconLapiz = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
   </svg>
 );
+
+// Al arrastrar, los demás widgets NO se desplazan mientras tanto (con tamaños distintos darían
+// saltos: al moverse uno, el puntero queda sobre otro). Se marca el destino y se recoloca al
+// soltar. Una estrategia de dnd-kit que no mueve nada.
+const sinDesplazar = () => null;
 
 // Silueta mientras carga: la forma del dashboard por defecto con dos grupos (P P M, G G, M M),
 // en la misma retícula.
@@ -76,7 +101,12 @@ const estiloCelda = ({ fila, columna, ancho, alto }) => ({
 
 // Dashboard personalizable (bloque 9d, DECISIONS 0052): widgets en una retícula estricta de 4 o 2
 // columnas, en el orden y con los tamaños que el usuario guardó en el servidor. Fuera del modo
-// edición (paso 3) solo se mira; el rango de cada grupo sí se cambia aquí.
+// edición solo se mira; el rango de cada grupo sí se cambia aquí, y se guarda al momento.
+//
+// Modo edición (paso 3c, tarjeta "Editar dashboard" del design system): "Editar" copia los
+// widgets a un BORRADOR (utils/edicionDashboard.js) y todo se hace sobre él: mover, cambiar de
+// tamaño, quitar y añadir desde el catálogo. "Hecho" lo guarda de una vez (PUT /api/dashboard);
+// "Cancelar" lo tira, preguntando si había cambios. Salir de la página con cambios, también.
 //
 // Cada widget de grupo pide su propio progreso; "Progreso total" y "Sesiones" comparten el de
 // todo el historial, que se pide aquí una sola vez.
@@ -91,6 +121,24 @@ export default function Dashboard() {
   const [errorGuardar, setErrorGuardar] = useState('');
   // Filas de los grupos desplegados ({ widgetId: filas }). Solo para mirar: no se guarda.
   const [filasDesplegadas, setFilasDesplegadas] = useState({});
+  // Catálogo de widgets del servidor (tipos, tamaños, rangos, campos de referencia).
+  const [catalogo, setCatalogo] = useState(null);
+  // Modo edición: el borrador, la foto de cómo estaba al entrar (para saber si hay cambios),
+  // dónde se inserta lo que se añada (null: catálogo cerrado) y qué se está arrastrando.
+  const [editando, setEditando] = useState(false);
+  const [borrador, setBorrador] = useState([]);
+  const [inicial, setInicial] = useState(null);
+  const [insertarEn, setInsertarEn] = useState(null);
+  const [arrastrando, setArrastrando] = useState(null);
+  const [confirmarCancelar, setConfirmarCancelar] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const conCambios = editando && hayCambios(inicial, borrador);
+  const aviso = useAvisoSalir(conCambios);
+  const sensores = useSensors(
+    // distance: hay que mover 4 px antes de que empiece el arrastre (un toque sin querer no mueve).
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   // Empezar rutina (bloque 9d): el mismo flujo que en Rutinas. Si hay otra sesión en curso,
   // pregunta antes con su diálogo, que va aquí y no dentro de la tarjeta del widget.
   const { start, conflicto, confirmarDescartar, cancelarConflicto, error: errorEmpezar } = useStartSession();
@@ -119,6 +167,7 @@ export default function Dashboard() {
         const [resDashboard, resCatalogo] = await Promise.all([getDashboard(), getCatalogo()]);
         const resGrupos = await listCharts();
         setRangos(resCatalogo.data.rangos);
+        setCatalogo(resCatalogo.data);
         setGrupos(new Map(resGrupos.data.charts.map((g) => [g._id, g])));
         setWidgets(resDashboard.data.dashboard.widgets);
       } catch (err) {
@@ -128,8 +177,11 @@ export default function Dashboard() {
     cargar();
   }, []);
 
+  // Lo que se ve: el borrador mientras se edita (así lo que se añade ya pide sus datos).
+  const lista = editando ? borrador : widgets;
+
   // El progreso de todo el historial, solo si algún widget lo usa.
-  const usaGeneral = widgets?.some((w) => w.tipo === 'progresoTotal' || w.tipo === 'sesionesTotales');
+  const usaGeneral = lista?.some((w) => w.tipo === 'progresoTotal' || w.tipo === 'sesionesTotales');
   useEffect(() => {
     if (!usaGeneral) return;
     let montado = true;
@@ -142,13 +194,13 @@ export default function Dashboard() {
   }, [usaGeneral]);
 
   // Datos compartidos: actividad (Racha y Frecuencia), récords y última sesión.
-  const actividad = useCarga(widgets?.some((w) => TIPOS_ACTIVIDAD.includes(w.tipo)), cargarActividad);
-  const records = useCarga(widgets?.some((w) => w.tipo === 'nuevosRecords'), cargarRecords);
-  const ultima = useCarga(widgets?.some((w) => w.tipo === 'ultimaSesion'), cargarUltima);
+  const actividad = useCarga(lista?.some((w) => TIPOS_ACTIVIDAD.includes(w.tipo)), cargarActividad);
+  const records = useCarga(lista?.some((w) => w.tipo === 'nuevosRecords'), cargarRecords);
+  const ultima = useCarga(lista?.some((w) => w.tipo === 'ultimaSesion'), cargarUltima);
 
   // Resumen de las rutinas de los widgets "Empezar rutina", todas en una petición. Se vuelve a
   // pedir solo si cambian las rutinas (la clave es la lista de ids, no el array de widgets).
-  const idsRutinas = [...new Set((widgets ?? []).filter((w) => w.tipo === 'empezarRutina').map((w) => w.workoutId))].join(',');
+  const idsRutinas = [...new Set((lista ?? []).filter((w) => w.tipo === 'empezarRutina').map((w) => w.workoutId))].join(',');
   const [rutinas, setRutinas] = useState({ datos: undefined, error: false });
   useEffect(() => {
     if (!idsRutinas) return;
@@ -180,7 +232,61 @@ export default function Dashboard() {
   // Un widget de grupo cuyo grupo no está en la lista (borrado en otra pestaña) no se pinta.
   const visibles = widgets?.filter((w) => w.tipo !== 'grupo' || grupos.has(w.chartId)) ?? [];
   const conFilas = visibles.map((w) => (filasDesplegadas[w._id] ? { ...w, filas: filasDesplegadas[w._id] } : w));
-  const { colocados } = colocarWidgets(widgets ? conFilas : ESQUELETO, columnas);
+  // Editando, sin grupos desplegados: cada widget en su tamaño, y con sus huecos.
+  const { colocados, huecos } = colocarWidgets(editando ? borrador : widgets ? conFilas : ESQUELETO, columnas);
+
+  // --- Modo edición ---
+  const definicion = (tipo) => catalogo?.catalogo.find((d) => d.tipo === tipo);
+  // Nombre de un widget para el lector de pantalla ("Mover Racha", "Quitar Empuje").
+  const nombreDe = (w) => (w.tipo === 'grupo' ? grupos.get(w.chartId)?.nombre : null) ?? definicion(w.tipo)?.nombre ?? w.tipo;
+
+  const entrarEnEdicion = () => {
+    const copia = empezarBorrador(visibles);
+    setBorrador(copia);
+    setInicial(copia);
+    setErrorGuardar('');
+    setEditando(true);
+  };
+  const salirDeEdicion = () => {
+    setEditando(false);
+    setInsertarEn(null);
+    setConfirmarCancelar(false);
+  };
+  const cancelarEdicion = () => (conCambios ? setConfirmarCancelar(true) : salirDeEdicion());
+  const guardarEdicion = async () => {
+    setGuardando(true);
+    setErrorGuardar('');
+    try {
+      const res = await updateDashboard(paraGuardar(borrador));
+      setWidgets(res.data.dashboard.widgets);
+      salirDeEdicion();
+    } catch (err) {
+      setErrorGuardar(err.response?.data?.message || 'No se han podido guardar los cambios. Inténtalo de nuevo.');
+    } finally {
+      setGuardando(false);
+    }
+  };
+  // Del catálogo: el widget nuevo, en su tamaño por defecto, donde se pidió (al final o en un hueco).
+  const anadir = (def, referencia) => {
+    const nuevo = nuevoWidget(def, referencia, catalogo.camposReferencia, crypto.randomUUID());
+    if (def.conRango) nuevo.rango = catalogo.rangoPorDefecto;
+    setBorrador((b) => insertarWidget(b, nuevo, insertarEn));
+    setInsertarEn(null);
+  };
+  const alSoltar = ({ active, over }) => {
+    setArrastrando(null);
+    if (over && active.id !== over.id) setBorrador((b) => moverWidget(b, active.id, over.id));
+  };
+  const posicion = (id) => `${borrador.findIndex((w) => w._id === id) + 1} de ${borrador.length}`;
+  const nombrePorId = (id) => nombreDe(borrador.find((w) => w._id === id) ?? {});
+  const anuncios = {
+    onDragStart: ({ active }) => `Has cogido «${nombrePorId(active.id)}», posición ${posicion(active.id)}.`,
+    onDragOver: ({ active, over }) => (over ? `«${nombrePorId(active.id)}» iría a la posición ${posicion(over.id)}.` : undefined),
+    onDragEnd: ({ active, over }) => (over ? `«${nombrePorId(active.id)}» queda en la posición ${posicion(over.id)}.` : `«${nombrePorId(active.id)}» no se ha movido.`),
+    onDragCancel: ({ active }) => `Cancelado. «${nombrePorId(active.id)}» vuelve a su sitio.`,
+  };
+  const lleno = catalogo && borrador.length >= catalogo.maxWidgets;
+  const widgetArrastrado = arrastrando ? borrador.find((w) => w._id === arrastrando) : null;
 
   const pintar = (widget) => {
     if (widget.tipo === 'grupo') {
@@ -232,14 +338,29 @@ export default function Dashboard() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
+      <header className={`${styles.header} ${editando ? styles.headerEditando : ''}`}>
         {/* "Inicio", como en el menú: la pantalla ya no es solo el progreso (bloque 9d). */}
-        <h1 className={styles.title}>Inicio</h1>
-        {/* Hasta el catálogo del modo edición (paso 3), los grupos se siguen creando aquí. */}
-        <button type="button" className={styles.newGroupButton} onClick={() => navigate('/groups/new')} aria-label="Nuevo grupo">
-          <IconPlus />
-          <span className={styles.newGroupButtonLabel}>Nuevo grupo</span>
-        </button>
+        <h1 className={styles.title}>{editando ? 'Editar inicio' : 'Inicio'}</h1>
+        {editando ? (
+          <div className={styles.accionesEdicion}>
+            <GrupoBotones>
+              <Button variant="ghost" size="sm" onClick={cancelarEdicion}>
+                Cancelar
+              </Button>
+              <Button size="sm" onClick={guardarEdicion} disabled={guardando}>
+                {guardando ? 'Guardando…' : 'Hecho'}
+              </Button>
+            </GrupoBotones>
+          </div>
+        ) : (
+          widgets && (
+            // Crear grupos pasa al catálogo del modo edición (Grupo de progreso → Crear grupo nuevo).
+            <button type="button" className={styles.botonEditar} onClick={entrarEnEdicion} aria-label="Editar inicio">
+              <IconLapiz />
+              <span className={styles.botonEditarTexto}>Editar</span>
+            </button>
+          )
+        )}
       </header>
 
       {error && <p className={styles.feedbackError}>{error}</p>}
@@ -261,7 +382,64 @@ export default function Dashboard() {
         </ZonaCarga>
       )}
 
-      {widgets && (
+      {editando && (
+        <>
+          <DndContext
+            sensors={sensores}
+            collisionDetection={closestCenter}
+            onDragStart={({ active }) => setArrastrando(active.id)}
+            onDragEnd={alSoltar}
+            onDragCancel={() => setArrastrando(null)}
+            accessibility={{
+              announcements: anuncios,
+              screenReaderInstructions: {
+                draggable: 'Para mover este widget, pulsa espacio, usa las flechas y vuelve a pulsar espacio para soltarlo. Escape cancela.',
+              },
+            }}
+          >
+            <SortableContext items={borrador.map((w) => w._id)} strategy={sinDesplazar}>
+              <div ref={ref} className={styles.reticula} style={{ '--columnas': columnas }} data-reticula>
+                {colocados.map((c) => (
+                  <CeldaEditable
+                    key={c.widget._id}
+                    id={c.widget._id}
+                    nombre={nombreDe(c.widget)}
+                    tamano={c.widget.tamano}
+                    tamanos={definicion(c.widget.tipo)?.tamanos ?? [c.widget.tamano]}
+                    estilo={estiloCelda(c)}
+                    onTamano={(t) => setBorrador((b) => cambiarTamano(b, c.widget._id, t))}
+                    onQuitar={() => setBorrador((b) => quitarWidget(b, c.widget._id))}
+                  >
+                    {pintar(c.widget)}
+                  </CeldaEditable>
+                ))}
+                {/* Celdas que ningún widget cubre: se pueden dejar (se guardan así) o rellenar. */}
+                {huecos.map((h) => (
+                  <div key={`${h.fila}-${h.columna}`} className={styles.hueco} style={estiloCelda({ ...h, ancho: 1, alto: 1 })}>
+                    <span>Hueco libre</span>
+                    {!lleno && (
+                      <button type="button" className={styles.anadirHueco} onClick={() => setInsertarEn(indiceParaHueco(colocados, h))}>
+                        + Añadir
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </SortableContext>
+            {/* La copia que sigue al dedo o al ratón; el original deja su sitio marcado. */}
+            <DragOverlay>{widgetArrastrado && <div className={styles.levantado}>{pintar(widgetArrastrado)}</div>}</DragOverlay>
+          </DndContext>
+          {lleno ? (
+            <p className={styles.vacio}>Tu inicio está lleno: como mucho {catalogo.maxWidgets} widgets.</p>
+          ) : (
+            <button type="button" className={styles.anadirWidget} onClick={() => setInsertarEn(borrador.length)}>
+              + Añadir widget
+            </button>
+          )}
+        </>
+      )}
+
+      {widgets && !editando && (
         // data-reticula: el grupo desplegado lee de aquí el alto de fila para pedir sus filas.
         <div ref={ref} className={styles.reticula} style={{ '--columnas': columnas }} data-reticula>
           {colocados.map((c) => (
@@ -272,9 +450,33 @@ export default function Dashboard() {
         </div>
       )}
 
-      {widgets && visibles.length === 0 && (
-        <p className={styles.vacio}>Tu dashboard está vacío. Crea un grupo para ver su progreso aquí.</p>
+      {widgets && !editando && visibles.length === 0 && (
+        <p className={styles.vacio}>Tu inicio está vacío. Pulsa Editar para añadir widgets.</p>
       )}
+
+      {insertarEn !== null && catalogo && (
+        <CatalogoWidgets
+          catalogo={catalogo.catalogo}
+          yaPuestos={tiposYaPuestos(borrador, catalogo.catalogo)}
+          gruposPuestos={gruposYaPuestos(borrador)}
+          grupos={grupos}
+          onElegir={anadir}
+          onCerrar={() => setInsertarEn(null)}
+        />
+      )}
+
+      <ConfirmDialog
+        open={confirmarCancelar}
+        title="¿Descartar los cambios?"
+        message="Has cambiado tu inicio. Si cancelas, los cambios se pierden."
+        confirmLabel="Descartar cambios"
+        cancelLabel="Seguir editando"
+        confirmVariant="danger"
+        onConfirm={salirDeEdicion}
+        onCancel={() => setConfirmarCancelar(false)}
+      />
+      {/* Salir de la página con cambios sin guardar (el menú, atrás, Crear grupo nuevo…). */}
+      <ConfirmDialog {...aviso.dialogo} />
 
       {/* El mismo aviso que en Rutinas al empezar con otra sesión en curso. */}
       <ConfirmDialog

@@ -20,7 +20,10 @@ export default function MarcoWidget({ etiqueta, dato, etiquetaAccesible, onClick
         </span>
         {dato && <span className={styles.dato}>{dato}</span>}
       </Bloque>
-      <Bloque className={styles.contenido}>{children}</Bloque>
+      {/* data-contenido: el modo edición del Dashboard atenúa esto, y no la cabecera. */}
+      <Bloque className={styles.contenido} data-contenido>
+        {children}
+      </Bloque>
     </>
   );
   if (onClick) {

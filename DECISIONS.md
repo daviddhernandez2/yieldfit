@@ -72,6 +72,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0051 | Récords personales marcados al guardar, con la marca de cada ejercicio como copia | vigente |
 | 0052 | Dashboard personalizable en el servidor, con "Todos" como grupo normal | vigente |
 | 0053 | Campos de fecha sin aspecto nativo en iOS y con pista propia | vigente |
+| 0054 | Widgets con anatomía común aprobada en el design system, y edición del dashboard con borrador | vigente |
 
 ---
 
@@ -1881,3 +1882,56 @@ ignoran `placeholder` en las fechas). Las medidas con Chrome de escritorio no lo
 **Consecuencias:**
 - Las medidas con Chrome de escritorio no sustituyen a la prueba en un iPhone: no hay simulador de
   iOS en el portátil (no está Xcode). David lo probó en su iPhone, con Chrome y Safari.
+
+---
+
+## 0054 — Widgets con anatomía común aprobada en el design system, y edición del dashboard con borrador
+
+Fecha: 2026-11-25 · Estado: vigente · Bloque: 9d · Matiza a: 0052
+
+**Contexto:** al construir el dashboard de la 0052, las revisiones de David cambiaron varios
+criterios: los widgets se veían desiguales y "muy apelotonados", la Racha pasó a ser un widget
+propio, y el modo edición necesitaba reglas que la 0052 no fijaba.
+
+**Decisión** (de David, aprobada en el design system del artefacto, versiones 19 a 29):
+- **Anatomía común de widget** (tarjeta Widget del design system): cabecera de 20 px arriba con la
+  etiqueta y un dato secundario, contenido alineado arriba, separaciones fijas y nada que se
+  estire. **Cada widget nuevo se diseña con esa anatomía en todos sus tamaños y se aprueba en el
+  artefacto antes de implementarlo** (regla en CLAUDE.md).
+- **Más aire:** filas de 168 px (antes 132); en escritorio, 24 px de hueco y de relleno; en el
+  móvil, 16 y 20; cifra principal de 32 px; tokens `--widget-*` y `--dashboard-hueco`.
+- **Etiqueta en una pastilla**, a 12 px y sin mayúsculas: en mayúsculas "Sesiones totales" no
+  cabía en un P a 375 px.
+- **Racha:** en M, "3 semanas seguidas" y la fila de semanas sola debajo, repartida a todo el ancho;
+  el aviso de en riesgo o rota va en la cabecera. En P, "semanas" va al pie (junto a la cifra no
+  cabía a 375 px).
+- **% grande** como unidad pequeña y sin decimales desde ±10 %, para que quepa en un P.
+- **Récord de un ejercicio y Empezar rutina** en P, M y G. El récord se lee con un índice parcial
+  por ejercicio (`records_por_ejercicio`, nombrado con `hint`), que crece con los récords y no con
+  el historial. La rutina, con `GET /api/workouts/resumen` (nombres de los ejercicios y última
+  sesión con el índice del 11d).
+- **Modo edición con borrador:** "Editar" copia los widgets; mover, cambiar de tamaño, quitar y
+  añadir se hacen sobre la copia, y "Hecho" la guarda de una vez (`PUT /api/dashboard`).
+  "Cancelar" y salir de la página preguntan si hay cambios.
+- **Al arrastrar, los demás se recolocan al soltar**, no mientras: con tamaños distintos darían
+  saltos (al moverse uno, el puntero queda sobre otro). Mientras, se marcan el origen y el destino.
+- **Los widgets de un solo dato van una vez** (en el catálogo, "Ya está"); los que apuntan a algo
+  se pueden repetir con otra referencia; un grupo, una sola vez (como ya exigía el servidor).
+- **Crear grupos pasa al catálogo** (Grupo de progreso → "Crear grupo nuevo"): sale "Nuevo grupo"
+  de la cabecera.
+
+**Alternativas descartadas:**
+- *Reflujo en vivo al arrastrar:* con P, M y G mezclados, el widget de debajo del puntero cambia al
+  recolocarse y el arrastre parpadea.
+- *Guardar cada cambio al momento:* muchas peticiones y estados a medias; el `PUT` ya estaba
+  pensado para "Hecho".
+- *Etiquetas en mayúsculas acortando los nombres* ("Sesiones", "Progreso"): se pierde claridad.
+- *Leer el récord con el índice por ejercicio de la 0029:* lee todas las sesiones del ejercicio
+  (90 de 270 en la base de desarrollo) y crece con los años.
+
+**Consecuencias:**
+- El dashboard por defecto ocupa más alto (unos 750 px en escritorio).
+- En producción, Render crea `records_por_ejercicio` al arrancar; si alguien pide un widget de
+  récord en esos segundos, ve "No se ha podido cargar" una vez.
+- El catálogo del servidor devuelve también `camposReferencia`, para que el cliente no copie a mano
+  en qué campo va cada referencia.

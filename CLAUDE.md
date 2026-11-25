@@ -281,9 +281,9 @@ al bloque del que nacen, para no renumerar:
    por la derecha en iOS (en `Input`, para toda la app), pista visible en la fecha vacía,
    placeholders que no parezcan valores y revisión de la pantalla de registro en iOS (teclado
    numérico, fuente mínima de 16 px, autocompletado).
-4. **9d — Dashboard personalizable**: bento con widgets y grupos al mismo nivel; modo "Editar
-   dashboard" (mover, añadir desde un catálogo, quitar, cambiar entre tamaños fijos); "Todos" pasa
-   a ser un grupo normal; retícula estricta. Se plantea antes de escribir código.
+4. [x] **9d — Dashboard personalizable** (hecho, 2026-11-25; 0052, 0054): bento con widgets y
+   grupos al mismo nivel; modo "Editar dashboard" (mover, añadir desde un catálogo, quitar, cambiar
+   entre tamaños fijos); "Todos" pasa a ser un grupo normal; retícula estricta.
 5. **1b — Backups automáticos fuera del portátil** (revisión prevista en la 0018).
 6. **6b — Cardio** en la sesión activa (análisis en la deuda técnica).
 

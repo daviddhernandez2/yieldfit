@@ -172,6 +172,10 @@ Entrenamiento realizado.
   la serie anterior (`GET /api/sessions/previous-sets`) busca la última sesión con cada
   ejercicio. Es multikey: una entrada por ejercicio de cada sesión. Sin él, un ejercicio que no
   se ha hecho nunca recorría todo el historial.
+- **Índice parcial `records_por_ejercicio`** `{ 'ejercicios.exerciseId': 1, fecha: -1 }`, solo con
+  las sesiones que tienen algún récord ([0054](../DECISIONS.md), bloque 9d): el widget "Récord de un
+  ejercicio" (`GET /api/estadisticas/record`) lee los récords de un ejercicio sin recorrer todas sus
+  sesiones. La consulta incluye `'ejercicios.esPR': true` y lo nombra con `hint`.
 
 #### Cómo se calcula el progreso
 
@@ -236,15 +240,16 @@ los grupos (0020); un grupo puede quedarse vacío y la tarjeta lo avisa.
 Dashboard personalizable de cada usuario ([0052](../DECISIONS.md), bloque 9d): un documento con
 la lista de widgets en orden (`tipo`, `tamano` P/M/G, `chartId`, `exerciseId` o `workoutId` según
 el tipo, y `rango`). Los tipos, sus tamaños y los rangos vienen de `data/catalogoWidgets.js`, que
-el cliente pide a `GET /api/dashboard/catalogo`. `PUT /api/dashboard` guarda la lista entera tras
-validarla (`utils/dashboard.js`). Al borrar un grupo, un ejercicio o una rutina se quita su widget
-en la misma transacción.
+el cliente pide a `GET /api/dashboard/catalogo` (con `camposReferencia`: en qué campo va cada
+referencia). `PUT /api/dashboard` guarda la lista entera tras validarla (`utils/dashboard.js`): lo
+usa el botón "Hecho" del modo edición ([0054](../DECISIONS.md)) y el cambio de rango de un grupo.
+Al borrar un grupo, un ejercicio o una rutina se quita su widget en la misma transacción.
 
 ```mermaid
 flowchart LR
     G["GET /api/dashboard"] --> A{"¿tiene dashboard?"}
     A -- sí --> D[("Dashboard")]
-    A -- "no (1.ª vez)" --> T["crear «Todos»<br/>(si no existe)"] --> P["dashboard por defecto:<br/>Progreso total · Sesiones<br/>· Todos (G) · grupos (M)"] --> D
+    A -- "no (1.ª vez)" --> T["crear «Todos»<br/>(si no existe)"] --> P["dashboard por defecto:<br/>Progreso total (P) · Sesiones totales (P) · Racha (M)<br/>· grupos (G, «Todos» primero)<br/>· Última sesión (M) · Nuevos récords (M)"] --> D
 ```
 
 ### BugReport

@@ -135,10 +135,25 @@
 }
 
 .variacionGrande {
-  gap: var(--space-xs);
+  gap: 2px;
   font-size: var(--widget-cifra);
   letter-spacing: -0.02em;
   line-height: 1;
+}
+
+/* La flecha de la cifra grande, algo más pequeña que la del texto (0,8em): con 32 px ocupaba
+   demasiado en un widget P. */
+.variacionGrande .flecha {
+  width: 0.7em;
+  height: 0.7em;
+}
+
+/* "%" junto a la cifra grande: unidad pequeña como "kg" o "semanas", del color de la variación. */
+.unidadVariacion {
+  margin-left: 2px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
 }
 
 .flecha {

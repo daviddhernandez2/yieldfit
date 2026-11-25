@@ -1,0 +1,20 @@
+/* Lo propio de un campo de varias líneas; el resto (borde, fondo, foco) viene de Input. */
+.areaTexto {
+  display: block;
+  line-height: 1.4;
+  font-family: inherit;
+  /* Solo crece hacia abajo: estirarlo a lo ancho rompería la maqueta. */
+  resize: vertical;
+}
+
+.opcional {
+  font-weight: var(--font-weight-regular);
+}
+
+.contador {
+  align-self: flex-end;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}

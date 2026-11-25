@@ -306,16 +306,21 @@
   }
 }
 
-/* "+ Añadir serie" y "Reemplazar ejercicio", uno al lado del otro bajo las series. */
+/* "+ Añadir serie" y "Reemplazar ejercicio", uno al lado del otro bajo las series. Su texto no
+   se parte (bloque 11d: a 390 px "Reemplazar ejercicio" salía en dos líneas): si no caben en una
+   fila, se apilan, como hace GrupoBotones. */
 .accionesEjercicio {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-sm);
   margin-top: var(--space-sm);
 }
 
 .accionEjercicio {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 48px;
   padding: var(--space-sm);
+  white-space: nowrap;
   background: transparent;
   border: 1px dashed rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-sm);

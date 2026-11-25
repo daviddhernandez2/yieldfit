@@ -4,7 +4,7 @@ import Cargando from '@/pages/Dashboard/widgets/Cargando.jsx';
 import { formatKg } from '@/utils/formato.js';
 import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 
-// Récords que caben en cada tamaño: 2 filas de 32 px en M y 6 de 36 px en G.
+// Récords que caben en cada tamaño: 2 filas de 40 px en M y 6 de 44 px en G.
 const EN_M = 2;
 const EN_G = 6;
 

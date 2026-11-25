@@ -6,8 +6,9 @@ import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 const FECHA_CORTA = { day: 'numeric', month: 'short' };
 // Semanas que se muestran (el servidor manda más, para la Racha).
 const SEMANAS = 12;
-// Alto máximo de las barras por tamaño: lo que cabe en el contenido (anatomía de widget).
-const ALTO_BARRAS = { M: 56, G: 184 };
+// Alto máximo de las barras por tamaño: lo que cabe en el contenido (anatomía de widget, con las
+// medidas de la tarjeta Espaciado: contenido de 120 px en M y 312 en G).
+const ALTO_BARRAS = { M: 60, G: 236 };
 
 // Frecuencia semanal (bloque 9d): barras con las sesiones de las últimas 12 semanas y la media en
 // la cabecera. Barras de 14 px con 6 px de hueco, alineadas a la izquierda: no se estiran. La

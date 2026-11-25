@@ -6,7 +6,7 @@ import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 // Widgets de una cifra, tamaño P (bloque 9d): "Progreso total" y "Sesiones totales". Los dos
 // salen del progreso de todo el historial (GET /api/progress sin fechas), que el Dashboard pide
 // una sola vez y reparte. Sin gráfica: la gráfica ya está en el grupo "Todos".
-// Anatomía: cabecera, cifra de 28 px y pie 4 px por debajo.
+// Anatomía: cabecera, cifra de 32 px y pie 8 px por debajo.
 // Props: tipo ("progresoTotal" | "sesionesTotales"), progreso (null mientras carga), error.
 export default function WidgetCifra({ tipo, progreso, error, className = '' }) {
   const esProgreso = tipo === 'progresoTotal';

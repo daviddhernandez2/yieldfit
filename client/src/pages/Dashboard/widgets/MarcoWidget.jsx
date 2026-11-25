@@ -2,7 +2,7 @@ import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 
 // Marco común de todos los widgets (bloque 9d): la anatomía de la tarjeta Widget del design
 // system. Pinta la tarjeta, la cabecera de 20 px (etiqueta y dato secundario) y el contenido
-// alineado arriba, 8 px por debajo. Cada widget solo pone su contenido.
+// alineado arriba, 16 px por debajo. Cada widget solo pone su contenido.
 //
 // Props:
 //   - etiqueta: texto de la izquierda de la cabecera (se ve en mayúsculas).

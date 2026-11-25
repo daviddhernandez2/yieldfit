@@ -113,14 +113,20 @@
         detalle de una sesión). Más estrecho a propósito: se lee y se rellena mejor. */
    --ancho-pagina: 1120px;
    --ancho-formulario: 700px;
-   /* Dashboard (bloque 9d): alto de una fila de la retícula. Un widget P o M mide una fila; un
-      G, dos. Las columnas (2 o 4) las decide utils/reticula.js por el ancho del dashboard. */
-   --alto-fila-dashboard: 132px;
-   /* Anatomía común de los widgets (bloque 9d, tarjeta Widget del design system): relleno de 16 px
-      (--space-md), cabecera de 20 px, contenido 8 px por debajo (--space-sm) y cifra principal de
-      28 px, igual en P, M y G para que en una fila todo quede alineado. */
+   /* Dashboard (bloque 9d): alto de una fila de la retícula y hueco entre widgets. Un widget P o
+      M mide una fila; un G, dos. Las columnas (2 o 4) las decide utils/reticula.js por el ancho
+      del dashboard. Con más aire desde la revisión de David ("muy apelotonados"): filas de 168 px
+      (antes 132) y hueco de 24 px en escritorio (16 en el móvil, abajo en la media query). */
+   --alto-fila-dashboard: 168px;
+   --dashboard-hueco: var(--space-md);
+   /* Anatomía común de los widgets (bloque 9d, tarjeta Widget del design system): relleno de 20 px
+      en el móvil y 24 en escritorio, cabecera de 20 px con la etiqueta en una pastilla, contenido
+      16 px por debajo (--space-md), cifra principal de 32 px (igual en P, M y G para que en una
+      fila todo quede alineado) y 12 px entre bloques (cifra, gráfica, lista). */
+   --widget-relleno: 20px;
    --widget-alto-cabecera: 20px;
-   --widget-cifra: 28px;
+   --widget-cifra: 32px;
+   --widget-separacion: 12px;
 
    /* Botón flotante "Reportar" (bloque 11b.2): sus alturas, el único sitio donde se deciden.
       Las usan el propio botón (ReportarFallo) y el Layout, que deja al final de la página el
@@ -169,6 +175,15 @@
      color var(--duration-fast) var(--ease-standard),
      box-shadow var(--duration-fast) var(--ease-standard),
      transform var(--duration-fast) var(--ease-standard);
+}
+
+/* Escritorio (desde 768 px, donde aparece la barra lateral): más aire alrededor y entre los
+   widgets del Dashboard. En el móvil el ancho manda: 20 px de relleno y 16 de hueco. */
+@media (min-width: 768px) {
+  :root {
+    --dashboard-hueco: var(--space-lg);
+    --widget-relleno: var(--space-lg);
+  }
 }
 
 /* Movimiento reducido: si el sistema lo pide, nada se mueve (ni escala al pulsar ni entra

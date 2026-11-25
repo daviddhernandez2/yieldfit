@@ -80,7 +80,7 @@
   display: grid;
   grid-template-columns: repeat(var(--columnas), minmax(0, 1fr));
   grid-auto-rows: var(--alto-fila-dashboard);
-  gap: var(--space-md);
+  gap: var(--dashboard-hueco);
 }
 
 /* La celda estira su widget a todo el espacio que ocupa en la retícula. */

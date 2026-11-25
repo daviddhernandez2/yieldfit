@@ -16,9 +16,9 @@ const EJERCICIOS_VISIBLES = 3;
 
 // Widget de un grupo de progreso (bloque 9d), siempre en G. Anatomía (tarjeta Widget):
 //   - Cabecera: el nombre del grupo y el lápiz para editarlo.
-//   - El % en grande (28 px) y, a la derecha, el rango ("Total ▾"), que se cambia sin entrar en
+//   - El % en grande (32 px) y, a la derecha, el rango ("Total ▾"), que se cambia sin entrar en
 //     el modo edición (es una forma de mirar) y se guarda en el servidor (onCambiarRango).
-//   - Gráfica de alto fijo (72 px), tres ejercicios en filas de 28 px y "+N ejercicios", que
+//   - Gráfica de alto fijo (96 px), tres ejercicios en filas de 32 px y "+N ejercicios", que
 //     despliega el resto: el widget ocupa las filas que necesite (onCambiarFilas) y lo de debajo
 //     baja. Desplegar no se guarda.
 // Con menos de tres ejercicios, el sitio de las filas que faltan queda libre (decisión de David).

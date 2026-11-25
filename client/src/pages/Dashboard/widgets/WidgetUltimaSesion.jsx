@@ -7,7 +7,7 @@ import { formatDuracion, formatFechaRelativa } from '@/utils/formato.js';
 import { recordsDeSesion } from '@/utils/records.js';
 import styles from '@/pages/Dashboard/widgets/Widget.module.css';
 
-// Ejercicios que caben en el tamaño G (filas de 28 px).
+// Ejercicios que caben en el tamaño G (filas de 36 px).
 const EJERCICIOS_EN_G = 6;
 
 // Última sesión (bloque 9d). Anatomía (tarjeta Widget): la fecha en la cabecera; el nombre con la

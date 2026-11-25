@@ -20,25 +20,43 @@ export const alturasBarras = (semanas) => {
 export const textoRacha = ({ semanas, masDe }) =>
   `${masDe ? 'más de ' : ''}${semanas} ${semanas === 1 ? 'semana' : 'semanas'}`;
 
-// Textos de la racha según su estado (bloque 9d), para el widget y la pastilla junto a "Inicio".
-// tamano: "P" (el texto de "en riesgo" se acorta: el largo no cabe) o "M".
-// Devuelve { etiqueta, cifra (número o null si está rota), unidad, pie, accesible }.
+// Textos del widget Racha según su estado (bloque 9d) y su tamano ("P" o "M").
+// Devuelve { etiqueta, cifra (número o null si está rota), unidad, pie, dato, accesible }.
+// En M no hay pie (opción 2 de la tarjeta Espaciado, bloque 9d): las semanas van solas debajo de
+// la cifra. "seguidas" pasa a la unidad ("3 semanas seguidas") y el aviso de en riesgo o rota,
+// más corto, a la derecha de la cabecera (`dato`). En P, como antes: pie de hasta dos líneas.
 export const textosRacha = ({ semanas, masDe, estado }, tamano = 'M') => {
+  const enM = tamano === 'M';
   const unidad = semanas === 1 ? 'semana' : 'semanas';
   const cifra = `${masDe ? '+' : ''}${semanas}`;
   if (estado === 'rota') {
-    return { etiqueta: 'Racha', cifra: null, unidad, pie: 'Empieza una racha nueva', accesible: 'Sin racha. Empieza una racha nueva' };
+    return {
+      etiqueta: 'Racha',
+      cifra: null,
+      unidad,
+      pie: enM ? null : 'Empieza una racha nueva',
+      dato: enM ? 'Empieza una nueva' : null,
+      accesible: 'Sin racha. Empieza una racha nueva',
+    };
   }
   if (estado === 'enRiesgo') {
     return {
-      etiqueta: tamano === 'M' ? 'Racha · en riesgo' : 'Racha',
+      etiqueta: enM ? 'Racha · en riesgo' : 'Racha',
       cifra,
       unidad,
-      pie: tamano === 'M' ? 'Entrena esta semana para mantenerla' : 'Entrena esta semana',
+      pie: enM ? null : 'Entrena esta semana',
+      dato: enM ? 'Entrena esta semana' : null,
       accesible: `Racha en riesgo: ${textoRacha({ semanas, masDe })}. Entrena esta semana para mantenerla`,
     };
   }
-  return { etiqueta: 'Racha', cifra, unidad, pie: 'seguidas entrenando', accesible: `Racha: ${textoRacha({ semanas, masDe })} seguidas entrenando` };
+  return {
+    etiqueta: 'Racha',
+    cifra,
+    unidad: enM ? `${unidad} ${semanas === 1 ? 'seguida' : 'seguidas'}` : unidad,
+    pie: enM ? null : 'seguidas entrenando',
+    dato: null,
+    accesible: `Racha: ${textoRacha({ semanas, masDe })} seguidas entrenando`,
+  };
 };
 
 // Cuántos círculos de semana caben en `ancho` px (círculos de 12 px con 8 px de hueco: 20 px por

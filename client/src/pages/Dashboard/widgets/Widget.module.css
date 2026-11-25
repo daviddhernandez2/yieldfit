@@ -268,16 +268,19 @@
 
 /* --- Racha --- */
 
-/* Fila de las semanas: círculos de 12 px con 8 px de hueco, alineados a la izquierda. Se pintan
-   los que caben en el ancho (de los más recientes hacia atrás); no se estiran. */
+/* Fila de las semanas (solo en M), 20 px por debajo de la cifra y sin texto debajo (opción 2 de
+   la tarjeta Espaciado). Se pintan las que caben con al menos 8 px de hueco, de las más recientes
+   hacia atrás, y se reparten a todo el ancho del contenido (decisión de David: que ocupen la
+   tarjeta respetando su margen). El primer círculo queda en el borde izquierdo del contenido; a
+   la derecha se reservan 4 px para el anillo de la semana actual (3,5 px por fuera del círculo),
+   que así no pisa el margen. Sin overflow: hidden, para que el anillo se vea entero. */
 .semanasRacha {
   display: flex;
   flex: none;
-  gap: var(--space-sm);
+  justify-content: space-between;
   height: 12px;
-  margin-top: 6px;
-  /* Sin overflow: hidden: solo se pintan las semanas que caben, y el anillo de la actual
-     (3,5 px por fuera del círculo) tiene que verse entero. */
+  margin-top: 20px;
+  padding-right: var(--space-xs);
 }
 
 .circuloSemana {
@@ -302,8 +305,10 @@
   box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 3.5px var(--color-border-strong);
 }
 
-.pieRacha {
-  margin-top: 6px;
+/* La llama dibuja dentro de su caja con un margen a la izquierda (un cuarto de su ancho): se
+   compensa para que la llama empiece en el borde del contenido, como la etiqueta y las semanas. */
+.llamaAlineada {
+  margin-left: calc(var(--widget-cifra) * -0.25);
 }
 
 .sinRacha {

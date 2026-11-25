@@ -10,12 +10,16 @@ assert.deepEqual(alturasBarras(s(0, 0)), [0, 0]);
 assert.equal(textoRacha({ semanas: 5, masDe: false }), '5 semanas');
 assert.equal(textoRacha({ semanas: 1, masDe: false }), '1 semana');
 assert.equal(textoRacha({ semanas: 104, masDe: true }), 'más de 104 semanas');
-assert.deepEqual(textosRacha({ semanas: 3, masDe: false, estado: 'activa' }), { etiqueta: 'Racha', cifra: '3', unidad: 'semanas', pie: 'seguidas entrenando', accesible: 'Racha: 3 semanas seguidas entrenando' });
+// En M (por defecto): sin pie; "seguidas" en la unidad y el aviso en la cabecera (dato).
+assert.deepEqual(textosRacha({ semanas: 3, masDe: false, estado: 'activa' }), { etiqueta: 'Racha', cifra: '3', unidad: 'semanas seguidas', pie: null, dato: null, accesible: 'Racha: 3 semanas seguidas entrenando' });
+assert.equal(textosRacha({ semanas: 1, masDe: false, estado: 'activa' }).unidad, 'semana seguida');
+assert.deepEqual(textosRacha({ semanas: 3, masDe: false, estado: 'enRiesgo' }, 'M'), { etiqueta: 'Racha · en riesgo', cifra: '3', unidad: 'semanas', pie: null, dato: 'Entrena esta semana', accesible: 'Racha en riesgo: 3 semanas. Entrena esta semana para mantenerla' });
+assert.deepEqual([textosRacha({ semanas: 0, masDe: false, estado: 'rota' }).cifra, textosRacha({ semanas: 0, masDe: false, estado: 'rota' }).pie, textosRacha({ semanas: 0, masDe: false, estado: 'rota' }).dato], [null, null, 'Empieza una nueva']);
+// En P, como antes: pie y sin dato.
+assert.deepEqual(textosRacha({ semanas: 3, masDe: false, estado: 'activa' }, 'P'), { etiqueta: 'Racha', cifra: '3', unidad: 'semanas', pie: 'seguidas entrenando', dato: null, accesible: 'Racha: 3 semanas seguidas entrenando' });
+assert.equal(textosRacha({ semanas: 1, masDe: false, estado: 'activa' }, 'P').unidad, 'semana');
 assert.equal(textosRacha({ semanas: 3, masDe: false, estado: 'enRiesgo' }, 'P').pie, 'Entrena esta semana');
-assert.equal(textosRacha({ semanas: 3, masDe: false, estado: 'enRiesgo' }, 'M').pie, 'Entrena esta semana para mantenerla');
-assert.equal(textosRacha({ semanas: 3, masDe: false, estado: 'enRiesgo' }, 'M').etiqueta, 'Racha · en riesgo');
-assert.equal(textosRacha({ semanas: 1, masDe: false, estado: 'activa' }).unidad, 'semana');
-assert.deepEqual([textosRacha({ semanas: 0, masDe: false, estado: 'rota' }).cifra, textosRacha({ semanas: 0, masDe: false, estado: 'rota' }).pie], [null, 'Empieza una racha nueva']);
+assert.equal(textosRacha({ semanas: 0, masDe: false, estado: 'rota' }, 'P').pie, 'Empieza una racha nueva');
 assert.equal(textosRacha({ semanas: 104, masDe: true, estado: 'activa' }).cifra, '+104');
 assert.equal(semanasQueCaben(422, 32), 21);
 assert.equal(semanasQueCaben(310, 32), 15);

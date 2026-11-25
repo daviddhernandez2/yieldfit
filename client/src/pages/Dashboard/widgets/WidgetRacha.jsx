@@ -11,9 +11,12 @@ const FECHA_CORTA = { day: 'numeric', month: 'short' };
 // mientras dura y se apaga si se rompe (LlamaRacha). Tres estados, que decide el servidor: activa,
 // en riesgo (esta semana aún no has entrenado) y rota. Textos en utils/actividad.js (textosRacha).
 // Anatomía (tarjeta Widget):
-//   - P: cabecera, la llama con la cifra (28 px) y el pie, hasta dos líneas.
-//   - M: además, la fila de semanas: tantas como caben en el ancho (círculos de 12 px con 8 px de
-//     hueco, sin estirarse), de la más reciente hacia atrás; la actual con un anillo.
+//   - P: cabecera, la llama con la cifra (32 px) y el pie, hasta dos líneas.
+//   - M: sin pie: "3 semanas seguidas" en la cifra, el aviso de en riesgo o rota a la derecha de
+//     la cabecera y la fila de semanas sola debajo, a 20 px. Se pintan las que caben con al menos
+//     8 px de hueco (círculos de 12 px), de la más reciente hacia atrás, repartidas a todo el
+//     ancho del contenido; la actual con un anillo (tarjeta Espaciado, decisión de David).
+//   - La llama, la etiqueta y las semanas empiezan en el borde izquierdo del contenido.
 // Props: tamano ("P" | "M"), actividad (null mientras carga), error.
 export default function WidgetRacha({ tamano, actividad, error, className = '' }) {
   const fila = useRef(null);
@@ -40,7 +43,8 @@ export default function WidgetRacha({ tamano, actividad, error, className = '' }
     cuerpo = (
       <div aria-label={textos.accesible}>
         <span className={styles.cifra}>
-          <LlamaRacha estado={actividad.racha.estado} tamano={28} />
+          {/* 32 px: el alto de la cifra (--widget-cifra). */}
+          <LlamaRacha estado={actividad.racha.estado} tamano={32} className={styles.llamaAlineada} />
           {textos.cifra ? (
             <>
               {textos.cifra}
@@ -68,13 +72,13 @@ export default function WidgetRacha({ tamano, actividad, error, className = '' }
             })}
           </div>
         )}
-        <p className={`${styles.pie} ${tamano === 'M' ? `${styles.unaLinea} ${styles.pieRacha}` : ''}`}>{textos.pie}</p>
+        {textos.pie && <p className={styles.pie}>{textos.pie}</p>}
       </div>
     );
   }
 
   return (
-    <MarcoWidget etiqueta={textos?.etiqueta ?? 'Racha'} etiquetaAccesible="Racha" className={className}>
+    <MarcoWidget etiqueta={textos?.etiqueta ?? 'Racha'} dato={textos?.dato} etiquetaAccesible="Racha" className={className}>
       {cuerpo}
     </MarcoWidget>
   );

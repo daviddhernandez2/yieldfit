@@ -235,8 +235,11 @@ sessionSchema.index(
 // con las importadas. Para listar los lotes basta con este índice: el recuento por lote sale de
 // las claves sin leer las sesiones, y la fecha de la importación va dentro del propio ObjectId.
 // Por eso el filtro es $type y no $exists: con $exists, MongoDB vuelve a leer cada sesión para
-// comprobar el campo (lo midió la prueba del 7b con explain). Las consultas tienen que filtrar
-// igual, con { 'importacion.lote': { $type: 'objectId' } } o con un lote concreto.
+// comprobar el campo (lo midió la prueba del 7b con explain). Las consultas tienen que llevar
+// SIEMPRE ese $type, también las de un lote concreto: { $eq: lote, $type: 'objectId' }. Con la
+// igualdad sola, MongoDB no deduce que el lote cumple el filtro del índice, lo descarta y recorre
+// todas las sesiones del usuario (medido en el 4d: 320 leídas en vez de 20). Para eso está
+// filtroLote en importarController.js.
 sessionSchema.index(
   { userId: 1, 'importacion.lote': 1 },
   { name: 'importacion_lote', partialFilterExpression: { 'importacion.lote': { $type: 'objectId' } } }

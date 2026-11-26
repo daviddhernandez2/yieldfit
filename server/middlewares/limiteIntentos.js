@@ -143,3 +143,16 @@ export const limiteImportar = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
+
+// Deshacer una importación (bloque 7b): 10 por hora y por usuario, con su propio contador. Borra
+// las sesiones del lote y recalcula los récords de sus ejercicios: menos que importar (no lee el
+// CSV ni crea nada), pero el recálculo lee todo el historial de esos ejercicios.
+export const limiteDeshacerImportacion = rateLimit({
+  windowMs: UNA_HORA,
+  limit: 10,
+  keyGenerator: (req) => String(req.user._id),
+  message: 'Has deshecho muchas importaciones seguidas.',
+  handler: responder,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});

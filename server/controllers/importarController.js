@@ -36,6 +36,10 @@ const leerPeticion = (body) => {
   return { zona, unidad, agrupado: agruparSesiones(filas, { unidad, zona, idioma }) };
 };
 
+// Las sesiones de un lote. El $type junto a la igualdad no sobra: sin él, MongoDB no usa el índice
+// parcial importacion_lote y recorre todas las sesiones del usuario (ver models/Session.js).
+const filtroLote = (userId, lote) => ({ userId, 'importacion.lote': { $eq: lote, $type: 'objectId' } });
+
 // Lo que la vista previa y la importación leen de la base, con las mismas consultas para que las
 // dos decidan lo mismo: los ejercicios y emparejamientos del usuario, las claves de este CSV que
 // ya están importadas y las sesiones registradas a mano en esas fechas.
@@ -181,7 +185,7 @@ export const importar = async (req, res, next) => {
     }
 
     const tTransaccion = performance.now();
-    const records = await Session.countDocuments({ userId, 'importacion.lote': lote, 'ejercicios.esPR': true });
+    const records = await Session.countDocuments({ ...filtroLote(userId, lote), 'ejercicios.esPR': true });
     // Solo recuentos y tiempos, nada del usuario (los logs de Render no deben tener sus datos).
     console.log(
       `Importación de Strong: ${documentos.length} sesiones, ${nuevosEjercicios.length} ejercicios nuevos, ` +
@@ -216,5 +220,75 @@ export const importar = async (req, res, next) => {
       return res.status(409).json({ error: 'Conflict', message: 'Alguno de estos entrenos se acaba de importar. Vuelve a abrir la vista previa.' });
     }
     next(error);
+  }
+};
+
+// Lotes que se listan como mucho. Cada importación es un lote; nadie importa 50 veces, pero así
+// la respuesta no crece sin límite.
+const MAX_LOTES = 50;
+
+// GET /api/importar/lotes
+// "Importaciones anteriores" (decisión A): cada lote con su fecha y cuántas sesiones le quedan.
+// Sale entero del índice parcial importacion_lote, sin leer las sesiones (medido con explain): por
+// eso el filtro es $type y no $exists (ver models/Session.js), y la fecha de la importación se
+// saca del propio ObjectId del lote, que lleva dentro el momento en que se creó.
+export const listarLotes = async (req, res, next) => {
+  try {
+    const grupos = await Session.aggregate([
+      { $match: { userId: req.user._id, 'importacion.lote': { $type: 'objectId' } } },
+      { $group: { _id: '$importacion.lote', sesiones: { $sum: 1 } } },
+      { $sort: { _id: -1 } },
+      { $limit: MAX_LOTES },
+    ]);
+    res.json({ lotes: grupos.map((g) => ({ lote: g._id, fecha: g._id.getTimestamp(), sesiones: g.sesiones })) });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE /api/importar/lotes/:lote
+// "Deshacer esta importación" (decisión A): borra las sesiones de ese lote y recalcula los récords
+// de sus ejercicios de fuerza, todo en una transacción (si fallara a mitad, quedarían marcas de
+// sesiones que ya no existen). Los ejercicios creados al importar y los emparejamientos se
+// quedan: si se vuelve a importar, se recuerdan.
+export const deshacerLote = async (req, res, next) => {
+  const t0 = performance.now();
+  const userId = req.user._id;
+  if (!mongoose.Types.ObjectId.isValid(req.params.lote)) {
+    return res.status(404).json({ error: 'Not Found', message: 'Importación no encontrada' });
+  }
+  const lote = new mongoose.Types.ObjectId(req.params.lote);
+  const filtro = filtroLote(userId, lote);
+
+  const transaccion = await mongoose.startSession();
+  try {
+    let borradas = 0;
+    let ids1RM = [];
+    let msRecords = 0;
+    await transaccion.withTransaction(async () => {
+      msRecords = 0;
+      // Los ejercicios de esas sesiones (distinct usa el índice del lote) que siguen existiendo
+      // y son de fuerza: los borrados no tienen récord que recalcular, y el cardio no tiene 1RM.
+      const ids = await Session.distinct('ejercicios.exerciseId', filtro, { session: transaccion });
+      ids1RM = (await Exercise.find({ _id: { $in: ids }, userId, tracking: '1RM' }, { _id: 1 }).session(transaccion).lean())
+        .map((e) => e._id);
+      ({ deletedCount: borradas } = await Session.deleteMany(filtro, { session: transaccion }));
+      if (borradas && ids1RM.length) {
+        const tRecords = performance.now();
+        await recalcularRecords({ db: mongoose.connection.db, userId, exerciseIds: ids1RM, session: transaccion });
+        msRecords = performance.now() - tRecords;
+      }
+    });
+
+    if (!borradas) return res.status(404).json({ error: 'Not Found', message: 'Importación no encontrada' });
+    console.log(
+      `Importación deshecha: ${borradas} sesiones, ${ids1RM.length} con récords · ` +
+      `récords ${Math.round(msRecords)} ms, total ${Math.round(performance.now() - t0)} ms`
+    );
+    res.json({ deshecha: { lote, sesiones: borradas } });
+  } catch (error) {
+    next(error);
+  } finally {
+    await transaccion.endSession();
   }
 };

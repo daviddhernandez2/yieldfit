@@ -10,8 +10,8 @@ const ok = (desc, real, esperado) => {
 };
 
 ok('vacío vale (el esfuerzo es opcional)', [esRpeValido(undefined), esRpeValido(null)], [true, true]);
-ok('de 6 a 10 en pasos de 0,5', [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10].every(esRpeValido), true);
-ok('fuera del rango', [esRpeValido(5.5), esRpeValido(10.5), esRpeValido(0), esRpeValido(-1)], [false, false, false, false]);
+ok('de 1 a 10 en pasos de 0,5 (19 valores)', Array.from({ length: 19 }, (_, i) => 1 + i * 0.5).every(esRpeValido), true);
+ok('fuera del rango', [esRpeValido(0.5), esRpeValido(0), esRpeValido(10.5), esRpeValido(-1)], [false, false, false, false]);
 ok('fuera del paso de 0,5', [esRpeValido(8.25), esRpeValido(7.1)], [false, false]);
 ok('no es un número', [esRpeValido('8'), esRpeValido(NaN), esRpeValido(Infinity), esRpeValido({})], [false, false, false, false]);
 

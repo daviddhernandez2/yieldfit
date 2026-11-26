@@ -27,7 +27,7 @@ const setSchema = new mongoose.Schema(
       type: Number,
       min: 0,
     },
-    // Esfuerzo de la serie (bloque 5c, DECISIONS 0056): opcional; de 6 a 10 en pasos de 0,5. Solo
+    // Esfuerzo de la serie (bloque 5c, DECISIONS 0056): opcional; de 1 a 10 en pasos de 0,5. Solo
     // se guarda el RPE; el RIR (10 − RPE) se calcula al mostrarlo. Antes del 5c el campo ya
     // existía (de 0 a 10) pero la app nunca lo enviaba: la validación nueva solo se aplica a
     // las sesiones que se guarden desde ahora. No cambia el cálculo del 1RM ni de los récords.
@@ -35,7 +35,7 @@ const setSchema = new mongoose.Schema(
       type: Number,
       validate: {
         validator: esRpeValido,
-        message: 'El RPE va de 6 a 10, en pasos de 0,5',
+        message: 'El RPE va de 1 a 10, en pasos de 0,5',
       },
     },
   },

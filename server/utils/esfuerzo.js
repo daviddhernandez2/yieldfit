@@ -2,13 +2,15 @@
 // única fuente de verdad: el modelo Session valida con esRpeValido, y el cliente recibe el rango
 // y las opciones con GET /api/exercises/opciones (no los copia a mano).
 //
-// Solo se guarda el RPE (Rate of Perceived Exertion: de 6 a 10, cuánto costó la serie). El RIR
+// Solo se guarda el RPE (Rate of Perceived Exertion: de 1 a 10, cuánto costó la serie). El RIR
 // (Reps In Reserve: repeticiones que quedaban) es 10 − RPE y se calcula al mostrarlo: así no hay
 // dos datos que puedan contradecirse.
 
-export const RPE = { min: 6, max: 10, paso: 0.5 };
+// Escala completa, de 1 a 10 (decisión de David; al principio era de 6 a 10, la zona habitual en
+// powerlifting). Cambiarla aquí basta: el cliente pinta los valores con este rango.
+export const RPE = { min: 1, max: 10, paso: 0.5 };
 
-// ¿Es un RPE permitido? De 6 a 10 en pasos de 0,5. Vacío (undefined o null) también vale: el
+// ¿Es un RPE permitido? De 1 a 10 en pasos de 0,5. Vacío (undefined o null) también vale: el
 // esfuerzo es opcional en cada serie.
 export const esRpeValido = (valor) => {
   if (valor === undefined || valor === null) return true;

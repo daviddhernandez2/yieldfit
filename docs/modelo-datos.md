@@ -63,6 +63,7 @@ erDiagram
         string nombre
         date fecha "índice userId + fecha"
         number duracionSegundos
+        string notas "opcional, hasta 500"
     }
     SessionExercise_embebido {
         ObjectId exerciseId FK
@@ -172,6 +173,11 @@ Entrenamiento realizado.
   la serie anterior (`GET /api/sessions/previous-sets`) busca la última sesión con cada
   ejercicio. Es multikey: una entrada por ejercicio de cada sesión. Sin él, un ejercicio que no
   se ha hecho nunca recorría todo el historial.
+- **`notas`** ([0055](../DECISIONS.md), bloque 11d): texto libre del usuario sobre el entreno, hasta
+  500 caracteres; sin campo si no hay nota. Como el resto de la sesión, no se edita.
+- **Índice `{ userId: 1, workoutId: 1, fecha: -1 }`** ([0055](../DECISIONS.md)): "la nota de la
+  última vez" (`GET /api/sessions/previous-note`) y la última sesión de cada rutina del widget
+  "Empezar rutina" leen un solo documento.
 - **Índice parcial `records_por_ejercicio`** `{ 'ejercicios.exerciseId': 1, fecha: -1 }`, solo con
   las sesiones que tienen algún récord ([0054](../DECISIONS.md), bloque 9d): el widget "Récord de un
   ejercicio" (`GET /api/estadisticas/record`) lee los récords de un ejercicio sin recorrer todas sus

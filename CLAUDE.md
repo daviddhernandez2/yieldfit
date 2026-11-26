@@ -284,8 +284,11 @@ al bloque del que nacen, para no renumerar:
 4. [x] **9d — Dashboard personalizable** (hecho, 2026-11-25; 0052, 0054): bento con widgets y
    grupos al mismo nivel; modo "Editar dashboard" (mover, añadir desde un catálogo, quitar, cambiar
    entre tamaños fijos); "Todos" pasa a ser un grupo normal; retícula estricta.
-5. **1b — Backups automáticos fuera del portátil** (revisión prevista en la 0018).
-6. **6b — Cardio** en la sesión activa (análisis en la deuda técnica).
+5. [x] **11d — Feedback de la beta** (hecho, 2026-11-25; 0055): hoja de reportar por encima de todo,
+   aviso de servidor dormido en el móvil, barra del descanso en el iPhone, cronómetro con horas,
+   añadir ejercicios a una sesión en curso y notas de la sesión con "la última vez".
+6. **1b — Backups automáticos fuera del portátil** (revisión prevista en la 0018).
+7. **6b — Cardio** en la sesión activa (análisis en la deuda técnica).
 
 - [x] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, documentación en Markdown en `/docs`
       (leída en GitHub, sin dependencias ni despliegue; índice en `docs/README.md`).

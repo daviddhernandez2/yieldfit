@@ -73,6 +73,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0052 | Dashboard personalizable en el servidor, con "Todos" como grupo normal | vigente |
 | 0053 | Campos de fecha sin aspecto nativo en iOS y con pista propia | vigente |
 | 0054 | Widgets con anatomía común aprobada en el design system, y edición del dashboard con borrador | vigente |
+| 0055 | Notas de la sesión con "la última vez", y añadir ejercicios a una sesión en curso | vigente |
 
 ---
 
@@ -1935,3 +1936,37 @@ propio, y el modo edición necesitaba reglas que la 0052 no fijaba.
   récord en esos segundos, ve "No se ha podido cargar" una vez.
 - El catálogo del servidor devuelve también `camposReferencia`, para que el cliente no copie a mano
   en qué campo va cada referencia.
+
+---
+
+## 0055 — Notas de la sesión con "la última vez", y añadir ejercicios a una sesión en curso
+
+Fecha: 2026-11-25 · Estado: vigente · Bloque: 11d
+
+**Contexto:** primeros reportes reales de la beta (página `/developer`). Además de tres fallos de
+pantalla, una usuaria pidió añadir ejercicios a una sesión ya empezada, y David quería notas al
+final del entreno.
+
+**Decisión** (de David):
+- **Añadir ejercicios** con la misma página que "Reemplazar" (`ReplaceExercise`), en
+  `/sessions/active/add`: se pueden elegir varios, entran al final con 3 series y 90 s (los mismos
+  valores que una rutina nueva, `utils/porDefecto.js`) y solo en esta sesión: la rutina no cambia.
+- **Notas** en un campo encima de "Terminar sesión", y no en el diálogo de terminar: se pueden
+  escribir durante el entreno, se guardan con la sesión en el dispositivo mientras se escribe, y en
+  el iPhone el teclado no tapa un diálogo. Hasta 500 caracteres; una vacía no se guarda. No se
+  editan después (como el resto de la sesión).
+- **"La última vez":** al empezar una rutina, la nota de la sesión **anterior de esa misma rutina**,
+  si la tiene. Si esa no tiene nota, no se busca más atrás. Se pide una vez y se guarda en la
+  sesión, como la serie anterior. Índice `{ userId, workoutId, fecha }`.
+
+**Alternativas descartadas:**
+- *Una página aparte para añadir:* casi igual que la de reemplazar; dos que mantener.
+- *Preguntar al terminar si se añade a la rutina:* mezcla dos cosas; queda para más adelante.
+- *Notas en el diálogo de terminar:* solo se podrían escribir al final, y el teclado lo tapaba.
+- *La última nota que exista de la rutina:* una de hace meses ya no describe cómo vas.
+
+**Consecuencias:**
+- Las notas de la beta empiezan vacías: "la última vez" aparece desde la segunda sesión con nota.
+- Pendientes, si se piden: editar la nota, notas por ejercicio o por serie, y añadir a la rutina lo
+  añadido en la sesión.
+

@@ -42,6 +42,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 11 — Auth robusta | [bloques/11-auth-robusta.md](bloques/11-auth-robusta.md) |
 | 11b — Beta cerrada | [bloques/11b-beta-cerrada.md](bloques/11b-beta-cerrada.md) |
 | 11c — Registro en iOS | [bloques/11c-registro-ios.md](bloques/11c-registro-ios.md) |
+| 11d — Feedback de la beta | [bloques/11d-feedback-beta.md](bloques/11d-feedback-beta.md) |
 
 ## Cómo mantener esta documentación
 

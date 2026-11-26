@@ -27,9 +27,13 @@ const IconCheck = () => (
 //     reemplazar, hace scroll la página entera y no una caja dentro).
 //   - onCreado(ejercicio): si se pasa, cuando lo buscado no existe aparece "+ Crear «…»" y
 //     se puede crear ahí mismo (CrearEjercicio). Quien usa el buscador lo añade a su lista.
+//   - permitirBloqueados: los ejercicios de un tipo bloqueado se pueden elegir. Solo para la
+//     importación de Strong (bloque 7b): una carrera de Strong se empareja con "Carrera
+//     continua" aunque la sesión activa todavía no sepa registrar cardio.
 //
 // Un ejercicio de un tipo bloqueado (cardio, 0030) sale con "Próximamente" y no se puede
-// pulsar, salvo que ya esté seleccionado: así se puede quitar de una rutina que ya lo tenía.
+// pulsar, salvo que ya esté seleccionado (así se puede quitar de una rutina que ya lo tenía)
+// o que se pida permitirBloqueados.
 export default function ExercisePicker({
   ejercicios,
   opciones,
@@ -38,6 +42,7 @@ export default function ExercisePicker({
   onElegir,
   listaCompleta = false,
   onCreado,
+  permitirBloqueados = false,
 }) {
   const [busqueda, setBusqueda] = useState('');
   const [grupo, setGrupo] = useState(null);
@@ -98,7 +103,7 @@ export default function ExercisePicker({
         {visibles.length === 0 && !puedeCrear && <p className={styles.vacio}>No hay ejercicios con esos filtros.</p>}
         {visibles.map((ex) => {
           const isSelected = seleccionados.has(ex._id);
-          const disponible = tipoDisponible(opciones, ex.tipo);
+          const disponible = permitirBloqueados || tipoDisponible(opciones, ex.tipo);
           return (
             <button
               key={ex._id}

@@ -13,18 +13,23 @@
 
 .group {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-sm);
   width: 100%;
 }
 
 /* Cada opción es una pill clickeable que ocupa el espacio disponible.
-   El input radio nativo se oculta visualmente con la regla más abajo. */
+   El input radio nativo se oculta visualmente con la regla más abajo.
+   Su texto nunca se parte (bloque 5c: "No mostrar" salía en dos líneas a 375 px): cada opción
+   parte de lo que mide su texto y crece para llenar la fila; si no caben todas, bajan a la
+   siguiente línea, como hace GrupoBotones. */
 .option {
-  flex: 1;
+  flex: 1 1 auto;
+  white-space: nowrap;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-md);
+  padding: var(--space-md) var(--space-sm);
   background-color: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);

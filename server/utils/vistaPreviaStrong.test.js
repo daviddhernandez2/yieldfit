@@ -4,7 +4,7 @@
 
 import { readFileSync } from 'node:fs';
 import { agruparSesiones, leerCsvStrong } from './importarStrong.js';
-import { buscarCoincidencias, montarVistaPrevia, rangoParaCoincidencias, separarYaImportadas } from './vistaPreviaStrong.js';
+import { buscarCoincidencias, combinacionesDeEjercicios, montarVistaPrevia, rangoParaCoincidencias, separarYaImportadas } from './vistaPreviaStrong.js';
 import { exercisePresets } from '../data/exercisePresets.js';
 
 let fallos = 0;
@@ -73,6 +73,17 @@ ok('coincideCon: los que salen en el mismo entreno', vista.ejercicios.map((e) =>
   ['Face Pull (Cable)', ['Pull Up']], ['Pull Up', ['Face Pull (Cable)']], ['Running', []],
 ]);
 ok('errores y recuentos del CSV, tal cual', [vista.totalErrores, vista.seriesDescartadas, vista.errores.length], [2, 2, 2]);
+ok('combinaciones: una por conjunto de ejercicios, con sus coincidencias', vista.combinaciones, [
+  { ejercicios: ['Face Pull (Cable)', 'Pull Up'], sesiones: 1, coincidencias: ['2026-05-16 13:26:22'] },
+  { ejercicios: ['Running'], sesiones: 1, coincidencias: ['2026-05-20 07:30:00'] }, // "Cardio (app)" del 20
+]);
+ok('combinaciones: las sesiones con los mismos ejercicios se juntan (sin importar el orden)', combinacionesDeEjercicios([
+  { clave: 'a', ejercicios: [{ nombreStrong: 'B' }, { nombreStrong: 'A' }] },
+  { clave: 'b', ejercicios: [{ nombreStrong: 'A' }, { nombreStrong: 'B' }] },
+  { clave: 'c', ejercicios: [{ nombreStrong: 'A' }] },
+], [{ clave: 'b' }]), [
+  { ejercicios: ['A', 'B'], sesiones: 2, coincidencias: ['b'] }, { ejercicios: ['A'], sesiones: 1, coincidencias: [] },
+]);
 ok('todo ya importado: nada nuevo', (() => {
   const v = montarVistaPrevia({ agrupado, ejercicios, recordados: [], clavesYaImportadas: claves, sesionesApp: [], zona });
   return [v.resumen.sesiones, v.resumen.yaImportadas, v.resumen.desde, v.ejercicios.length, v.coincidencias.length];

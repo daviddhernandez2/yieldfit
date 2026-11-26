@@ -57,6 +57,27 @@ const coincidenEnSesion = (nuevas) => {
   return con;
 };
 
+// "No importar" (decisión de David): una sesión que solo tiene ejercicios que no se importan se
+// salta, y la vista previa lo cuenta mientras el usuario cambia sus decisiones. Para eso el cliente
+// necesita saber qué ejercicios lleva cada sesión, pero sin mandarle una lista por sesión (con
+// cinco años, miles): se agrupan las sesiones por su combinación de ejercicios, que se repite
+// mucho (las rutinas). Cada combinación: { ejercicios: [nombres, ordenados], sesiones: cuántas,
+// coincidencias: [claves de las que coinciden con un día tuyo] } (esas se saltan por defecto,
+// decisión B, y el cliente no debe contarlas dos veces).
+export const combinacionesDeEjercicios = (nuevas, coincidencias) => {
+  const coinciden = new Set(coincidencias.map((c) => c.clave));
+  const porClave = new Map();
+  for (const s of nuevas) {
+    const ejercicios = [...new Set(s.ejercicios.map((e) => e.nombreStrong))].sort();
+    const clave = JSON.stringify(ejercicios);
+    if (!porClave.has(clave)) porClave.set(clave, { ejercicios, sesiones: 0, coincidencias: [] });
+    const c = porClave.get(clave);
+    c.sesiones++;
+    if (coinciden.has(s.clave)) c.coincidencias.push(s.clave);
+  }
+  return [...porClave.values()];
+};
+
 // Monta la respuesta de la vista previa.
 //   agrupado: lo que devuelve agruparSesiones (sesiones, errores, totalErrores, seriesDescartadas, avisos);
 //   ejercicios, recordados: los del usuario (ver proponerEmparejamientos);
@@ -71,6 +92,7 @@ export const montarVistaPrevia = ({ agrupado, ejercicios, recordados, clavesYaIm
     coincideCon: [...(juntos.get(p.nombreStrong) ?? [])].sort(),
   }));
 
+  const coincidencias = buscarCoincidencias(nuevas, sesionesApp, zona);
   return {
     resumen: {
       sesiones: nuevas.length,
@@ -82,7 +104,8 @@ export const montarVistaPrevia = ({ agrupado, ejercicios, recordados, clavesYaIm
       notasCortadas: nuevas.filter((s) => s.notasCortadas).length,
     },
     ejercicios: propuestas,
-    coincidencias: buscarCoincidencias(nuevas, sesionesApp, zona),
+    coincidencias,
+    combinaciones: combinacionesDeEjercicios(nuevas, coincidencias),
     errores: agrupado.errores,
     totalErrores: agrupado.totalErrores,
     seriesDescartadas: agrupado.seriesDescartadas,

@@ -117,9 +117,9 @@ export const limiteRestablecer = rateLimit({
 });
 
 // Importar desde Strong (bloque 7b): 10 vistas previas por hora y por USUARIO (va después de
-// requireAuth). Cada una lee un CSV de hasta 10 MB: es el trabajo más caro de la API para el
+// requireAuth). Cada una lee un CSV de hasta 5 MB: es el trabajo más caro de la API para el
 // servidor, y una persona que importa su historial necesita una o dos. Cuentan también las que
-// fallan (un CSV roto de 10 MB cuesta lo mismo de leer).
+// fallan (un CSV roto de 5 MB cuesta lo mismo de leer).
 export const limiteVistaPreviaImportar = rateLimit({
   windowMs: UNA_HORA,
   limit: 10,

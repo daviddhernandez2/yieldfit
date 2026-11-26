@@ -73,12 +73,12 @@ app.use(
     credentials: true,
   })
 );
-// La importación de Strong (bloque 7b) manda el CSV dentro del JSON: hasta 10 MB de archivo, que
-// con los escapes del JSON (\" y \n) ocupan algo más. Solo esa ruta acepta 12 MB; el límite real
-// del archivo (10 MB, con su mensaje) lo comprueba el controlador. Va antes del express.json()
+// La importación de Strong (bloque 7b) manda el CSV dentro del JSON: hasta 5 MB de archivo, que
+// con los escapes del JSON (\" y \n) ocupan algo más. Solo esa ruta acepta 6 MB; el límite real
+// del archivo (5 MB, con su mensaje) lo comprueba el controlador. Va antes del express.json()
 // general: el cuerpo ya leído aquí no se vuelve a leer, y el resto de la API sigue con los 100 KB
 // por defecto.
-app.use('/api/importar', express.json({ limit: '12mb' }));
+app.use('/api/importar', express.json({ limit: '6mb' }));
 app.use(express.json());
 
 app.get('/', (req, res) => {

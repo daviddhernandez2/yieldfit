@@ -16,7 +16,7 @@ export const errorHandler = (err, req, res, next) => {
 
   const status = err.status || 500;
 
-  // Un cuerpo que pasa del límite de express.json() (100 KB en la API; 12 MB en la importación).
+  // Un cuerpo que pasa del límite de express.json() (100 KB en la API; 6 MB en la importación).
   // Su mensaje en inglés ("request entity too large") no le dice nada al usuario.
   if (err.type === 'entity.too.large') {
     return res.status(413).json({ error: 'Payload Too Large', message: 'La petición es demasiado grande' });

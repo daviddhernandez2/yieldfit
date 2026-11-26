@@ -10,14 +10,16 @@ import { buscarCoincidencias, montarVistaPrevia, rangoParaCoincidencias, separar
 import { construirSesiones, validarDecisiones } from '../utils/construirImportacion.js';
 import { recalcularRecords } from '../utils/records.js';
 import { zonaValida } from '../utils/zona.js';
+import { ocupar, responderOcupado } from '../utils/operacionPesada.js';
 
 // Importar el historial de Strong (bloque 7b). El CSV llega como texto dentro del JSON (el
 // cliente lo lee con FileReader) y nunca se guarda: se lee, se usa y se descarta.
 
-// Tamaño máximo del CSV (decisión de David: 10 MB). La ruta acepta un JSON algo mayor (app.js)
+// Tamaño máximo del CSV (decisión de David: 5 MB; cinco años a su ritmo son unos 2,7 MB). Empezó
+// en 10 MB y se bajó al medir la memoria (ver importar). La ruta acepta un JSON algo mayor (app.js)
 // porque al ir dentro de un JSON el texto crece con los escapes (\" y \n); el límite de verdad
 // es este, sobre el propio CSV, para que el mensaje hable del archivo y no de la petición.
-export const MAX_BYTES_CSV = 10 * 1024 * 1024;
+export const MAX_BYTES_CSV = 5 * 1024 * 1024;
 
 // Lo común a la vista previa y a la importación: comprueba el cuerpo y lee el CSV. Lanza
 // ErrorImportacion (400) o un error 413 con un mensaje para el usuario.
@@ -25,7 +27,7 @@ const leerPeticion = (body) => {
   const { csv, zona, unidad = 'kg' } = body ?? {};
   if (typeof csv !== 'string') throw new ErrorImportacion('Falta el archivo CSV');
   if (Buffer.byteLength(csv, 'utf8') > MAX_BYTES_CSV) {
-    const error = new Error('El archivo pasa de 10 MB. Exporta desde Strong un periodo más corto.');
+    const error = new Error('El archivo pasa de 5 MB. Exporta desde Strong un periodo más corto.');
     error.status = 413;
     throw error;
   }
@@ -34,6 +36,28 @@ const leerPeticion = (body) => {
 
   const { idioma, filas } = leerCsvStrong(csv);
   return { zona, unidad, agrupado: agruparSesiones(filas, { unidad, zona, idioma }) };
+};
+
+// Sesiones que se guardan en cada insertMany de la importación (ver importar).
+const TANDA_SESIONES = 250;
+
+// Memoria del proceso (RSS) durante una importación, para el log: la de al empezar, la máxima
+// (muestreada cada 100 ms, porque el pico puede llegar y pasar entre el principio y el final) y la
+// del final. Render free tiene 512 MB. El cuerpo de la petición (el CSV dentro del JSON) ya está
+// leído al empezar: express.json() lo lee antes del controlador.
+const MB = 1024 * 1024;
+const medirMemoria = () => {
+  const inicio = process.memoryUsage().rss;
+  let maxima = inicio;
+  const muestreo = setInterval(() => {
+    maxima = Math.max(maxima, process.memoryUsage().rss);
+  }, 100);
+  return () => {
+    clearInterval(muestreo);
+    const final = process.memoryUsage().rss;
+    maxima = Math.max(maxima, final);
+    return `memoria ${Math.round(inicio / MB)} → máx. ${Math.round(maxima / MB)} → ${Math.round(final / MB)} MB`;
+  };
 };
 
 // Las sesiones de un lote. El $type junto a la igualdad no sobra: sin él, MongoDB no usa el índice
@@ -93,7 +117,12 @@ export const vistaPrevia = async (req, res, next) => {
 // B), las que el usuario no haya incluido. Todo en una transacción: o se importa entero o nada.
 // Las sesiones llevan el mismo lote, para listarlas y deshacerlas juntas (decisión A).
 export const importar = async (req, res, next) => {
+  // Una importación o un deshacer a la vez en todo el servidor (utils/operacionPesada.js). Se
+  // comprueba lo primero: leer el CSV ya es parte de lo pesado.
+  const liberar = ocupar();
+  if (!liberar) return responderOcupado(res);
   const t0 = performance.now();
+  const memoria = medirMemoria();
   try {
     const userId = req.user._id;
     const { zona, agrupado } = leerPeticion(req.body);
@@ -171,7 +200,16 @@ export const importar = async (req, res, next) => {
         // insertMany valida cada sesión con el modelo (RPE, límites de peso y reps, notas…) y el
         // índice único importacion_unica impide duplicar un entreno aunque llegaran dos
         // importaciones a la vez. Cualquier fallo deshace la transacción entera.
-        await Session.insertMany(documentos, { session: transaccion });
+        // En tandas de TANDA_SESIONES, todas dentro de la misma transacción: con un solo
+        // insertMany, Mongoose prepara y valida todas las sesiones a la vez, y con un CSV de 10 MB
+        // (el límite de entonces; hoy son 5)
+        // (1.360 sesiones, 50.000 series) el heap pasaba de 256 MB y el proceso se caía (medido en
+        // el 7b; Render free tiene 512 MB en total). El tamaño equilibra memoria y viajes a la base
+        // (medido con ese CSV y el heap a 256 MB): 100 → pico de 133 MB y 13,5 s; 250 → 150 MB y
+        // 8,5 s; 500 → 214 MB y 5,7 s, demasiado cerca del límite.
+        for (let i = 0; i < documentos.length; i += TANDA_SESIONES) {
+          await Session.insertMany(documentos.slice(i, i + TANDA_SESIONES), { session: transaccion });
+        }
         // Las marcas de todo el historial de esos ejercicios: las sesiones importadas suelen ser
         // anteriores a las de la app, así que pueden cambiar récords ya marcados.
         if (ids1RM.length) {
@@ -191,7 +229,7 @@ export const importar = async (req, res, next) => {
       `Importación de Strong: ${documentos.length} sesiones, ${nuevosEjercicios.length} ejercicios nuevos, ` +
       `${ids1RM.length} con récords · preparar ${Math.round(tPreparado - t0)} ms, ` +
       `transacción ${Math.round(tTransaccion - tPreparado)} ms (récords ${Math.round(msRecords)} ms), ` +
-      `total ${Math.round(performance.now() - t0)} ms`
+      `total ${Math.round(performance.now() - t0)} ms · ${memoria()}`
     );
     res.status(201).json({
       importacion: {
@@ -220,6 +258,9 @@ export const importar = async (req, res, next) => {
       return res.status(409).json({ error: 'Conflict', message: 'Alguno de estos entrenos se acaba de importar. Vuelve a abrir la vista previa.' });
     }
     next(error);
+  } finally {
+    memoria(); // para el muestreo también si ha fallado (si no, el intervalo seguiría vivo)
+    liberar(); // siempre, haya ido bien o mal: si no, nadie más podría importar hasta reiniciar
   }
 };
 
@@ -260,8 +301,12 @@ export const deshacerLote = async (req, res, next) => {
   const lote = new mongoose.Types.ObjectId(req.params.lote);
   const filtro = filtroLote(userId, lote);
 
-  const transaccion = await mongoose.startSession();
+  // El mismo turno que importar: el recálculo de récords también es pesado.
+  const liberar = ocupar();
+  if (!liberar) return responderOcupado(res);
+  let transaccion;
   try {
+    transaccion = await mongoose.startSession();
     let borradas = 0;
     let ids1RM = [];
     let msRecords = 0;
@@ -289,6 +334,7 @@ export const deshacerLote = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    await transaccion.endSession();
+    await transaccion?.endSession();
+    liberar();
   }
 };

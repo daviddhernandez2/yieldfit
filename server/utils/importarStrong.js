@@ -19,9 +19,9 @@ import { fechaLocalAUtc } from './zona.js';
 
 export { ORIGEN_STRONG } from '../data/importacion.js';
 
-// Con el límite de 10 MB de la ruta, unas 130.000 filas de Strong (unos 80 bytes por fila). Este
+// Con el límite de 5 MB de la ruta, unas 65.000 filas de Strong (unos 80 bytes por fila). Este
 // tope es la segunda barrera: csv-parse deja de leer al llegar a él, sin cargar el resto.
-export const LIMITE_FILAS = 150_000;
+export const LIMITE_FILAS = 75_000;
 // Los mismos límites que una sesión guardada desde la app (models/Session.js).
 export const MAX_NOTAS = 500;
 export const MAX_NOMBRE_SESION = 60;

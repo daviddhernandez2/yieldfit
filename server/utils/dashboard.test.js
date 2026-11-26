@@ -11,12 +11,28 @@ const ok = (desc, real, esperado) => {
   if (!bien) fallos++;
   console.log(`${bien ? 'OK   ' : 'FALLO'} ${desc}: ${JSON.stringify(real)}${bien ? '' : '  (esperado ' + JSON.stringify(esperado) + ')'}`);
 };
+// Desde el cierre del 9d todos los widgets del catálogo están disponibles, pero la regla sigue
+// (un widget nuevo nace con disponible: false). Para probarla, un tipo se marca como no
+// disponible solo mientras dura `fn`, y se deja como estaba aunque falle.
+const conNoDisponible = (tipo, fn) => {
+  const def = CATALOGO.find((w) => w.tipo === tipo);
+  const antes = def.disponible;
+  def.disponible = false;
+  try {
+    return fn();
+  } finally {
+    def.disponible = antes;
+  }
+};
 
 // --- validarWidgets ---
 ok('lista vacía', validarWidgets([]), { widgets: [] });
 ok('no es una lista', validarWidgets({}), { error: 'widgets tiene que ser una lista' });
 ok('tipo desconocido', validarWidgets([{ tipo: 'clima', tamano: 'P' }]), { error: 'Tipo de widget no válido: clima' });
-ok('tipo aún no disponible', validarWidgets([{ tipo: 'recordEjercicio', tamano: 'P', exerciseId: 'x' }]), { error: '«Récord de un ejercicio» aún no está disponible' });
+ok('tipo aún no disponible',
+  conNoDisponible('recordEjercicio', () => validarWidgets([{ tipo: 'recordEjercicio', tamano: 'P', exerciseId: 'x' }])),
+  { error: '«Récord de un ejercicio» aún no está disponible' });
+ok('y disponible, se acepta', 'widgets' in validarWidgets([{ tipo: 'recordEjercicio', tamano: 'P', exerciseId: 'x' }]), true);
 ok('tamaño no permitido', validarWidgets([{ tipo: 'progresoTotal', tamano: 'G' }]), { error: '«Progreso total» no admite el tamaño G' });
 ok('grupo sin chartId', validarWidgets([{ tipo: 'grupo', tamano: 'G' }]), { error: '«Grupo de progreso» necesita chartId' });
 ok('mismo grupo dos veces',
@@ -84,7 +100,8 @@ ok('grupos en M o P pasan a G; lo válido no cambia',
   normalizarWidgets([{ tipo: 'grupo', tamano: 'M', chartId: 'a' }, { tipo: 'grupo', tamano: 'P', chartId: 'b' }, { tipo: 'progresoTotal', tamano: 'P' }]),
   { widgets: [{ tipo: 'grupo', tamano: 'G', chartId: 'a' }, { tipo: 'grupo', tamano: 'G', chartId: 'b' }, { tipo: 'progresoTotal', tamano: 'P' }], cambiado: true });
 ok('tipo que ya no existe o no está disponible: se quita',
-  normalizarWidgets([{ tipo: 'clima', tamano: 'P' }, { tipo: 'empezarRutina', tamano: 'P', workoutId: 'w' }]), { widgets: [], cambiado: true });
+  conNoDisponible('empezarRutina', () => normalizarWidgets([{ tipo: 'clima', tamano: 'P' }, { tipo: 'empezarRutina', tamano: 'P', workoutId: 'w' }])),
+  { widgets: [], cambiado: true });
 ok('nada que ajustar', normalizarWidgets([{ tipo: 'sesionesTotales', tamano: 'P' }]).cambiado, false);
 
 // --- rehacerPorDefecto ---

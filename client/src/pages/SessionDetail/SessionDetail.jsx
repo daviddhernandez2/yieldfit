@@ -115,7 +115,10 @@ export default function SessionDetail() {
         </div>
         <div className={`${styles.statBox} glassCard`}>
           <span className={styles.statLabel}>Peso total</span>
-          <span className={styles.statValue}>{pesoTotal.toLocaleString('es-ES')} kg</span>
+          <span className={styles.statValue}>
+            {pesoTotal.toLocaleString('es-ES')}
+            <span className={styles.statUnidad}>kg</span>
+          </span>
         </div>
         <div className={`${styles.statBox} glassCard`}>
           <span className={styles.statLabel}>Series</span>

@@ -45,7 +45,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  padding: var(--space-md);
+  /* 8 px a los lados (no 16): a 375 px cada casilla mide unos 103 px y la cifra necesita el sitio. */
+  padding: var(--space-md) var(--space-sm);
+  min-width: 0;
   border-radius: var(--radius-md);
   align-items: center;
   text-align: center;
@@ -62,6 +64,16 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
+  /* La cifra nunca se parte en dos líneas ("2000 / kg" a 375 px). Con la unidad en pequeño,
+     caben "100.000 kg" y "10h 59 min" a 375 px (comprobado). */
+  white-space: nowrap;
+}
+
+/* Unidad junto a la cifra ("kg"), más pequeña, como en los widgets del design system. */
+.statUnidad {
+  margin-left: 2px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 .exercisesList {

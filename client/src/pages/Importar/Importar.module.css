@@ -143,6 +143,15 @@
   color: var(--color-error);
 }
 
+/* "No importar": la fila en gris y su estado en cursiva, para que no compita con lo que sí entra. */
+.filaOmitida .filaNombre {
+  color: var(--color-text-muted);
+}
+
+.omitido {
+  font-style: italic;
+}
+
 /* "Cambiar", "Elegir", "Deshacer": texto con zona táctil de 48 px. */
 .accionFila {
   flex: none;

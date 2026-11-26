@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Button from '@/components/Button/Button.jsx';
 import { formatHora } from '@/utils/formato.js';
-import { paresQueSeJuntan, sesionesAImportar, sinEmparejar } from '@/utils/importar.js';
+import { omitidos, paresQueSeJuntan, saltadasPorOmitir, sesionesAImportar, sinEmparejar } from '@/utils/importar.js';
 import styles from '@/pages/Importar/Importar.module.css';
 
 const ESTADO = { recordado: 'recordado', nombre: 'mismo nombre', equivalencia: 'propuesto' };
@@ -25,7 +25,9 @@ export default function VistaPrevia({ vista, catalogo, opcionesEjercicio, decisi
   const [verErrores, setVerErrores] = useState(false);
   const { resumen } = vista;
   const faltan = sinEmparejar(vista.ejercicios, decisiones);
-  const aImportar = sesionesAImportar(vista, incluidas);
+  const aImportar = sesionesAImportar(vista, incluidas, decisiones);
+  const fuera = omitidos(vista.ejercicios, decisiones);
+  const saltadasOmitir = saltadasPorOmitir(vista, decisiones, incluidas);
   const juntados = paresQueSeJuntan(vista.ejercicios, decisiones);
   const porId = new Map(catalogo.map((e) => [e._id, e]));
   const etiquetaTipo = (v) => opcionesEjercicio.tipos.find((t) => t.value === v)?.label ?? v;
@@ -46,7 +48,7 @@ export default function VistaPrevia({ vista, catalogo, opcionesEjercicio, decisi
 
   const textoBarra = () => {
     if (faltan > 0) return `Falta emparejar ${plural(faltan, 'ejercicio', 'ejercicios')}`;
-    if (aImportar === 0) return 'Todas coinciden con días que ya tienes: activa alguna para importarla';
+    if (aImportar === 0) return 'No queda ninguna sesión: revisa los días que coinciden o lo que no importas';
     return 'Lo que elijas se recuerda para la próxima vez';
   };
 
@@ -98,6 +100,17 @@ export default function VistaPrevia({ vista, catalogo, opcionesEjercicio, decisi
               {plural(vista.avisos.horasInexistentes, 'sesión empieza', 'sesiones empiezan')} a una hora que no existe ese día; se pasa a la hora siguiente.
             </p>
           )}
+        </div>
+      )}
+
+      {/* "No importar": lo que se queda fuera, y las sesiones que se saltan por eso. */}
+      {fuera.ejercicios > 0 && (
+        <div className={styles.aviso}>
+          <p>
+            <b>Sin importar: </b>
+            {plural(fuera.ejercicios, 'ejercicio no se importa', 'ejercicios no se importan')} ({plural(fuera.series, 'serie', 'series')}).
+            {saltadasOmitir > 0 && ` ${plural(saltadasOmitir, 'sesión se salta porque solo tenía', 'sesiones se saltan porque solo tenían')} ejercicios que no importas.`}
+          </p>
         </div>
       )}
 
@@ -186,7 +199,7 @@ export default function VistaPrevia({ vista, catalogo, opcionesEjercicio, decisi
             // El estado solo se dice si la decisión sigue siendo la propuesta del servidor.
             const esLaPropuesta = d?.exerciseId && d.exerciseId === e.exerciseId;
             return (
-              <li key={e.nombreStrong} className={styles.fila}>
+              <li key={e.nombreStrong} className={`${styles.fila} ${d?.omitir ? styles.filaOmitida : ''}`}>
                 <div className={styles.filaTexto}>
                   <span className={styles.filaNombre}>{e.nombreStrong}</span>
                   <span className={styles.filaSub}>
@@ -203,6 +216,7 @@ export default function VistaPrevia({ vista, catalogo, opcionesEjercicio, decisi
                         Crear: <b className={styles.pareja}>{d.crear.nombre}</b> ({etiquetaGrupo(d.crear.grupoMuscular)} · {etiquetaTipo(d.crear.tipo)})
                       </>
                     )}
+                    {d?.omitir && <span className={styles.omitido}>No se importa{e.estado === 'omitido' && ' (recordado)'}</span>}
                     {!d && <span className={styles.falta}>Sin emparejar</span>}
                   </span>
                 </div>

@@ -10,6 +10,7 @@ const plural = (n, uno, varios) => `${n.toLocaleString('es-ES')} ${n === 1 ? uno
 export default function Resultado({ resultado, deshaciendo, onDeshacer, onHistorial }) {
   const detalles = [
     resultado.saltadas > 0 && `${plural(resultado.saltadas, 'saltada', 'saltadas')} (días con sesiones tuyas)`,
+    resultado.saltadasPorOmitidos > 0 && `${plural(resultado.saltadasPorOmitidos, 'saltada', 'saltadas')} (solo ejercicios que no importas)`,
     resultado.yaImportadas > 0 && `${plural(resultado.yaImportadas, 'ya estaba importada', 'ya estaban importadas')}`,
     resultado.ejerciciosCreados > 0 && plural(resultado.ejerciciosCreados, 'ejercicio creado', 'ejercicios creados'),
     resultado.records > 0 ? plural(resultado.records, 'sesión con récord', 'sesiones con récord') : 'récords recalculados',

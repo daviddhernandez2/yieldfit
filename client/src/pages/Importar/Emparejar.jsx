@@ -13,6 +13,9 @@ const esCardio = (tracking) => tracking === 'tiempo_distancia';
 // trae peso y reps, ejercicios de fuerza; para una carrera, de cardio (que aquí sí se pueden
 // elegir y crear, decisión 1, aunque la sesión activa los tenga en "Próximamente").
 //
+// Tercera opción, "No importar" (decisión de David): sus series se quedan fuera y el resto de cada
+// entreno sí entra; se recuerda para la próxima vez.
+//
 // El nuevo NO se crea al pulsar: queda como decisión y se crea al importar, dentro de la misma
 // transacción (si la importación falla, no queda un ejercicio suelto). Por eso no se usa el
 // "+ Crear" del buscador, que lo crea en el momento.
@@ -98,6 +101,19 @@ export default function Emparejar({ fila, catalogo, opcionesEjercicio, decisione
         <div>
           <Button size="sm" variant="primary" disabled={!puedeCrear} onClick={() => onDecidir({ crear: { nombre: nombre.trim(), grupoMuscular, tipo } })}>
             Crear y usar
+          </Button>
+        </div>
+      </section>
+
+      <section className={styles.tarjeta}>
+        <h2 className={styles.tituloTarjeta}>O no importarlo</h2>
+        <p className={styles.textoPequeno}>
+          Sus {fila.series.toLocaleString('es-ES')} {fila.series === 1 ? 'serie se queda' : 'series se quedan'} fuera; el resto de cada entreno sí se importa. Si un
+          entreno solo tenía ejercicios que no importas, se salta. Se recuerda para la próxima vez y se puede cambiar.
+        </p>
+        <div>
+          <Button size="sm" variant="outline" disabled={Boolean(actual?.omitir)} onClick={() => onDecidir({ omitir: true })}>
+            {actual?.omitir ? 'Ya no se importa' : 'No importar este ejercicio'}
           </Button>
         </div>
       </section>

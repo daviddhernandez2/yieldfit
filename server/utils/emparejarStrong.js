@@ -3,6 +3,8 @@
 // puras: los ejercicios del usuario y sus emparejamientos recordados llegan ya leídos.
 //
 // Reglas, por orden (gana la primera que da algo):
+//   0. omitido: el usuario eligió "No importar" en una importación anterior (EmparejamientoImport
+//      con omitir: true). Se respeta y va al final de la lista; se puede cambiar;
 //   1. recordado: lo que el usuario eligió en una importación anterior (EmparejamientoImport);
 //   2. nombre: un ejercicio suyo que se llama igual (sin mayúsculas, tildes ni espacios de más);
 //   3. equivalencia: el preset equivalente del diccionario (data/equivalenciasStrong.js), si el
@@ -15,7 +17,8 @@
 // regla encuentra uno incompatible, se pasa a la siguiente. El servidor también rechaza al
 // importar un emparejamiento incompatible que llegue del cliente.
 // La vista previa lo muestra en ese orden de urgencia: sin emparejar arriba, luego lo propuesto
-// (incluido "Crear") y abajo lo recordado, que normalmente ya no hay que tocar.
+// (incluido "Crear"), después lo recordado, que normalmente ya no hay que tocar, y al final lo que
+// no se importa (no cuenta como "sin emparejar").
 
 import { EQUIVALENCIAS_STRONG } from '../data/equivalenciasStrong.js';
 import { derivarTracking } from '../models/Exercise.js';
@@ -109,16 +112,16 @@ export const adivinarEjercicio = (
   return grupoMuscular && tipo ? { grupoMuscular, tipo } : null;
 };
 
-export const ESTADOS = ['sinEmparejar', 'propuesto', 'recordado'];
+export const ESTADOS = ['sinEmparejar', 'propuesto', 'recordado', 'omitido'];
 
 // Propone un emparejamiento para cada ejercicio del CSV.
 //   resumen: [{ nombreStrong, sesiones, series, cardio }] (lo que el CSV trae de cada ejercicio);
 //   ejercicios: los del usuario, [{ _id, nombre, grupoMuscular, tipo, tracking }];
-//   recordados: [{ nombreOrigen, exerciseId }] de EmparejamientoImport.
+//   recordados: [{ nombreOrigen, exerciseId }] o [{ nombreOrigen, omitir: true }] de EmparejamientoImport.
 // Devuelve una fila por ejercicio, en el orden de la vista previa:
 //   { nombreStrong, sesiones, series, tracking, estado, motivo, exerciseId, crear }
 //   - tracking: el que necesita ('1RM' o 'tiempo_distancia'): el cliente solo ofrece esos;
-//   - estado: 'sinEmparejar' | 'propuesto' | 'recordado';
+//   - estado: 'sinEmparejar' | 'propuesto' | 'recordado' | 'omitido';
 //   - motivo: 'recordado' | 'nombre' | 'equivalencia' | 'crear' | null;
 //   - exerciseId: el ejercicio propuesto (string) o null;
 //   - crear: { nombre, grupoMuscular, tipo } si se propone uno nuevo, o null.
@@ -134,13 +137,18 @@ export const proponerEmparejamientos = ({ resumen, ejercicios, recordados }) => 
     if (!porNombre.has(clave)) porNombre.set(clave, []);
     porNombre.get(clave).push(e);
   }
-  const recordado = new Map(recordados.map((r) => [r.nombreOrigen, String(r.exerciseId)]));
+  const recordado = new Map(recordados.filter((r) => r.exerciseId).map((r) => [r.nombreOrigen, String(r.exerciseId)]));
+  const omitidos = new Set(recordados.filter((r) => r.omitir === true).map((r) => r.nombreOrigen));
 
   const filas = resumen.map(({ nombreStrong, sesiones, series, cardio }) => {
     const tracking = trackingDe(cardio);
     const base = { nombreStrong, sesiones, series, tracking };
     const compatible = (e) => trackingEjercicio(e) === tracking;
 
+    // 0. "No importar" recordado.
+    if (omitidos.has(nombreStrong)) {
+      return { ...base, estado: 'omitido', motivo: 'recordado', exerciseId: null, crear: null };
+    }
     // 1. Recordado, si el ejercicio sigue existiendo (borrarlo ya borra el emparejamiento, pero
     //    no cuesta nada comprobarlo) y sigue siendo compatible (se le pudo cambiar el tipo).
     const idRecordado = recordado.get(nombreStrong);

@@ -101,6 +101,14 @@ const ver = (n) => {
   return [p.estado, p.motivo, p.exerciseId, p.crear];
 };
 ok('recordado gana a todo', ver('Lat Pulldown (Cable)'), ['recordado', 'recordado', 'mio', null]);
+ok('"No importar" recordado: omitido y al final, aunque tenga propuesta', (() => {
+  const r = proponerEmparejamientos({
+    resumen: [fila('Squat (Barbell)'), fila('T Bar Row'), fila('Face Pull (Cable)')],
+    ejercicios,
+    recordados: [{ nombreOrigen: 'Squat (Barbell)', omitir: true }, { nombreOrigen: 'Face Pull (Cable)', exerciseId: 'mio' }],
+  });
+  return r.map((p) => [p.nombreStrong, p.estado, p.motivo, p.exerciseId]);
+})(), [['T Bar Row', 'sinEmparejar', null, null], ['Face Pull (Cable)', 'recordado', 'recordado', 'mio'], ['Squat (Barbell)', 'omitido', 'recordado', null]]);
 ok('cada fila dice qué tracking necesita', [propuestas.find((p) => p.nombreStrong === 'Running').tracking, propuestas.find((p) => p.nombreStrong === 'T Bar Row').tracking], ['tiempo_distancia', '1RM']);
 ok('recordado de un ejercicio borrado: se ignora y sigue con el diccionario', ver('Face Pull (Cable)'), ['propuesto', 'equivalencia', id('Face pull'), null]);
 ok('mismo nombre, sin mayúsculas', ver('PULL OVER'), ['propuesto', 'nombre', 'mio', null]);

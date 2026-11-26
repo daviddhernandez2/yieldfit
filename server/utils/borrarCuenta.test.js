@@ -9,7 +9,8 @@ import { MODELOS_DEL_USUARIO } from './borrarCuenta.js';
 import { COLECCIONES_DEL_USUARIO } from '../scripts/lib/coleccionesUsuario.js';
 
 const carpeta = new URL('../models/', import.meta.url);
-for (const archivo of readdirSync(carpeta).filter((a) => a.endsWith('.js'))) {
+// Solo los modelos: las pruebas que viven junto a ellos (*.test.js) no se importan, o se ejecutarían aquí.
+for (const archivo of readdirSync(carpeta).filter((a) => a.endsWith('.js') && !a.endsWith('.test.js'))) {
   await import(new URL(archivo, carpeta));
 }
 

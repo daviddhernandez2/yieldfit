@@ -112,12 +112,16 @@ const moda = (valores) => {
   return mejor;
 };
 
-// Junta la nota del entreno y las de cada serie en un texto de 500 caracteres como mucho.
-// Devuelve { notas, cortadas }: cortadas = true si no cabía todo (la vista previa lo avisa).
+// Junta la nota del entreno y las de cada serie en un texto de 500 caracteres como mucho, una por
+// línea: "Serie 3 (Triceps Pushdown): bien". El número es el de la serie en Yield Fit y el nombre,
+// el de Strong (si dos ejercicios de Strong se juntan en uno, la serie 1 del segundo pasa a ser la
+// 3, y el nombre dice de cuál venía). Devuelve { notas, cortadas }: cortadas = true si no cabía
+// todo (la vista previa lo avisa). La usan agruparSesiones (con la numeración de Strong, para la
+// vista previa) y construirSesiones (con la definitiva, al importar).
 export const juntarNotas = (notaEntreno, notasSerie) => {
   const partes = [];
   if (notaEntreno) partes.push(notaEntreno);
-  for (const { ejercicio, numeroSerie, texto } of notasSerie) partes.push(`${ejercicio} · Serie ${numeroSerie}: ${texto}`);
+  for (const { ejercicio, numeroSerie, texto } of notasSerie) partes.push(`Serie ${numeroSerie} (${ejercicio}): ${texto}`);
   const completo = partes.join('\n');
   if (completo.length <= MAX_NOTAS) return { notas: completo || null, cortadas: false };
   return { notas: `${completo.slice(0, MAX_NOTAS - 1).trimEnd()}…`, cortadas: true };
@@ -169,9 +173,11 @@ export const leerCsvStrong = (texto, { limiteFilas = LIMITE_FILAS } = {}) => {
 // zonaValida): las fechas de Strong son de reloj y se guardan en UTC.
 //
 // Devuelve:
-//   sesiones: [{ clave, fecha, nombre, nombreStrong, duracionSegundos, notas, notasCortadas,
-//                ejercicios: [{ nombreStrong, descansoSegundos, series: [{ numeroSerie, peso,
-//                reps, tiempoSegundos, distanciaMetros, rpe }] }] }], en orden de fecha;
+//   sesiones: [{ clave, fecha, nombre, nombreStrong, duracionSegundos, notaEntreno, notas,
+//                notasCortadas, ejercicios: [{ nombreStrong, descansoSegundos, series: [{
+//                numeroSerie, peso, reps, tiempoSegundos, distanciaMetros, rpe, nota }] }] }],
+//                en orden de fecha. `notas` es la vista previa del texto; al importar se vuelve a
+//                montar con notaEntreno y la nota de cada serie, con la numeración definitiva;
 //   errores: [{ fila, mensaje }] (como mucho MAX_ERRORES_DETALLE), totalErrores y
 //   seriesDescartadas (las series que no entran por un error, sin contar filas de descanso);
 //   avisos: recuentos de lo que se ha ajustado sin ser un error.
@@ -277,7 +283,10 @@ export const agruparSesiones = (filas, { unidad, zona, idioma = 'es' }) => {
       }
       serie.numeroSerie = grupo.series.length + 1;
       grupo.series.push(serie);
-      if (f.notas) notasSerie.push({ ejercicio: f.ejercicio, numeroSerie: serie.numeroSerie, texto: f.notas });
+      if (f.notas) {
+        serie.nota = f.notas;
+        notasSerie.push({ ejercicio: f.ejercicio, numeroSerie: serie.numeroSerie, texto: f.notas });
+      }
     }
 
     const ejercicios = [...porEjercicio.values()]
@@ -293,7 +302,7 @@ export const agruparSesiones = (filas, { unidad, zona, idioma = 'es' }) => {
     const { notas, cortadas } = juntarNotas(notaEntreno, notasSerie);
     if (cortadas) avisos.notasCortadas++;
 
-    sesiones.push({ clave, fecha, nombre, nombreStrong, duracionSegundos, notas, notasCortadas: cortadas, ejercicios });
+    sesiones.push({ clave, fecha, nombre, nombreStrong, duracionSegundos, notaEntreno, notas, notasCortadas: cortadas, ejercicios });
   }
 
   sesiones.sort((a, b) => a.fecha - b.fecha);

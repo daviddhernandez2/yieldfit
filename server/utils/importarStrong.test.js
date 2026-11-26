@@ -33,7 +33,7 @@ ok('juntarNotas sin nada → null', juntarNotas('', []), { notas: null, cortadas
 ok(
   'juntarNotas: entreno y series, una por línea',
   juntarNotas('Día flojo', [{ ejercicio: 'Squat', numeroSerie: 2, texto: 'bien' }]).notas,
-  'Día flojo\nSquat · Serie 2: bien'
+  'Día flojo\nSerie 2 (Squat): bien'
 );
 const larga = juntarNotas('x'.repeat(600), []);
 ok('juntarNotas corta a 500 con "…"', [larga.notas.length, larga.notas.endsWith('…'), larga.cortadas], [MAX_NOTAS, true, true]);
@@ -59,7 +59,7 @@ ok(
   [[1, 100, 5, 8], [2, 102.5, 5, 8.5], [3, 105, 4, null]]
 );
 ok('la serie vacía del curl femoral no entra', pierna.ejercicios[1].series.length, 1);
-ok('notas: la del entreno y la de la serie (con su salto de línea)', pierna.notas, 'Día flojo\nSquat (Barbell) · Serie 2: Rodilla bien,\nsin molestias');
+ok('notas: la del entreno y la de la serie (con su salto de línea)', pierna.notas, 'Día flojo\nSerie 2 (Squat (Barbell)): Rodilla bien,\nsin molestias');
 ok('descanso: el que más se repite (120, 90, 120 → 120)', espalda.ejercicios[0].descansoSegundos, 120);
 ok('dominadas con peso 0 y reps', espalda.ejercicios[0].series.map((s) => [s.peso, s.reps]), [[0, 10], [0, 8], [0, 7]]);
 ok('face pull: la fila con "doce" no entra, la otra sí', espalda.ejercicios[1].series.map((s) => s.reps), [15]);

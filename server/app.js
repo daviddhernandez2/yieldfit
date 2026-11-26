@@ -15,6 +15,7 @@ import reportRoutes from './routes/reportRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import estadisticasRoutes from './routes/estadisticasRoutes.js';
+import importarRoutes from './routes/importarRoutes.js';
 
 const app = express();
 
@@ -72,6 +73,12 @@ app.use(
     credentials: true,
   })
 );
+// La importación de Strong (bloque 7b) manda el CSV dentro del JSON: hasta 10 MB de archivo, que
+// con los escapes del JSON (\" y \n) ocupan algo más. Solo esa ruta acepta 12 MB; el límite real
+// del archivo (10 MB, con su mensaje) lo comprueba el controlador. Va antes del express.json()
+// general: el cuerpo ya leído aquí no se vuelve a leer, y el resto de la API sigue con los 100 KB
+// por defecto.
+app.use('/api/importar', express.json({ limit: '12mb' }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -99,6 +106,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
+app.use('/api/importar', importarRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

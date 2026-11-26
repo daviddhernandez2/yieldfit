@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import { ESFUERZO_POR_DEFECTO, VALORES_ESFUERZO } from '../utils/esfuerzo.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -57,6 +58,16 @@ const userSchema = new mongoose.Schema(
     // mucho una escritura por hora (utils/ultimoAcceso.js). Lo ve el admin en /developer.
     ultimoAcceso: {
       type: Date,
+    },
+    // Preferencias de la app (bloque 5c). Solo las cambia PUT /api/auth/me/preferencias. Los
+    // usuarios anteriores no tienen el campo: Mongoose aplica los valores por defecto al leerlos.
+    preferencias: {
+      // Cómo ver el esfuerzo por serie: no mostrar, RPE o RIR (utils/esfuerzo.js).
+      esfuerzo: {
+        type: String,
+        enum: { values: VALORES_ESFUERZO, message: 'Preferencia de esfuerzo no válida' },
+        default: ESFUERZO_POR_DEFECTO,
+      },
     },
   },
   {

@@ -9,6 +9,7 @@ import {
   changePassword,
   forgotPassword,
   resetPassword,
+  updatePreferencias,
 } from '../controllers/authController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import {
@@ -30,6 +31,8 @@ router.get('/me', requireAuth, me);
 // límite va tras requireAuth porque cuenta por usuario, y es el mismo para las dos.
 router.delete('/me', requireAuth, limiteConfirmarContrasena, deleteMe);
 router.put('/me/password', requireAuth, limiteConfirmarContrasena, changePassword);
+// Preferencias de la app (bloque 5c): por ahora, cómo ver el esfuerzo por serie.
+router.put('/me/preferencias', requireAuth, updatePreferencias);
 // Sin requireAuth: la prueba de identidad es la cookie de renovación (bloque 11).
 router.post('/refresh', refresh);
 router.post('/logout', logout);

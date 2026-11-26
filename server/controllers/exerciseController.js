@@ -3,6 +3,7 @@ import Exercise, { OPCIONES_GRUPO_MUSCULAR, OPCIONES_TIPO, tipoDisponible } from
 import Workout from '../models/Workout.js';
 import Chart from '../models/Chart.js';
 import Dashboard from '../models/Dashboard.js';
+import { OPCIONES_ESFUERZO, RPE } from '../utils/esfuerzo.js';
 
 // GET /api/exercises
 // Lista los ejercicios del usuario autenticado.
@@ -13,7 +14,13 @@ import Dashboard from '../models/Dashboard.js';
 // Es igual para todos los usuarios y no toca la base de datos.
 export const opciones = (req, res) => {
   res.status(200).json({
-    opciones: { gruposMusculares: OPCIONES_GRUPO_MUSCULAR, tipos: OPCIONES_TIPO },
+    // esfuerzo (bloque 5c): las opciones de la preferencia y el rango del RPE, para que el
+    // cliente pinte los valores sin copiarlos.
+    opciones: {
+      gruposMusculares: OPCIONES_GRUPO_MUSCULAR,
+      tipos: OPCIONES_TIPO,
+      esfuerzo: { opciones: OPCIONES_ESFUERZO, rpe: RPE },
+    },
   });
 };
 

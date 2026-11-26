@@ -16,6 +16,7 @@ import { DURACION_RECUPERACION_MS, emitirRecuperacion, gastarRecuperacion } from
 import { enviarEmail } from '../utils/email.js';
 import { emailContrasenaCambiada, emailRecuperacion } from '../utils/emailsCuenta.js';
 import PasswordReset from '../models/PasswordReset.js';
+import { VALORES_ESFUERZO } from '../utils/esfuerzo.js';
 
 // ---------------------------------------------------------------------------
 // Cookie del token de renovación (bloque 11, DECISIONS.md 0037)
@@ -204,6 +205,28 @@ export const logout = async (req, res, next) => {
 // hay que serializarlo. El método toJSON del modelo User elimina la contraseña.
 export const me = async (req, res, next) => {
   try {
+    res.status(200).json({ user: req.user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PUT /api/auth/me/preferencias  { esfuerzo }
+// Cambia las preferencias del usuario (bloque 5c). Solo los campos que conoce: el resto del
+// cuerpo se ignora (el rol, el email o la contraseña nunca se cambian por aquí). Devuelve el
+// usuario actualizado.
+export const updatePreferencias = async (req, res, next) => {
+  try {
+    const { esfuerzo } = req.body ?? {};
+    if (!VALORES_ESFUERZO.includes(esfuerzo)) {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: `esfuerzo tiene que ser uno de: ${VALORES_ESFUERZO.join(', ')}`,
+      });
+    }
+    // Solo esa preferencia: si mañana hay más, las demás no se tocan.
+    req.user.set('preferencias.esfuerzo', esfuerzo);
+    await req.user.save();
     res.status(200).json({ user: req.user });
   } catch (error) {
     next(error);

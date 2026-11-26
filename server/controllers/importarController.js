@@ -1,9 +1,14 @@
+import mongoose from 'mongoose';
 import Exercise from '../models/Exercise.js';
 import Session from '../models/Session.js';
+import Workout from '../models/Workout.js';
 import EmparejamientoImport from '../models/EmparejamientoImport.js';
 import { ORIGEN_STRONG } from '../data/importacion.js';
 import { agruparSesiones, ErrorImportacion, leerCsvStrong, UNIDADES } from '../utils/importarStrong.js';
-import { montarVistaPrevia, rangoParaCoincidencias } from '../utils/vistaPreviaStrong.js';
+import { resumirEjercicios } from '../utils/emparejarStrong.js';
+import { buscarCoincidencias, montarVistaPrevia, rangoParaCoincidencias, separarYaImportadas } from '../utils/vistaPreviaStrong.js';
+import { construirSesiones, validarDecisiones } from '../utils/construirImportacion.js';
+import { recalcularRecords } from '../utils/records.js';
 import { zonaValida } from '../utils/zona.js';
 
 // Importar el historial de Strong (bloque 7b). El CSV llega como texto dentro del JSON (el
@@ -31,6 +36,35 @@ const leerPeticion = (body) => {
   return { zona, unidad, agrupado: agruparSesiones(filas, { unidad, zona, idioma }) };
 };
 
+// Lo que la vista previa y la importación leen de la base, con las mismas consultas para que las
+// dos decidan lo mismo: los ejercicios y emparejamientos del usuario, las claves de este CSV que
+// ya están importadas y las sesiones registradas a mano en esas fechas.
+const leerContexto = async (userId, agrupado) => {
+  const claves = agrupado.sesiones.map((s) => s.clave);
+  const [ejercicios, recordados, yaImportadas] = await Promise.all([
+    Exercise.find({ userId }, { nombre: 1, grupoMuscular: 1, tipo: 1, tracking: 1 }).lean(),
+    EmparejamientoImport.find({ userId, origen: ORIGEN_STRONG }, { nombreOrigen: 1, exerciseId: 1 }).lean(),
+    // Usa el índice único importacion_unica y solo lee la clave: no trae las sesiones.
+    Session.find(
+      { userId, 'importacion.origen': ORIGEN_STRONG, 'importacion.clave': { $in: claves } },
+      { _id: 0, 'importacion.clave': 1 }
+    ).lean(),
+  ]);
+  const clavesYaImportadas = yaImportadas.map((s) => s.importacion.clave);
+
+  // Sesiones registradas a mano en el rango del CSV, con un día de margen (índice { userId,
+  // fecha }). Solo nombre y fecha. Crece con lo registrado en la app en esas fechas, no con todo
+  // el historial.
+  const rango = rangoParaCoincidencias(separarYaImportadas(agrupado.sesiones, clavesYaImportadas).nuevas);
+  const sesionesApp = rango
+    ? await Session.find(
+      { userId, fecha: { $gte: rango.desde, $lte: rango.hasta }, importacion: { $exists: false } },
+      { _id: 0, nombre: 1, fecha: 1 }
+    ).lean()
+    : [];
+  return { ejercicios, recordados, clavesYaImportadas, sesionesApp };
+};
+
 // POST /api/importar/strong/vista-previa   { csv, zona, unidad? }
 // Lee el CSV y dice qué pasaría al importarlo, SIN escribir nada: cuántas sesiones son nuevas y
 // cuántas ya estaban, la propuesta de emparejamiento de cada ejercicio, los días que coinciden
@@ -38,36 +72,149 @@ const leerPeticion = (body) => {
 // La importación no se fía de esta respuesta: vuelve a leer el CSV (decisión C).
 export const vistaPrevia = async (req, res, next) => {
   try {
-    const userId = req.user._id;
     const { zona, agrupado } = leerPeticion(req.body);
-    const claves = agrupado.sesiones.map((s) => s.clave);
-
-    // Las cuatro lecturas no dependen entre sí salvo la última, que necesita las nuevas.
-    const [ejercicios, recordados, yaImportadas] = await Promise.all([
-      Exercise.find({ userId }, { nombre: 1, grupoMuscular: 1, tipo: 1, tracking: 1 }).lean(),
-      EmparejamientoImport.find({ userId, origen: ORIGEN_STRONG }, { nombreOrigen: 1, exerciseId: 1 }).lean(),
-      // Usa el índice único importacion_unica y solo lee la clave: no trae las sesiones.
-      Session.find(
-        { userId, 'importacion.origen': ORIGEN_STRONG, 'importacion.clave': { $in: claves } },
-        { _id: 0, 'importacion.clave': 1 }
-      ).lean(),
-    ]);
-    const clavesYaImportadas = yaImportadas.map((s) => s.importacion.clave);
-
-    // Sesiones registradas a mano en el rango del CSV (índice { userId, fecha }). Solo nombre y
-    // fecha. Crece con lo registrado en la app en esas fechas, no con todo el historial.
-    const nuevasClaves = new Set(clavesYaImportadas);
-    const rango = rangoParaCoincidencias(agrupado.sesiones.filter((s) => !nuevasClaves.has(s.clave)));
-    const sesionesApp = rango
-      ? await Session.find(
-        { userId, fecha: { $gte: rango.desde, $lte: rango.hasta }, importacion: { $exists: false } },
-        { _id: 0, nombre: 1, fecha: 1 }
-      ).lean()
-      : [];
-
-    const vista = montarVistaPrevia({ agrupado, ejercicios, recordados, clavesYaImportadas, sesionesApp, zona });
+    const contexto = await leerContexto(req.user._id, agrupado);
+    const vista = montarVistaPrevia({ agrupado, zona, ...contexto });
     res.json({ vistaPrevia: vista });
   } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/importar/strong
+//   { csv, zona, unidad, emparejamientos: { nombreStrong: exerciseId },
+//     crear: { nombreStrong: { nombre, grupoMuscular, tipo } }, incluirCoincidencias: [clave] }
+// Importa de verdad. Vuelve a leer el CSV (decisión C): del cliente solo se usan sus decisiones.
+// Se saltan las sesiones ya importadas y, de los días con sesiones registradas a mano (decisión
+// B), las que el usuario no haya incluido. Todo en una transacción: o se importa entero o nada.
+// Las sesiones llevan el mismo lote, para listarlas y deshacerlas juntas (decisión A).
+export const importar = async (req, res, next) => {
+  const t0 = performance.now();
+  try {
+    const userId = req.user._id;
+    const { zona, agrupado } = leerPeticion(req.body);
+    const { emparejamientos, crear, incluirCoincidencias = [] } = req.body;
+    if (!Array.isArray(incluirCoincidencias) || !incluirCoincidencias.every((c) => typeof c === 'string')) {
+      throw new ErrorImportacion('incluirCoincidencias tiene que ser una lista de claves');
+    }
+
+    const [contexto, rutinas] = await Promise.all([
+      leerContexto(userId, agrupado),
+      Workout.find({ userId }, { nombre: 1 }).lean(),
+    ]);
+    const { nuevas, yaImportadas } = separarYaImportadas(agrupado.sesiones, contexto.clavesYaImportadas);
+    const incluir = new Set(incluirCoincidencias);
+    const saltar = new Set(
+      buscarCoincidencias(nuevas, contexto.sesionesApp, zona).map((c) => c.clave).filter((clave) => !incluir.has(clave))
+    );
+    const aImportar = nuevas.filter((s) => !saltar.has(s.clave));
+    if (aImportar.length === 0) throw new ErrorImportacion('No hay sesiones nuevas que importar');
+
+    const { error, asignacion } = validarDecisiones({
+      necesarios: resumirEjercicios(aImportar), emparejamientos, crear, ejercicios: contexto.ejercicios,
+    });
+    if (error) throw new ErrorImportacion(error);
+
+    // Los ejercicios nuevos llevan su _id desde ya: las sesiones los necesitan, y si
+    // withTransaction repite la función, se repite con los mismos documentos.
+    const porId = new Map(contexto.ejercicios.map((e) => [String(e._id), e]));
+    const ejercicioDe = new Map();
+    const nuevosEjercicios = [];
+    for (const [nombreStrong, decision] of asignacion) {
+      if (decision.exerciseId) {
+        const e = porId.get(decision.exerciseId);
+        ejercicioDe.set(nombreStrong, { _id: e._id, nombre: e.nombre, tracking: e.tracking });
+      } else {
+        const _id = new mongoose.Types.ObjectId();
+        // insertMany no ejecuta pre('save'): el tracking va ya calculado (validarDecisiones). El
+        // tipo Cardio está bloqueado en el alta normal hasta el 6b, pero aquí se permite
+        // (decisión de David): el bloqueo es porque la sesión activa no sabe registrarlo.
+        nuevosEjercicios.push({ _id, userId, ...decision.crear });
+        ejercicioDe.set(nombreStrong, { _id, nombre: decision.crear.nombre, tracking: decision.crear.tracking });
+      }
+    }
+
+    const lote = new mongoose.Types.ObjectId();
+    const { documentos, seriesSinDatos, juntados, notasCortadas } = construirSesiones({
+      sesiones: aImportar, ejercicioDe, rutinas, userId, lote, origen: ORIGEN_STRONG,
+    });
+
+    // Emparejamientos a recordar (todos, también los de ejercicios recién creados). bulkWrite no
+    // valida con el modelo, así que cada uno se valida antes (p. ej. un nombre de más de 200).
+    const emparejamientosNuevos = [...ejercicioDe].map(([nombreOrigen, e]) => ({ userId, origen: ORIGEN_STRONG, nombreOrigen, exerciseId: e._id }));
+    for (const doc of emparejamientosNuevos) {
+      const invalido = new EmparejamientoImport(doc).validateSync();
+      if (invalido) throw invalido;
+    }
+
+    const ids1RM = [...new Set(documentos.flatMap((d) => d.ejercicios.filter((e) => e.trackingSnapshot === '1RM').map((e) => String(e.exerciseId))))];
+
+    // Tiempos para el log (abajo): la transacción tiene un límite de 60 s en MongoDB y el plan
+    // del 7b pide vigilarlo. Si withTransaction repite la función, cuenta el último intento.
+    const tPreparado = performance.now();
+    let msRecords = 0;
+    const transaccion = await mongoose.startSession();
+    try {
+      await transaccion.withTransaction(async () => {
+        msRecords = 0;
+        if (nuevosEjercicios.length) await Exercise.insertMany(nuevosEjercicios, { session: transaccion });
+        await EmparejamientoImport.bulkWrite(
+          emparejamientosNuevos.map(({ userId: u, origen, nombreOrigen, exerciseId }) => ({
+            updateOne: { filter: { userId: u, origen, nombreOrigen }, update: { $set: { exerciseId } }, upsert: true },
+          })),
+          { session: transaccion }
+        );
+        // insertMany valida cada sesión con el modelo (RPE, límites de peso y reps, notas…) y el
+        // índice único importacion_unica impide duplicar un entreno aunque llegaran dos
+        // importaciones a la vez. Cualquier fallo deshace la transacción entera.
+        await Session.insertMany(documentos, { session: transaccion });
+        // Las marcas de todo el historial de esos ejercicios: las sesiones importadas suelen ser
+        // anteriores a las de la app, así que pueden cambiar récords ya marcados.
+        if (ids1RM.length) {
+          const tRecords = performance.now();
+          await recalcularRecords({ db: mongoose.connection.db, userId, exerciseIds: ids1RM, session: transaccion });
+          msRecords = performance.now() - tRecords;
+        }
+      });
+    } finally {
+      await transaccion.endSession();
+    }
+
+    const tTransaccion = performance.now();
+    const records = await Session.countDocuments({ userId, 'importacion.lote': lote, 'ejercicios.esPR': true });
+    // Solo recuentos y tiempos, nada del usuario (los logs de Render no deben tener sus datos).
+    console.log(
+      `Importación de Strong: ${documentos.length} sesiones, ${nuevosEjercicios.length} ejercicios nuevos, ` +
+      `${ids1RM.length} con récords · preparar ${Math.round(tPreparado - t0)} ms, ` +
+      `transacción ${Math.round(tTransaccion - tPreparado)} ms (récords ${Math.round(msRecords)} ms), ` +
+      `total ${Math.round(performance.now() - t0)} ms`
+    );
+    res.status(201).json({
+      importacion: {
+        lote,
+        fecha: lote.getTimestamp(),
+        sesiones: documentos.length,
+        ejerciciosCreados: nuevosEjercicios.length,
+        records,
+        yaImportadas,
+        saltadas: saltar.size,
+        juntados,
+        seriesSinDatos,
+        notasCortadas,
+      },
+    });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        error: 'Validation Error',
+        message: 'Datos no válidos',
+        details: Object.values(error.errors).map((e) => e.message),
+      });
+    }
+    // Dos importaciones del mismo archivo a la vez: la segunda choca con el índice único.
+    if (error.code === 11000) {
+      return res.status(409).json({ error: 'Conflict', message: 'Alguno de estos entrenos se acaba de importar. Vuelve a abrir la vista previa.' });
+    }
     next(error);
   }
 };

@@ -1,7 +1,7 @@
 import express from 'express';
-import { vistaPrevia } from '../controllers/importarController.js';
+import { importar, vistaPrevia } from '../controllers/importarController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
-import { limiteVistaPreviaImportar } from '../middlewares/limiteIntentos.js';
+import { limiteImportar, limiteVistaPreviaImportar } from '../middlewares/limiteIntentos.js';
 
 const router = express.Router();
 
@@ -10,5 +10,6 @@ router.use(requireAuth);
 
 // El límite va después de requireAuth porque cuenta por usuario (req.user).
 router.post('/strong/vista-previa', limiteVistaPreviaImportar, vistaPrevia);
+router.post('/strong', limiteImportar, importar);
 
 export default router;

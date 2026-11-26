@@ -119,12 +119,26 @@ export const limiteRestablecer = rateLimit({
 // Importar desde Strong (bloque 7b): 10 vistas previas por hora y por USUARIO (va después de
 // requireAuth). Cada una lee un CSV de hasta 10 MB: es el trabajo más caro de la API para el
 // servidor, y una persona que importa su historial necesita una o dos. Cuentan también las que
-// fallan (un CSV roto de 10 MB cuesta lo mismo de leer). La importación tendrá su propio límite.
+// fallan (un CSV roto de 10 MB cuesta lo mismo de leer).
 export const limiteVistaPreviaImportar = rateLimit({
   windowMs: UNA_HORA,
   limit: 10,
   keyGenerator: (req) => String(req.user._id),
   message: 'Has pedido muchas vistas previas de la importación seguidas.',
+  handler: responder,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+});
+
+// Importar de verdad (bloque 7b): 5 por hora y por usuario, con su propio contador. Es la
+// operación más cara de la API (lee el CSV otra vez y escribe miles de documentos en una
+// transacción). Una persona importa una vez y, como mucho, deshace y repite: 5 deja margen para
+// equivocarse dos veces. Cuentan también las que fallan, por lo mismo que la vista previa.
+export const limiteImportar = rateLimit({
+  windowMs: UNA_HORA,
+  limit: 5,
+  keyGenerator: (req) => String(req.user._id),
+  message: 'Has hecho muchas importaciones seguidas.',
   handler: responder,
   standardHeaders: 'draft-7',
   legacyHeaders: false,

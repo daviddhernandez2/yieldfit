@@ -11,7 +11,7 @@ import styles from '@/pages/Privacidad/Privacidad.module.css';
 // ESTA PÁGINA TIENE QUE DECIR LA VERDAD. Si cambia qué datos guarda la app, quién los ve o
 // qué servicio los procesa, se actualiza aquí y la fecha de abajo (lista de comprobación en
 // docs/privacidad.md).
-const ACTUALIZADA = '23 de noviembre de 2026';
+const ACTUALIZADA = '26 de noviembre de 2026';
 
 export default function Privacidad() {
   const navigate = useNavigate();
@@ -51,14 +51,16 @@ export default function Privacidad() {
             <dt>Tu cuenta</dt>
             <dd>
               Nombre, email y fecha de nacimiento; y, solo si los das, peso, altura y género. Sirven
-              para identificarte y mostrar tu perfil. La contraseña no se guarda: solo una huella
+              para identificarte y mostrar tu perfil. También tus preferencias de la app (por
+              ahora, cómo ver el esfuerzo por serie). La contraseña no se guarda: solo una huella
               cifrada (bcrypt) a partir de la que nadie puede leerla, tampoco el desarrollador.
             </dd>
 
             <dt>Tus entrenamientos</dt>
             <dd>
-              Ejercicios, rutinas, sesiones (series, pesos, repeticiones, fecha y duración) y
-              grupos de progreso. Sirven para tu historial y para calcular tu progreso.
+              Ejercicios, rutinas, sesiones (series, pesos, repeticiones, el esfuerzo de cada serie
+              si lo anotas, las notas que escribas, fecha y duración) y grupos de progreso. Sirven
+              para tu historial y para calcular tu progreso.
             </dd>
 
             <dt>Registro y último acceso</dt>

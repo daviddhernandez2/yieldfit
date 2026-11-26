@@ -169,3 +169,13 @@
   color: var(--color-error);
   padding: var(--space-2xl);
 }
+
+/* Con la columna de esfuerzo (bloque 5c): cuatro columnas en vez de tres. */
+.setsHeader.conEsfuerzo,
+.setsRow.conEsfuerzo {
+  grid-template-columns: 60px 1fr 1fr 1fr;
+}
+
+.sinEsfuerzo {
+  color: var(--color-text-muted);
+}

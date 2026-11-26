@@ -6,6 +6,8 @@ import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import MarcaPR from '@/components/MarcaPR/MarcaPR.jsx';
 import { formatKg } from '@/utils/formato.js';
+import { useAuth } from '@/hooks/useAuth.js';
+import { seMuestra, valorEsfuerzo } from '@/utils/esfuerzo.js';
 import styles from '@/pages/SessionDetail/SessionDetail.module.css';
 
 const formatDuracion = (segundos) => {
@@ -39,6 +41,9 @@ const formatFecha = (fecha) => {
 // así que aunque el ejercicio original haya sido renombrado o borrado,
 // el detalle sigue mostrando lo que hiciste ese día.
 export default function SessionDetail() {
+  // Esfuerzo por serie (bloque 5c): con "no mostrar" en Perfil no sale, aunque haya datos.
+  const { user } = useAuth();
+  const modoEsfuerzo = user?.preferencias?.esfuerzo ?? 'no';
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -146,20 +151,7 @@ export default function SessionDetail() {
               </p>
             )}
 
-            <div className={styles.setsTable}>
-              <div className={styles.setsHeader}>
-                <span>Serie</span>
-                <span>Peso (kg)</span>
-                <span>Reps</span>
-              </div>
-              {ej.sets.map((set) => (
-                <div key={set._id} className={styles.setsRow}>
-                  <span className={styles.setNum}>{set.numeroSerie}</span>
-                  <span className={styles.setValue}>{set.peso}</span>
-                  <span className={styles.setValue}>{set.reps}</span>
-                </div>
-              ))}
-            </div>
+            <TablaSeries sets={ej.sets} modoEsfuerzo={modoEsfuerzo} />
           </div>
         ))}
       </div>
@@ -183,6 +175,39 @@ export default function SessionDetail() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setConfirmOpen(false)}
       />
+    </div>
+  );
+}
+
+// Tabla de las series de un ejercicio. Con una columna más para el esfuerzo (bloque 5c) solo si
+// alguna serie lo tiene y la preferencia no es "no mostrar"; "—" en las que no lo tienen.
+// Props: sets (las del ejercicio), modoEsfuerzo ('no' | 'rpe' | 'rir').
+function TablaSeries({ sets, modoEsfuerzo }) {
+  const conEsfuerzo = seMuestra(modoEsfuerzo) && sets.some((s) => s.rpe != null);
+  const fila = conEsfuerzo ? styles.conEsfuerzo : '';
+  return (
+    <div className={styles.setsTable}>
+      <div className={`${styles.setsHeader} ${fila}`}>
+        <span>Serie</span>
+        <span>Peso (kg)</span>
+        <span>Reps</span>
+        {conEsfuerzo && <span>{modoEsfuerzo.toUpperCase()}</span>}
+      </div>
+      {sets.map((set) => (
+        <div key={set._id} className={`${styles.setsRow} ${fila}`}>
+          <span className={styles.setNum}>{set.numeroSerie}</span>
+          <span className={styles.setValue}>{set.peso}</span>
+          <span className={styles.setValue}>{set.reps}</span>
+          {conEsfuerzo &&
+            (set.rpe != null ? (
+              <span className={styles.setValue}>{valorEsfuerzo(set.rpe, modoEsfuerzo)}</span>
+            ) : (
+              <span className={styles.sinEsfuerzo} aria-label="Sin esfuerzo">
+                —
+              </span>
+            ))}
+        </div>
+      ))}
     </div>
   );
 }

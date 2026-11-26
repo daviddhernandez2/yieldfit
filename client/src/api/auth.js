@@ -35,6 +35,12 @@ export const changePassword = (actual, nueva) => {
   return apiClient.put('/auth/me/password', { actual, nueva });
 };
 
+// PUT /api/auth/me/preferencias  { esfuerzo } → { user }
+// Cambia las preferencias de la app (bloque 5c): por ahora, cómo ver el esfuerzo por serie.
+export const updatePreferencias = (preferencias) => {
+  return apiClient.put('/auth/me/preferencias', preferencias);
+};
+
 // POST /api/auth/forgot-password  { email } → { message }
 // Pide el enlace para restablecer la contraseña (bloque 11b). La respuesta es SIEMPRE la
 // misma, exista o no la cuenta. 429 si se piden demasiados.

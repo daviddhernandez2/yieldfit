@@ -6,6 +6,7 @@ import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import EliminarCuenta from '@/pages/Profile/EliminarCuenta.jsx';
 import CambiarContrasena from '@/pages/Profile/CambiarContrasena.jsx';
+import PreferenciaEsfuerzo from '@/pages/Profile/PreferenciaEsfuerzo.jsx';
 import styles from '@/pages/Profile/Profile.module.css';
 
 const formatFecha = (fecha) => {
@@ -124,6 +125,9 @@ export default function Profile() {
           <DeleteButton onClick={pedirCerrarSesion}>Cerrar sesión</DeleteButton>
         </div>
       </section>
+
+      {/* Preferencias del entreno (bloque 5c): cómo ver el esfuerzo por serie. */}
+      <PreferenciaEsfuerzo />
 
       {/* Cambiar la contraseña (bloque 11b). */}
       <CambiarContrasena />

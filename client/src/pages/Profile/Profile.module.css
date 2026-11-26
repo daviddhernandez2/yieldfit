@@ -248,3 +248,10 @@
   color: var(--color-text);
   text-decoration: underline;
 }
+
+/* Ayuda bajo "Esfuerzo por serie" (bloque 5c). */
+.ayudaPreferencia {
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}

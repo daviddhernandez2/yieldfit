@@ -5,6 +5,7 @@ import {
   logout as logoutApi,
   deleteAccount,
   changePassword,
+  updatePreferencias,
 } from '@/api/auth.js';
 import { alCaducarSesion, ponerTokenAcceso, renovarSesion } from '@/api/client.js';
 import { marcarSesion } from '@/utils/indicadorSesion.js';
@@ -133,6 +134,13 @@ export function AuthProvider({ children }) {
     entrar(response.data.token, response.data.user);
   };
 
+  // Preferencias de la app (bloque 5c). El servidor devuelve el usuario actualizado y se
+  // sustituye en memoria: el token no cambia. Si falla, el error sube a la pantalla.
+  const cambiarPreferencias = async (preferencias) => {
+    const response = await updatePreferencias(preferencias);
+    dispatch({ type: 'AUTH_SUCCESS', payload: { user: response.data.user } });
+  };
+
   const value = {
     user: state.user,
     status: state.status,
@@ -141,6 +149,7 @@ export function AuthProvider({ children }) {
     logout,
     eliminarCuenta,
     cambiarContrasena,
+    cambiarPreferencias,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -34,6 +34,8 @@ assert.equal(formatDuracion(59), '0 min');
 assert.equal(formatDuracion(52 * 60), '52 min');
 assert.equal(formatDuracion(65 * 60 + 30), '1h 5 min');
 assert.equal(formatDuracion(120 * 60), '2h 0 min');
+assert.equal(formatDuracion(undefined), '—'); // sesión importada sin duración (bloque 7b)
+assert.equal(formatDuracion(null), '—');
 
 // formatHace (bloque 9d): días de calendario, no horas.
 const hoy = new Date(2026, 10, 25, 9, 0);

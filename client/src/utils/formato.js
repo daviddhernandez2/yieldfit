@@ -12,7 +12,10 @@ export const formatConSigno = (n) => {
 export const formatPorcentaje = (n) => `${formatConSigno(n)}%`;
 
 // Duración legible: 52 min · 1h 5 min. La misma que usa la lista del Historial.
+// Sin duración (null o undefined) devuelve "—": una sesión importada de Strong puede no tenerla
+// (bloque 7b), y antes salía "NaNh NaN min" en el Historial, el detalle y el Dashboard.
 export const formatDuracion = (segundos) => {
+  if (typeof segundos !== 'number' || !Number.isFinite(segundos)) return '—';
   const totalMin = Math.floor(segundos / 60);
   if (totalMin < 60) return `${totalMin} min`;
   const horas = Math.floor(totalMin / 60);

@@ -13,4 +13,5 @@ export const COLECCIONES_DEL_USUARIO = [
   'refreshtokens',
   'passwordresets',
   'dashboards',
+  'emparejamientoimports',
 ];

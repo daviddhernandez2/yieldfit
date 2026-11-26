@@ -7,11 +7,13 @@ import BugReport from '../models/BugReport.js';
 import RefreshToken from '../models/RefreshToken.js';
 import PasswordReset from '../models/PasswordReset.js';
 import Dashboard from '../models/Dashboard.js';
+import EmparejamientoImport from '../models/EmparejamientoImport.js';
 
 // Todo lo que pertenece a un usuario (campo userId). Al borrar la cuenta se borra todo, sin
 // excepciones (bloque 11b): ejercicios, rutinas, sesiones, grupos, reportes de fallos (la
 // privacidad va primero, decisión de David), tokens de renovación (sus otros dispositivos
-// dejan de poder renovar), enlaces de recuperación de contraseña y el dashboard (bloque 9d).
+// dejan de poder renovar), enlaces de recuperación de contraseña, el dashboard (bloque 9d) y los
+// emparejamientos recordados de la importación (bloque 7b).
 //
 // SI SE AÑADE UNA COLECCIÓN CON userId, TIENE QUE IR EN ESTA LISTA (lo comprueba
 // borrarCuenta.test.js). Si no, al borrar una cuenta quedarían datos huérfanos, como los de
@@ -25,6 +27,7 @@ export const MODELOS_DEL_USUARIO = [
   RefreshToken,
   PasswordReset,
   Dashboard,
+  EmparejamientoImport,
 ];
 
 // Borra el usuario y todos sus datos dentro de la transacción `session`: o se borra todo

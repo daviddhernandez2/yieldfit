@@ -3,6 +3,7 @@ import Exercise, { OPCIONES_GRUPO_MUSCULAR, OPCIONES_TIPO, tipoDisponible } from
 import Workout from '../models/Workout.js';
 import Chart from '../models/Chart.js';
 import Dashboard from '../models/Dashboard.js';
+import EmparejamientoImport from '../models/EmparejamientoImport.js';
 import { OPCIONES_ESFUERZO, RPE } from '../utils/esfuerzo.js';
 
 // GET /api/exercises
@@ -241,6 +242,10 @@ export const remove = async (req, res, next) => {
         { $pull: { widgets: { exerciseId: exercise._id } } },
         { session }
       );
+
+      // Y lo que la importación recordaba de él (bloque 7b): si no, la próxima vista previa
+      // propondría un ejercicio que ya no existe.
+      await EmparejamientoImport.deleteMany({ userId, exerciseId: exercise._id }, { session });
 
       respuesta = { status: 204 };
     });

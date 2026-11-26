@@ -51,6 +51,10 @@ activo, cada sesión una operación, y el progreso se lee como rendimiento de ca
 10. Sé directo. Si una petición es una mala decisión técnica, dilo y explica por qué.
 11. **El repo es público.** `/docs`, `DECISIONS.md` y los README nunca contienen secretos,
     URLs de conexión (p. ej. cadenas de MongoDB) ni datos de usuarios.
+12. **Preguntar antes de instalar fuera del repo.** Herramientas de prueba en el scratchpad,
+    `npx … install`, navegadores (p. ej. Playwright y su WebKit) o paquetes globales: antes,
+    decir qué paquete y versión, dónde se instala, cuánto ocupa y cómo se desinstala, y esperar
+    confirmación. Las dependencias del proyecto siguen su regla (ver Stack).
 
 ## Stack
 
@@ -118,7 +122,8 @@ Import alias en cliente: `@` → `client/src`.
 
 ## Modelo de datos (resumen)
 
-- **User**: credenciales (bcrypt en `pre('save')`), datos de perfil. `toJSON` elimina `password`.
+- **User**: credenciales (bcrypt en `pre('save')`), datos de perfil y `preferencias.esfuerzo`
+  (`no` | `rpe` | `rir`, bloque 5c). `toJSON` elimina `password`.
 - **Exercise**: por usuario. `tipo` y `grupoMuscular` son enums; `tracking` (`1RM` |
   `tiempo_distancia`) se deriva en `pre('save')`. Borrarlo lo quita de rutinas y grupos,
   pero las sesiones lo conservan y el progreso lo ignora (0020; 409 si es el único de una rutina).
@@ -128,6 +133,8 @@ Import alias en cliente: `@` → `client/src`.
   Índice `{ userId: 1, fecha: -1 }`. El progreso lo calcula `GET /api/progress` (0026) y el
   historial se pagina por cursor (0027). Récords personales (0051): `esPR` y `prAnterior` en el
   ejercicio de la sesión que batió la marca; se marcan al guardar y se recalculan al borrar.
+  Esfuerzo (0056): solo `rpe` por serie (1–10, pasos de 0,5; rango en `server/utils/esfuerzo.js`);
+  el RIR (10 − RPE) solo se muestra. No cambia el 1RM ni los récords.
 - **Exercise.record1RM**: la marca actual de cada ejercicio, copia reconstruible de las sesiones
   (`npm run migrar:pr`). Solo la escribe el servidor (`utils/records.js`).
 - **Chart**: grupo de progreso del usuario (`nombre`, `exerciseIds`); en la app se llama "grupo".
@@ -287,8 +294,14 @@ al bloque del que nacen, para no renumerar:
 5. [x] **11d — Feedback de la beta** (hecho, 2026-11-25; 0055): hoja de reportar por encima de todo,
    aviso de servidor dormido en el móvil, barra del descanso en el iPhone, cronómetro con horas,
    añadir ejercicios a una sesión en curso y notas de la sesión con "la última vez".
-6. **1b — Backups automáticos fuera del portátil** (revisión prevista en la 0018).
-7. **6b — Cardio** en la sesión activa (análisis en la deuda técnica).
+6. [x] **5c — Esfuerzo por serie (RPE/RIR)** (hecho, 2026-11-26; 0056): opcional, preferencia en
+   Perfil (no mostrar / RPE / RIR), pastilla bajo cada serie en la sesión activa, serie anterior y
+   detalle. Se guarda solo el RPE (1–10). Fase 2, sin hacer: ajustar el 1RM con el RPE.
+7. **7b — Importar desde Strong** (CSV): vista previa, emparejar ejercicios (recordado), sin
+   duplicar (origen + fecha de inicio al segundo), récords recalculados. Plan detallado antes de
+   escribir código.
+8. **1b — Backups automáticos fuera del portátil** (revisión prevista en la 0018).
+9. **6b — Cardio** en la sesión activa (análisis en la deuda técnica).
 
 - [x] **0 — Fundaciones**: este CLAUDE.md, `DECISIONS.md`, documentación en Markdown en `/docs`
       (leída en GitHub, sin dependencias ni despliegue; índice en `docs/README.md`).

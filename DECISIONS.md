@@ -74,6 +74,7 @@ qué se decidió, qué se descartó y qué consecuencias tiene.
 | 0053 | Campos de fecha sin aspecto nativo en iOS y con pista propia | vigente |
 | 0054 | Widgets con anatomía común aprobada en el design system, y edición del dashboard con borrador | vigente |
 | 0055 | Notas de la sesión con "la última vez", y añadir ejercicios a una sesión en curso | vigente |
+| 0056 | Esfuerzo por serie: se guarda solo el RPE, de 1 a 10, y se ve como RPE o RIR según el perfil | vigente |
 
 ---
 
@@ -1969,4 +1970,54 @@ final del entreno.
 - Las notas de la beta empiezan vacías: "la última vez" aparece desde la segunda sesión con nota.
 - Pendientes, si se piden: editar la nota, notas por ejercicio o por serie, y añadir a la rutina lo
   añadido en la sesión.
+
+---
+
+## 0056 — Esfuerzo por serie: se guarda solo el RPE, de 1 a 10, y se ve como RPE o RIR según el perfil
+
+Fecha: 2026-11-26 · Estado: vigente · Bloque: 5c
+
+**Contexto:** David quiere anotar el esfuerzo de cada serie, pensado para powerlifting, sin que
+estorbe a quien no lo usa. El campo `rpe` ya existía en las series (de 0 a 10), pero la app nunca
+lo había enviado.
+
+**Decisión** (de David):
+- **Se guarda solo el RPE**, opcional en cada serie. El RIR es `10 − RPE` y solo se muestra: no hay
+  dos datos que puedan contradecirse.
+- **Escala completa, de 1 a 10 en pasos de 0,5** (RIR de 9 a 0). Al principio era de 6 a 10; David
+  la amplió antes de cerrar el bloque. Rango, validación y opciones viven en
+  `server/utils/esfuerzo.js`, la única fuente: el modelo valida con él y el cliente recibe el
+  rango y las opciones con `GET /api/exercises/opciones`.
+- **Preferencia en Perfil:** "Esfuerzo por serie: no mostrar / RPE / RIR"
+  (`User.preferencias.esfuerzo`, por defecto "no mostrar"), con su propia ruta
+  (`PUT /api/auth/me/preferencias`), que solo acepta ese campo. Con "no mostrar" no aparece en
+  ningún sitio, aunque haya datos.
+- **Sesión activa:** una pastilla en una segunda línea bajo cada serie (a 375 px no cabía otra
+  columna). Al tocarla se abren los valores en filas de 5, de 52 × 44 px, sin teclado. Elegir uno
+  lo guarda y cierra; tocar fuera, Escape o la pastilla de otra serie cierran sin cambiar nada;
+  nunca hay dos abiertas. El de la vez anterior se ve en gris solo como referencia: el atajo de
+  repetir no lo copia.
+- **Dónde más se ve:** la serie anterior y el detalle de la sesión (una columna solo si alguna serie
+  del ejercicio lo tiene). No en la lista del Historial.
+- **Fase 1:** no cambia el cálculo del 1RM ni de los récords. **Fase 2**, solo si David lo decide:
+  ajustar el 1RM estimado con el RPE. Queda preparada: el 1RM se calcula en un solo sitio
+  (`utils/unaRM.js`) y se puede recalcular con `npm run migrar:1rm`.
+
+**Alternativas descartadas:**
+- *Guardar el RPE y el RIR:* dos datos que se pueden contradecir.
+- *Otra columna en la fila de la serie:* a 375 px, peso y reps bajarían de 53 a 29 px.
+- *Los 9 (después 19) valores en una fila:* unos 29 px por valor, por debajo de los 44 recomendados.
+- *Un selector nativo:* más lento con la mano sudada entre series.
+- *Cerrar los valores con `click` al tocar fuera:* en iOS, tocar algo que no es un botón no siempre
+  da `click`; se usa `pointerdown`, salvo sobre otra pastilla.
+
+**Consecuencias:**
+- La validación nueva solo se aplica a las sesiones que se guardan desde ahora. Ninguna escritura
+  sobre sesiones antiguas pasa por el modelo (los récords y las migraciones usan el driver), y una
+  consulta de solo lectura en desarrollo no encontró ningún `rpe` fuera del rango.
+- **La importación de Strong (7b)** tiene que validar cada serie con las mismas funciones, o
+  insertar con `insertMany`, que sí valida: los datos de fuera no entran sin validar.
+- La exportación CSV (bloque 7, aplazado) ya tenía prevista la columna `rpe`.
+- La nota de privacidad menciona el esfuerzo y las preferencias, y también las notas del 11d, que
+  faltaban.
 

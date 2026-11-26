@@ -32,6 +32,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 4b — Récords personales | [bloques/4b-records-personales.md](bloques/4b-records-personales.md) |
 | 5 — Serie anterior | [bloques/5-serie-anterior.md](bloques/5-serie-anterior.md) |
 | 5b — Cardio bloqueado | [bloques/5b-cardio-bloqueado.md](bloques/5b-cardio-bloqueado.md) |
+| 5c — Esfuerzo por serie (RPE/RIR) | [bloques/5c-esfuerzo-por-serie.md](bloques/5c-esfuerzo-por-serie.md) |
 | 6 — Reemplazar ejercicio | [bloques/6-reemplazar-ejercicio.md](bloques/6-reemplazar-ejercicio.md) |
 | 8 — Calendario | [bloques/8-calendario.md](bloques/8-calendario.md) |
 | 8b — Calendario en escritorio | [bloques/8b-calendario-escritorio.md](bloques/8b-calendario-escritorio.md) |

@@ -38,6 +38,7 @@ erDiagram
         string genero "enum, opcional"
         string rol "usuario | admin, por defecto usuario"
         date ultimoAcceso "opcional"
+        string preferencias_esfuerzo "no | rpe | rir, por defecto no"
     }
     Exercise {
         ObjectId userId FK "indexado"
@@ -81,7 +82,7 @@ erDiagram
         number reps
         number tiempoSegundos
         number distanciaMetros
-        number rpe "0-10"
+        number rpe "opcional, 1-10 en pasos de 0,5"
     }
     Chart {
         ObjectId userId FK "indexado"
@@ -111,6 +112,9 @@ Todos los modelos tienen además `createdAt` y `updatedAt` (`timestamps: true`).
   Mongoose les aplica `usuario` al leerlos.
 - `ultimoAcceso`: se guarda al registrarse, iniciar sesión y renovar el token, como mucho una vez
   por hora (`utils/ultimoAcceso.js`), sin tocar `updatedAt`.
+- `preferencias.esfuerzo` ([0056](../DECISIONS.md), bloque 5c): cómo ver el esfuerzo por serie (`no`,
+  `rpe` o `rir`; por defecto `no`). Solo la cambia `PUT /api/auth/me/preferencias`. Los usuarios
+  anteriores no tienen el campo: Mongoose les aplica el valor por defecto al leerlos.
 - **Borrar la cuenta** (bloque 11b, [auth.md](auth.md#borrar-la-cuenta)) borra en una transacción
   el usuario y todos los documentos con su `userId` en las demás colecciones.
 

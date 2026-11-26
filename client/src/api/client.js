@@ -47,12 +47,14 @@ export const renovarSesion = () => {
 // Interceptor de request: añade el token de acceso, si hay, y empieza a cronometrar la
 // petición para detectar un arranque en frío del servidor (bloque 3). La función para parar
 // el cronómetro viaja dentro de la propia config, que axios devuelve en la respuesta.
+// `vigilarLentitud: false` en la config la deja fuera: para peticiones que tardan por sí
+// mismas (importar un historial, bloque 7b), en las que tardar no significa servidor dormido.
 apiClient.interceptors.request.use(
   (config) => {
     if (tokenAcceso) {
       config.headers.Authorization = `Bearer ${tokenAcceso}`;
     }
-    config.terminarVigilancia = vigilarPeticion();
+    if (config.vigilarLentitud !== false) config.terminarVigilancia = vigilarPeticion();
     return config;
   },
   (error) => Promise.reject(error)

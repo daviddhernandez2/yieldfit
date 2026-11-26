@@ -12,14 +12,19 @@ const esObjeto = (v) => v !== null && typeof v === 'object' && !Array.isArray(v)
 
 // Comprueba lo que el usuario decidió para cada ejercicio de Strong que se va a importar.
 //   necesarios: [{ nombreStrong, cardio }] (resumirEjercicios de las sesiones que se importan);
-//   emparejamientos: { nombreStrong: exerciseId } y crear: { nombreStrong: { nombre, grupoMuscular, tipo } };
+//   emparejamientos: { nombreStrong: exerciseId }, crear: { nombreStrong: { nombre, grupoMuscular, tipo } }
+//   y omitir: [nombreStrong] ("No importar", decisión de David);
 //   ejercicios: los del usuario, [{ _id, nombre, grupoMuscular, tipo, tracking }].
 // Devuelve { error } con el primer problema (para un 400) o { asignacion }, un Map
-// nombreStrong → { exerciseId } o { crear: { nombre, grupoMuscular, tipo, tracking } }.
+// nombreStrong → { exerciseId }, { crear: { nombre, grupoMuscular, tipo, tracking } } u { omitir: true }.
+// Cada ejercicio lleva exactamente UNA de las tres decisiones.
 // Lo que no hace: validar grupo y tipo contra los enums, que lo hace el modelo al crear el
 // ejercicio (insertMany valida), con su propio mensaje.
-export const validarDecisiones = ({ necesarios, emparejamientos = {}, crear = {}, ejercicios }) => {
-  if (!esObjeto(emparejamientos) || !esObjeto(crear)) return { error: 'Las decisiones de emparejamiento no son válidas' };
+export const validarDecisiones = ({ necesarios, emparejamientos = {}, crear = {}, omitir = [], ejercicios }) => {
+  if (!esObjeto(emparejamientos) || !esObjeto(crear) || !Array.isArray(omitir) || !omitir.every((n) => typeof n === 'string')) {
+    return { error: 'Las decisiones de emparejamiento no son válidas' };
+  }
+  const omitidos = new Set(omitir);
 
   const porId = new Map(ejercicios.map((e) => [String(e._id), e]));
   const nombresExistentes = new Set(ejercicios.map((e) => normalizarNombre(e.nombre)));
@@ -30,8 +35,15 @@ export const validarDecisiones = ({ necesarios, emparejamientos = {}, crear = {}
     const tracking = trackingDe(cardio);
     const id = emparejamientos[nombreStrong];
     const nuevo = crear[nombreStrong];
-    if (id !== undefined && nuevo !== undefined) return { error: `«${nombreStrong}»: o se empareja o se crea, no las dos cosas` };
-    if (id === undefined && nuevo === undefined) return { error: `Falta emparejar «${nombreStrong}»` };
+    const omite = omitidos.has(nombreStrong);
+    const cuantas = [id !== undefined, nuevo !== undefined, omite].filter(Boolean).length;
+    if (cuantas > 1) return { error: `«${nombreStrong}»: se empareja, se crea o no se importa, solo una de las tres` };
+    if (cuantas === 0) return { error: `Falta emparejar «${nombreStrong}»` };
+
+    if (omite) {
+      asignacion.set(nombreStrong, { omitir: true });
+      continue;
+    }
 
     if (id !== undefined) {
       const ejercicio = porId.get(String(id));
@@ -73,12 +85,15 @@ const serieParaGuardar = (serie, tracking, numeroSerie) => {
 // Monta los documentos de sesión que se van a guardar.
 //   sesiones: las de agruparSesiones que se importan (ya sin las importadas ni las saltadas);
 //   ejercicioDe: Map nombreStrong → { _id, nombre, tracking } (los elegidos y los recién creados);
+//   omitidos: Set de nombres de Strong que no se importan ("No importar");
 //   rutinas: [{ _id, nombre }] del usuario; userId, lote: los de esta importación.
-// Devuelve { documentos, seriesSinDatos, juntados, notasCortadas }: juntados cuenta los ejercicios
-// de Strong que se unieron a otro en la misma sesión (decisión 2).
+// Devuelve { documentos, seriesSinDatos, juntados, notasCortadas, seriesOmitidas,
+// saltadasPorOmitidos }: juntados cuenta los ejercicios de Strong que se unieron a otro en la
+// misma sesión (decisión 2); una sesión que solo tenía ejercicios que no se importan se salta y
+// cuenta en saltadasPorOmitidos.
 // Las notas se vuelven a montar aquí, con el número de serie que se verá en Yield Fit (decisión
 // de David): al juntar dos ejercicios, la serie 1 del segundo pasa a ser la 3.
-export const construirSesiones = ({ sesiones, ejercicioDe, rutinas, userId, lote, origen }) => {
+export const construirSesiones = ({ sesiones, ejercicioDe, omitidos = new Set(), rutinas, userId, lote, origen }) => {
   // Solo se enlaza la rutina si el nombre coincide exactamente con UNA (decisión del plan): con
   // dos rutinas del mismo nombre no se sabe cuál era.
   const rutinaPorNombre = new Map();
@@ -87,12 +102,25 @@ export const construirSesiones = ({ sesiones, ejercicioDe, rutinas, userId, lote
   let seriesSinDatos = 0;
   let juntados = 0;
   let notasCortadas = 0;
+  let seriesOmitidas = 0;
+  let saltadasPorOmitidos = 0;
   const documentos = sesiones.map((s) => {
+    // "No importar": sus series se quedan fuera; si no queda ningún ejercicio, la sesión entera.
+    const importados = s.ejercicios.filter((e) => {
+      if (!omitidos.has(e.nombreStrong)) return true;
+      seriesOmitidas += e.series.length;
+      return false;
+    });
+    if (importados.length === 0) {
+      saltadasPorOmitidos++;
+      return null;
+    }
+
     // Un ejercicio de Yield Fit por sesión: si dos de Strong van al mismo, se juntan, con las
     // series seguidas en el orden del CSV.
     // Cada serie recuerda de qué ejercicio de Strong venía, para su nota.
     const porEjercicio = new Map();
-    for (const e of s.ejercicios) {
+    for (const e of importados) {
       const destino = ejercicioDe.get(e.nombreStrong);
       const id = String(destino._id);
       const series = e.series.map((serie) => ({ serie, deStrong: e.nombreStrong }));
@@ -144,7 +172,7 @@ export const construirSesiones = ({ sesiones, ejercicioDe, rutinas, userId, lote
       ejercicios,
       importacion: { origen, clave: s.clave, lote },
     };
-  }).filter((d) => d.ejercicios.length > 0);
+  }).filter((d) => d !== null && d.ejercicios.length > 0);
 
-  return { documentos, seriesSinDatos, juntados, notasCortadas };
+  return { documentos, seriesSinDatos, juntados, notasCortadas, seriesOmitidas, saltadasPorOmitidos };
 };

@@ -26,7 +26,16 @@ ok('todo emparejado', [...validarDecisiones({ necesarios, ejercicios, emparejami
 ok('falta uno', error({ emparejamientos: { 'Squat (Barbell)': 'sentadilla' } }), 'Falta emparejar «Running»');
 ok('emparejar y crear a la vez', error({
   emparejamientos: { 'Squat (Barbell)': 'sentadilla', Running: 'carrera' }, crear: { Running: { nombre: 'Correr', grupoMuscular: 'Cardio', tipo: 'Cardio' } },
-}), '«Running»: o se empareja o se crea, no las dos cosas');
+}), '«Running»: se empareja, se crea o no se importa, solo una de las tres');
+ok('emparejar y no importar a la vez', error({ emparejamientos: { 'Squat (Barbell)': 'sentadilla', Running: 'carrera' }, omitir: ['Running'] }),
+  '«Running»: se empareja, se crea o no se importa, solo una de las tres');
+ok('no importar uno: vale, y sin nada más', [...validarDecisiones({ necesarios, ejercicios, emparejamientos: { 'Squat (Barbell)': 'sentadilla' }, omitir: ['Running'] }).asignacion], [
+  ['Squat (Barbell)', { exerciseId: 'sentadilla' }], ['Running', { omitir: true }],
+]);
+ok('no importar ninguno también vale (el controlador dirá que no queda nada)', validarDecisiones({ necesarios, ejercicios, omitir: ['Squat (Barbell)', 'Running'] }).error ?? null, null);
+ok('omitir que no es una lista de nombres', [error({ omitir: 'Running' }), error({ omitir: [3] })], [
+  'Las decisiones de emparejamiento no son válidas', 'Las decisiones de emparejamiento no son válidas',
+]);
 ok('un ejercicio que no es suyo (o no existe)', error({ emparejamientos: { 'Squat (Barbell)': 'de-otro', Running: 'carrera' } }), '«Squat (Barbell)»: el ejercicio elegido no existe');
 ok('incompatible: fuerza con un cardio (decisión 3)', error({ emparejamientos: { 'Squat (Barbell)': 'carrera', Running: 'carrera' } }),
   '«Squat (Barbell)» no se puede emparejar con «Carrera continua»: uno es de fuerza y el otro no');
@@ -89,6 +98,15 @@ ok('la nota de una serie juntada lleva el número de Yield Fit y el nombre de St
 ok('la nota no se guarda dentro de la serie', 'nota' in brazo.ejercicios[0].sets[2], false);
 ok('ninguna serie sin datos', seriesSinDatos, 0);
 
+// "No importar": las series del omitido fuera, el resto de la sesión dentro; una sesión que
+// solo tenía omitidos se salta y se cuenta.
+ok('no importar: fuera sus series, el resto entra; sesión solo con omitidos, saltada', (() => {
+  const r = construirSesiones({
+    sesiones, ejercicioDe, omitidos: new Set(['Squat (Barbell)', 'Running']), rutinas, userId: 'u', lote: 'L', origen: 'strong',
+  });
+  return [r.documentos.length, r.documentos[0].ejercicios.map((e) => e.exerciseId), r.seriesOmitidas, r.saltadasPorOmitidos];
+})(), [1, ['triceps'], 2, 1]);
+ok('sin omitidos, los recuentos a cero', [seriesSinDatos, (({ seriesOmitidas: o, saltadasPorOmitidos: p }) => [o, p])(construirSesiones({ sesiones, ejercicioDe, rutinas, userId: 'u', lote: 'L', origen: 'strong' }))], [0, [0, 0]]);
 ok('serie sin datos para su tracking: no entra y se cuenta; sesión vacía: fuera', (() => {
   const r = construirSesiones({
     sesiones: [{ ...sesiones[1], ejercicios: [{ nombreStrong: 'Raro', descansoSegundos: null, series: [{ peso: 0, reps: 0, tiempoSegundos: 60, distanciaMetros: 0 }] }] }],

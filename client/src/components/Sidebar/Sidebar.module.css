@@ -79,8 +79,8 @@
   color: var(--color-accent);
 }
 
-/* "Reportar un fallo" va pegado a la tarjeta del menú: el hueco de la columna (2xl) es para
-   separar el logo, no esto. */
+/* "Reportar un fallo" va cerca de la tarjeta del menú, con aire (space-lg): el hueco de la
+   columna (2xl) es para separar el logo, no esto. */
 .sidebar > button:last-child {
-  margin-top: calc(var(--space-md) - var(--space-2xl));
+  margin-top: calc(var(--space-lg) - var(--space-2xl));
 }

@@ -57,16 +57,23 @@
   }
 }
 
-/* En la barra lateral: un elemento discreto bajo la tarjeta del menú, con el icono alineado
-   con los del menú (el relleno de la tarjeta + el de cada opción + su borde, como el logo). */
+/* En la barra lateral, bajo la tarjeta del menú: el bicho y el texto dentro de una pastilla de
+   cristal con borde, como la píldora flotante de antes del 9d (decisión de David, 2026-11-26).
+   Del ancho de la tarjeta del menú y con el contenido centrado. Sigue aquí y no en la esquina:
+   allí tapaba la última tarjeta al bajar del todo. */
 .enBarraLateral {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-sm) var(--space-md) var(--space-sm) calc(var(--space-md) * 2 + 1px);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-lg);
+  background-color: var(--color-bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
   color: var(--color-text-muted);
   font-family: inherit;
   font-size: var(--font-size-sm);
@@ -78,7 +85,8 @@
 
 .enBarraLateral:hover,
 .enBarraLateral:focus-visible {
-  color: var(--color-text);
+  color: var(--color-accent);
+  border-color: var(--color-accent-medium);
 }
 
 .enBarraLateral svg {

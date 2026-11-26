@@ -48,7 +48,19 @@
       blanco roto). Apuntan al acento para que haya un solo verde. */
    --color-action: var(--color-accent);
    --color-action-hover: var(--color-accent-hover);
-   --color-on-action: var(--color-accent-text);
+   /* Botón primario: CRISTAL OSCURO CON BORDE DE LUZ VERDE (opción B, elegida por David el
+      2026-11-26 entre cuatro; el verde plano y el cristal con halo se veían bastos). El fondo es
+      cristal oscuro (lo de detrás, desenfocado); el verde va en el borde, en degradado de arriba
+      abajo, en el texto y en un brillo suave por dentro. Al pasar el ratón se tiñe de verde. Sin
+      sombra exterior. El verde de marca es el mismo (color-accent). */
+   --color-action-glass: rgba(15, 16, 18, 0.62);
+   --color-action-glass-hover: linear-gradient(rgba(62, 248, 126, 0.14), rgba(62, 248, 126, 0.06));
+   --color-action-border: linear-gradient(180deg, rgba(62, 248, 126, 0.95), rgba(62, 248, 126, 0.35));
+   --color-action-border-hover: linear-gradient(180deg, #3ef87e, rgba(62, 248, 126, 0.5));
+   --shadow-action: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 18px rgba(62, 248, 126, 0.1);
+   --shadow-action-hover: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 22px rgba(62, 248, 126, 0.18);
+   --blur-glass: blur(16px) saturate(160%);
+   --color-on-action: var(--color-accent);
 
    /* Rojo: error, pérdida y peligro. Más vivo que el del Premium original (#dc6b67): 80 % de
       saturación, 5,5:1 sobre surface-1 (DECISIONS 0048). Una señal, nunca un fondo sólido: los

@@ -3,8 +3,8 @@ import styles from '@/components/Button/Button.module.css';
 // Botón de acción en píldora (design system del artefacto, README de Button; bloque 9c).
 //
 // Variantes:
-//   - "primary" (por defecto): relleno color-action (blanco roto) con texto oscuro. Una sola
-//     acción principal por vista; el verde queda para datos y estados.
+//   - "primary" (por defecto): cristal oscuro con borde de luz verde y texto verde (opción B).
+//     Una sola acción principal por vista.
 //   - "outline": borde verde, sin relleno. Acciones secundarias y "Cancelar".
 //   - "danger": rojo TONAL (fondo y borde translúcidos, texto rojo), nunca sólido. Para
 //     confirmar borrados (p. ej. en ConfirmDialog con confirmVariant="danger").

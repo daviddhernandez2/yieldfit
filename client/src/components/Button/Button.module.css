@@ -56,14 +56,25 @@
 
 /* --- Variantes --- */
 
-/* Primaria: relleno color-action (blanco roto), texto oscuro. */
+/* Primaria: cristal oscuro con borde de luz verde (opción B, decisión de David, 2026-11-26). El
+   borde en degradado se dibuja con dos fondos: el cristal ocupa el interior (padding-box) y el
+   degradado verde asoma por el borde transparente (border-box). Los valores, en variables.css. */
 .primary {
-  background-color: var(--color-action);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--color-action-glass), var(--color-action-glass)) padding-box,
+    var(--color-action-border) border-box;
+  box-shadow: var(--shadow-action);
   color: var(--color-on-action);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
 }
 
 .primary:hover:not(:disabled) {
-  background-color: var(--color-action-hover);
+  background:
+    var(--color-action-glass-hover) padding-box,
+    var(--color-action-border-hover) border-box;
+  box-shadow: var(--shadow-action-hover);
 }
 
 /* Outline: borde verde sin relleno. */

@@ -20,7 +20,14 @@
   letter-spacing: -0.02em;
 }
 
-/* Botón "Exportar datos" del header. Estilo pill outline verde con icono.
+/* Importar y Exportar, juntos a la derecha del título (bloque 7b). */
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Botón "Exportar datos" del header (y, con el mismo estilo, "Importar"). Estilo pill outline verde con icono.
    Deshabilitado en MVP hasta que se implemente la exportación. */
 .exportButton {
   display: inline-flex;

@@ -37,6 +37,15 @@ const calcularPesoTotal = (sesion) => {
   return total;
 };
 
+// Icono "upload" para el botón de importar (bloque 7b), el mismo trazo que el de exportar.
+const IconUpload = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
+
 // Icono "download" para el botón de exportar. Placeholder en MVP.
 const IconDownload = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -122,11 +131,18 @@ export default function History() {
 
   return (
     <div className={styles.page}>
-      {/* Header con título y botón de exportar como acción secundaria a la
-          derecha. La exportación se implementará en el pulido. */}
+      {/* Header con título y, a la derecha, importar (bloque 7b) y exportar (sigue en
+          "Próximamente"). Importar se ve siempre, también con el historial vacío, y lleva texto
+          también en el móvil: una flecha sola es ambigua (diseño de la tarjeta Importar).
+          Exportar se queda en icono en el móvil mientras siga sin hacer. */}
       <header className={styles.header}>
         <h1 className={styles.title}>Historial</h1>
-        {sessions.length > 0 && (
+        <div className={styles.acciones}>
+          <button type="button" className={styles.exportButton} onClick={() => navigate('/history/importar')}>
+            <IconUpload />
+            <span>Importar</span>
+          </button>
+          {sessions.length > 0 && (
           <button
             type="button"
             className={styles.exportButton}
@@ -137,7 +153,8 @@ export default function History() {
             <IconDownload />
             <span className={styles.exportButtonLabel}>Exportar datos</span>
           </button>
-        )}
+          )}
+        </div>
       </header>
 
       {avisoRecords.length > 0 && (

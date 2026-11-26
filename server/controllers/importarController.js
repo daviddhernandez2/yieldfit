@@ -93,6 +93,14 @@ const leerContexto = async (userId, agrupado) => {
   return { ejercicios, recordados, clavesYaImportadas, sesionesApp };
 };
 
+// GET /api/importar/opciones
+// Lo que el cliente necesita saber antes de enviar nada: el tamaño máximo del archivo (lo
+// comprueba antes de mandarlo, sin subir 5 MB para recibir un 413) y las unidades de peso. Es la
+// única fuente de verdad de los dos: el cliente no tiene copias (como las opciones de ejercicio).
+export const opciones = (req, res) => {
+  res.json({ opciones: { maxBytes: MAX_BYTES_CSV, unidades: UNIDADES.map((u) => ({ value: u, label: u })) } });
+};
+
 // POST /api/importar/strong/vista-previa   { csv, zona, unidad? }
 // Lee el CSV y dice qué pasaría al importarlo, SIN escribir nada: cuántas sesiones son nuevas y
 // cuántas ya estaban, la propuesta de emparejamiento de cada ejercicio, los días que coinciden

@@ -2,6 +2,7 @@
 //   node src/utils/importar.test.js
 
 import {
+  omitidos, saltadasPorOmitir,
   cuerpoDecisiones, decisionesIniciales, ejercicioConNombre, errorTamano, formatFechaLote, formatTamano, mensajeError,
   normalizarNombre, otroQueCrea, paresQueSeJuntan, sesionesAImportar, sinEmparejar, textoDeshacer,
 } from './importar.js';
@@ -27,9 +28,15 @@ ok('decisiones iniciales: las propuestas del servidor', d, {
   Squat: { exerciseId: 'sentadilla' }, 'Hammer Curl (Cable)': { crear: { nombre: 'Hammer Curl (Cable)', grupoMuscular: 'Brazos', tipo: 'Poleas' } },
 });
 ok('sin emparejar', sinEmparejar(ejercicios, d), 1);
-ok('lo que se manda: emparejar y crear por separado, sin los que faltan', cuerpoDecisiones(d), {
+ok('un "No importar" recordado empieza omitido y no cuenta como sin emparejar', (() => {
+  const conOmitido = [...ejercicios, { nombreStrong: 'Stretching', estado: 'omitido', exerciseId: null, crear: null, series: 14, coincideCon: [] }];
+  const dd = decisionesIniciales(conOmitido);
+  return [dd.Stretching, sinEmparejar(conOmitido, dd)];
+})(), [{ omitir: true }, 1]);
+ok('lo que se manda: emparejar, crear y no importar por separado, sin los que faltan', cuerpoDecisiones({ ...d, 'T Bar Row': { omitir: true } }), {
   emparejamientos: { 'Triceps Extension (Cable)': 'triceps', 'Triceps Pushdown': 'triceps', Squat: 'sentadilla' },
   crear: { 'Hammer Curl (Cable)': { nombre: 'Hammer Curl (Cable)', grupoMuscular: 'Brazos', tipo: 'Poleas' } },
+  omitir: ['T Bar Row'],
 });
 ok('se juntan los que salen juntos y van al mismo (cada par una vez)', paresQueSeJuntan(ejercicios, d), [
   { a: 'Triceps Extension (Cable)', b: 'Triceps Pushdown', exerciseId: 'triceps' },
@@ -41,6 +48,22 @@ ok('van al mismo pero nunca salen juntos: no se juntan', paresQueSeJuntan(ejerci
 
 const vista = { resumen: { sesiones: 90 }, coincidencias: [{ clave: 'a' }, { clave: 'b' }, { clave: 'c' }] };
 ok('sesiones a importar: las coincidencias se saltan salvo las incluidas', [sesionesAImportar(vista, new Set()), sesionesAImportar(vista, new Set(['b']))], [87, 88]);
+
+// "No importar": sesiones que se saltan, sin contar dos veces las que ya coinciden con un día tuyo.
+const vistaO = {
+  resumen: { sesiones: 10 },
+  coincidencias: [{ clave: 'x' }],
+  combinaciones: [
+    { ejercicios: ['Stretching'], sesiones: 3, coincidencias: ['x'] },
+    { ejercicios: ['Squat', 'Stretching'], sesiones: 5, coincidencias: [] },
+    { ejercicios: ['Running'], sesiones: 2, coincidencias: [] },
+  ],
+};
+const dO = { Stretching: { omitir: true }, Squat: { exerciseId: 's' }, Running: { omitir: true } };
+ok('saltadas por omitir: solo las combinaciones con todo omitido', saltadasPorOmitir(vistaO, dO, new Set()), 2 + 2);
+ok('…la coincidencia ya saltada no cuenta dos veces; si la incluyes, sí', [saltadasPorOmitir(vistaO, dO, new Set()), saltadasPorOmitir(vistaO, dO, new Set(['x']))], [4, 5]);
+ok('sesiones a importar con todo junto', [sesionesAImportar(vistaO, new Set(), dO), sesionesAImportar(vistaO, new Set(['x']), dO)], [10 - 1 - 4, 10 - 0 - 5]);
+ok('omitidos: ejercicios y series', omitidos([{ nombreStrong: 'Stretching', series: 14 }, { nombreStrong: 'Squat', series: 30 }, { nombreStrong: 'Running', series: 2 }], dO), { ejercicios: 2, series: 16 });
 
 ok('normalizarNombre', normalizarNombre('  Curl   FEMORAL tumbádo '), 'curl femoral tumbado');
 const catalogo = [{ _id: 'x', nombre: 'Curl femoral tumbado' }];

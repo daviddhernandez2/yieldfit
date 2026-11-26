@@ -3,11 +3,14 @@
 // falla. La pantalla (pages/Importar) solo pinta. Pruebas en importar.test.js.
 
 // La decisión de cada ejercicio de Strong: { exerciseId } (uno tuyo), { crear: { nombre,
-// grupoMuscular, tipo } } (uno nuevo, que se crea al importar) o null (sin emparejar). Al abrir la
-// vista previa, la que propone el servidor.
+// grupoMuscular, tipo } } (uno nuevo, que se crea al importar), { omitir: true } ("No importar") o
+// null (sin emparejar). Al abrir la vista previa, la que propone el servidor.
 export const decisionesIniciales = (ejercicios) =>
   Object.fromEntries(
-    ejercicios.map((e) => [e.nombreStrong, e.exerciseId ? { exerciseId: e.exerciseId } : e.crear ? { crear: e.crear } : null])
+    ejercicios.map((e) => [
+      e.nombreStrong,
+      e.estado === 'omitido' ? { omitir: true } : e.exerciseId ? { exerciseId: e.exerciseId } : e.crear ? { crear: e.crear } : null,
+    ])
   );
 
 export const sinEmparejar = (ejercicios, decisiones) => ejercicios.filter((e) => !decisiones[e.nombreStrong]).length;
@@ -16,12 +19,28 @@ export const sinEmparejar = (ejercicios, decisiones) => ejercicios.filter((e) =>
 export const cuerpoDecisiones = (decisiones) => {
   const emparejamientos = {};
   const crear = {};
+  const omitir = [];
   for (const [nombre, d] of Object.entries(decisiones)) {
     if (d?.exerciseId) emparejamientos[nombre] = d.exerciseId;
     else if (d?.crear) crear[nombre] = d.crear;
+    else if (d?.omitir) omitir.push(nombre);
   }
-  return { emparejamientos, crear };
+  return { emparejamientos, crear, omitir };
 };
+
+// "No importar": cuántos ejercicios y series se quedan fuera.
+export const omitidos = (ejercicios, decisiones) => {
+  const fuera = ejercicios.filter((e) => decisiones[e.nombreStrong]?.omitir);
+  return { ejercicios: fuera.length, series: fuera.reduce((n, e) => n + e.series, 0) };
+};
+
+// Sesiones que se saltan porque solo tienen ejercicios que no importas. Sale de las combinaciones
+// de la vista previa (cada conjunto distinto de ejercicios, con cuántas sesiones lo tienen). Las
+// que ya se saltan por coincidir con un día tuyo (y no las has incluido) no se cuentan otra vez.
+export const saltadasPorOmitir = (vista, decisiones, incluidas) =>
+  (vista.combinaciones ?? [])
+    .filter((c) => c.ejercicios.every((n) => decisiones[n]?.omitir))
+    .reduce((total, c) => total + c.sesiones - c.coincidencias.filter((clave) => !incluidas.has(clave)).length, 0);
 
 // Decisión 2: dos ejercicios de Strong que salen en el mismo entreno y van al mismo ejercicio de
 // Yield Fit se juntan en uno. Devuelve los pares, para avisar: [{ a, b, exerciseId }].
@@ -40,9 +59,10 @@ export const paresQueSeJuntan = (ejercicios, decisiones) => {
 };
 
 // Sesiones que se importarán: las nuevas menos los días que coinciden con sesiones tuyas y no
-// has incluido (decisión B: se saltan por defecto).
-export const sesionesAImportar = (vista, incluidas) =>
-  vista.resumen.sesiones - vista.coincidencias.filter((c) => !incluidas.has(c.clave)).length;
+// has incluido (decisión B: se saltan por defecto) y menos las que solo tienen ejercicios que no
+// importas.
+export const sesionesAImportar = (vista, incluidas, decisiones = {}) =>
+  vista.resumen.sesiones - vista.coincidencias.filter((c) => !incluidas.has(c.clave)).length - saltadasPorOmitir(vista, decisiones, incluidas);
 
 // Sin mayúsculas, tildes ni espacios de más: la misma regla con la que el servidor rechaza un
 // nombre repetido. Aquí solo sirve para avisar antes de enviar.

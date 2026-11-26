@@ -131,6 +131,16 @@ ok('añadir: los que había son los mismos objetos', s.ejercicios[0] === base.ej
 ok('añadir sin grupo ni tipo: no añade esos campos', ['grupoMuscular' in s.ejercicios[3], 'tipo' in s.ejercicios[3]], [false, false]);
 ok('añadir: misma forma que en localStorage', claves(JSON.parse(JSON.stringify(s)).ejercicios[2]), claves(SESION_ACTUAL.ejercicios[0]));
 
+// --- Esfuerzo (bloque 5c) ---
+const conRpeAnterior = { ...base, anteriores: { ...(base.anteriores ?? {}), [base.ejercicios[0].exerciseId]: { sets: [{ peso: 100, reps: 5, rpe: 8.5 }] } } };
+s = sesionReducer(conRpeAnterior, { type: 'actualizarSerie', exerciseIndex: 0, setIndex: 0, cambios: { peso: '', reps: '' } });
+s = sesionReducer(s, { type: 'alternarCompletada', exerciseIndex: 0, setIndex: 0 });
+ok('esfuerzo: al marcar, peso y reps se rellenan con la vez anterior pero el RPE no', [s.ejercicios[0].sets[0].peso, s.ejercicios[0].sets[0].reps, 'rpe' in s.ejercicios[0].sets[0]], ['100', '5', false]);
+s = sesionReducer(s, { type: 'actualizarSerie', exerciseIndex: 0, setIndex: 0, cambios: { rpe: 9 } });
+ok('esfuerzo: elegido, se guarda en la serie', s.ejercicios[0].sets[0].rpe, 9);
+s = sesionReducer(s, { type: 'actualizarSerie', exerciseIndex: 0, setIndex: 0, cambios: { rpe: null } });
+ok('esfuerzo: "Quitar" lo deja vacío', s.ejercicios[0].sets[0].rpe, null);
+
 // --- Notas (bloque 11d) ---
 s = sesionReducer(base, { type: 'escribirNotas', texto: 'hombro cargado ' });
 ok('notas: guarda el texto tal cual (se recorta al guardar la sesión)', s.notas, 'hombro cargado ');

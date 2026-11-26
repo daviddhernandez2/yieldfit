@@ -137,17 +137,20 @@ export const contar = (n, singular, plural) => `${n} ${n === 1 ? singular : plur
 // { <exerciseId>: { fecha, sets } }. Se guarda dentro de la sesión (localStorage) para que
 // siga disponible si se recarga o se pierde la cobertura en mitad del entreno.
 
-// Peso y reps de la vez anterior para una serie, emparejando por posición (la 2.ª serie
-// con la 2.ª). null si ese ejercicio no se ha hecho nunca o la vez anterior tuvo menos series.
+// Peso, reps y esfuerzo de la vez anterior para una serie, emparejando por posición (la 2.ª
+// serie con la 2.ª). null si ese ejercicio no se ha hecho nunca o la vez anterior tuvo menos
+// series. El rpe (bloque 5c) es solo una referencia en gris: el atajo de repetir no lo copia.
 export const serieAnterior = (session, exerciseIndex, setIndex) => {
   const ej = session.ejercicios[exerciseIndex];
   const anterior = session.anteriores?.[ej.exerciseId]?.sets?.[setIndex];
   if (!anterior) return null;
-  return { peso: anterior.peso ?? null, reps: anterior.reps ?? null };
+  return { peso: anterior.peso ?? null, reps: anterior.reps ?? null, rpe: anterior.rpe ?? null };
 };
 
 // Atajo de repetir: al marcar como completada una serie, cada campo que esté VACÍO se
 // rellena con el valor de la vez anterior. Lo que el usuario haya escrito no se toca.
+// El esfuerzo NO se rellena (bloque 5c, decisión de David): el de la vez anterior es solo una
+// referencia y no se guarda si no se elige.
 // Devuelve solo los cambios (para mezclarlos con { completada: true }).
 export const rellenarConAnterior = (set, anterior) => {
   if (!anterior) return {};

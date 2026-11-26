@@ -71,7 +71,7 @@ const leerContexto = async (userId, agrupado) => {
   const claves = agrupado.sesiones.map((s) => s.clave);
   const [ejercicios, recordados, yaImportadas] = await Promise.all([
     Exercise.find({ userId }, { nombre: 1, grupoMuscular: 1, tipo: 1, tracking: 1 }).lean(),
-    EmparejamientoImport.find({ userId, origen: ORIGEN_STRONG }, { nombreOrigen: 1, exerciseId: 1 }).lean(),
+    EmparejamientoImport.find({ userId, origen: ORIGEN_STRONG }, { nombreOrigen: 1, exerciseId: 1, omitir: 1 }).lean(),
     // Usa el índice único importacion_unica y solo lee la clave: no trae las sesiones.
     Session.find(
       { userId, 'importacion.origen': ORIGEN_STRONG, 'importacion.clave': { $in: claves } },
@@ -119,7 +119,10 @@ export const vistaPrevia = async (req, res, next) => {
 
 // POST /api/importar/strong
 //   { csv, zona, unidad, emparejamientos: { nombreStrong: exerciseId },
-//     crear: { nombreStrong: { nombre, grupoMuscular, tipo } }, incluirCoincidencias: [clave] }
+//     crear: { nombreStrong: { nombre, grupoMuscular, tipo } }, omitir: [nombreStrong],
+//     incluirCoincidencias: [clave] }
+// `omitir` son los ejercicios que no se importan ("No importar", decisión de David): sus series se
+// quedan fuera, y una sesión que solo tenía esos se salta.
 // Importa de verdad. Vuelve a leer el CSV (decisión C): del cliente solo se usan sus decisiones.
 // Se saltan las sesiones ya importadas y, de los días con sesiones registradas a mano (decisión
 // B), las que el usuario no haya incluido. Todo en una transacción: o se importa entero o nada.
@@ -134,7 +137,7 @@ export const importar = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { zona, agrupado } = leerPeticion(req.body);
-    const { emparejamientos, crear, incluirCoincidencias = [] } = req.body;
+    const { emparejamientos, crear, omitir, incluirCoincidencias = [] } = req.body;
     if (!Array.isArray(incluirCoincidencias) || !incluirCoincidencias.every((c) => typeof c === 'string')) {
       throw new ErrorImportacion('incluirCoincidencias tiene que ser una lista de claves');
     }
@@ -152,7 +155,7 @@ export const importar = async (req, res, next) => {
     if (aImportar.length === 0) throw new ErrorImportacion('No hay sesiones nuevas que importar');
 
     const { error, asignacion } = validarDecisiones({
-      necesarios: resumirEjercicios(aImportar), emparejamientos, crear, ejercicios: contexto.ejercicios,
+      necesarios: resumirEjercicios(aImportar), emparejamientos, crear, omitir, ejercicios: contexto.ejercicios,
     });
     if (error) throw new ErrorImportacion(error);
 
@@ -160,9 +163,12 @@ export const importar = async (req, res, next) => {
     // withTransaction repite la función, se repite con los mismos documentos.
     const porId = new Map(contexto.ejercicios.map((e) => [String(e._id), e]));
     const ejercicioDe = new Map();
+    const omitidos = new Set();
     const nuevosEjercicios = [];
     for (const [nombreStrong, decision] of asignacion) {
-      if (decision.exerciseId) {
+      if (decision.omitir) {
+        omitidos.add(nombreStrong);
+      } else if (decision.exerciseId) {
         const e = porId.get(decision.exerciseId);
         ejercicioDe.set(nombreStrong, { _id: e._id, nombre: e.nombre, tracking: e.tracking });
       } else {
@@ -176,17 +182,22 @@ export const importar = async (req, res, next) => {
     }
 
     const lote = new mongoose.Types.ObjectId();
-    const { documentos, seriesSinDatos, juntados, notasCortadas } = construirSesiones({
-      sesiones: aImportar, ejercicioDe, rutinas, userId, lote, origen: ORIGEN_STRONG,
+    const { documentos, seriesSinDatos, juntados, notasCortadas, seriesOmitidas, saltadasPorOmitidos } = construirSesiones({
+      sesiones: aImportar, ejercicioDe, omitidos, rutinas, userId, lote, origen: ORIGEN_STRONG,
     });
-
-    // Emparejamientos a recordar (todos, también los de ejercicios recién creados). bulkWrite no
-    // valida con el modelo, así que cada uno se valida antes (p. ej. un nombre de más de 200).
-    const emparejamientosNuevos = [...ejercicioDe].map(([nombreOrigen, e]) => ({ userId, origen: ORIGEN_STRONG, nombreOrigen, exerciseId: e._id }));
-    for (const doc of emparejamientosNuevos) {
-      const invalido = new EmparejamientoImport(doc).validateSync();
-      if (invalido) throw invalido;
+    if (documentos.length === 0) {
+      throw new ErrorImportacion('No queda ninguna sesión que importar: todas tienen solo ejercicios que no importas');
     }
+
+    // Lo que se recuerda para la próxima vez: los emparejamientos (también los de ejercicios recién
+    // creados) y los "No importar". bulkWrite no valida con el modelo, así que cada uno se valida
+    // antes con validate() (validateSync no ejecuta el pre('validate') que impide guardar las dos
+    // cosas a la vez).
+    const recordar = [
+      ...[...ejercicioDe].map(([nombreOrigen, e]) => ({ userId, origen: ORIGEN_STRONG, nombreOrigen, exerciseId: e._id })),
+      ...[...omitidos].map((nombreOrigen) => ({ userId, origen: ORIGEN_STRONG, nombreOrigen, omitir: true })),
+    ];
+    for (const doc of recordar) await new EmparejamientoImport(doc).validate();
 
     const ids1RM = [...new Set(documentos.flatMap((d) => d.ejercicios.filter((e) => e.trackingSnapshot === '1RM').map((e) => String(e.exerciseId))))];
 
@@ -199,9 +210,15 @@ export const importar = async (req, res, next) => {
       await transaccion.withTransaction(async () => {
         msRecords = 0;
         if (nuevosEjercicios.length) await Exercise.insertMany(nuevosEjercicios, { session: transaccion });
+        // Un nombre tiene una sola respuesta: al guardar una, se quita la otra ($unset). Así un
+        // "No importar" que pasa a emparejado (o al revés) no se queda con las dos.
         await EmparejamientoImport.bulkWrite(
-          emparejamientosNuevos.map(({ userId: u, origen, nombreOrigen, exerciseId }) => ({
-            updateOne: { filter: { userId: u, origen, nombreOrigen }, update: { $set: { exerciseId } }, upsert: true },
+          recordar.map(({ userId: u, origen, nombreOrigen, exerciseId, omitir: omite }) => ({
+            updateOne: {
+              filter: { userId: u, origen, nombreOrigen },
+              update: omite ? { $set: { omitir: true }, $unset: { exerciseId: '' } } : { $set: { exerciseId }, $unset: { omitir: '' } },
+              upsert: true,
+            },
           })),
           { session: transaccion }
         );
@@ -209,9 +226,8 @@ export const importar = async (req, res, next) => {
         // índice único importacion_unica impide duplicar un entreno aunque llegaran dos
         // importaciones a la vez. Cualquier fallo deshace la transacción entera.
         // En tandas de TANDA_SESIONES, todas dentro de la misma transacción: con un solo
-        // insertMany, Mongoose prepara y valida todas las sesiones a la vez, y con un CSV de 10 MB
-        // (el límite de entonces; hoy son 5)
-        // (1.360 sesiones, 50.000 series) el heap pasaba de 256 MB y el proceso se caía (medido en
+        // insertMany, Mongoose prepara y valida todas las sesiones a la vez, y con un CSV de 10 MB (el
+        // límite de entonces; hoy son 5) de 1.360 sesiones y 50.000 series, el heap pasaba de 256 MB y el proceso se caía (medido en
         // el 7b; Render free tiene 512 MB en total). El tamaño equilibra memoria y viajes a la base
         // (medido con ese CSV y el heap a 256 MB): 100 → pico de 133 MB y 13,5 s; 250 → 150 MB y
         // 8,5 s; 500 → 214 MB y 5,7 s, demasiado cerca del límite.
@@ -251,6 +267,8 @@ export const importar = async (req, res, next) => {
         juntados,
         seriesSinDatos,
         notasCortadas,
+        seriesOmitidas,
+        saltadasPorOmitidos,
       },
     });
   } catch (error) {

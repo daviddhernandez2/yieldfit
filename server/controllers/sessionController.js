@@ -304,12 +304,14 @@ export const previousSets = async (req, res, next) => {
       if (!sesion) return;
       anteriores[ids[i]] = {
         fecha: sesion.fecha,
-        sets: sesion.ejercicios[0].sets.map(({ numeroSerie, peso, reps, tiempoSegundos, distanciaMetros }) => ({
+        // rpe (bloque 5c): el esfuerzo de la vez anterior, si lo tenía.
+        sets: sesion.ejercicios[0].sets.map(({ numeroSerie, peso, reps, tiempoSegundos, distanciaMetros, rpe }) => ({
           numeroSerie,
           peso,
           reps,
           tiempoSegundos,
           distanciaMetros,
+          rpe,
         })),
       };
     });

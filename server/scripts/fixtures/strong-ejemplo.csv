@@ -1,0 +1,21 @@
+Fecha,Nombre de entrenamiento,Duración,Nombre del ejercicio,Orden de la serie,Peso,Rep.,Distancia,Segundos,Notas,Notas del entrenamiento,RPE
+2026-01-10 18:00:00,"Pierna",1 h 5 min,"Squat (Barbell)",1,100.0,5.0,0,0.0,"","Día flojo",8
+2026-01-10 18:00:00,"Pierna",1 h 5 min,"Squat (Barbell)",Temporizador de descanso,0,0.0,0,180.0,,,
+2026-01-10 18:00:00,"Pierna",1 h 5 min,"Squat (Barbell)",2,102.5,5.0,0,0.0,"Rodilla bien,
+sin molestias","Día flojo",8.5
+2026-01-10 18:00:00,"Pierna",1 h 5 min,"Squat (Barbell)",Temporizador de descanso,0,0.0,0,180.0,,,
+2026-01-10 18:00:00,"Pierna",1 h 5 min,"Squat (Barbell)",3,105.0,4.0,0,0.0,"","Día flojo",11
+2026-01-10 18:00:00,"Pierna",1 h 5 min,"Leg Curl (Machine)",1,40.0,12.0,0,0.0,"","Día flojo",
+2026-01-10 18:00:00,"Pierna",1 h 5 min,"Leg Curl (Machine)",Temporizador de descanso,0,0.0,0,90.0,,,
+2026-01-10 18:00:00,"Pierna",1 h 5 min,"Leg Curl (Machine)",2,0,0.0,0,0.0,"","Día flojo",
+2026-05-16 13:26:22,"Espalda, hombro",45 min,"Pull Up",1,0,10.0,0,0.0,"","",
+2026-05-16 13:26:22,"Espalda, hombro",45 min,"Pull Up",Temporizador de descanso,0,0.0,0,120.0,,,
+2026-05-16 13:26:22,"Espalda, hombro",45 min,"Pull Up",2,0,8.0,0,0.0,"","",
+2026-05-16 13:26:22,"Espalda, hombro",45 min,"Pull Up",Temporizador de descanso,0,0.0,0,90.0,,,
+2026-05-16 13:26:22,"Espalda, hombro",45 min,"Pull Up",3,0,7.0,0,0.0,"","",
+2026-05-16 13:26:22,"Espalda, hombro",45 min,"Pull Up",Temporizador de descanso,0,0.0,0,120.0,,,
+2026-05-16 13:26:22,"Espalda, hombro",45 min,"Face Pull (Cable)",1,25.0,doce,0,0.0,"","",
+2026-05-16 13:26:22,"Espalda, hombro",45 min,"Face Pull (Cable)",2,25.0,15.0,0,0.0,"","",
+2026-05-20 07:30:00,"Run",38 s,"Running",1,0,0.0,3.47,1293.0,"","",
+2026-05-20 07:30:00,"Run",38 s,"Running",Temporizador de descanso,0,0.0,0,120.0,,,
+2026-02-31 10:00:00,"Fantasma",30 min,"Pull Up",1,0,10.0,0,0.0,"","",

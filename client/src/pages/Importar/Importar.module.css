@@ -1,0 +1,396 @@
+/* Importar desde Strong (bloque 7b; tarjeta Importar del design system). La página usa el ancho
+   de formulario y la cabecera de styles/paginaFormulario.module.css; aquí, lo propio. Todo sale
+   de los tokens de styles/variables.css. */
+
+/* El título del paso de emparejar es el nombre de Strong, que puede ser largo: se parte por
+   palabras antes que desbordar. */
+.titulo {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-1);
+}
+
+.tituloTarjeta {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.cabeceraTarjeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.contadorFalta {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  white-space: nowrap;
+}
+
+.texto {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
+.textoPequeno {
+  composes: texto;
+}
+
+/* --- Elegir archivo --- */
+.archivo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.archivo:hover,
+.archivo:focus-within {
+  border-color: var(--color-border-accent);
+}
+
+.archivoOcupado {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+/* El input de verdad, invisible pero encima de toda la caja: así cualquier toque lo abre y el
+   teclado llega a él con Tab. */
+.inputArchivo {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.archivoAccion {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.archivoDetalle {
+  max-width: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+/* --- Listas (ejercicios, días, importaciones anteriores) --- */
+.lista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.fila:first-child {
+  border-top: none;
+}
+
+.filaTexto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.filaNombre {
+  font-size: var(--font-size-base);
+  overflow-wrap: anywhere;
+}
+
+.filaSub {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.pareja {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.falta {
+  color: var(--color-error);
+}
+
+/* "Cambiar", "Elegir", "Deshacer": texto con zona táctil de 48 px. */
+.accionFila {
+  flex: none;
+  min-height: 48px;
+  padding: 0 0 0 var(--space-sm);
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.accionFila:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.accionPeligro {
+  color: var(--color-error);
+}
+
+/* --- Vista previa --- */
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+@media (min-width: 600px) {
+  .resumen {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-2);
+}
+
+.dato b {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* El rango de fechas es texto, no una cifra: más pequeño y sin Geist Mono, y puede partirse. */
+.dato b.datoTexto {
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  white-space: normal;
+}
+
+.dato span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.aviso {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
+.aviso p {
+  margin: 0;
+}
+
+.aviso b {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Errores: rojo tonal, nunca sólido. */
+.avisoError {
+  border-color: var(--color-danger-border);
+  background-color: var(--color-danger-fill);
+}
+
+.enlace {
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.errores {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-wrap: anywhere;
+}
+
+.errorFila {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+}
+
+/* Interruptor de cada día que coincide. El botón mide 48 px de alto (zona táctil del design
+   system) y es transparente; la pista (44 × 26) y el círculo se dibujan dentro, centrados. */
+.estadoInterruptor {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.interruptor {
+  --pista-ancho: 44px;
+  --pista-alto: 26px;
+  --circulo: 18px;
+  position: relative;
+  flex: none;
+  width: var(--pista-ancho);
+  height: 48px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.interruptor::before,
+.interruptor::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  border-radius: var(--radius-pill);
+  transition: var(--transition-control);
+}
+
+.interruptor::before {
+  left: 0;
+  width: var(--pista-ancho);
+  height: var(--pista-alto);
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--surface-3);
+}
+
+.interruptor::after {
+  left: calc((var(--pista-alto) - var(--circulo)) / 2);
+  width: var(--circulo);
+  height: var(--circulo);
+  transform: translateY(-50%);
+  background-color: var(--color-text-muted);
+}
+
+.interruptorActivo::before {
+  border-color: var(--color-border-accent);
+  background-color: var(--color-accent-soft);
+}
+
+.interruptorActivo::after {
+  transform: translate(calc(var(--pista-ancho) - var(--pista-alto)), -50%);
+  background-color: var(--color-accent);
+}
+
+.interruptor:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Franja de "Importar" pegada abajo, como en Reemplazar ejercicio: en el móvil, por encima de la
+   TabBar y del círculo de "Reportar"; en escritorio no hay ninguno de los dos. */
+.barra {
+  position: sticky;
+  bottom: calc(var(--reportar-bottom-movil) + var(--reportar-alto-movil) + var(--space-sm));
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-elevated);
+}
+
+@media (min-width: 768px) {
+  .barra {
+    bottom: var(--space-lg);
+  }
+}
+
+.barraTexto {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+/* --- Emparejar --- */
+.selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+}
+
+.selects > * {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+/* --- Resultado --- */
+.hecho {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) 0;
+  text-align: center;
+}
+
+.circuloHecho {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-xl);
+}
+
+.hechoTitulo {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}

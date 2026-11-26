@@ -35,6 +35,7 @@ const History = lazy(() => import('@/pages/History/History.jsx'));
 const SessionDetail = lazy(() => import('@/pages/SessionDetail/SessionDetail.jsx'));
 const Profile = lazy(() => import('@/pages/Profile/Profile.jsx'));
 const Developer = lazy(() => import('@/pages/Developer/Developer.jsx'));
+const Importar = lazy(() => import('@/pages/Importar/Importar.jsx'));
 
 // Fallback minimalista mientras se descarga el chunk de la página.
 // Se muestra solo durante fracciones de segundo en conexiones normales.
@@ -186,6 +187,18 @@ const router = createBrowserRouter(
           <PrivateRoute>
             <Layout>
               <History />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      {/* Importar desde Strong (bloque 7b). Antes que /history/:id, aunque React Router elige la
+          ruta más concreta igualmente. */}
+      <Route
+        path="/history/importar"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Importar />
             </Layout>
           </PrivateRoute>
         }

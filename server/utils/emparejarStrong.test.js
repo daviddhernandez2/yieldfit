@@ -101,6 +101,7 @@ const ver = (n) => {
   return [p.estado, p.motivo, p.exerciseId, p.crear];
 };
 ok('recordado gana a todo', ver('Lat Pulldown (Cable)'), ['recordado', 'recordado', 'mio', null]);
+ok('cada fila dice qué tracking necesita', [propuestas.find((p) => p.nombreStrong === 'Running').tracking, propuestas.find((p) => p.nombreStrong === 'T Bar Row').tracking], ['tiempo_distancia', '1RM']);
 ok('recordado de un ejercicio borrado: se ignora y sigue con el diccionario', ver('Face Pull (Cable)'), ['propuesto', 'equivalencia', id('Face pull'), null]);
 ok('mismo nombre, sin mayúsculas', ver('PULL OVER'), ['propuesto', 'nombre', 'mio', null]);
 ok('diccionario', ver('Squat (Barbell)'), ['propuesto', 'equivalencia', id('Sentadilla libre'), null]);
@@ -119,6 +120,23 @@ ok('preset renombrado por el usuario: el diccionario ya no lo encuentra', (() =>
   const [p] = proponerEmparejamientos({ resumen: [fila('Squat (Barbell)')], ejercicios: sinSentadilla, recordados: [] });
   return [p.estado, p.motivo];
 })(), ['propuesto', 'crear']);
+
+// Incompatibles (fuerza ↔ cardio): nunca se proponen, y se pasa a la siguiente regla.
+const conCardio = [...ejercicios, { _id: 'paseo', nombre: 'Paseo', grupoMuscular: 'Cardio', tipo: 'Cardio' }];
+const incompatibles = proponerEmparejamientos({
+  resumen: [
+    fila('Paseo'), // mismo nombre que un cardio, pero con peso y reps
+    fila('Running'), // cardio por el diccionario, pero con peso y reps
+    fila('Lat Pulldown (Cable)', { cardio: true }), // recordado de fuerza, pero con distancia
+  ],
+  ejercicios: conCardio,
+  recordados: [{ nombreOrigen: 'Lat Pulldown (Cable)', exerciseId: 'mio' }],
+});
+ok('nunca se propone un ejercicio incompatible', incompatibles.map((p) => [p.nombreStrong, p.estado, p.motivo, p.exerciseId]), [
+  ['Paseo', 'sinEmparejar', null, null],
+  ['Running', 'sinEmparejar', null, null],
+  ['Lat Pulldown (Cable)', 'propuesto', 'crear', null],
+]);
 
 // --- resumirEjercicios, con el CSV de ejemplo ---
 const { idioma, filas } = leerCsvStrong(readFileSync(new URL('../scripts/fixtures/strong-ejemplo.csv', import.meta.url), 'utf8'));

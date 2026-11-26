@@ -10,10 +10,15 @@
 //   4. crear: un ejercicio nuevo con el nombre de Strong, si se puede adivinar el grupo muscular y
 //      el tipo (el equipo entre paréntesis: "(Cable)" → Poleas);
 //   5. sin emparejar: el usuario tiene que elegir.
+// Solo se propone un ejercicio compatible (decisión de David): uno de fuerza (1RM) para lo que
+// trae peso y reps, y uno de cardio (tiempo_distancia) para lo que trae distancia o tiempo. Si la
+// regla encuentra uno incompatible, se pasa a la siguiente. El servidor también rechaza al
+// importar un emparejamiento incompatible que llegue del cliente.
 // La vista previa lo muestra en ese orden de urgencia: sin emparejar arriba, luego lo propuesto
 // (incluido "Crear") y abajo lo recordado, que normalmente ya no hay que tocar.
 
 import { EQUIVALENCIAS_STRONG } from '../data/equivalenciasStrong.js';
+import { derivarTracking } from '../models/Exercise.js';
 
 // "  Press Banca  " y "press banca" son el mismo nombre; "Jalón" y "jalon" también. Se usa para
 // comparar, nunca para guardar. La misma regla rechaza crear un ejercicio con un nombre que ya
@@ -111,11 +116,16 @@ export const ESTADOS = ['sinEmparejar', 'propuesto', 'recordado'];
 //   ejercicios: los del usuario, [{ _id, nombre, grupoMuscular, tipo, tracking }];
 //   recordados: [{ nombreOrigen, exerciseId }] de EmparejamientoImport.
 // Devuelve una fila por ejercicio, en el orden de la vista previa:
-//   { nombreStrong, sesiones, series, estado, motivo, exerciseId, crear }
+//   { nombreStrong, sesiones, series, tracking, estado, motivo, exerciseId, crear }
+//   - tracking: el que necesita ('1RM' o 'tiempo_distancia'): el cliente solo ofrece esos;
 //   - estado: 'sinEmparejar' | 'propuesto' | 'recordado';
 //   - motivo: 'recordado' | 'nombre' | 'equivalencia' | 'crear' | null;
 //   - exerciseId: el ejercicio propuesto (string) o null;
 //   - crear: { nombre, grupoMuscular, tipo } si se propone uno nuevo, o null.
+export const trackingDe = (cardio) => (cardio ? 'tiempo_distancia' : '1RM');
+// El tracking de un ejercicio del usuario (los guardados lo llevan; se deriva por si acaso).
+const trackingEjercicio = (e) => e.tracking ?? derivarTracking(e.grupoMuscular, e.tipo);
+
 export const proponerEmparejamientos = ({ resumen, ejercicios, recordados }) => {
   const porId = new Map(ejercicios.map((e) => [String(e._id), e]));
   const porNombre = new Map();
@@ -127,28 +137,31 @@ export const proponerEmparejamientos = ({ resumen, ejercicios, recordados }) => 
   const recordado = new Map(recordados.map((r) => [r.nombreOrigen, String(r.exerciseId)]));
 
   const filas = resumen.map(({ nombreStrong, sesiones, series, cardio }) => {
-    const base = { nombreStrong, sesiones, series };
+    const tracking = trackingDe(cardio);
+    const base = { nombreStrong, sesiones, series, tracking };
+    const compatible = (e) => trackingEjercicio(e) === tracking;
 
     // 1. Recordado, si el ejercicio sigue existiendo (borrarlo ya borra el emparejamiento, pero
-    //    no cuesta nada comprobarlo).
+    //    no cuesta nada comprobarlo) y sigue siendo compatible (se le pudo cambiar el tipo).
     const idRecordado = recordado.get(nombreStrong);
-    if (idRecordado && porId.has(idRecordado)) {
+    if (idRecordado && porId.has(idRecordado) && compatible(porId.get(idRecordado))) {
       return { ...base, estado: 'recordado', motivo: 'recordado', exerciseId: idRecordado, crear: null };
     }
     // 2. Mismo nombre. Si hay dos con el mismo nombre, el primero (el usuario lo verá y lo cambia).
-    const mismoNombre = porNombre.get(normalizarNombre(nombreStrong));
+    const mismoNombre = (porNombre.get(normalizarNombre(nombreStrong)) ?? []).find(compatible);
     if (mismoNombre) {
-      return { ...base, estado: 'propuesto', motivo: 'nombre', exerciseId: String(mismoNombre[0]._id), crear: null };
+      return { ...base, estado: 'propuesto', motivo: 'nombre', exerciseId: String(mismoNombre._id), crear: null };
     }
     // 3. Equivalencia del diccionario, con su grupo (por los presets con el mismo nombre).
     const eq = EQUIVALENCIAS.get(normalizarNombre(nombreStrong));
-    const delDiccionario = eq && (porNombre.get(normalizarNombre(eq.nombre)) ?? []).find((e) => e.grupoMuscular === eq.grupoMuscular);
+    const delDiccionario = eq && (porNombre.get(normalizarNombre(eq.nombre)) ?? []).find((e) => e.grupoMuscular === eq.grupoMuscular && compatible(e));
     if (delDiccionario) {
       return { ...base, estado: 'propuesto', motivo: 'equivalencia', exerciseId: String(delDiccionario._id), crear: null };
     }
-    // 4. Crear uno nuevo, si se puede adivinar cómo.
+    // 4. Crear uno nuevo, si se puede adivinar cómo y queda compatible (un nombre de cardio con
+    //    series de peso no se crea como cardio).
     const adivinado = adivinarEjercicio(nombreStrong, { cardio });
-    if (adivinado) {
+    if (adivinado && derivarTracking(adivinado.grupoMuscular, adivinado.tipo) === tracking) {
       return { ...base, estado: 'propuesto', motivo: 'crear', exerciseId: null, crear: { nombre: nombreStrong, ...adivinado } };
     }
     // 5. El usuario elige.

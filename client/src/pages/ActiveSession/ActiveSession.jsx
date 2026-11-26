@@ -1,4 +1,4 @@
-import { useState, useEffect, useReducer } from "react";
+import { useCallback, useState, useEffect, useReducer } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   readActiveSession,
@@ -24,6 +24,9 @@ import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
 import styles from "@/pages/ActiveSession/ActiveSession.module.css";
 import { formatCronometro, formatFechaRelativa } from "@/utils/formato.js";
 import AreaTexto from "@/components/AreaTexto/AreaTexto.jsx";
+import EsfuerzoSerie from "@/pages/ActiveSession/EsfuerzoSerie.jsx";
+import { useAuth } from "@/hooks/useAuth.js";
+import { seMuestra } from "@/utils/esfuerzo.js";
 
 // Formatea segundos como MM:SS. Sigue creciendo pasada la hora (65:30).
 // Cronómetro y descanso: "07:05", y desde la hora "1:30:05" (utils/formato.js, bloque 11d).
@@ -100,6 +103,15 @@ export default function ActiveSession() {
   const { opciones } = useOpcionesEjercicio();
   // Al volver de añadir ejercicios (bloque 11d) se abre el primero añadido; si no, el primero.
   const [expandedIndex, setExpandedIndex] = useState(() => location.state?.abrir ?? 0);
+  // Esfuerzo por serie (bloque 5c): se ve solo con RPE o RIR elegido en Perfil, y con el rango que
+  // manda el servidor. `esfuerzoAbierto` es el id de la serie con los valores abiertos: uno solo,
+  // así que abrir otra cierra la anterior.
+  const { user } = useAuth();
+  const modoEsfuerzo = user?.preferencias?.esfuerzo ?? "no";
+  const rangoEsfuerzo = opciones?.esfuerzo?.rpe ?? null;
+  const conEsfuerzo = seMuestra(modoEsfuerzo) && rangoEsfuerzo !== null;
+  const [esfuerzoAbierto, setEsfuerzoAbierto] = useState(null);
+  const cerrarEsfuerzo = useCallback(() => setEsfuerzoAbierto(null), []);
   const [restTimer, setRestTimer] = useState(null);
   // Si la nota de la última vez se ve entera o recortada a 2 líneas (bloque 11d).
   const [notaAbierta, setNotaAbierta] = useState(false);
@@ -310,6 +322,8 @@ export default function ActiveSession() {
                 numeroSerie: idx + 1,
                 peso: Number(s.peso) || 0,
                 reps: Number(s.reps) || 0,
+                // Solo si se eligió (bloque 5c): vacío no se envía y el servidor no guarda nada.
+                ...(s.rpe != null && { rpe: s.rpe }),
                 completada: s.completada,
               }))
               .filter((s) => s.completada)
@@ -474,6 +488,16 @@ export default function ActiveSession() {
                         onQuitar={() =>
                           handleQuitarSerie(exerciseIndex, setIndex)
                         }
+                        esfuerzo={
+                          conEsfuerzo && {
+                            modo: modoEsfuerzo,
+                            rango: rangoEsfuerzo,
+                            abierta: esfuerzoAbierto === set.id,
+                            onAbrir: () => setEsfuerzoAbierto(set.id),
+                            onCerrar: cerrarEsfuerzo,
+                            onElegir: (rpe) => updateSet(exerciseIndex, setIndex, { rpe }),
+                          }
+                        }
                       />
                     );
                   })}
@@ -603,6 +627,7 @@ function SetRow({
   onToggleCompletada,
   onReiniciarDescanso,
   onQuitar,
+  esfuerzo,
 }) {
   // Cálculo puro del tiempo de descanso.
   //   - Si esta serie tiene el timer activo → cuenta atrás en curso.
@@ -636,6 +661,7 @@ function SetRow({
     // Envoltorio de la fila (bloque 11d): la barra del descanso va aquí y no dentro de la fila,
     // que es una retícula. En el iPhone (WebKit), un hijo con position: absolute dentro de una
     // retícula no se pintaba donde tocaba y la barra no se veía.
+    <>
     <div className={styles.filaSerie}>
       <div
         className={`${styles.setRow} ${set.completada ? styles.setRowCompleted : ""}`}
@@ -723,7 +749,18 @@ function SetRow({
           />
         </div>
       )}
-    </div>
+      </div>
+      {/* Esfuerzo (bloque 5c): fuera de la fila, así la barra del descanso sigue pegada a ella y,
+          con "no mostrar", la fila queda exactamente como antes. */}
+      {esfuerzo && (
+        <EsfuerzoSerie
+          rpe={set.rpe ?? null}
+          rpeAnterior={anterior?.rpe ?? null}
+          numeroSerie={setIndex + 1}
+          {...esfuerzo}
+        />
+      )}
+    </>
   );
 }
 

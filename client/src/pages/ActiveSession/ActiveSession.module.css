@@ -426,3 +426,116 @@
   min-width: 0;
 }
 
+
+/* --- Esfuerzo por serie (bloque 5c, tarjeta Esfuerzo del design system) --- */
+
+/* Segunda línea bajo la fila de la serie: la pastilla, alineada con el campo del peso (misma
+   primera columna de 24 px y el mismo hueco que la fila). */
+.lineaEsfuerzo {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: var(--space-sm);
+  padding: 0 var(--space-xs) var(--space-sm);
+}
+
+.pastillaEsfuerzo {
+  position: relative;
+  grid-column: 2;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-width: 72px;
+  height: 28px;
+  padding: 0 var(--space-sm);
+  background: none;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+/* Zona táctil de 44 px de alto sin ocupar más sitio. */
+.pastillaEsfuerzo::before {
+  content: '';
+  position: absolute;
+  inset: -8px -4px;
+}
+
+/* Con valor: en verde. */
+.pastillaConValor {
+  border-style: solid;
+  border-color: var(--color-border-accent);
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* El de la vez anterior: gris y en cursiva, como los placeholders del peso y las reps. */
+.pastillaAnterior {
+  font-style: italic;
+}
+
+.pastillaAbierta {
+  border-style: solid;
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+/* Los valores: filas de 5 a todo el ancho de la fila (con la escala de 1 a 10, cuatro filas), cada
+   uno de 44 px de alto. Van en el flujo, no encima: la serie siguiente baja y nada queda tapado. */
+.valoresEsfuerzo {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 0 var(--space-xs) var(--space-md);
+  /* Al abrirse se desplaza para verse entero (EsfuerzoSerie): en el móvil, por encima de la barra
+     de pestañas y del círculo de "Reportar" (sus alturas, los mismos tokens que el aviso de
+     servidor dormido). */
+  scroll-margin-bottom: calc(var(--reportar-bottom-movil) + var(--reportar-alto-movil) + var(--space-sm));
+}
+
+@media (min-width: 768px) {
+  .valoresEsfuerzo {
+    scroll-margin-bottom: var(--space-2xl);
+  }
+}
+
+.valorEsfuerzo {
+  height: 44px;
+  padding: 0;
+  background-color: var(--surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.valorEsfuerzo:hover {
+  border-color: var(--color-border-strong);
+}
+
+.valorElegido {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* El de la vez anterior, marcado como referencia (borde discontinuo). */
+.valorAnterior {
+  border-style: dashed;
+  color: var(--color-text-muted);
+}
+
+.quitarEsfuerzo {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

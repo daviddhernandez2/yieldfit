@@ -17,7 +17,8 @@ import { parse } from 'csv-parse/sync';
 import { esRpeValido } from './esfuerzo.js';
 import { fechaLocalAUtc } from './zona.js';
 
-export const ORIGEN_STRONG = 'strong';
+export { ORIGEN_STRONG } from '../data/importacion.js';
+
 // Con el límite de 10 MB de la ruta, unas 130.000 filas de Strong (unos 80 bytes por fila). Este
 // tope es la segunda barrera: csv-parse deja de leer al llegar a él, sin cargar el resto.
 export const LIMITE_FILAS = 150_000;

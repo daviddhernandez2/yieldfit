@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { esRpeValido } from '../utils/esfuerzo.js';
+import { ORIGENES_IMPORTACION } from '../data/importacion.js';
 
 // Subschema más anidado: cada serie individual del ejercicio.
 const setSchema = new mongoose.Schema(
@@ -111,6 +112,22 @@ const sessionExerciseSchema = new mongoose.Schema(
   }
 );
 
+// De dónde viene una sesión importada (bloque 7b). Solo existe en las importadas: en las
+// registradas en la app no hay campo. Lo escribe solo el servidor al importar.
+//   - origen: la app de la que viene ('strong');
+//   - clave: la fecha de inicio tal cual sale en el CSV ("2026-05-16 13:26:22"). Con el origen,
+//     identifica el entreno para no importarlo dos veces (índice único de abajo). No lleva el
+//     nombre: renombrar el entreno en Strong no debe duplicarlo;
+//   - lote: un id por cada importación, para listarlas y deshacer una entera (decisión A).
+const importacionSchema = new mongoose.Schema(
+  {
+    origen: { type: String, required: true, enum: ORIGENES_IMPORTACION },
+    clave: { type: String, required: true, trim: true, maxlength: 40 },
+    lote: { type: mongoose.Schema.Types.ObjectId, required: true },
+  },
+  { _id: false }
+);
+
 // Schema principal: la sesión de entrenamiento registrada.
 const sessionSchema = new mongoose.Schema(
   {
@@ -147,6 +164,9 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: [500, 'Las notas no pueden superar los 500 caracteres'],
+    },
+    importacion: {
+      type: importacionSchema,
     },
     ejercicios: {
       type: [sessionExerciseSchema],
@@ -200,6 +220,26 @@ sessionSchema.index(
 sessionSchema.index(
   { 'ejercicios.exerciseId': 1, fecha: -1 },
   { name: 'records_por_ejercicio', partialFilterExpression: { 'ejercicios.esPR': true } }
+);
+
+// Sin duplicados al importar (bloque 7b): un mismo entreno de Strong (origen + clave) solo puede
+// estar una vez por usuario. Es la garantía de verdad: aunque la vista previa ya los salte, dos
+// importaciones a la vez o una repetida tras un fallo chocan aquí y no duplican. Parcial: las
+// sesiones registradas en la app no tienen importacion y no ocupan sitio en el índice.
+sessionSchema.index(
+  { userId: 1, 'importacion.origen': 1, 'importacion.clave': 1 },
+  { name: 'importacion_unica', unique: true, partialFilterExpression: { 'importacion.clave': { $exists: true } } }
+);
+
+// Lotes de importación ("Importaciones anteriores" y "Deshacer esta importación"). Parcial, solo
+// con las importadas. Para listar los lotes basta con este índice: el recuento por lote sale de
+// las claves sin leer las sesiones, y la fecha de la importación va dentro del propio ObjectId.
+// Por eso el filtro es $type y no $exists: con $exists, MongoDB vuelve a leer cada sesión para
+// comprobar el campo (lo midió la prueba del 7b con explain). Las consultas tienen que filtrar
+// igual, con { 'importacion.lote': { $type: 'objectId' } } o con un lote concreto.
+sessionSchema.index(
+  { userId: 1, 'importacion.lote': 1 },
+  { name: 'importacion_lote', partialFilterExpression: { 'importacion.lote': { $type: 'objectId' } } }
 );
 
 const Session = mongoose.model('Session', sessionSchema);

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { ICONOS_RUTINA } from '../../compartido/pictogramas.js';
 
 // Subschema embebido: cada ejercicio dentro de una rutina
 // No genera modelo propio, vive solo dentro de Workout
@@ -46,6 +47,18 @@ const workoutSchema = new mongoose.Schema(
       trim: true,
       minlength: [1, 'El nombre debe tener al menos 1 carácter'],
       maxlength: [60, 'El nombre no puede superar los 60 caracteres'],
+    },
+    // Icono de la rutina (bloque 10): opcional, de una lista cerrada. Son las claves de
+    // ICONOS_RUTINA en compartido/pictogramas.js, la misma lista que ofrece el selector del
+    // cliente: si alguien manda otra cosa, el enum la rechaza. Sin icono, la app muestra el
+    // marco vacío. Se guarda la clave ("empuje"), no el id de la figura, para poder cambiar el
+    // dibujo sin migrar las rutinas.
+    icono: {
+      type: String,
+      enum: {
+        values: Object.keys(ICONOS_RUTINA),
+        message: 'Icono de rutina no válido',
+      },
     },
     ejercicios: {
       type: [workoutExerciseSchema],

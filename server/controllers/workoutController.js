@@ -122,7 +122,7 @@ export const getOne = async (req, res, next) => {
 // El modelo exige al menos 1 ejercicio (validación a nivel de schema).
 export const create = async (req, res, next) => {
   try {
-    const { nombre, ejercicios = [] } = req.body;
+    const { nombre, ejercicios = [], icono } = req.body;
 
     const ownershipOk = await verificarOwnershipDeEjercicios(ejercicios, req.user._id);
     if (!ownershipOk) {
@@ -138,6 +138,8 @@ export const create = async (req, res, next) => {
     const workout = new Workout({
       userId: req.user._id,
       nombre,
+      // null o '' = sin icono. Un valor que no está en la lista lo rechaza el enum (400).
+      icono: icono || undefined,
       ejercicios: ejerciciosOrdenados,
     });
     await workout.save();
@@ -172,7 +174,7 @@ export const update = async (req, res, next) => {
       });
     }
 
-    const { nombre, ejercicios } = req.body;
+    const { nombre, ejercicios, icono } = req.body;
 
     if (ejercicios !== undefined) {
       const ownershipOk = await verificarOwnershipDeEjercicios(ejercicios, req.user._id);
@@ -186,6 +188,8 @@ export const update = async (req, res, next) => {
     }
 
     if (nombre !== undefined) workout.nombre = nombre;
+    // Sin el campo en la petición, el icono no cambia; con null o '', se quita.
+    if (icono !== undefined) workout.icono = icono || undefined;
 
     await workout.save();
 

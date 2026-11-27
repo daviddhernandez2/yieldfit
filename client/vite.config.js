@@ -27,6 +27,21 @@ export default defineConfig(({ mode }) => {
       // '@/components/Button/Button.jsx' en vez de rutas relativas '../../'.
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
+        // Código compartido con el servidor y la futura app móvil (bloque 10): vive fuera de
+        // client/, en la raíz del repo. En Vercel funciona porque "Include files outside the
+        // Root Directory" está activado.
+        '@compartido': fileURLToPath(new URL('../compartido', import.meta.url)),
+      },
+    },
+    server: {
+      // El servidor de desarrollo solo sirve archivos de dentro de client/ por seguridad; hay
+      // que permitirle también compartido/ (y mantener client/, que deja de ser el valor por
+      // defecto en cuanto se escribe esta lista).
+      fs: {
+        allow: [
+          fileURLToPath(new URL('.', import.meta.url)),
+          fileURLToPath(new URL('../compartido', import.meta.url)),
+        ],
       },
     },
     build: {

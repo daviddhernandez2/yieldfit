@@ -96,6 +96,13 @@
    --color-border-accent: var(--color-accent);
    /* Fondo de hover de botones ghost y filas. */
    --color-hover: rgba(255, 255, 255, 0.05);
+
+   /* Pictogramas de ejercicios (bloque 10): cuerpo, material y cables en grises; lo que trabaja
+      va en color-accent. El borde que recorta discos y rellenos es --pictograma-fondo, que no es
+      global: lo define cada marco con su propio fondo (componente Pictograma). */
+   --color-pictograma-cuerpo: #6b7078;
+   --color-pictograma-equipo: #4a4e55;
+   --color-pictograma-cable: #5a5f67;
    /* Campo en foco: borde verde suave y anillo (field-focus-ring, abajo). El foco de teclado
       general sigue siendo el anillo sólido de 2 px en color-accent. */
    --color-field-focus: rgba(62, 248, 126, 0.55);

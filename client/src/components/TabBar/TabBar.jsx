@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from '@/components/NavItems.jsx';
+import Icono from '@/components/Icono/Icono.jsx';
 import styles from '@/components/TabBar/TabBar.module.css';
 
 // TabBar inferior para móvil. Solo visible por debajo de 768px.
@@ -9,7 +10,7 @@ import styles from '@/components/TabBar/TabBar.module.css';
 export default function TabBar() {
   return (
     <nav className={styles.tabbar}>
-      {NAV_ITEMS.map(({ path, label, Icon }) => (
+      {NAV_ITEMS.map(({ path, label, icono }) => (
         <NavLink
           key={path}
           to={path}
@@ -17,7 +18,7 @@ export default function TabBar() {
             `${styles.item} ${isActive ? styles.active : ''}`
           }
         >
-          <Icon />
+          <Icono nombre={icono} />
           <span className={styles.label}>{label}</span>
         </NavLink>
       ))}

@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from '@/components/NavItems.jsx';
+import Icono from '@/components/Icono/Icono.jsx';
 import Logo from '@/components/Logo/Logo.jsx';
 import ReportarFallo from '@/components/ReportarFallo/ReportarFallo.jsx';
 import styles from '@/components/Sidebar/Sidebar.module.css';
@@ -17,7 +18,7 @@ export default function Sidebar() {
       </div>
 
       <nav className={styles.nav}>
-        {NAV_ITEMS.map(({ path, label, Icon }) => (
+        {NAV_ITEMS.map(({ path, label, icono }) => (
           <NavLink
             key={path}
             to={path}
@@ -25,7 +26,7 @@ export default function Sidebar() {
               `${styles.item} ${isActive ? styles.active : ''}`
             }
           >
-            <Icon />
+            <Icono nombre={icono} />
             <span>{label}</span>
           </NavLink>
         ))}

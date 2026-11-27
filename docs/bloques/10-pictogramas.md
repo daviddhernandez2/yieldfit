@@ -17,7 +17,8 @@ aprobado en el lienzo "Imágenes de ejercicios" y en la tarjeta Pictograma del d
 | 2 | `presetId` en los ejercicios, snapshot del pictograma en las sesiones y migración | `b3dd8f4` `6e09793` `9e89c8a` |
 | 3 | Icono de rutina: campo validado por el servidor y selector en el formulario | `421ec90` `33388f9` |
 | 4 | Pictogramas en las pantallas y `presetId` en la sesión activa | `81eb4d6` `2519b75` `e9509d2` `d845530` |
-| 5 | Vista ampliada | pendiente |
+| 5 | Vista ampliada | `02c09b7` |
+| 6 | Revisión de diseño: regla de dos familias y Miniatura | pendiente |
 
 ## Migración de producción (paso 2)
 
@@ -90,6 +91,29 @@ flowchart TD
   fuera y ✕ cierran; tocar dentro no; el foco vuelve; con movimiento reducido no anima; la fila
   sigue abriendo o eligiendo.
 - Fase 2, solo apuntada: animar el movimiento con una segunda postura por figura.
+
+## Revisión de diseño (paso 6)
+
+Tras ver las pantallas, David pidió una revisión: había dos mancuernas distintas en la misma
+pantalla (el menú y la rutina sin icono), el recuadro discontinuo parecía un error y los
+pictogramas e iconos de línea convivían sin regla. Diseño aprobado en la tarjeta **Miniatura** del
+design system (versiones 54 y 55):
+
+- **Dos familias:** iconos de interfaz (línea 1,5, `currentColor`; navegan y actúan) y
+  pictogramas (contenido; siempre en una Miniatura). Nunca se mezclan en la misma Miniatura; en una
+  fila, la Miniatura al principio y las acciones al final. La mancuerna es solo "Entrenar": se
+  retira `rutina.svg`. Todos los iconos propios viven en `components/Icono/`, también los del
+  menú (`NavItems` solo nombra el icono).
+- **Miniatura** (sustituye a `Pictograma`): tamaños 32, 40, 48 y ampliada; radio `radius-sm`
+  siempre, por la regla concéntrica (24 − 16 = 8); figura al 90 %. Donde toca la esquina de su
+  tarjeta, la tarjeta lleva `space-md` de relleno (rutinas: 80 px de alto); en listas y buscador
+  queda a `space-md` del borde. El selector baja de 64 a 48.
+- **Estado vacío:** la Miniatura con el icono "Entrenar" en gris, al 50 %, para la rutina sin icono
+  y para el ejercicio de una sesión anterior al bloque 10. El borde discontinuo, solo en "Sin
+  icono" del selector.
+- **Foco:** al abrir la vista ampliada, el foco va al diálogo (`tabindex="-1"`) y no a la ✕; el
+  anillo solo con `:focus-visible`.
+- La papelera de la lista de ejercicios pasa a trazo 1,5 a 20 px.
 
 ## Deuda vista en este bloque
 

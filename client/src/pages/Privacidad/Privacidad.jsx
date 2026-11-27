@@ -63,6 +63,14 @@ export default function Privacidad() {
               para tu historial y para calcular tu progreso.
             </dd>
 
+            <dt>Si importas tu historial de Strong</dt>
+            <dd>
+              El archivo CSV no se guarda: el servidor lo lee, guarda los entrenos como sesiones
+              tuyas y lo descarta. Sí se guarda qué ejercicio tuyo corresponde a cada nombre de
+              Strong (y cuáles decidiste no importar), para proponértelo la próxima vez. Se borra
+              con tu cuenta; deshacer una importación borra sus sesiones.
+            </dd>
+
             <dt>Registro y último acceso</dt>
             <dd>
               La fecha en que creaste la cuenta y la última vez que entraste (con una hora de

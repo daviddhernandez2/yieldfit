@@ -55,6 +55,9 @@ export function useVistaAmpliada() {
   const mostrar = () => {
     flushSync(() => setAbierta(true));
     dialogo.current?.showModal();
+    // showModal lleva el foco a la ✕ (el primer control); se lleva al diálogo, que tiene
+    // tabIndex -1: el lector anuncia su nombre y el anillo solo sale al tabular hasta la ✕.
+    dialogo.current?.focus({ preventScroll: true });
   };
   const ocultar = () => {
     dialogo.current?.close();

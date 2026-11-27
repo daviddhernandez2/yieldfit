@@ -5,7 +5,8 @@ import { useStartSession } from '@/hooks/useStartSession.js';
 import WorkoutActionsModal from '@/components/WorkoutActionsModal/WorkoutActionsModal.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
-import IconoRutina from '@/components/IconoRutina/IconoRutina.jsx';
+import Miniatura from '@/components/Miniatura/Miniatura.jsx';
+import { pictogramaDeRutina } from '@compartido/trazosPictograma.js';
 import styles from '@/pages/Workouts/Workouts.module.css';
 
 const IconPlus = () => (
@@ -110,8 +111,9 @@ export default function Workouts() {
               className={`${styles.card} glassCard`}
               onClick={() => setSelected(wo)}
             >
-              {/* Icono de la rutina (bloque 10), a 48 y solo imagen: el botón es la tarjeta entera. */}
-              <IconoRutina icono={wo.icono} />
+              {/* Icono de la rutina (bloque 10): Miniatura de 48, solo imagen (el botón es la tarjeta
+                  entera). Sin icono, la Miniatura vacía (el icono "entrenar" del menú). */}
+              <Miniatura id={pictogramaDeRutina(wo.icono)} tam={48} />
               <span className={styles.cardName}>{wo.nombre}</span>
               <span className={styles.chevron}>
                 <IconChevronRight />

@@ -121,7 +121,7 @@
   padding: var(--space-md);
   /* "Nombre" alineado con el nombre de las filas, que empieza detrás del pictograma (bloque 10):
      hueco + zona de 48 + el relleno izquierdo de rowMain. */
-  padding-left: calc(var(--space-sm) + 48px + var(--space-sm));
+  padding-left: calc(var(--space-md) - var(--space-xs) + 48px + var(--space-sm));
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-weight: var(--font-weight-medium);
@@ -150,7 +150,9 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  margin-left: var(--space-sm);
+  /* La Miniatura (40) queda a space-md del borde de la tarjeta, como pide el design system: la zona
+     de 48 ya le da space-xs por cada lado. */
+  margin-left: calc(var(--space-md) - var(--space-xs));
 }
 
 .rowMain {

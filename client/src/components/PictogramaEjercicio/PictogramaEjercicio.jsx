@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import { elegirPictograma } from '@compartido/trazosPictograma.js';
-import Pictograma from '@/components/Pictograma/Pictograma.jsx';
+import Miniatura from '@/components/Miniatura/Miniatura.jsx';
 import BotonIcono from '@/components/BotonIcono/BotonIcono.jsx';
 import { useVistaAmpliada } from '@/hooks/useVistaAmpliada.js';
 import { etiquetaDe } from '@/hooks/useOpcionesEjercicio.js';
@@ -38,15 +38,18 @@ export default function PictogramaEjercicio({ nombre, presetId, grupoMuscular, t
         aria-label={`Ver «${nombre}» en grande`}
         aria-haspopup="dialog"
       >
-        <Pictograma id={id} tam={tam} />
+        <Miniatura id={id} tam={tam} />
       </button>
 
       {vista.abierta &&
         createPortal(
           // Escape lanza "cancel": se cancela el cierre brusco y se cierra con animación. Un toque
           // fuera de la tarjeta llega al propio <dialog>, que ocupa toda la pantalla.
+          // tabIndex -1: al abrir, el foco va al diálogo (useVistaAmpliada), no a la ✕; un lector
+          // de pantalla anuncia su nombre y nada se ilumina (design system, tarjeta Miniatura).
           <dialog
             ref={vista.dialogo}
+            tabIndex={-1}
             className={styles.dialogo}
             aria-labelledby="vista-pictograma-nombre"
             onCancel={(e) => {
@@ -58,8 +61,10 @@ export default function PictogramaEjercicio({ nombre, presetId, grupoMuscular, t
             }}
           >
             <div ref={vista.tarjeta} className={styles.tarjeta}>
+              {/* La Miniatura ampliada va arriba, en la esquina de la tarjeta (concéntrica), y la ✕
+                  se apoya sobre su esquina superior derecha. */}
+              <Miniatura id={id} tam="ampliada" etiqueta={nombre} className={styles.miniaturaGrande} marcoRef={vista.marcoGrande} />
               <BotonIcono icono="cerrar" etiqueta="Cerrar" variante="sinFondo" className={styles.cerrar} onClick={vista.cerrar} />
-              <Pictograma id={id} tam="var(--tam-ampliado)" etiqueta={nombre} className={styles.marcoGrande} marcoRef={vista.marcoGrande} />
               <h2 id="vista-pictograma-nombre" className={styles.nombre}>{nombre}</h2>
               {(grupo || tipoTexto) && (
                 <p className={styles.chips}>

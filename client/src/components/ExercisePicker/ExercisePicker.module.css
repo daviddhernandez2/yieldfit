@@ -129,7 +129,8 @@
 .catalogoFila {
   display: flex;
   align-items: center;
-  padding-left: var(--space-sm);
+  /* Miniatura a space-md del borde (la zona de 48 le da space-xs por cada lado). */
+  padding-left: calc(var(--space-md) - var(--space-xs));
   border-bottom: 1px solid var(--color-border);
 }
 

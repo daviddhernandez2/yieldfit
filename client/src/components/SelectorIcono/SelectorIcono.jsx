@@ -1,9 +1,10 @@
 import { ICONOS_RUTINA } from '@compartido/pictogramas.js';
-import Pictograma from '@/components/Pictograma/Pictograma.jsx';
+import Miniatura from '@/components/Miniatura/Miniatura.jsx';
 import styles from '@/components/SelectorIcono/SelectorIcono.module.css';
 
-// Selector del icono de una rutina (bloque 10, "Icono de rutina" en la tarjeta Pictograma del
-// design system): una rejilla de opciones de 64 con "Sin icono" primero, porque es opcional.
+// Selector del icono de una rutina (bloque 10, tarjetas Pictograma y Miniatura del design system):
+// una rejilla de opciones con Miniaturas de 48 y "Sin icono" primero, porque es opcional. "Sin
+// icono" es la única Miniatura con borde discontinuo: ahí significa "nada elegido".
 //
 // La lista sale de ICONOS_RUTINA (compartido/), la misma que valida el servidor: aquí no hay
 // copia de las claves. Si se añade un icono allí, aparece aquí solo.
@@ -34,7 +35,7 @@ export default function SelectorIcono({ valor, onCambiar, etiqueta = 'Icono (opc
                 onChange={() => onCambiar(clave)}
                 className={styles.input}
               />
-              {id ? <Pictograma id={id} tam={64} className={styles.marco} /> : <span className={styles.sinIcono} aria-hidden="true">—</span>}
+              <Miniatura id={id} tam={48} discontinua={!id} className={styles.miniatura} />
               <span className={styles.texto}>{texto}</span>
             </label>
           );

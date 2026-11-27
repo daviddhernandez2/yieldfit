@@ -1,0 +1,100 @@
+/* Miniatura: el cuadrado de superficie donde vive la figura. Su fondo es también --pictograma-fondo,
+   el borde de 2 px que recorta discos y rellenos: si quien la usa cambia el fondo (dentro de un
+   diálogo, una opción elegida), cambia las dos cosas a la vez. */
+.miniatura {
+  --pictograma-fondo: var(--surface-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: var(--lado);
+  height: var(--lado);
+  overflow: hidden;
+  /* Regla concéntrica del design system: tarjeta radius-lg (24) − relleno space-md (16) = 8. */
+  border-radius: var(--radius-sm);
+  background-color: var(--pictograma-fondo);
+}
+
+/* Tamaños cerrados. */
+.t32 {
+  --lado: 32px;
+}
+
+.t40 {
+  --lado: 40px;
+}
+
+.t48 {
+  --lado: 48px;
+}
+
+/* Ampliada: 280 en el móvil sin pasarse del ancho (100vw menos el margen del diálogo y el relleno de
+   su tarjeta, space-md cada uno) y 240 en escritorio. */
+.ampliada {
+  --lado: min(280px, calc(100vw - 4 * var(--space-md)));
+}
+
+@media (min-width: 768px) {
+  .ampliada {
+    --lado: 240px;
+  }
+}
+
+/* La figura ocupa siempre el 90 % del lado. */
+.figura {
+  display: block;
+  width: 90%;
+  height: 90%;
+}
+
+.equipo {
+  stroke: var(--color-pictograma-equipo);
+}
+
+.cable {
+  stroke: var(--color-pictograma-cable);
+}
+
+.cuerpo {
+  stroke: var(--color-pictograma-cuerpo);
+}
+
+.trabaja {
+  stroke: var(--color-accent);
+}
+
+/* Rellenos y discos van delante del cuerpo: el trazo del color del fondo, pintado por detrás del
+   relleno (paint-order), los separa del cuerpo sin tapar su propia forma. */
+.relleno {
+  fill: var(--color-accent);
+  stroke: var(--pictograma-fondo);
+  paint-order: stroke;
+}
+
+.disco {
+  fill: var(--color-pictograma-equipo);
+  stroke: var(--pictograma-fondo);
+  paint-order: stroke;
+}
+
+.cabeza {
+  fill: var(--color-pictograma-cuerpo);
+}
+
+/* Estado vacío: el icono "entrenar" del menú en gris, al 50 % del lado. */
+.vacia {
+  color: var(--color-text-muted);
+}
+
+.iconoVacio {
+  width: 50%;
+  height: 50%;
+}
+
+/* Solo la opción "Sin icono" del selector: el único borde discontinuo, porque ahí significa "nada
+   elegido". */
+.discontinua {
+  --pictograma-fondo: transparent;
+  border: 1px dashed var(--color-border-strong);
+}

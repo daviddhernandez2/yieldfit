@@ -101,9 +101,9 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--space-md);
-  /* 8 px alrededor del icono de 48 (bloque 10, diseño de la lista de rutinas): la tarjeta mide
-     64 px de alto, poco más que con la antigua insignia de 36. */
-  padding: var(--space-sm) var(--space-lg) var(--space-sm) var(--space-sm);
+  /* space-md alrededor de la Miniatura de 48 (bloque 10): con radius-lg (24), su radius-sm (8) es
+     concéntrico (design system, tarjeta Miniatura). La tarjeta mide 80 px de alto. */
+  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-md);
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
   color: var(--color-text);

@@ -14,13 +14,11 @@
   cursor: zoom-in;
 }
 
-/* ---------- Vista ampliada (tarjeta Pictograma del design system) ---------- */
+/* ---------- Vista ampliada (tarjetas Pictograma y Miniatura del design system) ---------- */
 
 /* El <dialog> ocupa toda la pantalla y es transparente: así un toque fuera de la tarjeta llega al
    propio diálogo y se puede cerrar. El velo es su ::backdrop. */
 .dialogo {
-  /* 280 en el móvil (sin pasarse del ancho: 100vw menos márgenes y relleno) y 240 en escritorio. */
-  --tam-ampliado: min(280px, calc(100vw - 2 * var(--space-md) - 2 * var(--space-lg)));
   width: 100vw;
   max-width: none;
   height: 100dvh;
@@ -30,6 +28,12 @@
   border: none;
   background: transparent;
   color: var(--color-text);
+}
+
+.dialogo:focus {
+  /* El diálogo es el contenedor: recibe el foco al abrir, pero nunca pinta anillo. El anillo sale
+     en la ✕ cuando se llega con el teclado (:focus-visible, regla global). */
+  outline: none;
 }
 
 .dialogo[open] {
@@ -44,21 +48,19 @@
   -webkit-backdrop-filter: blur(6px);
 }
 
-@media (min-width: 768px) {
-  .dialogo {
-    --tam-ampliado: 240px;
-  }
-}
-
 .tarjeta {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-md);
-  width: 100%;
-  max-width: 400px;
-  padding: var(--space-lg);
+  /* min-content: la tarjeta mide lo que la Miniatura ampliada (280 o 240) más su relleno, así la
+     Miniatura toca las esquinas a space-md; un nombre largo se parte en líneas. */
+  width: min-content;
+  max-width: 100%;
+  /* space-md: con radius-lg (24) deja la Miniatura ampliada en radius-sm (8), concéntrica. */
+  padding: var(--space-md);
+  padding-bottom: var(--space-lg);
   background-color: var(--surface-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -67,15 +69,14 @@
 
 .cerrar {
   position: absolute;
-  top: var(--space-sm);
-  right: var(--space-sm);
+  top: var(--space-md);
+  right: var(--space-md);
 }
 
-/* La figura grande va sobre surface-1 (un nivel por debajo de la tarjeta). Dos clases para ganar
-   a .marco de Pictograma, que también define el fondo. */
-.tarjeta .marcoGrande {
+/* Dentro de un diálogo (surface-2), la Miniatura va en surface-1: siempre un nivel distinto del de
+   su contenedor. Dos clases para ganar a .miniatura, que también define el fondo. */
+.tarjeta .miniaturaGrande {
   --pictograma-fondo: var(--surface-1);
-  margin-top: var(--space-lg);
 }
 
 /* dialog-title del design system, como el título de ConfirmDialog. */

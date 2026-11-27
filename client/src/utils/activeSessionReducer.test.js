@@ -129,6 +129,14 @@ ok('añadir: con sus series vacías y el descanso de la acción', s.ejercicios[2
 });
 ok('añadir: los que había son los mismos objetos', s.ejercicios[0] === base.ejercicios[0], true);
 ok('añadir sin grupo ni tipo: no añade esos campos', ['grupoMuscular' in s.ejercicios[3], 'tipo' in s.ejercicios[3]], [false, false]);
+
+// Pictograma (bloque 10): el presetId entra con el ejercicio y no se hereda del reemplazado.
+const conPreset = sesionReducer(conHecha, { type: 'reemplazarEjercicio', exerciseIndex: 0, exerciseId: 'remo', exerciseNombre: 'Remo con barra', grupoMuscular: 'Espalda', tipo: 'Pesas libres', presetId: 'remo-barra', ids: ['r1'] });
+ok('reemplazar guarda el presetId del nuevo', conPreset.ejercicios[0].presetId, 'remo-barra');
+const sinPreset = sesionReducer(conPreset, { type: 'reemplazarEjercicio', exerciseIndex: 0, exerciseId: 'mio', exerciseNombre: 'Mío', grupoMuscular: 'Espalda', tipo: 'Poleas', ids: ['r1'] });
+ok('reemplazar por uno sin preset no hereda el anterior', 'presetId' in sinPreset.ejercicios[0], false);
+const añadidoConPreset = sesionReducer(conHecha, { type: 'añadirEjercicios', ejercicios: [{ exerciseId: 'remo', exerciseNombre: 'Remo con barra', grupoMuscular: 'Espalda', tipo: 'Pesas libres', presetId: 'remo-barra', descansoSegundos: 90, ids: ['a1'] }] });
+ok('añadir guarda el presetId', añadidoConPreset.ejercicios.at(-1).presetId, 'remo-barra');
 ok('añadir: misma forma que en localStorage', claves(JSON.parse(JSON.stringify(s)).ejercicios[2]), claves(SESION_ACTUAL.ejercicios[0]));
 
 // --- Esfuerzo (bloque 5c) ---

@@ -65,7 +65,7 @@ export function useStartSession() {
         { ...wo, ejercicios: disponibles },
         nombreById,
         bloqueados,
-        new Map(catalogo.map((ex) => [ex._id, { grupoMuscular: ex.grupoMuscular, tipo: ex.tipo }])),
+        new Map(catalogo.map((ex) => [ex._id, { grupoMuscular: ex.grupoMuscular, tipo: ex.tipo, presetId: ex.presetId }])),
       );
       writeActiveSession(nueva);
       navigate('/sessions/active');

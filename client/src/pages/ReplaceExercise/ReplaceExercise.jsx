@@ -101,6 +101,7 @@ export default function ReplaceExercise() {
       exerciseNombre: nuevo.nombre,
       grupoMuscular: nuevo.grupoMuscular,
       tipo: nuevo.tipo,
+      presetId: nuevo.presetId,
       ids: Array.from({ length: seriesAlReemplazar(ejercicio) }, () => crypto.randomUUID()),
     });
     // Se guarda ya: si la petición de abajo tarda o falla, el reemplazo está hecho.
@@ -120,6 +121,7 @@ export default function ReplaceExercise() {
         exerciseNombre: ex.nombre,
         grupoMuscular: ex.grupoMuscular,
         tipo: ex.tipo,
+        presetId: ex.presetId,
         descansoSegundos: DESCANSO_POR_DEFECTO,
         ids: Array.from({ length: SERIES_POR_DEFECTO }, () => crypto.randomUUID()),
       })),

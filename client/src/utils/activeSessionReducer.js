@@ -15,7 +15,7 @@
 // La forma de la sesión es EXACTAMENTE la que ya se guarda en localStorage (ver
 // buildActiveSessionFromWorkout en activeSession.js): una sesión a medias de antes de este
 // cambio sigue funcionando después del deploy. El reducer no añade ni quita campos, salvo
-// grupoMuscular y tipo al reemplazar un ejercicio (opcionales, bloque 9b).
+// grupoMuscular y tipo al reemplazar un ejercicio (opcionales, bloque 9b) y presetId (bloque 10).
 
 import { serieAnterior, rellenarConAnterior } from './activeSession.js';
 import { moverElemento } from './orden.js';
@@ -94,13 +94,15 @@ export const sesionReducer = (sesion, accion) => {
     // Reemplazar un ejercicio por otro (bloque 6, 0031): el nuevo ocupa el mismo sitio, con
     // el mismo número de series (al menos 1) y el mismo descanso, y los campos vacíos. Lo
     // hecho del ejercicio anterior se pierde (la pantalla lo confirma antes).
-    // { exerciseIndex, exerciseId, exerciseNombre, grupoMuscular?, tipo?, ids: [uno por serie] }
+    // { exerciseIndex, exerciseId, exerciseNombre, grupoMuscular?, tipo?, presetId?, ids: [uno por serie] }
     case 'reemplazarEjercicio':
       return cambiarEjercicio(sesion, accion.exerciseIndex, (ej) => ({
         exerciseId: accion.exerciseId,
         exerciseNombre: accion.exerciseNombre,
         // Grupo y tipo para "Pecho · Máquinas" (bloque 9b), si la acción los trae.
         ...(accion.grupoMuscular && { grupoMuscular: accion.grupoMuscular, tipo: accion.tipo }),
+        // Su pictograma (bloque 10). El del ejercicio reemplazado no se hereda.
+        ...(accion.presetId && { presetId: accion.presetId }),
         // Solo se puede elegir un ejercicio disponible (el catálogo no deja otros).
         bloqueado: false,
         descansoSegundos: ej.descansoSegundos,
@@ -110,7 +112,7 @@ export const sesionReducer = (sesion, accion) => {
     // Añadir ejercicios al final de la sesión (bloque 11d), solo para esta sesión: la rutina no
     // cambia. Cada uno entra con las series vacías que digan sus ids (la pantalla genera
     // SERIES_POR_DEFECTO) y el descanso que traiga la acción.
-    // { ejercicios: [{ exerciseId, exerciseNombre, grupoMuscular?, tipo?, descansoSegundos, ids }] }
+    // { ejercicios: [{ exerciseId, exerciseNombre, grupoMuscular?, tipo?, presetId?, descansoSegundos, ids }] }
     case 'añadirEjercicios':
       return {
         ...sesion,
@@ -120,6 +122,7 @@ export const sesionReducer = (sesion, accion) => {
             exerciseId: nuevo.exerciseId,
             exerciseNombre: nuevo.exerciseNombre,
             ...(nuevo.grupoMuscular && { grupoMuscular: nuevo.grupoMuscular, tipo: nuevo.tipo }),
+            ...(nuevo.presetId && { presetId: nuevo.presetId }),
             // Como al reemplazar: el buscador solo deja elegir ejercicios disponibles.
             bloqueado: false,
             descansoSegundos: nuevo.descansoSegundos,

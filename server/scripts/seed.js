@@ -201,6 +201,8 @@ const main = async () => {
           // Snapshots y mejor1RM, igual que hace sessionController al crear una sesión.
           nombreSnapshot: ex.nombre,
           trackingSnapshot: ex.tracking,
+          presetIdSnapshot: ex.presetId,
+          grupoMuscularSnapshot: ex.grupoMuscular,
           descansoSegundos: e.series === 1 ? 0 : 120,
           orden,
           mejor1RM: mejor1RMDeEjercicio({ trackingSnapshot: ex.tracking, sets }),

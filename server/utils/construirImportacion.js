@@ -84,7 +84,8 @@ const serieParaGuardar = (serie, tracking, numeroSerie) => {
 
 // Monta los documentos de sesión que se van a guardar.
 //   sesiones: las de agruparSesiones que se importan (ya sin las importadas ni las saltadas);
-//   ejercicioDe: Map nombreStrong → { _id, nombre, tracking } (los elegidos y los recién creados);
+//   ejercicioDe: Map nombreStrong → { _id, nombre, tracking, grupoMuscular, presetId? } (los elegidos y
+//     los recién creados, que no tienen presetId);
 //   omitidos: Set de nombres de Strong que no se importan ("No importar");
 //   rutinas: [{ _id, nombre }] del usuario; userId, lote: los de esta importación.
 // Devuelve { documentos, seriesSinDatos, juntados, notasCortadas, seriesOmitidas,
@@ -152,6 +153,9 @@ export const construirSesiones = ({ sesiones, ejercicioDe, omitidos = new Set(),
         exerciseId: destino._id,
         nombreSnapshot: destino.nombre,
         trackingSnapshot: destino.tracking,
+        // Pictograma (bloque 10), igual que en las sesiones de la app.
+        ...(destino.presetId && { presetIdSnapshot: destino.presetId }),
+        grupoMuscularSnapshot: destino.grupoMuscular,
         ...(descansoSegundos !== null && descansoSegundos !== undefined && { descansoSegundos }),
         orden: ejercicios.length,
         mejor1RM: mejor1RMDeEjercicio({ trackingSnapshot: destino.tracking, sets }) ?? undefined,

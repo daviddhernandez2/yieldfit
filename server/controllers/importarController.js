@@ -70,7 +70,7 @@ const filtroLote = (userId, lote) => ({ userId, 'importacion.lote': { $eq: lote,
 const leerContexto = async (userId, agrupado) => {
   const claves = agrupado.sesiones.map((s) => s.clave);
   const [ejercicios, recordados, yaImportadas] = await Promise.all([
-    Exercise.find({ userId }, { nombre: 1, grupoMuscular: 1, tipo: 1, tracking: 1 }).lean(),
+    Exercise.find({ userId }, { nombre: 1, grupoMuscular: 1, tipo: 1, tracking: 1, presetId: 1 }).lean(),
     EmparejamientoImport.find({ userId, origen: ORIGEN_STRONG }, { nombreOrigen: 1, exerciseId: 1, omitir: 1 }).lean(),
     // Usa el índice único importacion_unica y solo lee la clave: no trae las sesiones.
     Session.find(
@@ -170,14 +170,17 @@ export const importar = async (req, res, next) => {
         omitidos.add(nombreStrong);
       } else if (decision.exerciseId) {
         const e = porId.get(decision.exerciseId);
-        ejercicioDe.set(nombreStrong, { _id: e._id, nombre: e.nombre, tracking: e.tracking });
+        // presetId y grupoMuscular, para el pictograma de la sesión (bloque 10).
+        ejercicioDe.set(nombreStrong, { _id: e._id, nombre: e.nombre, tracking: e.tracking, presetId: e.presetId, grupoMuscular: e.grupoMuscular });
       } else {
         const _id = new mongoose.Types.ObjectId();
         // insertMany no ejecuta pre('save'): el tracking va ya calculado (validarDecisiones). El
         // tipo Cardio está bloqueado en el alta normal hasta el 6b, pero aquí se permite
         // (decisión de David): el bloqueo es porque la sesión activa no sabe registrarlo.
         nuevosEjercicios.push({ _id, userId, ...decision.crear });
-        ejercicioDe.set(nombreStrong, { _id, nombre: decision.crear.nombre, tracking: decision.crear.tracking });
+        ejercicioDe.set(nombreStrong, {
+          _id, nombre: decision.crear.nombre, tracking: decision.crear.tracking, grupoMuscular: decision.crear.grupoMuscular,
+        });
       }
     }
 

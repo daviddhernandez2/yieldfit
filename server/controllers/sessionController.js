@@ -51,6 +51,9 @@ const construirEjerciciosConSnapshots = async (ejerciciosInput, userId) => {
       exerciseId: ejInput.exerciseId,
       nombreSnapshot: exercise.nombre,
       trackingSnapshot: exercise.tracking,
+      // Pictograma (bloque 10). Sin presetId, el campo no se guarda (undefined).
+      presetIdSnapshot: exercise.presetId,
+      grupoMuscularSnapshot: exercise.grupoMuscular,
       descansoSegundos: ejInput.descansoSegundos,
       orden: index,
       mejor1RM: mejor1RMDeEjercicio({ trackingSnapshot: exercise.tracking, sets }),

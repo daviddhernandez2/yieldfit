@@ -65,6 +65,20 @@ const sessionExerciseSchema = new mongoose.Schema(
       required: true,
       enum: ['1RM', 'tiempo_distancia'],
     },
+    // Para el pictograma del historial (bloque 10): el preset y el grupo del ejercicio al
+    // guardar, por lo mismo que el nombre (que la figura no cambie si luego se edita o se borra
+    // el ejercicio). Los escribe solo el servidor. Opcionales: las sesiones anteriores al bloque
+    // 10 no los tienen y muestran el marco vacío; presetIdSnapshot tampoco existe si el ejercicio
+    // no venía de un preset. Sin enum a propósito: es una foto del pasado, y si algún día un
+    // valor dejara de existir, las sesiones viejas tienen que seguir siendo válidas.
+    presetIdSnapshot: {
+      type: String,
+      trim: true,
+    },
+    grupoMuscularSnapshot: {
+      type: String,
+      trim: true,
+    },
     descansoSegundos: {
       type: Number,
       min: 0,

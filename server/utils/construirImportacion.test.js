@@ -12,7 +12,7 @@ const ok = (desc, real, esperado) => {
 };
 
 const ejercicios = [
-  { _id: 'sentadilla', nombre: 'Sentadilla libre', grupoMuscular: 'Piernas', tipo: 'Pesas libres', tracking: '1RM' },
+  { _id: 'sentadilla', presetId: 'sentadilla', nombre: 'Sentadilla libre', grupoMuscular: 'Piernas', tipo: 'Pesas libres', tracking: '1RM' },
   { _id: 'triceps', nombre: 'Extensión de tríceps en polea', grupoMuscular: 'Brazos', tipo: 'Poleas', tracking: '1RM' },
   { _id: 'carrera', nombre: 'Carrera continua', grupoMuscular: 'Cardio', tipo: 'Cardio', tracking: 'tiempo_distancia' },
 ];
@@ -114,6 +114,12 @@ ok('serie sin datos para su tracking: no entra y se cuenta; sesión vacía: fuer
   });
   return [r.documentos.length, r.seriesSinDatos];
 })(), [0, 1]);
+
+// Pictograma (bloque 10): el snapshot lleva el grupo siempre y el preset solo si existe.
+ok('snapshot del pictograma: preset y grupo, o solo grupo',
+  brazo.ejercicios.map((e) => [e.exerciseId, e.presetIdSnapshot ?? null, e.grupoMuscularSnapshot]),
+  [['triceps', null, 'Brazos'], ['sentadilla', 'sentadilla', 'Piernas']]);
+ok('sin preset, el campo ni siquiera existe', 'presetIdSnapshot' in brazo.ejercicios[0], false);
 
 console.log(fallos === 0 ? '\nTODO CORRECTO' : `\n${fallos} FALLOS`);
 if (fallos > 0) process.exitCode = 1;

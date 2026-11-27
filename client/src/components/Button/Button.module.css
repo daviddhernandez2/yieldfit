@@ -60,6 +60,10 @@
    borde en degradado se dibuja con dos fondos: el cristal ocupa el interior (padding-box) y el
    degradado verde asoma por el borde transparente (border-box). Los valores, en variables.css. */
 .primary {
+  /* relative + isolation: la capa verde del hover (::before) va dentro del botón, detrás del
+     texto y delante del cristal. */
+  position: relative;
+  isolation: isolate;
   border: 1px solid transparent;
   background:
     linear-gradient(var(--color-action-glass), var(--color-action-glass)) padding-box,
@@ -68,20 +72,57 @@
   color: var(--color-on-action);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
+  transition:
+    color var(--duration-overlay) var(--ease-standard),
+    box-shadow var(--duration-overlay) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
 }
 
-.primary:hover:not(:disabled) {
+/* La capa verde: invisible en reposo; al pasar el ratón (o al pulsar, en el móvil) aparece poco a
+   poco. Es una capa aparte porque un degradado no se puede animar, pero su opacidad sí: así el
+   cristal se va llenando de verde en vez de cambiar de golpe. */
+.primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-action-glass-hover);
+  opacity: 0;
+  transition: opacity var(--duration-overlay) var(--ease-standard);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.primary:hover:not(:disabled),
+.primary:active:not(:disabled) {
   background:
-    var(--color-action-glass-hover) padding-box,
+    linear-gradient(var(--color-action-glass), var(--color-action-glass)) padding-box,
     var(--color-action-border-hover) border-box;
   box-shadow: var(--shadow-action-hover);
+  /* Sobre el verde, el texto pasa al color del fondo para leerse. */
+  color: var(--color-on-action-hover);
 }
 
-/* Outline: borde verde sin relleno. */
+.primary:hover:not(:disabled)::before,
+.primary:active:not(:disabled)::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary,
+  .primary::before {
+    transition: none;
+  }
+}
+
+/* Outline: borde verde con cristal sutil (2026-11-26). Acciones secundarias y "Cancelar". */
 .outline {
-  background-color: transparent;
-  border: 1.5px solid var(--color-border-accent);
+  background-color: var(--color-outline-glass);
+  border: 1.5px solid var(--color-outline-border);
+  box-shadow: var(--shadow-outline);
   color: var(--color-accent);
+  backdrop-filter: var(--blur-glass-sutil);
+  -webkit-backdrop-filter: var(--blur-glass-sutil);
 }
 
 .outline:hover:not(:disabled) {

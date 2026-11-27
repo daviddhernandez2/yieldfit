@@ -54,13 +54,26 @@
       abajo, en el texto y en un brillo suave por dentro. Al pasar el ratón se tiñe de verde. Sin
       sombra exterior. El verde de marca es el mismo (color-accent). */
    --color-action-glass: rgba(15, 16, 18, 0.62);
-   --color-action-glass-hover: linear-gradient(rgba(62, 248, 126, 0.14), rgba(62, 248, 126, 0.06));
+   /* Al pasar o pulsar, el cristal se va llenando de verde (una capa que aparece poco a poco,
+      translúcida y en degradado, no un sólido de golpe) y el texto pasa al color del fondo
+      (David, 2026-11-26/27: verde o blanco sobre verde no se leían). */
+   --color-action-glass-hover: linear-gradient(180deg, rgba(62, 248, 126, 0.96), rgba(62, 248, 126, 0.8));
    --color-action-border: linear-gradient(180deg, rgba(62, 248, 126, 0.95), rgba(62, 248, 126, 0.35));
-   --color-action-border-hover: linear-gradient(180deg, #3ef87e, rgba(62, 248, 126, 0.5));
+   --color-action-border-hover: linear-gradient(180deg, #3ef87e, rgba(62, 248, 126, 0.7));
    --shadow-action: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 18px rgba(62, 248, 126, 0.1);
-   --shadow-action-hover: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 22px rgba(62, 248, 126, 0.18);
+   --shadow-action-hover: inset 0 1px 0 rgba(255, 255, 255, 0.35);
    --blur-glass: blur(16px) saturate(160%);
    --color-on-action: var(--color-accent);
+   /* Texto del primario al pasar el ratón: el color del fondo, sobre el verde. */
+   --color-on-action-hover: var(--surface-0);
+   /* Botones con borde verde (outline y las píldoras de cabecera): el mismo cristal, en sutil
+      (decisión de David, 2026-11-26). Fondo casi transparente con lo de detrás desenfocado, filo
+      claro arriba y borde verde algo más suave; sin degradado ni brillo verde por dentro, para no
+      confundirse con el primario. */
+   --color-outline-glass: rgba(255, 255, 255, 0.03);
+   --color-outline-border: rgba(62, 248, 126, 0.6);
+   --shadow-outline: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+   --blur-glass-sutil: blur(12px) saturate(140%);
 
    /* Rojo: error, pérdida y peligro. Más vivo que el del Premium original (#dc6b67): 80 % de
       saturación, 5,5:1 sobre surface-1 (DECISIONS 0048). Una señal, nunca un fondo sólido: los

@@ -5,7 +5,7 @@ import styles from '@/components/Button/Button.module.css';
 // Variantes:
 //   - "primary" (por defecto): cristal oscuro con borde de luz verde y texto verde (opción B).
 //     Una sola acción principal por vista.
-//   - "outline": borde verde, sin relleno. Acciones secundarias y "Cancelar".
+//   - "outline": borde verde con cristal sutil. Acciones secundarias y "Cancelar".
 //   - "danger": rojo TONAL (fondo y borde translúcidos, texto rojo), nunca sólido. Para
 //     confirmar borrados (p. ej. en ConfirmDialog con confirmVariant="danger").
 //   - "ghost": sin fondo ni borde; hover suave. Acciones terciarias en barras y tarjetas.

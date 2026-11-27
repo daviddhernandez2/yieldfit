@@ -167,6 +167,26 @@ lleva, pero no los recupera.
 - Revisión prevista ([0018](../DECISIONS.md)): backups automáticos fuera del portátil cuando la app
   tenga usuarios reales además de David.
 
+## Código compartido (`compartido/`) y despliegues
+
+Desde el bloque 10, `compartido/` (en la raíz del repo) tiene código que usan la web y la API, como
+los pictogramas y la lista cerrada de iconos de rutina. Los dos despliegues tienen que verlo:
+
+- **Vercel** (Root Directory `client`): "Include files outside the Root Directory in the Build
+  Step" **activado**. Sin eso, la compilación falla al importar `@compartido`.
+- **Render** (Root Directory `server`): clona el repo entero, así que la API encuentra
+  `../compartido` al arrancar. Pero por defecto solo se despliega si cambia algo dentro de su
+  Root Directory. Por eso en Settings → Build → **Build Filters** → Included Paths están
+  (configurado el 2026-11-27) estas dos rutas, relativas a la raíz del repo:
+  - **`compartido/**`**: para que un cambio solo en `compartido/` despliegue también la API. Sin
+    ella, la web se actualiza y la API no, y la web podría ofrecer un icono que la API todavía
+    rechaza.
+  - **`server/**`**: en cuanto hay una ruta incluida, Render ignora todo lo que no esté en la
+    lista, también el propio Root Directory. Sin ella, los cambios de la API dejarían de
+    desplegarse.
+
+  Si se cambia el Root Directory o se mueve `compartido/`, hay que revisar esta lista.
+
 ## Variables de entorno de Vercel
 
 - `VITE_API_URL` = `https://api.yieldfit.app/api` (Production).

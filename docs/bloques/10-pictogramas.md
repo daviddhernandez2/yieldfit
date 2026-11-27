@@ -16,7 +16,8 @@ aprobado en el lienzo "Imágenes de ejercicios" y en la tarjeta Pictograma del d
 | 1 | Datos en `compartido/` y componente `Pictograma` | `3be8a77` `25668fc` |
 | 2 | `presetId` en los ejercicios, snapshot del pictograma en las sesiones y migración | `b3dd8f4` `6e09793` `9e89c8a` |
 | 3 | Icono de rutina: campo validado por el servidor y selector en el formulario | `421ec90` `33388f9` |
-| 4 | Pictogramas en las pantallas y `presetId` en la sesión activa | pendiente |
+| 4 | Pictogramas en las pantallas y `presetId` en la sesión activa | `81eb4d6` `2519b75` `e9509d2` `d845530` |
+| 5 | Vista ampliada | pendiente |
 
 ## Migración de producción (paso 2)
 
@@ -61,6 +62,34 @@ los iconos propios salen de `BotonIcono` a un componente `Icono` (`components/Ic
 De paso: el detalle de sesión tenía su propia copia de `formatDuracion`, sin el arreglo del 7b, y
 las sesiones de Strong sin duración salían como "NaNh NaN min". Se borró la copia y usa la de
 `utils/formato.js`.
+
+## Vista ampliada (paso 5)
+
+Tocar el pictograma (no la fila) en la lista y el buscador de ejercicios o en la sesión activa
+abre un `<dialog>` con la figura grande, el nombre y los chips de grupo y tipo. La animación vive
+en `hooks/useVistaAmpliada.js`:
+
+```mermaid
+flowchart TD
+    T["Toque en el pictograma"] --> R{"¿prefers-reduced-motion?"}
+    R -- sí --> M["showModal sin animar"]
+    R -- no --> V{"¿document.startViewTransition?"}
+    V -- sí --> VT["View Transitions: el marco pequeño y el grande<br/>comparten view-transition-name; el resto, fundido"]
+    V -- no --> F["FLIP: medir pequeño → abrir → medir grande →<br/>animar la diferencia con Web Animations"]
+    VT --> A["Diálogo abierto · foco en ✕"]
+    F --> A
+    M --> A
+    A -->|"Escape · tocar fuera · ✕"| C["Cierre con el camino inverso;<br/>el foco vuelve al pictograma"]
+```
+
+- 280 px en el móvil (sin pasarse del ancho) y 240 en escritorio: `Pictograma` acepta el tamaño
+  como valor CSS (`var(--tam-ampliado)`).
+- El diálogo va en un portal a `<body>` para no heredar estilos de la fila.
+- Probado en Chrome y en WebKit 27.2 (Playwright 1.65.0) a 375 y 1280 px: los dos tienen View
+  Transitions, y el grupo vuela de 40 px en la fila a 280 px en el centro en 280 ms. Escape, tocar
+  fuera y ✕ cierran; tocar dentro no; el foco vuelve; con movimiento reducido no anima; la fila
+  sigue abriendo o eligiendo.
+- Fase 2, solo apuntada: animar el movimiento con una segunda postura por figura.
 
 ## Deuda vista en este bloque
 

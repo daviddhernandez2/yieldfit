@@ -18,6 +18,8 @@ erDiagram
     User ||--o{ Chart : "tiene (userId)"
     User ||--o{ BugReport : "envía (userId)"
     User ||--o{ PasswordReset : "pide (userId)"
+    User ||--o{ EmparejamientoImport : "recuerda (userId)"
+    EmparejamientoImport }o--o| Exercise : "exerciseId (salvo omitir)"
 
     Workout ||--|{ WorkoutExercise_embebido : "ejercicios[]"
     Session ||--|{ SessionExercise_embebido : "ejercicios[]"
@@ -186,6 +188,14 @@ Entrenamiento realizado.
   las sesiones que tienen algún récord ([0054](../DECISIONS.md), bloque 9d): el widget "Récord de un
   ejercicio" (`GET /api/estadisticas/record`) lee los récords de un ejercicio sin recorrer todas sus
   sesiones. La consulta incluye `'ejercicios.esPR': true` y lo nombra con `hint`.
+- **`importacion { origen, clave, lote }`** ([0057](../DECISIONS.md), bloque 7b): solo en las
+  sesiones importadas de Strong; lo escribe el servidor. `clave` es la fecha de inicio tal cual
+  sale en el CSV y `lote`, un id por importación (para listarlas y deshacerlas).
+  - **Índice único parcial `importacion_unica`** `{ userId, 'importacion.origen', 'importacion.clave' }`:
+    un mismo entreno no entra dos veces, ni con dos importaciones a la vez.
+  - **Índice parcial `importacion_lote`** `{ userId, 'importacion.lote' }`, con filtro
+    `$type: 'objectId'`: el listado de lotes sale del índice sin leer sesiones. Las consultas de un
+    lote filtran con `{ $eq: lote, $type: 'objectId' }`; con la igualdad sola, MongoDB no lo usa.
 
 #### Cómo se calcula el progreso
 
@@ -261,6 +271,14 @@ flowchart LR
     A -- sí --> D[("Dashboard")]
     A -- "no (1.ª vez)" --> T["crear «Todos»<br/>(si no existe)"] --> P["dashboard por defecto:<br/>Progreso total (P) · Sesiones totales (P) · Racha (M)<br/>· grupos (G, «Todos» primero)<br/>· Última sesión (M) · Nuevos récords (M)"] --> D
 ```
+
+### EmparejamientoImport
+Lo que se recuerda de la importación de Strong ([0057](../DECISIONS.md), bloque 7b): por cada nombre
+de ejercicio de Strong (`nombreOrigen`, tal cual sale en el CSV), **o** el ejercicio tuyo
+(`exerciseId`) **o** "no importar" (`omitir: true`), nunca las dos cosas (lo valida el modelo en
+`pre('validate')`). Índice único `{ userId, origen, nombreOrigen }`: una sola respuesta por nombre;
+cambiarla es el mismo documento. Borrar el ejercicio borra su emparejamiento (no los "no
+importar"); deshacer una importación no los toca; se borran con la cuenta.
 
 ### BugReport
 Reporte de un fallo enviado con el botón de la app (bloque 11b): `POST /api/reports`, 5 por hora

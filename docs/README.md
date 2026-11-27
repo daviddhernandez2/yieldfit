@@ -14,12 +14,13 @@ renderiza los diagramas mermaid de forma nativa (ver [0016](../DECISIONS.md)).
 | [Autenticación](auth.md) | Registro, login, tokens de acceso y de renovación, límite de intentos e IP real |
 | [Operaciones](operaciones.md) | Backups de producción, prueba de restauración y reparaciones puntuales |
 | [Privacidad](privacidad.md) | Dónde está la nota de privacidad de la app y cuándo hay que actualizarla |
+| [Roadmap](roadmap.md) | Orden de trabajo, qué es cada bloque y deuda técnica (el estado, en el tablero) |
 | [Decisiones](../DECISIONS.md) | Registro de decisiones técnicas y de producto (fuente única, no se duplica aquí) |
 
 ## Bloques del roadmap
 
-Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
-[CLAUDE.md](../CLAUDE.md#roadmap-por-bloques).
+Una página por bloque, que se añade al cerrarlo. El orden y qué es cada bloque, en
+[roadmap.md](roadmap.md); el estado, en el tablero privado de David.
 
 | Bloque | Página |
 |---|---|
@@ -34,6 +35,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 5b — Cardio bloqueado | [bloques/5b-cardio-bloqueado.md](bloques/5b-cardio-bloqueado.md) |
 | 5c — Esfuerzo por serie (RPE/RIR) | [bloques/5c-esfuerzo-por-serie.md](bloques/5c-esfuerzo-por-serie.md) |
 | 6 — Reemplazar ejercicio | [bloques/6-reemplazar-ejercicio.md](bloques/6-reemplazar-ejercicio.md) |
+| 7b — Importar desde Strong | [bloques/7b-importar-strong.md](bloques/7b-importar-strong.md) |
 | 8 — Calendario | [bloques/8-calendario.md](bloques/8-calendario.md) |
 | 8b — Calendario en escritorio | [bloques/8b-calendario-escritorio.md](bloques/8b-calendario-escritorio.md) |
 | 9 — Grupos de progreso | [bloques/9-grupos-progreso.md](bloques/9-grupos-progreso.md) |
@@ -44,6 +46,7 @@ Una página por bloque, que se añade al cerrarlo. El roadmap completo está en
 | 11b — Beta cerrada | [bloques/11b-beta-cerrada.md](bloques/11b-beta-cerrada.md) |
 | 11c — Registro en iOS | [bloques/11c-registro-ios.md](bloques/11c-registro-ios.md) |
 | 11d — Feedback de la beta | [bloques/11d-feedback-beta.md](bloques/11d-feedback-beta.md) |
+| 12a — App móvil: prueba de viabilidad (pendiente) | [bloques/12a-app-movil.md](bloques/12a-app-movil.md) |
 
 ## Cómo mantener esta documentación
 

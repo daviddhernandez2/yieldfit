@@ -2021,3 +2021,106 @@ lo había enviado.
 - La nota de privacidad menciona el esfuerzo y las preferencias, y también las notas del 11d, que
   faltaban.
 
+
+## 0057 — Importar el historial de Strong: vista previa, emparejar y deshacer por lotes
+
+Fecha: 2026-11-26 · Estado: vigente · Bloque: 7b
+
+**Contexto:** David (y quien se pase a Yield Fit) tiene años de entrenos en Strong, que los exporta
+como CSV. Importarlos tiene que ser fiable con años de historial, no duplicar nada si se repite y
+caber en el servidor gratuito de Render (512 MB).
+
+**Decisión** (de David):
+- **El CSV lo lee el servidor** con `csv-parse` 7.0.3 (versión fija), nunca un lector propio. Se
+  manda como texto dentro del JSON y **no se guarda**: se lee, se usa y se descarta.
+- **Dos pasos.** `POST /api/importar/strong/vista-previa` no escribe nada: sesiones nuevas y ya
+  importadas, errores por línea, avisos y una propuesta para cada ejercicio. `POST
+  /api/importar/strong` **vuelve a leer el CSV** (no se fía de la vista previa): del cliente solo
+  usa decisiones.
+- **Sin duplicados:** cada sesión importada lleva `importacion { origen, clave, lote }`. La clave es
+  la fecha de inicio tal cual sale en el CSV, sin el nombre (renombrar el entreno en Strong no
+  duplica). Índice único parcial `{ userId, origen, clave }`.
+- **Cada ejercicio de Strong: emparejar, crear o no importar**, solo una de las tres; se recuerda
+  en `EmparejamientoImport` (un documento por nombre de Strong: `exerciseId` u `omitir: true`).
+  Propuestas: recordado → mismo nombre → diccionario de equivalencias → crear (grupo y tipo
+  adivinados) → sin emparejar. Solo se proponen y se aceptan ejercicios compatibles (fuerza con
+  fuerza, cardio con cardio). El cardio se puede crear desde aquí aunque siga bloqueado en el alta
+  normal.
+- **Días con sesiones tuyas:** se listan y se saltan por defecto; cada uno se puede incluir.
+- **Dos ejercicios de Strong al mismo tuyo** en una sesión se juntan, con las series seguidas; las
+  notas de serie se renumeran ("Serie 3 (Triceps Pushdown): …").
+- **Todo en una transacción**, con las sesiones en tandas de 250 (`insertMany`, que valida cada
+  serie) y los récords recalculados. **Deshacer** borra las sesiones de un lote y recalcula los
+  récords; los ejercicios creados y los emparejamientos se quedan.
+- **Límites:** CSV de 5 MB (empezó en 10 y se bajó al medir la memoria); 10 vistas previas, 5
+  importaciones y 10 deshacer por hora y usuario (los rechazos cuentan); **una sola importación o
+  deshacer a la vez en todo el servidor** (503 si no).
+
+**Alternativas descartadas:**
+- *Leer el CSV en el cliente y mandar las sesiones:* el servidor tendría que fiarse de datos ya
+  procesados.
+- *La clave con el nombre del entreno:* renombrarlo en Strong duplicaría la importación.
+- *Importar por tandas en varias transacciones:* no hizo falta; la transacción del peor caso tarda
+  unos 14 s (umbral de David: 20 s).
+- *Un solo `insertMany`:* con un CSV de 10 MB agotaba un heap de 256 MB y el proceso se caía.
+- *Las omisiones en otra colección o en el usuario:* otra colección que borrar con la cuenta, o una
+  lista que crece dentro del documento del usuario.
+
+**Consecuencias:**
+- Medido (portátil → Atlas): 5 años del seed (695 sesiones), transacción de 6 s y deshacer de 2 s;
+  4,96 MB (681 sesiones, 25.421 series), pico de memoria del proceso de 284 MB con el heap a
+  256 MB. El log de cada importación lleva tiempos y memoria.
+- Las consultas de un lote filtran con `{ $eq: lote, $type: 'objectId' }`: con la igualdad sola,
+  MongoDB no usa el índice parcial y recorre todas las sesiones del usuario.
+- Una sesión importada puede no tener duración: la app muestra "—".
+- El indicador de "una a la vez" vive en memoria: con más de una instancia habría que compartirlo.
+
+## 0058 — La app móvil será React Native con Expo, no Capacitor
+
+Fecha: 2026-11-26 · Estado: vigente · Bloques: 12a, 12
+
+**Contexto:** el bloque 12 planteaba meter la web dentro de Capacitor para el iPhone. David quiere
+lo que una web empaquetada hace mal: el descanso animado con el móvil bloqueado y widgets, en iOS
+y en Android.
+
+**Decisión** (de David): **React Native con Expo**, para iOS y Android, como otro cliente de la
+misma API. La web sigue igual. Primera versión: iniciar sesión, empezar una rutina, sesión activa
+con el descanso en la pantalla bloqueada (Live Activity en iOS, notificación fija con cuenta
+atrás en Android) y un widget en cada sistema. El resto, en la web de momento. Antes, un bloque
+**12a** de prueba de viabilidad, con nueve preguntas que se plantean antes de escribir código
+([docs/bloques/12a-app-movil.md](docs/bloques/12a-app-movil.md)).
+
+**Alternativas descartadas:**
+- *Capacitor:* las Live Activities, la notificación con cuenta atrás y los widgets son nativos de
+  todas formas; con Capacitor habría que escribirlos igual, sin la parte de React Native.
+- *Apps nativas separadas (Swift y Kotlin):* dos bases de código más; David no sabe Swift.
+
+**Consecuencias:**
+- Lo que dependía de Capacitor (el criterio de escalabilidad de CLAUDE.md, la descarga del CSV del
+  bloque 7) se replantea para Expo.
+- La sesión activa de la app se diseña para añadir el cardio después (bloque 6b) y, mientras, lo
+  muestra bloqueado como la web.
+
+## 0059 — Botón primario de cristal oscuro con borde de luz verde
+
+Fecha: 2026-11-26 · Estado: vigente · Bloque: 7b (cambio visual pedido durante el cierre)
+
+**Contexto:** el botón primario era un relleno verde sólido con texto casi negro (0048). A David
+se le veía basto y poco de marca.
+
+**Decisión** (de David, opción B de cuatro en el design system): **cristal oscuro** (fondo
+translúcido con lo de detrás desenfocado) con el verde en un **borde de luz en degradado**, en el
+texto y en un brillo suave por dentro; al pasar, se tiñe de verde. Sin sombra exterior. Tokens
+`color-action-glass`, `color-action-border`, `shadow-action`, `blur-glass` y sus `-hover`, en
+`variables.css` y en el design system. Los botones con borde verde (`outline` y las píldoras de
+cabecera del Historial) llevan el mismo cristal en sutil: fondo casi transparente con desenfoque,
+filo claro y borde verde al 60 %, sin degradado ni brillo interior (tokens `color-outline-glass`,
+`color-outline-border`, `shadow-outline`, `blur-glass-sutil`). Además, "Reportar un fallo" en
+escritorio va en una pastilla de cristal del ancho de la barra lateral.
+
+**Alternativas descartadas:** cristal verde translúcido (se perdía el verde), cristal pulido con
+reflejo y halo (basto por la sombra), verde vivo con filo de luz y verde sólido con brillo
+interior.
+
+**Consecuencias:** el primario se parece al `outline`; no se ponen juntos sin necesidad. Si en
+alguna pantalla no se distinguen, se cambia el secundario (decisión aparte).

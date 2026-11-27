@@ -38,3 +38,6 @@ postman/
 
 # Backups de MongoDB (se guardan fuera del repo; esto es solo una red de seguridad)
 *.archive.gz
+
+# Ids del tablero privado de GitHub Projects (los usa Claude Code con gh; no van al repo público)
+.claude/tablero.local.json

@@ -9,6 +9,7 @@ import {
   deleteWorkout,
 } from '@/api/workouts.js';
 import Input from '@/components/Input/Input.jsx';
+import SelectorIcono from '@/components/SelectorIcono/SelectorIcono.jsx';
 import Button from '@/components/Button/Button.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ExercisePicker from '@/components/ExercisePicker/ExercisePicker.jsx';
@@ -45,6 +46,8 @@ export default function WorkoutForm() {
 
   const [nombre, setNombre] = useState('');
   const [ejercicios, setEjercicios] = useState([]);
+  // Clave del icono ("empuje") o null: sin icono (bloque 10).
+  const [icono, setIcono] = useState(null);
 
   const [catalogo, setCatalogo] = useState([]);
 
@@ -58,8 +61,8 @@ export default function WorkoutForm() {
 
   // Aviso al salir con cambios sin guardar (11b.7). Foto del estado inicial: vacío al crear;
   // al editar, null hasta que llega la rutina del servidor (sin foto no hay nada que perder).
-  const [inicial, setInicial] = useState(isEditMode ? null : { nombre: '', ejercicios: [] });
-  const aviso = useAvisoSalir(hayCambios(inicial, { nombre, ejercicios }));
+  const [inicial, setInicial] = useState(isEditMode ? null : { nombre: '', icono: null, ejercicios: [] });
+  const aviso = useAvisoSalir(hayCambios(inicial, { nombre, icono, ejercicios }));
 
   useEffect(() => {
     const cargar = async () => {
@@ -73,8 +76,9 @@ export default function WorkoutForm() {
         if (isEditMode) {
           const wo = woRes.data.workout;
           setNombre(wo.nombre);
+          setIcono(wo.icono ?? null);
           setEjercicios(wo.ejercicios);
-          setInicial({ nombre: wo.nombre, ejercicios: wo.ejercicios });
+          setInicial({ nombre: wo.nombre, icono: wo.icono ?? null, ejercicios: wo.ejercicios });
         }
       } catch {
         if (isEditMode) navigate('/workouts', { replace: true });
@@ -135,7 +139,8 @@ export default function WorkoutForm() {
 
     setSubmitting(true);
     try {
-      const payload = { nombre: nombre.trim(), ejercicios };
+      // icono: null quita el que hubiera (el servidor lo trata como "sin icono").
+      const payload = { nombre: nombre.trim(), icono, ejercicios };
       if (isEditMode) {
         await updateWorkout(id, payload);
       } else {
@@ -197,6 +202,8 @@ export default function WorkoutForm() {
           required
           autoFocus={!isEditMode}
         />
+
+        <SelectorIcono valor={icono} onCambiar={setIcono} />
 
         {ejercicios.length > 0 && (
           <section className={formulario.section}>

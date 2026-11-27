@@ -105,15 +105,15 @@ export default function ExercisePicker({
         {visibles.map((ex) => {
           const isSelected = seleccionados.has(ex._id);
           const disponible = permitirBloqueados || tipoDisponible(opciones, ex.tipo);
-          // La fila (bloque 10) lleva el pictograma y el botón de elegir como hermanos: el
-          // pictograma será su propio botón (ver en grande) y no se pueden anidar botones. El
+          // La fila (bloque 10) lleva el pictograma (botón de ver en grande) y el botón de elegir
+          // como hermanos: no se pueden anidar botones. El
           // fondo de elegido y el hover van en la fila, para que cubran también la figura.
           return (
             <div
               key={ex._id}
               className={`${styles.catalogoFila} ${isSelected ? styles.catalogoFilaSelected : ''} ${!disponible && !isSelected ? styles.catalogoFilaBloqueada : ''}`}
             >
-              <PictogramaEjercicio presetId={ex.presetId} grupoMuscular={ex.grupoMuscular} />
+              <PictogramaEjercicio nombre={ex.nombre} presetId={ex.presetId} grupoMuscular={ex.grupoMuscular} tipo={ex.tipo} opciones={opciones} />
               <button
                 type="button"
                 onClick={() => onElegir(ex._id)}

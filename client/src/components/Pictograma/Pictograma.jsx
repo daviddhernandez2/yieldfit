@@ -12,18 +12,21 @@ import styles from '@/components/Pictograma/Pictograma.module.css';
 // Props:
 //   - id: id de la figura (o null).
 //   - tam: lado del marco en px (32, 40, 48, 64 o 240 en el diseño). La figura ocupa el 90 %.
+//     También admite un valor CSS ("var(--tam-ampliado)") cuando el tamaño cambia con el ancho
+//     de pantalla, como en la vista ampliada; entonces el radio es el del grande (md).
 //   - etiqueta: lo que lee un lector de pantalla (el nombre del ejercicio). Sin etiqueta, la
 //     figura es decorativa (aria-hidden): úsalo así cuando el nombre ya está escrito al lado o
 //     cuando la envuelve un botón con su propio aria-label.
 //   - className: para ajustes del contenedor (p. ej. el marco de la vista ampliada).
-export default function Pictograma({ id, tam = 40, etiqueta, className = '' }) {
+//   - marcoRef: ref al marco, para medirlo y animarlo (vista ampliada, useVistaAmpliada).
+export default function Pictograma({ id, tam = 40, etiqueta, className = '', marcoRef }) {
   const t = id ? trazosDe(id) : null;
   // Radios concéntricos del diseño: xs en el más pequeño, md en el grande, sm en el resto.
-  const radio = tam <= 32 ? styles.radioXs : tam >= 120 ? styles.radioMd : styles.radioSm;
+  const radio = typeof tam !== 'number' || tam >= 120 ? styles.radioMd : tam <= 32 ? styles.radioXs : styles.radioSm;
   const accesible = etiqueta ? { role: 'img', 'aria-label': etiqueta } : { 'aria-hidden': true };
 
   return (
-    <span className={`${styles.marco} ${radio} ${className}`} style={{ '--tam': `${tam}px` }} {...(t ? {} : { 'aria-hidden': true })}>
+    <span ref={marcoRef} className={`${styles.marco} ${radio} ${className}`} style={{ '--tam': typeof tam === 'number' ? `${tam}px` : tam }} {...(t ? {} : { 'aria-hidden': true })}>
       {t && (
         <svg className={styles.figura} viewBox="0 0 120 120" fill="none" strokeLinecap="round" strokeLinejoin="round" {...accesible}>
           {/* Orden de dibujo de los datos: material, torsos, cuerpo, lo que trabaja, rellenos,

@@ -1,4 +1,5 @@
-/* Zona táctil de 48 con el marco centrado (40 o 48). */
+/* Botón del pictograma: zona táctil de 48 con el marco centrado (40 o 48). Sin fondo ni borde:
+   lo que se ve es el marco. */
 .zona {
   display: inline-flex;
   align-items: center;
@@ -6,4 +7,113 @@
   flex-shrink: 0;
   width: 48px;
   height: 48px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: zoom-in;
+}
+
+/* ---------- Vista ampliada (tarjeta Pictograma del design system) ---------- */
+
+/* El <dialog> ocupa toda la pantalla y es transparente: así un toque fuera de la tarjeta llega al
+   propio diálogo y se puede cerrar. El velo es su ::backdrop. */
+.dialogo {
+  /* 280 en el móvil (sin pasarse del ancho: 100vw menos márgenes y relleno) y 240 en escritorio. */
+  --tam-ampliado: min(280px, calc(100vw - 2 * var(--space-md) - 2 * var(--space-lg)));
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: var(--space-md);
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.dialogo[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialogo::backdrop {
+  background-color: var(--color-overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+@media (min-width: 768px) {
+  .dialogo {
+    --tam-ampliado: 240px;
+  }
+}
+
+.tarjeta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-lg);
+  background-color: var(--surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-3);
+}
+
+.cerrar {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+}
+
+/* La figura grande va sobre surface-1 (un nivel por debajo de la tarjeta). Dos clases para ganar
+   a .marco de Pictograma, que también define el fondo. */
+.tarjeta .marcoGrande {
+  --pictograma-fondo: var(--surface-1);
+  margin-top: var(--space-lg);
+}
+
+/* dialog-title del design system, como el título de ConfirmDialog. */
+.nombre {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: -0.01em;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+/* Como un Chip sin elegir, pero sin ser botón: aquí solo informa. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+/* View Transitions: el marco que vuela (mismo nombre en el pequeño y en el grande) y el fundido
+   del resto, con la duración y la curva del design system. Son selectores globales: no hay otras
+   View Transitions en la app. */
+::view-transition-group(pictograma-ampliado),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-overlay);
+  animation-timing-function: var(--ease-standard);
 }

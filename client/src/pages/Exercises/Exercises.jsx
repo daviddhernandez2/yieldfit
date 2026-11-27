@@ -183,10 +183,10 @@ export default function Exercises() {
 
           {ejerciciosFiltrados.map((ex) => (
             <div key={ex._id} className={styles.row}>
-              {/* Pictograma (bloque 10): hermano del botón de la fila, no dentro, porque en el
-                  paso 5 será su propio botón (ver en grande). */}
+              {/* Pictograma (bloque 10): su propio botón (ver en grande), hermano del de la fila:
+                  no se pueden anidar botones. */}
               <span className={styles.rowPictograma}>
-                <PictogramaEjercicio presetId={ex.presetId} grupoMuscular={ex.grupoMuscular} />
+                <PictogramaEjercicio nombre={ex.nombre} presetId={ex.presetId} grupoMuscular={ex.grupoMuscular} tipo={ex.tipo} opciones={opciones} />
               </span>
               {/* rowMain ocupa nombre+tipo y es clicable para navegar a editar. */}
               <button

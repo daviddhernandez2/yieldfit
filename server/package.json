@@ -18,6 +18,7 @@
     "reparar:huerfanos": "node scripts/reparar-huerfanos.js",
     "migrar:1rm": "node scripts/migrar-1rm.js",
     "migrar:pr": "node scripts/migrar-pr.js",
+    "migrar:preset": "node scripts/migrar-preset.js",
     "admin": "node scripts/asignar-admin.js",
     "restablecer": "node scripts/restablecer-contrasena.js"
   },

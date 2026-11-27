@@ -122,6 +122,47 @@
   background-color: transparent;
 }
 
+/* ---------- Fila con pictograma (bloque 10) ---------- */
+
+/* La fila lleva el borde, el hover y el fondo de elegido; el botón de dentro, ninguno, para
+   que no se sumen dos fondos (accent-soft sobre accent-soft). */
+.catalogoFila {
+  display: flex;
+  align-items: center;
+  padding-left: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.catalogoFila:last-child {
+  border-bottom: none;
+}
+
+.catalogoFila:hover {
+  background-color: rgba(62, 248, 126, 0.04);
+}
+
+.catalogoFilaSelected,
+.catalogoFila.catalogoFilaSelected:hover {
+  background-color: var(--color-accent-soft);
+}
+
+.catalogoFila.catalogoFilaSelected:hover {
+  background-color: rgba(62, 248, 126, 0.12);
+}
+
+.catalogoFilaBloqueada:hover {
+  background-color: transparent;
+}
+
+.catalogoFila .catalogoItem {
+  flex: 1;
+  min-width: 0;
+  /* 12 px entre la figura y el nombre, como en la lista de ejercicios. */
+  padding-left: var(--space-sm);
+  border-bottom: none;
+  background-color: transparent;
+}
+
 /* ---------- Crear un ejercicio desde el buscador (bloque 9b) ---------- */
 
 /* Fila "+ Crear «…»": en verde, como acción, al final de la lista. */

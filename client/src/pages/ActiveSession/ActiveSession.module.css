@@ -105,6 +105,8 @@
   gap: var(--space-md);
   width: 100%;
   padding: var(--space-md);
+  /* Detrás del pictograma (bloque 10): 12 px entre la figura y el nombre. */
+  padding-left: var(--space-sm);
   background: transparent;
   border: none;
   text-align: left;

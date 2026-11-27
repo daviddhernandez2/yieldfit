@@ -5,6 +5,8 @@ import BotonIcono from '@/components/BotonIcono/BotonIcono.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import MarcaPR from '@/components/MarcaPR/MarcaPR.jsx';
+import Pictograma from '@/components/Pictograma/Pictograma.jsx';
+import { elegirPictograma } from '@compartido/trazosPictograma.js';
 // formatDuracion es la de utils/formato.js: aquí había una copia sin el arreglo del 7b, y las
 // sesiones de Strong sin duración salían como "NaNh NaN min".
 import { formatKg, formatDuracion } from '@/utils/formato.js';
@@ -136,6 +138,10 @@ export default function SessionDetail() {
             {/* Récord (bloque 4b): la marca junto al nombre y el 1RM estimado que batió la
                 marca anterior. Lo decide el servidor al guardar (esPR, prAnterior). */}
             <div className={styles.exerciseHeader}>
+              {/* Pictograma (bloque 10), a 32 y solo imagen: el del snapshot, para que no cambie si
+                  luego se edita o se borra el ejercicio. Las sesiones anteriores al bloque 10 no
+                  tienen esos datos y muestran el marco vacío. */}
+              <Pictograma id={elegirPictograma({ presetId: ej.presetIdSnapshot, grupoMuscular: ej.grupoMuscularSnapshot })} tam={32} />
               <h2 className={styles.exerciseName}>{ej.nombreSnapshot}</h2>
               {ej.esPR && <MarcaPR />}
             </div>

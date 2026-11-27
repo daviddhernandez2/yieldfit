@@ -101,7 +101,9 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
+  /* 8 px alrededor del icono de 48 (bloque 10, diseño de la lista de rutinas): la tarjeta mide
+     64 px de alto, poco más que con la antigua insignia de 36. */
+  padding: var(--space-sm) var(--space-lg) var(--space-sm) var(--space-sm);
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
   color: var(--color-text);
@@ -115,20 +117,6 @@
 .card:hover {
   border-color: rgba(62, 248, 126, 0.3);
   transform: translateY(-1px);
-}
-
-.badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background-color: rgba(62, 248, 126, 0.12);
-  border-radius: var(--radius-pill);
-  color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  flex-shrink: 0;
 }
 
 .cardName {

@@ -18,6 +18,7 @@ import DeleteButton from "@/components/DeleteButton/DeleteButton.jsx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog.jsx";
 import Proximamente from "@/components/Proximamente/Proximamente.jsx";
 import NombreEjercicio from "@/components/NombreEjercicio/NombreEjercicio.jsx";
+import PictogramaEjercicio from "@/components/PictogramaEjercicio/PictogramaEjercicio.jsx";
 import ListaOrdenable, { Asa } from "@/components/ListaOrdenable/ListaOrdenable.jsx";
 import { indiceTrasMover } from "@/utils/orden.js";
 import useOpcionesEjercicio from "@/hooks/useOpcionesEjercicio.js";
@@ -414,6 +415,7 @@ export default function ActiveSession() {
               >
                 <div className={styles.cabeceraFila}>
                   <Asa {...asa} />
+                  <PictogramaEjercicio presetId={ej.presetId} grupoMuscular={ej.grupoMuscular} tam={48} />
                   <div className={styles.exerciseHeader}>
                     <NombreEjercicio className={styles.exerciseName} nombre={ej.exerciseNombre} grupoMuscular={ej.grupoMuscular} tipo={ej.tipo} opciones={opciones} />
                     <Proximamente />
@@ -428,9 +430,11 @@ export default function ActiveSession() {
               key={ej.exerciseId}
               className={`${styles.exerciseCard} glassCard ${setsCompletados === ej.sets.length && ej.sets.length > 0 ? styles.exerciseCardCompleted : ""}`}
             >
-              {/* El asa va fuera del botón de abrir/cerrar: no se pueden anidar botones. */}
+              {/* El asa y el pictograma (bloque 10) van fuera del botón de abrir/cerrar: no se
+                  pueden anidar botones, y el pictograma será su propio botón (ver en grande). */}
               <div className={styles.cabeceraFila}>
                 <Asa {...asa} />
+                <PictogramaEjercicio presetId={ej.presetId} grupoMuscular={ej.grupoMuscular} tam={48} />
                 <button
                   type="button"
                   className={styles.exerciseHeader}

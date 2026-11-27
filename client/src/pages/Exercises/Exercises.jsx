@@ -7,6 +7,7 @@ import { tituloBorrarEjercicio, MENSAJE_BORRAR_EJERCICIO } from '@/utils/borrado
 import useOpcionesEjercicio, { etiquetaDe, tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
 import NombreEjercicio from '@/components/NombreEjercicio/NombreEjercicio.jsx';
+import PictogramaEjercicio from '@/components/PictogramaEjercicio/PictogramaEjercicio.jsx';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
 import styles from '@/pages/Exercises/Exercises.module.css';
 
@@ -146,6 +147,9 @@ export default function Exercises() {
         <ZonaCarga etiqueta="Cargando tus ejercicios" className={`${styles.list} glassCard`}>
           {[48, 36, 55, 42, 30, 50].map((ancho) => (
             <div key={ancho} className={styles.row}>
+              <span className={styles.rowPictograma}>
+                <Esqueleto forma="bloque" ancho="40px" alto="40px" />
+              </span>
               <div className={styles.rowMain}>
                 <Esqueleto ancho={`${ancho}%`} alto="1rem" />
                 <Esqueleto ancho="72px" />
@@ -173,12 +177,17 @@ export default function Exercises() {
           {/* Cabecera con 3 columnas: Nombre / Tipo / (hueco para papelera). */}
           <div className={styles.listHeader}>
             <span>Nombre</span>
-            <span>Tipo</span>
+            <span className={styles.tipoEscritorio}>Tipo</span>
             <span></span>
           </div>
 
           {ejerciciosFiltrados.map((ex) => (
             <div key={ex._id} className={styles.row}>
+              {/* Pictograma (bloque 10): hermano del botón de la fila, no dentro, porque en el
+                  paso 5 será su propio botón (ver en grande). */}
+              <span className={styles.rowPictograma}>
+                <PictogramaEjercicio presetId={ex.presetId} grupoMuscular={ex.grupoMuscular} />
+              </span>
               {/* rowMain ocupa nombre+tipo y es clicable para navegar a editar. */}
               <button
                 type="button"
@@ -190,10 +199,13 @@ export default function Exercises() {
                   nombre={ex.nombre}
                   grupoMuscular={ex.grupoMuscular}
                   opciones={opciones}
-                  mostrarTipo={false}
+                  tipo={ex.tipo}
+                  // En el móvil el tipo va bajo el nombre; en escritorio, en su columna (bloque 10:
+                  // con el pictograma, la columna dejaba el nombre en "Bi…" a 375 px).
+                  claseTipo={styles.tipoMovil}
                 />
                 <span className={styles.rowType}>
-                  {etiquetaDe(opciones.tipos, ex.tipo)}
+                  <span className={styles.tipoEscritorio}>{etiquetaDe(opciones.tipos, ex.tipo)}</span>
                   {/* Se puede abrir y borrar como siempre; solo avisa de que aún no se registra. */}
                   {!tipoDisponible(opciones, ex.tipo) && <Proximamente />}
                 </span>

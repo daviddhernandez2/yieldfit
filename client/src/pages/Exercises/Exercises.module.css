@@ -119,6 +119,9 @@
   display: grid;
   grid-template-columns: 1fr auto 40px;
   padding: var(--space-md);
+  /* "Nombre" alineado con el nombre de las filas, que empieza detrás del pictograma (bloque 10):
+     hueco + zona de 48 + el relleno izquierdo de rowMain. */
+  padding-left: calc(var(--space-sm) + 48px + var(--space-sm));
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-weight: var(--font-weight-medium);
@@ -127,7 +130,8 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 40px;
+  /* Pictograma (bloque 10) · nombre y tipo · papelera. */
+  grid-template-columns: auto 1fr 40px;
   align-items: center;
   border-bottom: 1px solid var(--color-border);
   transition: var(--transition-base);
@@ -140,12 +144,24 @@
 .row:hover {
   background-color: rgba(62, 248, 126, 0.04);
 }
+.rowPictograma {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-left: var(--space-sm);
+}
+
 .rowMain {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: var(--space-md);
   align-items: center;
   padding: var(--space-md);
+  /* Más cerca del pictograma: con la zona de 48 alrededor del marco de 40, quedan 12 px entre la
+     figura y el nombre, como en el diseño. */
+  padding-left: var(--space-sm);
   background: transparent;
   border: none;
   text-align: left;
@@ -195,4 +211,18 @@
 .deleteIcon:hover {
   color: var(--color-error);
   background-color: var(--color-danger-fill);
+}
+/* El tipo (bloque 10): bajo el nombre en el móvil, en su columna desde 600 px. */
+.tipoEscritorio {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .tipoMovil {
+    display: none;
+  }
+
+  .tipoEscritorio {
+    display: inline;
+  }
 }

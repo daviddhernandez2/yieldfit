@@ -8,15 +8,23 @@ import styles from '@/components/NombreEjercicio/NombreEjercicio.module.css';
 // - opciones: las del servidor, para mostrar los textos con tilde ("Máquinas"). Si aún no
 //   han llegado (p. ej. la sesión activa sin cobertura), se muestra el valor guardado.
 // - mostrarTipo: false donde el tipo ya está en otra columna (lista de Ejercicios).
+// - claseTipo: clase para la parte " · Tipo", para que una página la muestre solo a algunos
+//   anchos (lista de Ejercicios, bloque 10: en el móvil el tipo va aquí y no en su columna).
 // - Sin grupo (sesiones activas empezadas antes de esto), solo se ve el nombre.
-export default function NombreEjercicio({ nombre, grupoMuscular, tipo, opciones, mostrarTipo = true, className = '' }) {
+export default function NombreEjercicio({ nombre, grupoMuscular, tipo, opciones, mostrarTipo = true, claseTipo, className = '' }) {
   const texto = (lista, valor) => (opciones ? etiquetaDe(lista(opciones), valor) : valor);
-  const detalle = [
-    grupoMuscular && texto((o) => o.gruposMusculares, grupoMuscular),
-    mostrarTipo && tipo && texto((o) => o.tipos, tipo),
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  const grupo = grupoMuscular && texto((o) => o.gruposMusculares, grupoMuscular);
+  // Si el tipo dice lo mismo que el grupo ("Cardio · Cardio"), se muestra una sola vez.
+  const tipoTexto = mostrarTipo && tipo && texto((o) => o.tipos, tipo);
+  const parteTipoRepetida = tipoTexto && tipoTexto === grupo;
+  // El separador va con el tipo: si el tipo se oculta, no queda un " · " colgando.
+  const parteTipo = tipoTexto && !parteTipoRepetida && (grupo ? ` · ${tipoTexto}` : tipoTexto);
+  const detalle = (grupo || parteTipo) && (
+    <>
+      {grupo}
+      {parteTipo && (claseTipo ? <span className={claseTipo}>{parteTipo}</span> : parteTipo)}
+    </>
+  );
 
   return (
     <span className={`${styles.nombreEjercicio} ${className}`}>

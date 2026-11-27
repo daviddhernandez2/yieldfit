@@ -1,0 +1,9 @@
+/* Zona táctil de 48 con el marco centrado (40 o 48). */
+.zona {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}

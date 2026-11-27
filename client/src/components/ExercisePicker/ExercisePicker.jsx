@@ -3,6 +3,7 @@ import Chip from '@/components/Chip/Chip.jsx';
 import Proximamente from '@/components/Proximamente/Proximamente.jsx';
 import CrearEjercicio from '@/components/ExercisePicker/CrearEjercicio.jsx';
 import NombreEjercicio from '@/components/NombreEjercicio/NombreEjercicio.jsx';
+import PictogramaEjercicio from '@/components/PictogramaEjercicio/PictogramaEjercicio.jsx';
 import { tipoDisponible } from '@/hooks/useOpcionesEjercicio.js';
 import styles from '@/components/ExercisePicker/ExercisePicker.module.css';
 
@@ -104,29 +105,37 @@ export default function ExercisePicker({
         {visibles.map((ex) => {
           const isSelected = seleccionados.has(ex._id);
           const disponible = permitirBloqueados || tipoDisponible(opciones, ex.tipo);
+          // La fila (bloque 10) lleva el pictograma y el botón de elegir como hermanos: el
+          // pictograma será su propio botón (ver en grande) y no se pueden anidar botones. El
+          // fondo de elegido y el hover van en la fila, para que cubran también la figura.
           return (
-            <button
+            <div
               key={ex._id}
-              type="button"
-              onClick={() => onElegir(ex._id)}
-              disabled={!disponible && !isSelected}
-              className={`${styles.catalogoItem} ${isSelected ? styles.catalogoItemSelected : ''}`}
+              className={`${styles.catalogoFila} ${isSelected ? styles.catalogoFilaSelected : ''} ${!disponible && !isSelected ? styles.catalogoFilaBloqueada : ''}`}
             >
-              {/* Grupo y tipo bajo el nombre: distingue "Press en máquina" de pecho y de hombros. */}
-              <NombreEjercicio
-                className={styles.catalogoItemName}
-                nombre={ex.nombre}
-                grupoMuscular={ex.grupoMuscular}
-                tipo={ex.tipo}
-                opciones={opciones}
-              />
-              <span className={styles.catalogoItemMeta}>{!disponible && <Proximamente />}</span>
-              {isSelected && (
-                <span className={styles.catalogoItemCheck}>
-                  <IconCheck />
-                </span>
-              )}
-            </button>
+              <PictogramaEjercicio presetId={ex.presetId} grupoMuscular={ex.grupoMuscular} />
+              <button
+                type="button"
+                onClick={() => onElegir(ex._id)}
+                disabled={!disponible && !isSelected}
+                className={`${styles.catalogoItem} ${isSelected ? styles.catalogoItemSelected : ''}`}
+              >
+                {/* Grupo y tipo bajo el nombre: distingue "Press en máquina" de pecho y de hombros. */}
+                <NombreEjercicio
+                  className={styles.catalogoItemName}
+                  nombre={ex.nombre}
+                  grupoMuscular={ex.grupoMuscular}
+                  tipo={ex.tipo}
+                  opciones={opciones}
+                />
+                <span className={styles.catalogoItemMeta}>{!disponible && <Proximamente />}</span>
+                {isSelected && (
+                  <span className={styles.catalogoItemCheck}>
+                    <IconCheck />
+                  </span>
+                )}
+              </button>
+            </div>
           );
         })}
 

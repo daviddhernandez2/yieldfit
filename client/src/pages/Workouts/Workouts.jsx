@@ -5,14 +5,8 @@ import { useStartSession } from '@/hooks/useStartSession.js';
 import WorkoutActionsModal from '@/components/WorkoutActionsModal/WorkoutActionsModal.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import Esqueleto, { ZonaCarga } from '@/components/Esqueleto/Esqueleto.jsx';
+import IconoRutina from '@/components/IconoRutina/IconoRutina.jsx';
 import styles from '@/pages/Workouts/Workouts.module.css';
-
-// Genera un badge de 2 letras a partir del nombre de la rutina.
-const generarBadge = (nombre) => {
-  const palabras = nombre.trim().split(/\s+/);
-  if (palabras.length === 1) return palabras[0].slice(0, 2).toUpperCase();
-  return (palabras[0][0] + palabras[1][0]).toUpperCase();
-};
 
 const IconPlus = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -83,12 +77,12 @@ export default function Workouts() {
         </button>
       </header>
 
-      {/* Mientras llegan las rutinas: tres tarjetas con insignia y nombre. */}
+      {/* Mientras llegan las rutinas: tres tarjetas con icono y nombre. */}
       {loading && (
         <ZonaCarga etiqueta="Cargando tus rutinas" className={styles.list}>
           {[45, 35, 52].map((ancho) => (
             <div key={ancho} className={`${styles.card} glassCard`}>
-              <Esqueleto forma="circulo" ancho="36px" />
+              <Esqueleto forma="bloque" ancho="48px" alto="48px" />
               <Esqueleto ancho={`${ancho}%`} alto="1rem" />
               <span />
             </div>
@@ -116,7 +110,8 @@ export default function Workouts() {
               className={`${styles.card} glassCard`}
               onClick={() => setSelected(wo)}
             >
-              <span className={styles.badge}>{generarBadge(wo.nombre)}</span>
+              {/* Icono de la rutina (bloque 10), a 48 y solo imagen: el botón es la tarjeta entera. */}
+              <IconoRutina icono={wo.icono} />
               <span className={styles.cardName}>{wo.nombre}</span>
               <span className={styles.chevron}>
                 <IconChevronRight />

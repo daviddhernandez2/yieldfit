@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { PICTOGRAMA_POR_PRESET } from '../../compartido/pictogramas.js';
 
 // Valores permitidos de grupoMuscular y tipo, con el texto que ve el usuario.
 // Son la ÚNICA fuente de verdad: el schema los usa como enum y el cliente los recibe
@@ -91,6 +92,18 @@ const exerciseSchema = new mongoose.Schema(
     record1RM: {
       type: Number,
       min: 0,
+    },
+    // De qué preset viene (bloque 10): solo en los ejercicios clonados al registrarse. Es lo
+    // que elige su pictograma, y no el nombre, para que renombrarlo no cambie la figura. Los
+    // creados por el usuario (o importados) no lo tienen y muestran la figura de su grupo.
+    // Lo escribe solo el servidor (clonado y `npm run migrar:preset`): los controladores no
+    // lo aceptan del cliente. El enum son las claves de compartido/pictogramas.js.
+    presetId: {
+      type: String,
+      enum: {
+        values: Object.keys(PICTOGRAMA_POR_PRESET),
+        message: 'Preset no válido',
+      },
     },
   },
   {

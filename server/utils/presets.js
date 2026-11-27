@@ -11,6 +11,7 @@ import { exercisePresets } from '../data/exercisePresets.js';
 export const clonarPresetsAUsuario = async (userId, session) => {
   const documentos = exercisePresets.map((preset) => ({
     userId,
+    presetId: preset.presetId,
     nombre: preset.nombre,
     grupoMuscular: preset.grupoMuscular,
     tipo: preset.tipo,
@@ -21,3 +22,13 @@ export const clonarPresetsAUsuario = async (userId, session) => {
 
   await Exercise.insertMany(documentos, { session });
 };
+
+// presetId de un ejercicio que se clonó ANTES del bloque 10 (sin el campo), por su nombre y
+// grupo EXACTOS de hoy. Lo usa `npm run migrar:preset`. Hace falta el grupo porque hay dos
+// "Press en máquina" (Pecho y Hombros). Si el usuario lo renombró o le cambió el grupo, ya no
+// se reconoce y devuelve null: es preferible la figura del grupo a adivinar mal.
+const presetPorNombreYGrupo = new Map(
+  exercisePresets.map((p) => [`${p.nombre}|${p.grupoMuscular}`, p.presetId])
+);
+export const presetIdDe = (nombre, grupoMuscular) =>
+  presetPorNombreYGrupo.get(`${nombre}|${grupoMuscular}`) ?? null;

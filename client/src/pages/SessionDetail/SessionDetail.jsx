@@ -5,18 +5,12 @@ import BotonIcono from '@/components/BotonIcono/BotonIcono.jsx';
 import DeleteButton from '@/components/DeleteButton/DeleteButton.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog.jsx';
 import MarcaPR from '@/components/MarcaPR/MarcaPR.jsx';
-import { formatKg } from '@/utils/formato.js';
+// formatDuracion es la de utils/formato.js: aquí había una copia sin el arreglo del 7b, y las
+// sesiones de Strong sin duración salían como "NaNh NaN min".
+import { formatKg, formatDuracion } from '@/utils/formato.js';
 import { useAuth } from '@/hooks/useAuth.js';
 import { seMuestra, valorEsfuerzo } from '@/utils/esfuerzo.js';
 import styles from '@/pages/SessionDetail/SessionDetail.module.css';
-
-const formatDuracion = (segundos) => {
-  const totalMin = Math.floor(segundos / 60);
-  if (totalMin < 60) return `${totalMin} min`;
-  const horas = Math.floor(totalMin / 60);
-  const minutos = totalMin % 60;
-  return `${horas}h ${minutos} min`;
-};
 
 // Formatea fecha + hora: "sábado, 16 de mayo de 2026 · 18:34".
 // Se mantiene en minúsculas para coherencia con el resto de textos de fecha

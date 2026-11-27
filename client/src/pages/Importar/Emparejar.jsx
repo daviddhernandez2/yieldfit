@@ -108,7 +108,7 @@ export default function Emparejar({ fila, catalogo, opcionesEjercicio, decisione
       <section className={styles.tarjeta}>
         <h2 className={styles.tituloTarjeta}>O no importarlo</h2>
         <p className={styles.textoPequeno}>
-          Sus {fila.series.toLocaleString('es-ES')} {fila.series === 1 ? 'serie se queda' : 'series se quedan'} fuera; el resto de cada entreno sí se importa. Si un
+          {fila.series === 1 ? 'Su única serie se queda' : `Sus ${fila.series.toLocaleString('es-ES')} series se quedan`} fuera; el resto de cada entreno sí se importa. Si un
           entreno solo tenía ejercicios que no importas, se salta. Se recuerda para la próxima vez y se puede cambiar.
         </p>
         <div>
